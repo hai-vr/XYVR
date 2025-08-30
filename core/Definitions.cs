@@ -12,6 +12,8 @@ public class Individual
     public string guid;
     public List<Account> accounts = new();
     public string displayName;
+    
+    public bool isAnyContact;
 }
 
 public class Account
