@@ -1,4 +1,4 @@
-﻿namespace XYVR.API.Resonite;
+﻿namespace XYVR.Core;
 
 public class VERSION
 {

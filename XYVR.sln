@@ -8,6 +8,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "core", "core\core.csproj", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "account-resonite", "account-resonite\account-resonite.csproj", "{7D270FE3-3D6B-4BB6-A878-7990D45691D3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "api-vrchat", "api-vrchat\api-vrchat.csproj", "{2B09CE62-6355-435C-9D1B-6AF555E8DA43}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "account-vrchat", "account-vrchat\account-vrchat.csproj", "{2EAC5F0C-0B8B-4DBE-96C4-2CD22C3E6274}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +34,13 @@ Global
 		{7D270FE3-3D6B-4BB6-A878-7990D45691D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7D270FE3-3D6B-4BB6-A878-7990D45691D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7D270FE3-3D6B-4BB6-A878-7990D45691D3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2B09CE62-6355-435C-9D1B-6AF555E8DA43}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B09CE62-6355-435C-9D1B-6AF555E8DA43}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2B09CE62-6355-435C-9D1B-6AF555E8DA43}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2B09CE62-6355-435C-9D1B-6AF555E8DA43}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2EAC5F0C-0B8B-4DBE-96C4-2CD22C3E6274}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2EAC5F0C-0B8B-4DBE-96C4-2CD22C3E6274}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2EAC5F0C-0B8B-4DBE-96C4-2CD22C3E6274}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2EAC5F0C-0B8B-4DBE-96C4-2CD22C3E6274}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

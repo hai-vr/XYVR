@@ -25,11 +25,7 @@ public class ResoniteCommunicator
     
     public async Task<List<Account>> FindUndiscoveredAccounts(IndividualRepository individualRepository)
     {
-        var resoniteAccountIdentifiers = individualRepository.Individuals
-            .SelectMany(individual => individual.accounts)
-            .Where(account => account.namedApp == NamedApp.Resonite)
-            .Select(account => account.inAppIdentifier)
-            .ToHashSet();
+        var resoniteAccountIdentifiers = individualRepository.CollectAllInAppIdentifiers(NamedApp.Resonite);
         
         var api = new ResoniteAPI(Guid.NewGuid().ToString(), _uid);
         

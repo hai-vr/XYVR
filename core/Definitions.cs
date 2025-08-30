@@ -34,6 +34,7 @@ public class Account
 
 public enum NamedApp
 {
-    NotNamed,
-    Resonite
+    NotNamed = 0,
+    Resonite = 1,
+    VRChat = 2
 }
