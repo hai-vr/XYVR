@@ -15,11 +15,15 @@ public class ResoniteAPI
     
     private readonly string _secretMachineId;
     private readonly string _uid;
+    
+    private string _authHeader__sensitive;
+    private string _myUserId;
 
     public ResoniteAPI(string secretMachineId_isGuid, string uid_isSha256Hash)
     {
         _secretMachineId = secretMachineId_isGuid;
         _uid = uid_isSha256Hash;
+        
         _cookies = new CookieContainer();
         var handler = new HttpClientHandler
         {
@@ -29,7 +33,7 @@ public class ResoniteAPI
         _client.DefaultRequestHeaders.UserAgent.ParseAdd($"Hai.XYVR/{VERSION.version} (docs.hai-vr.dev/docs/products/xyvr#user-agent)");
     }
 
-    public async Task<HttpResponseMessage> CreateToken(string username__sensitive, string password__sensitive, string? twoferTotp = null)
+    public async Task<LoginResponseJsonObject> Login(string username__sensitive, string password__sensitive, string? twoferTotp = null)
     {
         var obj__sensitive = new LoginJsonObject
         {
@@ -41,12 +45,20 @@ public class ResoniteAPI
             },
             secretMachineId = _secretMachineId
         };
-        var request = new HttpRequestMessage(HttpMethod.Post, $"{PrefixWithSlash}userSessions");
-        request.Content = ToCarefulJsonContent__Sensitive(obj__sensitive);
-        request.Headers.Add("UID", _uid);
-        if (twoferTotp != null) request.Headers.Add("TOTP", twoferTotp);
+        var request__sensitive = new HttpRequestMessage(HttpMethod.Post, $"{PrefixWithSlash}userSessions");
+        request__sensitive.Content = ToCarefulJsonContent__Sensitive(obj__sensitive);
+        request__sensitive.Headers.Add("UID", _uid);
+        if (twoferTotp != null) request__sensitive.Headers.Add("TOTP", twoferTotp);
 
-        var response = await _client.SendAsync(request);
+        var response__sensitive = await _client.SendAsync(request__sensitive);
+        
+        EnsureSuccessOrThrowVerbose(response__sensitive);
+
+        var response = JsonConvert.DeserializeObject<LoginResponseJsonObject>(await response__sensitive.Content.ReadAsStringAsync());
+
+        _authHeader__sensitive = ToAuthHeader(response);
+        _myUserId = response.entity.userId;
+        
         return response;
     }
 
@@ -55,7 +67,7 @@ public class ResoniteAPI
         return new StringContent(JsonConvert.SerializeObject(obj__sensitive), Encoding.UTF8, "application/json");
     }
 
-    private static StringContent ToJsonContent(LoginJsonObject obj)
+    private static StringContent ToJsonContent(object obj)
     {
         return new StringContent(JsonConvert.SerializeObject(obj), Encoding.UTF8, "application/json");
     }
@@ -74,18 +86,45 @@ public class ResoniteAPI
             return Convert.ToHexString(hashBytes).ToLowerInvariant();
         }
     }
-}
 
-public struct LoginJsonObject
-{
-    public string username;
-    public AuthenticationJsonObject authentication;
-    public string secretMachineId;
-}
+    public static string ToAuthHeader(LoginResponseJsonObject response)
+    {
+        var userId = response.entity.userId;
+        var authHeader = $"res {userId}:{response.entity.token}";
+        return authHeader;
+    }
 
-public class AuthenticationJsonObject
-{
-    [JsonProperty("$type")]
-    public string type;
-    public string password;
+    private static void EnsureSuccessOrThrowVerbose(HttpResponseMessage response)
+    {
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new HttpRequestException($"Request failed with status {response.StatusCode}, reason: {response.ReasonPhrase}");
+        }
+    }
+    
+    public async Task<ContactResponseElementJsonObject[]> GetUserContacts()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, $"{PrefixWithSlash}users/{_myUserId}/contacts");
+        request.Headers.Add("Authorization", _authHeader__sensitive);
+
+        var response = await _client.SendAsync(request);
+    
+        EnsureSuccessOrThrowVerbose(response);
+    
+        var jsonContent = await response.Content.ReadAsStringAsync();
+        return JsonConvert.DeserializeObject<ContactResponseElementJsonObject[]>(jsonContent);
+    }
+    
+    public async Task<UserResponseJsonObject> GetUser(string userId)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, $"{PrefixWithSlash}users/{userId}");
+        request.Headers.Add("Authorization", _authHeader__sensitive);
+
+        var response = await _client.SendAsync(request);
+    
+        EnsureSuccessOrThrowVerbose(response);
+    
+        var jsonContent = await response.Content.ReadAsStringAsync();
+        return JsonConvert.DeserializeObject<UserResponseJsonObject>(jsonContent);
+    }
 }
