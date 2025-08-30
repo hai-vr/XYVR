@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "api-resonite", "api-resonit
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "program", "program\program.csproj", "{71937CC4-FEB4-4F8D-BF49-5A9BF7CBAFA0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "core", "core\core.csproj", "{4053A948-EA5C-4597-AB43-60FBFBFFF6DC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{71937CC4-FEB4-4F8D-BF49-5A9BF7CBAFA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{71937CC4-FEB4-4F8D-BF49-5A9BF7CBAFA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{71937CC4-FEB4-4F8D-BF49-5A9BF7CBAFA0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4053A948-EA5C-4597-AB43-60FBFBFFF6DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4053A948-EA5C-4597-AB43-60FBFBFFF6DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4053A948-EA5C-4597-AB43-60FBFBFFF6DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4053A948-EA5C-4597-AB43-60FBFBFFF6DC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
