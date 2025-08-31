@@ -15,6 +15,9 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         _appApi = new AppApi(this);
+
+        Title = "XYVR";
+        
         Loaded += MainWindow_Loaded;
     }
 
@@ -23,7 +26,6 @@ public partial class MainWindow : Window
         IndividualRepository = new IndividualRepository(await Scaffolding.OpenRepository());
         
         await WebView.EnsureCoreWebView2Async();
-        
         WebView.CoreWebView2.AddHostObjectToScript("appApi", _appApi);
 
         var distPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "src/dist");

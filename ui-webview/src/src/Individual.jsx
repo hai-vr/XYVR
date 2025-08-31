@@ -1,8 +1,9 @@
 ﻿import Account from "./Account.jsx";
 
-function Individual({ individual, index }) {
+function Individual({ individual, index, isVisible = true }) {
     return (
-        <div key={index} style={{
+        <div style={{ 
+            display: isVisible ? 'block' : 'none',
             background: 'white',
             border: '1px solid #e1e5e9',
             borderRadius: '12px',
