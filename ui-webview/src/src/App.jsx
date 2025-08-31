@@ -120,17 +120,90 @@ function App() {
         return variants;
     };
 
+    // Parse special search terms and separate them from regular search terms
+    const parseSearchTerms = (searchTerm) => {
+        const terms = searchTerm.toLowerCase().trim().split(' ').filter(term => term.trim() !== '');
+        const specialTerms = [];
+        const regularTerms = [];
+
+        terms.forEach(term => {
+            if (term.startsWith('app:') || term.startsWith('accounts:') || term === 'has:alt' || term === 'has:bot') {
+                specialTerms.push(term);
+            } else {
+                regularTerms.push(term);
+            }
+        });
+
+        return { specialTerms, regularTerms };
+    };
+
+    // Check if individual matches special search terms
+    const matchesSpecialTerms = (individual, specialTerms) => {
+        return specialTerms.every(term => {
+            switch (term) {
+                case 'app:resonite':
+                    return individual.accounts?.some(account => account.namedApp === 1) || false;
+                
+                case 'app:vrchat':
+                    return individual.accounts?.some(account => account.namedApp === 2) || false;
+                
+                case 'app:cluster':
+                    return individual.accounts?.some(account => account.namedApp === 3) || false;
+                
+                case 'has:bot':
+                    return individual.accounts?.some(account => account.isTechnical) || false;
+                
+                case 'has:alt': {
+                    if (!individual.accounts) return false;
+                    
+                    // Group accounts by namedApp, excluding technical accounts
+                    const accountGroups = {};
+                    individual.accounts.forEach(account => {
+                        if (account.isTechnical === false || account.isTechnical === undefined) {
+                            if (!accountGroups[account.namedApp]) {
+                                accountGroups[account.namedApp] = 0;
+                            }
+                            accountGroups[account.namedApp]++;
+                        }
+                    });
+                    
+                    // Check if any namedApp has more than one account
+                    return Object.values(accountGroups).some(count => count > 1);
+                }
+                
+                default:
+                    if (term.startsWith('accounts:>')) {
+                        const minCount = parseInt(term.substring(10));
+                        if (isNaN(minCount)) return false;
+                        
+                        const accountCount = individual.accounts?.length || 0;
+                        return accountCount > minCount;
+                    }
+                    return false;
+            }
+        });
+    };
+
     const isIndividualVisible = (individual, searchTerm) => {
         if (!searchTerm) return true;
 
+        const { specialTerms, regularTerms } = parseSearchTerms(searchTerm);
+
+        // Check special terms first
+        if (specialTerms.length > 0 && !matchesSpecialTerms(individual, specialTerms)) {
+            return false;
+        }
+
+        // If there are no regular terms, and special terms matched, return true
+        if (regularTerms.length === 0) {
+            return true;
+        }
+
+        // Check regular search terms (existing logic)
         const displayName = individual.displayName || '';
         const individualNote = individual.note?.text || '';
 
-        const searchTerms = searchTerm.toLowerCase().split(' ').filter(term => term.trim() !== '');
-
-        if (searchTerms.length === 0) return true;
-
-        const individualMatch = searchTerms.every(term => {
+        const individualMatch = regularTerms.every(term => {
             const kanaVariants = generateKanaVariants(term);
 
             return kanaVariants.some(variant => {
@@ -147,7 +220,7 @@ function App() {
             const accountDisplayName = account.inAppDisplayName || '';
             const accountIdentifier = account.inAppIdentifier || '';
 
-            return searchTerms.every(term => {
+            return regularTerms.every(term => {
                 const kanaVariants = generateKanaVariants(term);
 
                 return kanaVariants.some(variant => {
@@ -167,16 +240,16 @@ function App() {
         return accountNotesMatch;
     };
 
-// Function to check if search terms match display name
+    // Function to check if search terms match display name
     const hasDisplayNameMatch = (individual, searchTerm) => {
         if (!searchTerm) return false;
 
+        const { regularTerms } = parseSearchTerms(searchTerm);
+        if (regularTerms.length === 0) return false;
+
         const displayName = individual.displayName || '';
-        const searchTerms = searchTerm.toLowerCase().split(' ').filter(term => term.trim() !== '');
 
-        if (searchTerms.length === 0) return false;
-
-        return searchTerms.every(term => {
+        return regularTerms.every(term => {
             const kanaVariants = generateKanaVariants(term);
 
             return kanaVariants.some(variant => {
@@ -190,9 +263,8 @@ function App() {
     const hasIdentifierMatch = (individual, searchTerm) => {
         if (!searchTerm) return false;
 
-        const searchTerms = searchTerm.toLowerCase().split(' ').filter(term => term.trim() !== '');
-
-        if (searchTerms.length === 0) return false;
+        const { regularTerms } = parseSearchTerms(searchTerm);
+        if (regularTerms.length === 0) return false;
 
         return individual.accounts?.some(account => {
             // Only check identifier for namedApp === 3 (Cluster)
@@ -200,7 +272,7 @@ function App() {
 
             const accountIdentifier = account.inAppIdentifier || '';
 
-            return searchTerms.every(term => {
+            return regularTerms.every(term => {
                 const kanaVariants = generateKanaVariants(term);
 
                 return kanaVariants.some(variant => {
@@ -338,7 +410,7 @@ function App() {
                             <div className="no-results-icon">🔍</div>
                             <div className="no-results-text">No individuals found matching "<strong>{searchTerm}</strong>"</div>
                             <div className="no-results-hint">
-                                Try searching by name or note content
+                                Try searching by name, note content, or use special terms like app:resonite, app:vrchat, app:cluster, accounts:&gt;1, has:alt, has:bot
                             </div>
                         </div>
                     )}
