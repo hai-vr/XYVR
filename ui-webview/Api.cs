@@ -8,7 +8,7 @@ namespace XYVR.UI.WebviewUI;
 public interface IAppApi
 {
     string GetAppVersion();
-    string GetAllIndividuals();
+    string GetAllExposedIndividuals();
     void ShowMessage(string message);
     string GetCurrentTime();
     void CloseApp();
@@ -30,9 +30,11 @@ public class AppApi : IAppApi
         return "1.0.0";
     }
 
-    public string GetAllIndividuals()
+    public string GetAllExposedIndividuals()
     {
-        var responseObj = _mainWindow.IndividualRepository.Individuals;
+        var responseObj = _mainWindow.IndividualRepository.Individuals
+            .Where(individual => individual.isExposed)
+            .ToList();
         
         return JsonConvert.SerializeObject(responseObj);
     }

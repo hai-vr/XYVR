@@ -247,12 +247,13 @@ public class VRChatAPI
         
         var url = $"{RootUrl}/users/{userId}";
         var response = await _client.GetAsync(url);
-        if (response.StatusCode == HttpStatusCode.NotFound) return null;
-        
-        EnsureSuccessOrThrowVerbose(response);
             
         Console.WriteLine($"Got {url} ; Waiting a second...");
         await Task.Delay(1000);
+        
+        if (response.StatusCode == HttpStatusCode.NotFound) return null;
+        
+        EnsureSuccessOrThrowVerbose(response);
         
         return JsonConvert.DeserializeObject<VRChatUser>(await response.Content.ReadAsStringAsync());
     }
@@ -263,6 +264,23 @@ public class VRChatAPI
         {
             throw new HttpRequestException($"Request failed with status {response.StatusCode}, reason: {response.ReasonPhrase}");
         }
+    }
+
+    public async Task<VRChatNote?> GetNoteByUserNoteId(string userNoteId)
+    {
+        if (!IsLoggedIn) throw new HttpRequestException("Not logged in"); // FIXME: Proper error handling
+        
+        var url = $"{RootUrl}/userNotes/{userNoteId}";
+        var response = await _client.GetAsync(url);
+            
+        Console.WriteLine($"Got {url} ; Waiting a second...");
+        await Task.Delay(1000);
+        
+        if (response.StatusCode == HttpStatusCode.NotFound) return null;
+        
+        EnsureSuccessOrThrowVerbose(response);
+        
+        return JsonConvert.DeserializeObject<VRChatNote>(await response.Content.ReadAsStringAsync());
     }
 }
 

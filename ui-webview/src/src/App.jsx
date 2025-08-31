@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
+import Account from "./Account.jsx";
 
 function App() {
     const [count, setCount] = useState(0)
@@ -45,10 +46,10 @@ function App() {
         }
     };
 
-    const handleGetAllIndividuals = async () => {
+    const handleGetAllExposedIndividuals = async () => {
         if (window.chrome?.webview?.hostObjects?.appApi) {
             try {
-                const allIndividuals = await window.chrome.webview.hostObjects.appApi.GetAllIndividuals();
+                const allIndividuals = await window.chrome.webview.hostObjects.appApi.GetAllExposedIndividuals();
                 const individualsArray = JSON.parse(allIndividuals);
                 setIndividuals(individualsArray);
 
@@ -75,7 +76,7 @@ function App() {
             <h1>WebView2 + React App</h1>
             <p>App Version: {appVersion}</p>
             <button onClick={handleGetTime}>Get Current Time</button>
-            <button onClick={handleGetAllIndividuals}>Get Individuals</button>
+            <button onClick={handleGetAllExposedIndividuals}>Get Individuals</button>
             <button onClick={handleShowMessage}>Show Message Box</button>
             <button onClick={handleCloseApp}>Close Application</button>
 
@@ -105,14 +106,14 @@ function App() {
                                 transition: 'transform 0.2s ease, box-shadow 0.2s ease',
                                 cursor: 'pointer'
                             }}
-                                 onMouseEnter={(e) => {
+                                 /*onMouseEnter={(e) => {
                                      e.target.style.transform = 'translateY(-2px)';
                                      e.target.style.boxShadow = '0 4px 16px rgba(0,0,0,0.12)';
                                  }}
                                  onMouseLeave={(e) => {
                                      e.target.style.transform = 'translateY(0)';
                                      e.target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.06)';
-                                 }}>
+                                 }}*/>
                                 <div style={{
                                     display: 'flex',
                                     alignItems: 'center',
@@ -181,64 +182,7 @@ function App() {
                                             gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))'
                                         }}>
                                             {individual.accounts.map((account, accountIndex) => (
-                                                <div key={accountIndex} style={{
-                                                    background: '#f8f9fa',
-                                                    border: '1px solid #e9ecef',
-                                                    borderRadius: '8px',
-                                                    padding: '12px',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'space-between'
-                                                }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                        <div style={{
-                                                            width: '32px',
-                                                            height: '32px',
-                                                            borderRadius: '6px',
-                                                            background: account.namedApp === 1 ? '#ff6b35' :
-                                                                account.namedApp === 2 ? '#1778f2' : '#6c757d',
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            justifyContent: 'center',
-                                                            marginRight: '12px',
-                                                            fontSize: '14px'
-                                                        }}>
-                                                            {account.namedApp === 1 ? '⚡' :
-                                                                account.namedApp === 2 ? '💬' : '❓'}
-                                                        </div>
-                                                        <div>
-                                                            <div style={{
-                                                                fontWeight: '600',
-                                                                color: '#2c3e50',
-                                                                fontSize: '14px'
-                                                            }}>
-                                                                {account.inAppDisplayName}
-                                                            </div>
-                                                            {account.qualifiedAppName && (
-                                                                <div style={{
-                                                                    color: '#6c757d',
-                                                                    fontSize: '12px',
-                                                                    marginTop: '2px'
-                                                                }}>
-                                                                    {account.namedApp === 1 ? 'Resonite' :
-                                                                        account.namedApp === 2 ? 'VRChat' : account.qualifiedAppName}
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                    {account.isContact && (
-                                                        <span style={{
-                                                            background: '#fff3cd',
-                                                            color: '#856404',
-                                                            padding: '2px 6px',
-                                                            borderRadius: '4px',
-                                                            fontSize: '11px',
-                                                            fontWeight: '500'
-                                                        }}>
-                                            Contact
-                                        </span>
-                                                    )}
-                                                </div>
+                                                <Account key={accountIndex} account={account} />
                                             ))}
                                         </div>
                                     ) : (

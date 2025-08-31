@@ -10,9 +10,20 @@ public class IndividualRepository
     public IndividualRepository(Individual[] individuals)
     {
         Individuals = individuals.ToList();
+        EvaluateDataMigrations(Individuals);
         
         _resoniteIdToIndividual = CreateAccountDictionary(NamedApp.Resonite);
         _vrchatIdToIndividual = CreateAccountDictionary(NamedApp.VRChat);
+    }
+
+    // This can change the data of an individual when we have data migrations
+    // (i.e. when isExposed was added, none of the individuals had that info)
+    private void EvaluateDataMigrations(List<Individual> individuals)
+    {
+        foreach (var individual in individuals)
+        {
+            UpdateIndividualBasedOnAccounts(individual);
+        }
     }
 
     public HashSet<string> CollectAllInAppIdentifiers(NamedApp namedApp)
@@ -42,7 +53,7 @@ public class IndividualRepository
                     if (SynchronizeAccount(existingAccount, inputAccount)) break;
                 }
 
-                UpdateIndividualBasedOnAccounts(inputAccount, existingResoniteIndividual);
+                UpdateIndividualBasedOnAccounts(existingResoniteIndividual);
             }
             else if (inputAccount.namedApp == NamedApp.VRChat && _vrchatIdToIndividual.TryGetValue(inputAccount.inAppIdentifier, out var existingVRChatIndividual))
             {
@@ -51,7 +62,7 @@ public class IndividualRepository
                     if (SynchronizeAccount(existingAccount, inputAccount)) break;
                 }
 
-                UpdateIndividualBasedOnAccounts(inputAccount, existingVRChatIndividual);
+                UpdateIndividualBasedOnAccounts(existingVRChatIndividual);
             }
             else
             {
@@ -85,15 +96,14 @@ public class IndividualRepository
         return false;
     }
 
-    private static void UpdateIndividualBasedOnAccounts(Account inputAccount, Individual existingIndividual)
+    private static void UpdateIndividualBasedOnAccounts(Individual existingIndividual)
     {
-        if (inputAccount.isContact != existingIndividual.isAnyContact)
-        {
-            existingIndividual.isAnyContact = existingIndividual.accounts.Any(account => account.isContact);
-        }
+        existingIndividual.isAnyContact = existingIndividual.accounts.Any(account => account.isContact);
+        existingIndividual.isExposed = existingIndividual.isAnyContact
+                                       || existingIndividual.note.status == NoteState.Exists
+                                       || existingIndividual.accounts.Any(account => account.note.status == NoteState.Exists);
         
-        if (existingIndividual.accounts.Count == 1 && existingIndividual.accounts[0].inAppDisplayName != inputAccount.inAppDisplayName
-            || existingIndividual.accounts.All(it => it.inAppDisplayName != existingIndividual.displayName))
+        if (existingIndividual.accounts.All(it => it.inAppDisplayName != existingIndividual.displayName))
         {
             existingIndividual.displayName = MajorMainAccountOf(existingIndividual).inAppDisplayName;
         }
@@ -127,7 +137,8 @@ public class IndividualRepository
             guid = Guid.NewGuid().ToString(),
             accounts = [account],
             displayName = account.inAppDisplayName,
-            isAnyContact = account.isContact
+            isAnyContact = account.isContact,
+            isExposed = account.isContact || account.note.status == NoteState.Exists
         };
         Individuals.Add(individual);
         return individual;
@@ -142,6 +153,18 @@ public class IndividualRepository
 
         toAugment.accounts.AddRange(toDestroy.accounts);
         toAugment.isAnyContact = toAugment.accounts.Any(account => account.isContact);
+        if (toAugment.note.status == NoteState.NeverHad)
+        {
+            if (toDestroy.note.status is NoteState.Exists or NoteState.WasRemoved)
+            {
+                toAugment.note.status = toDestroy.note.status;
+                toAugment.note.text = toDestroy.note.text;
+            }
+        }
+        // Order matters
+        toAugment.isExposed = toAugment.isAnyContact
+                              || toAugment.note.status == NoteState.Exists
+                              || toAugment.accounts.Any(account => account.note.status == NoteState.Exists);
         
         foreach (var accountFromDestroyed in toDestroy.accounts)
         {

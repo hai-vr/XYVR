@@ -11,6 +11,7 @@ public class VRChatCommunicator
     private readonly string _account__sensitive;
     private readonly string _password__sensitive;
     private readonly string? _twoFactor__sensitive;
+    private VRChatAPI? _api;
 
     public VRChatCommunicator()
     {
@@ -25,10 +26,10 @@ public class VRChatCommunicator
     {
         var vrchatAccountIdentifiers = individualRepository.CollectAllInAppIdentifiers(NamedApp.VRChat);
         
-        var api = await InitializeAPI();
+        _api ??= await InitializeAPI();
 
-        var onlineFriends = await api.ListFriends(ListFriendsRequestType.OnlyOnline);
-        var offlineFriends = await api.ListFriends(ListFriendsRequestType.OnlyOffline);
+        var onlineFriends = await _api.ListFriends(ListFriendsRequestType.OnlyOnline);
+        var offlineFriends = await _api.ListFriends(ListFriendsRequestType.OnlyOffline);
         
         return onlineFriends.Concat(offlineFriends)
             .Where(friend => !vrchatAccountIdentifiers.Contains(friend.id))
@@ -44,12 +45,12 @@ public class VRChatCommunicator
             .Distinct() // Get rid of duplicates
             .ToList();
         
-        var api = await InitializeAPI();
+        _api ??= await InitializeAPI();
 
         var accounts = new List<Account>();
         foreach (var userId in undiscoveredAndNotNecessarilyValidUserIds)
         {
-            var user = await api.GetUserLenient(userId);
+            var user = await _api.GetUserLenient(userId);
             if (user != null)
             {
                 accounts.Add(UserAsAccount((VRChatUser)user));
@@ -57,6 +58,30 @@ public class VRChatCommunicator
         }
 
         return accounts;
+    }
+
+    public async Task<Note?> CollectNoteFromUser(Account vrcAccount)
+    {
+        _api ??= await InitializeAPI();
+        
+        var resultN = await _api.GetUserLenient(vrcAccount.inAppIdentifier);
+        if (resultN == null) return null;
+        
+        var result = (VRChatUser)resultN;
+        if (string.IsNullOrWhiteSpace(result.note))
+        {
+            return new Note
+            {
+                status = NoteState.NeverHad,
+                text = null
+            };
+        }
+
+        return new Note
+        {
+            status = NoteState.Exists,
+            text = result.note
+        };
     }
 
     private Account UserAsAccount(VRChatUser user)

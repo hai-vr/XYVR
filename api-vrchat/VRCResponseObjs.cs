@@ -79,3 +79,8 @@ public struct VRChatBadge
     public bool showcased;
     public string updatedAt;
 }
+
+public struct VRChatNote
+{
+    public string note;
+}
