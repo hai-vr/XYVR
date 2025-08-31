@@ -6,7 +6,30 @@
 Once data is retrieved, it is stored offline, no Internet connection needed.
 The address book remains fully functional even if access to the original account is lost for any reason.
 
-### Goals of this address book application
+# User documentation
+
+If you are a user looking to use this software: Sorry, but this application is not currently readily usable,
+as it involves typing commands.
+
+Please check back another time.
+
+If you are a developer, feel free to read below.
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+-----
+
+# Developer documentation
+
+## Goals of this address book application
 
 *For the purposes of this README, the words "friend" and "contact" refer to the same social VR concept.*
 
@@ -20,7 +43,7 @@ The following are **not** goals:
 - It is not a goal to track friendship status changes: The address book will only show users in the UI who are friends or who have
   a note attached to them. This application purposefully will not keep track of status changes.
 
-### Current status of this app
+## Current status of this app
 
 At first, this app is under development as a personal application tailored for my own personal needs, which are described above.
 
@@ -41,7 +64,13 @@ The following work remains to be done:
 - Write the necessary API connectors to fetch live session data and display the current social VR application that a user is playing.
 - Set up workflow automation to build the React app and the .NET app.
 
+## Technology in use
+
 The app is written in .NET 9 and uses a WebView pointing to a React app set up with Vite. Offline data is stored in plain JSON.
 - As I am originally a backend developer, the WebView and React frontend are built using heavy assistance from Claude 4 integrated
   with Jetbrains Rider.
 - The backend is designed without much assistance.
+
+## Executing the app as a developer
+
+*The instructions to execute this application have not been written yet.*
