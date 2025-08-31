@@ -60,6 +60,10 @@ public class IndividualRepository
                 {
                     _resoniteIdToIndividual.Add(inputAccount.inAppIdentifier, newIndividual);
                 }
+                else if (inputAccount.namedApp == NamedApp.VRChat)
+                {
+                    _vrchatIdToIndividual.Add(inputAccount.inAppIdentifier, newIndividual);
+                }
             }
         }
     }
