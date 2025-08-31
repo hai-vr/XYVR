@@ -160,7 +160,46 @@ function App() {
         return accountNotesMatch;
     };
 
+    // Function to check if search terms match display name
+    const hasDisplayNameMatch = (individual, searchTerm) => {
+        if (!searchTerm) return false;
 
+        const displayName = individual.displayName || '';
+        const searchTerms = searchTerm.toLowerCase().split(' ').filter(term => term.trim() !== '');
+
+        if (searchTerms.length === 0) return false;
+
+        return searchTerms.every(term => {
+            const kanaVariants = generateKanaVariants(term);
+
+            return kanaVariants.some(variant => {
+                const variantNormalized = removeDiacritics(variant);
+                return removeDiacritics(displayName.toLowerCase()).includes(variantNormalized);
+            });
+        });
+    };
+
+    // Create sorted and filtered individuals array
+    const sortedAndFilteredIndividuals = useMemo(() => {
+        const visibleIndividuals = individuals.filter(ind => isIndividualVisible(ind, searchTerm));
+        
+        if (!searchTerm) {
+            return visibleIndividuals;
+        }
+
+        // Sort by display name matches first, then by original order
+        return visibleIndividuals.sort((a, b) => {
+            const aHasDisplayNameMatch = hasDisplayNameMatch(a, searchTerm);
+            const bHasDisplayNameMatch = hasDisplayNameMatch(b, searchTerm);
+
+            // If one has display name match and the other doesn't, prioritize the one with match
+            if (aHasDisplayNameMatch && !bHasDisplayNameMatch) return -1;
+            if (!aHasDisplayNameMatch && bHasDisplayNameMatch) return 1;
+
+            // If both have or don't have display name matches, maintain original order
+            return 0;
+        });
+    }, [individuals, searchTerm]);
 
     const handleGetTime = async () => {
         if (window.chrome?.webview?.hostObjects?.appApi) {
@@ -198,10 +237,8 @@ function App() {
         }
     };
 
-    // Calculate visible individuals count once using useMemo
-    const visibleIndividualsCount = useMemo(() => {
-        return individuals.filter(ind => isIndividualVisible(ind, searchTerm)).length;
-    }, [individuals, searchTerm]);
+    // Calculate visible individuals count using the sorted array
+    const visibleIndividualsCount = sortedAndFilteredIndividuals.length;
 
     return (
         <>
@@ -245,12 +282,12 @@ function App() {
                     </div>
 
                     <div className="individuals-grid">
-                        {individuals.map((individual, index) => (
+                        {sortedAndFilteredIndividuals.map((individual, index) => (
                             <Individual
                                 key={individual.id || index}
                                 individual={individual}
                                 index={index}
-                                isVisible={isIndividualVisible(individual, searchTerm)}
+                                isVisible={true} // Always visible since we're already filtering
                             />
                         ))}
                     </div>
