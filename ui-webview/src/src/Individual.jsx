@@ -66,21 +66,6 @@ function Individual({ individual, index, isVisible = true }) {
             </div>
 
             <div>
-                <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    marginBottom: '12px'
-                }}>
-                    <h4 style={{
-                        margin: 0,
-                        fontSize: '16px',
-                        fontWeight: '600',
-                        color: '#34495e'
-                    }}>
-                        🎮 Accounts ({individual.accounts?.length || 0})
-                    </h4>
-                </div>
-
                 {individual.accounts && individual.accounts.length > 0 ? (
                     <div style={{
                         display: 'grid',

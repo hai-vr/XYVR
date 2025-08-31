@@ -23,7 +23,7 @@ const Account = ({ account }) => {
                         width: '32px',
                         height: '32px',
                         borderRadius: '6px',
-                        background: account.namedApp === 1 ? '#ff6b35' :
+                        background: account.namedApp === 1 ? 'linear-gradient(170deg, #84ea22 20%, #fff834 80%)' :
                             account.namedApp === 2 ? '#1778f2' : '#6c757d',
                         display: 'flex',
                         alignItems: 'center',
@@ -38,20 +38,20 @@ const Account = ({ account }) => {
                         <div style={{
                             fontWeight: '600',
                             color: '#2c3e50',
-                            fontSize: '14px'
+                            fontSize: '14px',
+                            textAlign: 'left'
                         }}>
                             {account.inAppDisplayName}
                         </div>
-                        {account.qualifiedAppName && (
-                            <div style={{
-                                color: '#6c757d',
-                                fontSize: '12px',
-                                marginTop: '2px'
-                            }}>
-                                {account.namedApp === 1 ? 'Resonite' :
-                                    account.namedApp === 2 ? 'VRChat' : account.qualifiedAppName}
-                            </div>
-                        )}
+                        <div style={{
+                            color: '#6c757d',
+                            fontSize: '12px',
+                            marginTop: '2px',
+                            textAlign: 'left'
+                        }}>
+                            {account.namedApp === 1 ? 'Resonite' :
+                                account.namedApp === 2 ? 'VRChat' : account.qualifiedAppName}
+                        </div>
                     </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -76,7 +76,7 @@ const Account = ({ account }) => {
                             fontSize: '11px',
                             fontWeight: '500'
                         }}>
-                            Contact
+                            {account.namedApp === 2 ? 'Friend' : 'Contact'}
                         </span>
                     )}
                 </div>

@@ -42,7 +42,9 @@ function App() {
 
     // Remove the filteredIndividuals calculation and pass search logic to Individual components
     const removeDiacritics = (str) => {
-        return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        return str.normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '') // Replaces diacritics
+            .replace(/\u2024/g, '.'); // Replaces the crappy "one dot leader" character with a proper period
     };
 
     const isIndividualVisible = (individual, searchTerm) => {
@@ -50,20 +52,31 @@ function App() {
 
         const displayName = individual.displayName || '';
         const individualNote = individual.note?.text || '';
-        const searchLower = removeDiacritics(searchTerm.toLowerCase());
 
-        const individualMatch = removeDiacritics(displayName.toLowerCase()).includes(searchLower) ||
-            removeDiacritics(individualNote.toLowerCase()).includes(searchLower);
+        const searchTerms = searchTerm.toLowerCase().split(' ').filter(term => term.trim() !== '');
+
+        if (searchTerms.length === 0) return true;
+
+        const individualMatch = searchTerms.every(term => {
+            const termNormalized = removeDiacritics(term);
+            return removeDiacritics(displayName.toLowerCase()).includes(termNormalized) ||
+                removeDiacritics(individualNote.toLowerCase()).includes(termNormalized);
+        });
+
         if (individualMatch) return true;
 
-        const anyAccountMatch = individual.accounts?.some(account => {
+        const accountNotesMatch = individual.accounts?.some(account => {
             const accountNote = account.note?.text || '';
             const accountDisplayName = account.inAppDisplayName || '';
-            return removeDiacritics(accountNote.toLowerCase()).includes(searchLower) ||
-                removeDiacritics(accountDisplayName.toLowerCase()).includes(searchLower);
+
+            return searchTerms.every(term => {
+                const termNormalized = removeDiacritics(term);
+                return removeDiacritics(accountNote.toLowerCase()).includes(termNormalized) ||
+                    removeDiacritics(accountDisplayName.toLowerCase()).includes(termNormalized);
+            });
         }) || false;
 
-        return anyAccountMatch;
+        return accountNotesMatch;
     };
 
 
