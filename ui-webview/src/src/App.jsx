@@ -145,14 +145,21 @@ function App() {
         const accountNotesMatch = individual.accounts?.some(account => {
             const accountNote = account.note?.text || '';
             const accountDisplayName = account.inAppDisplayName || '';
+            const accountIdentifier = account.inAppIdentifier || '';
 
             return searchTerms.every(term => {
                 const kanaVariants = generateKanaVariants(term);
 
                 return kanaVariants.some(variant => {
                     const variantNormalized = removeDiacritics(variant);
-                    return removeDiacritics(accountNote.toLowerCase()).includes(variantNormalized) ||
-                        removeDiacritics(accountDisplayName.toLowerCase()).includes(variantNormalized);
+                    const noteMatch = removeDiacritics(accountNote.toLowerCase()).includes(variantNormalized);
+                    const displayNameMatch = removeDiacritics(accountDisplayName.toLowerCase()).includes(variantNormalized);
+
+                    // Only search in inAppIdentifier if namedApp equals 3 (Cluster)
+                    const identifierMatch = account.namedApp === 3 &&
+                        removeDiacritics(accountIdentifier.toLowerCase()).includes(variantNormalized);
+
+                    return noteMatch || displayNameMatch || identifierMatch;
                 });
             });
         }) || false;
@@ -160,7 +167,7 @@ function App() {
         return accountNotesMatch;
     };
 
-    // Function to check if search terms match display name
+// Function to check if search terms match display name
     const hasDisplayNameMatch = (individual, searchTerm) => {
         if (!searchTerm) return false;
 
@@ -179,27 +186,61 @@ function App() {
         });
     };
 
+    // Function to check if search terms match inAppIdentifier (only for namedApp === 3)
+    const hasIdentifierMatch = (individual, searchTerm) => {
+        if (!searchTerm) return false;
+
+        const searchTerms = searchTerm.toLowerCase().split(' ').filter(term => term.trim() !== '');
+
+        if (searchTerms.length === 0) return false;
+
+        return individual.accounts?.some(account => {
+            // Only check identifier for namedApp === 3 (Cluster)
+            if (account.namedApp !== 3) return false;
+
+            const accountIdentifier = account.inAppIdentifier || '';
+
+            return searchTerms.every(term => {
+                const kanaVariants = generateKanaVariants(term);
+
+                return kanaVariants.some(variant => {
+                    const variantNormalized = removeDiacritics(variant);
+                    return removeDiacritics(accountIdentifier.toLowerCase()).includes(variantNormalized);
+                });
+            });
+        }) || false;
+    };
+
     // Create sorted and filtered individuals array
     const sortedAndFilteredIndividuals = useMemo(() => {
         const visibleIndividuals = individuals.filter(ind => isIndividualVisible(ind, searchTerm));
-        
+
         if (!searchTerm) {
             return visibleIndividuals;
         }
 
-        // Sort by display name matches first, then by original order
+        // Sort by priority: display name matches first, then identifier matches, then original order
         return visibleIndividuals.sort((a, b) => {
             const aHasDisplayNameMatch = hasDisplayNameMatch(a, searchTerm);
             const bHasDisplayNameMatch = hasDisplayNameMatch(b, searchTerm);
+            const aHasIdentifierMatch = hasIdentifierMatch(a, searchTerm);
+            const bHasIdentifierMatch = hasIdentifierMatch(b, searchTerm);
 
-            // If one has display name match and the other doesn't, prioritize the one with match
+            // First priority: display name matches
             if (aHasDisplayNameMatch && !bHasDisplayNameMatch) return -1;
             if (!aHasDisplayNameMatch && bHasDisplayNameMatch) return 1;
 
-            // If both have or don't have display name matches, maintain original order
+            // Second priority: identifier matches (only if both don't have display name matches)
+            if (!aHasDisplayNameMatch && !bHasDisplayNameMatch) {
+                if (aHasIdentifierMatch && !bHasIdentifierMatch) return -1;
+                if (!aHasIdentifierMatch && bHasIdentifierMatch) return 1;
+            }
+
+            // If both have the same priority level, maintain original order
             return 0;
         });
     }, [individuals, searchTerm]);
+
 
     const handleGetTime = async () => {
         if (window.chrome?.webview?.hostObjects?.appApi) {

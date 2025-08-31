@@ -4,7 +4,6 @@
 // - An individual may have one or more accounts across several apps.
 // - An individual may be on some apps and not some others.
 // - An individual may have multiple accounts on the same app.
-// - Individuals must have exactly one "main" account per app.
 // - Two different individuals must not have the same account.
 
 public class Individual
@@ -65,5 +64,6 @@ public enum NamedApp
 {
     NotNamed = 0,
     Resonite = 1,
-    VRChat = 2
+    VRChat = 2,
+    Cluster = 3,
 }

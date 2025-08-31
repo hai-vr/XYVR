@@ -1,6 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using System.Windows;
 using Newtonsoft.Json;
+using XYVR.Core;
 
 namespace XYVR.UI.WebviewUI;
 
@@ -27,7 +28,7 @@ public class AppApi : IAppApi
 
     public string GetAppVersion()
     {
-        return "1.0.0";
+        return VERSION.version;
     }
 
     public string GetAllExposedIndividuals()

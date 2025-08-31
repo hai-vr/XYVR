@@ -149,7 +149,20 @@ internal partial class Program
             case Mode.ManualMerges:
             {
                 // repository.FusionIndividuals(IndividualByAnyAccountId("usr_505d0888-f9f1-4ba1-92d5-71ff09607837"), IndividualByAnyAccountId("U-Hai"));
-                
+                // IndividualByAnyAccountId("usr_505d0888-f9f1-4ba1-92d5-71ff09607837").accounts.Add(ClusterAccount("vr_hai", "Haï~"));
+
+                Account ClusterAccount(string inAppIdentifier, string inAppDisplayName)
+                {
+                    return new Account
+                    {
+                        namedApp = NamedApp.Cluster,
+                        qualifiedAppName = "cluster",
+                        inAppIdentifier = inAppIdentifier,
+                        inAppDisplayName = inAppDisplayName,
+                        isContact = true,
+                    };
+                }
+
                 await Scaffolding.SaveRepository(repository);
                 
                 Individual IndividualByAnyAccountId(string id)

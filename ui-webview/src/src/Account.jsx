@@ -28,7 +28,9 @@ const Account = ({ account }) => {
                         height: '32px',
                         borderRadius: '6px',
                         background: account.namedApp === 1 ? 'linear-gradient(170deg, #84ea22 20%, #fff834 80%)' :
-                            account.namedApp === 2 ? '#1778f2' : '#6c757d',
+                            account.namedApp === 2 ? '#186dcd' :
+                            account.namedApp === 3 ? '#02a8ea' :
+                                '#6c757d',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -36,7 +38,8 @@ const Account = ({ account }) => {
                         fontSize: '14px'
                     }}>
                         {account.namedApp === 1 ? '⚡' :
-                            account.namedApp === 2 ? '💬' : '❓'}
+                            account.namedApp === 2 ? '💬' :
+                            account.namedApp === 3 ? '☁️' : '❓'}
                     </div>
                     <div>
                         <div style={{
@@ -54,7 +57,8 @@ const Account = ({ account }) => {
                             textAlign: 'left'
                         }}>
                             {account.namedApp === 1 ? 'Resonite' :
-                                account.namedApp === 2 ? 'VRChat' : account.qualifiedAppName}
+                                account.namedApp === 2 ? 'VRChat' :
+                                account.namedApp === 3 ? 'Cluster (@' + account.inAppIdentifier + ')' : account.qualifiedAppName}
                         </div>
                     </div>
                 </div>

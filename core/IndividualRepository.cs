@@ -4,16 +4,18 @@ public class IndividualRepository
 {
     public List<Individual> Individuals { get; }
     
-    private Dictionary<string, Individual> _resoniteIdToIndividual;
-    private readonly Dictionary<string, Individual> _vrchatIdToIndividual;
+    private Dictionary<NamedApp, Dictionary<string, Individual>> _namedAppToInAppIdToIndividual;
 
     public IndividualRepository(Individual[] individuals)
     {
         Individuals = individuals.ToList();
         EvaluateDataMigrations(Individuals);
-        
-        _resoniteIdToIndividual = CreateAccountDictionary(NamedApp.Resonite);
-        _vrchatIdToIndividual = CreateAccountDictionary(NamedApp.VRChat);
+
+        _namedAppToInAppIdToIndividual = new Dictionary<NamedApp, Dictionary<string, Individual>>();
+        foreach (var namedApp in Enum.GetValues<NamedApp>())
+        {
+            _namedAppToInAppIdToIndividual[namedApp] = CreateAccountDictionary(namedApp);
+        }
     }
 
     // This can change the data of an individual when we have data migrations
@@ -46,7 +48,7 @@ public class IndividualRepository
     {
         foreach (var inputAccount in accounts)
         {
-            if (inputAccount.namedApp == NamedApp.Resonite && _resoniteIdToIndividual.TryGetValue(inputAccount.inAppIdentifier, out var existingResoniteIndividual))
+            if (_namedAppToInAppIdToIndividual[inputAccount.namedApp].TryGetValue(inputAccount.inAppIdentifier, out var existingResoniteIndividual))
             {
                 foreach (var existingAccount in existingResoniteIndividual.accounts)
                 {
@@ -55,26 +57,10 @@ public class IndividualRepository
 
                 UpdateIndividualBasedOnAccounts(existingResoniteIndividual);
             }
-            else if (inputAccount.namedApp == NamedApp.VRChat && _vrchatIdToIndividual.TryGetValue(inputAccount.inAppIdentifier, out var existingVRChatIndividual))
-            {
-                foreach (var existingAccount in existingVRChatIndividual.accounts)
-                {
-                    if (SynchronizeAccount(existingAccount, inputAccount)) break;
-                }
-
-                UpdateIndividualBasedOnAccounts(existingVRChatIndividual);
-            }
             else
             {
                 var newIndividual = CreateNewIndividualFromAccount(inputAccount);
-                if (inputAccount.namedApp == NamedApp.Resonite)
-                {
-                    _resoniteIdToIndividual.Add(inputAccount.inAppIdentifier, newIndividual);
-                }
-                else if (inputAccount.namedApp == NamedApp.VRChat)
-                {
-                    _vrchatIdToIndividual.Add(inputAccount.inAppIdentifier, newIndividual);
-                }
+                _namedAppToInAppIdToIndividual[inputAccount.namedApp].Add(inputAccount.inAppIdentifier, newIndividual);
             }
         }
     }
@@ -168,14 +154,7 @@ public class IndividualRepository
         
         foreach (var accountFromDestroyed in toDestroy.accounts)
         {
-            if (accountFromDestroyed.namedApp == NamedApp.Resonite)
-            {
-                _resoniteIdToIndividual[accountFromDestroyed.inAppIdentifier] = toAugment;
-            }
-            else if (accountFromDestroyed.namedApp == NamedApp.VRChat)
-            {
-                _vrchatIdToIndividual[accountFromDestroyed.inAppIdentifier] = toAugment;
-            }
+            _namedAppToInAppIdToIndividual[accountFromDestroyed.namedApp][accountFromDestroyed.inAppIdentifier] = toAugment;
         }
         
         Individuals.RemoveAt(indexToDestroy);
