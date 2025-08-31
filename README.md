@@ -6,6 +6,8 @@
 Once data is retrieved, it is stored offline, no Internet connection needed.
 The address book remains fully functional even if access to the original account is lost for any reason.
 
+<img width="484" height="617" alt="ui-webview_W5YVhJwwnL" src="https://github.com/user-attachments/assets/d64cfad9-bdc5-4319-b05f-88204e36c5eb" />
+
 # User documentation
 
 If you are a user looking to use this software: Sorry, but this application is not currently readily usable,
