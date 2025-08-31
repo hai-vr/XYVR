@@ -1,4 +1,6 @@
 bin/
 obj/
+ui-webview/src/node_modules/
+ui-webview/src/dist/
 .idea
 *.DotSettings.user
