@@ -25,8 +25,56 @@ public class VRChatCommunicator
     {
         var vrchatAccountIdentifiers = individualRepository.CollectAllInAppIdentifiers(NamedApp.VRChat);
         
-        var api = new VRChatAPI();
+        var api = await InitializeAPI();
 
+        var onlineFriends = await api.ListFriends(ListFriendsRequestType.OnlyOnline);
+        var offlineFriends = await api.ListFriends(ListFriendsRequestType.OnlyOffline);
+        
+        return onlineFriends.Concat(offlineFriends)
+            .Where(friend => !vrchatAccountIdentifiers.Contains(friend.id))
+            .Select(AsAccount)
+            .ToList();
+    }
+
+    public async Task<List<Account>> CollectUndiscoveredLenient(IndividualRepository repository, List<string> notNecessarilyValidUserIds)
+    {
+        var vrchatAccountIdentifiers = repository.CollectAllInAppIdentifiers(NamedApp.VRChat);
+        var undiscoveredAndNotNecessarilyValidUserIds = notNecessarilyValidUserIds
+            .Where(userId => !vrchatAccountIdentifiers.Contains(userId))
+            .Distinct() // Get rid of duplicates
+            .ToList();
+        
+        var api = await InitializeAPI();
+
+        var accounts = new List<Account>();
+        foreach (var userId in undiscoveredAndNotNecessarilyValidUserIds)
+        {
+            var user = await api.GetUserLenient(userId);
+            if (user != null)
+            {
+                accounts.Add(UserAsAccount((VRChatUser)user));
+            }
+        }
+
+        return accounts;
+    }
+
+    private Account UserAsAccount(VRChatUser user)
+    {
+        return new Account
+        {
+            namedApp = NamedApp.VRChat,
+            qualifiedAppName = "vrchat",
+            inAppIdentifier = user.id,
+            inAppDisplayName = user.displayName,
+            liveServerData = user,
+            isContact = user.isFriend,
+        };
+    }
+
+    private async Task<VRChatAPI> InitializeAPI()
+    {
+        var api = new VRChatAPI();
         if (File.Exists(CookieFileName))
         {
             var userinput_cookies__sensitive = await File.ReadAllTextAsync(CookieFileName, Encoding.UTF8);
@@ -38,13 +86,7 @@ public class VRChatCommunicator
             await TryLogin(api);
         }
 
-        var onlineFriends = await api.ListFriends(ListFriendsRequestType.OnlyOnline);
-        var offlineFriends = await api.ListFriends(ListFriendsRequestType.OnlyOffline);
-        
-        return onlineFriends.Concat(offlineFriends)
-            .Where(friend => !vrchatAccountIdentifiers.Contains(friend.id))
-            .Select(AsAccount)
-            .ToList();
+        return api;
     }
 
     private Account AsAccount(VRChatFriend friend)

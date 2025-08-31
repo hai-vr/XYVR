@@ -241,6 +241,22 @@ public class VRChatAPI
         return allFriends;
     }
 
+    public async Task<VRChatUser?> GetUserLenient(string userId)
+    {
+        if (!IsLoggedIn) throw new HttpRequestException("Not logged in"); // FIXME: Proper error handling
+        
+        var url = $"{RootUrl}/users/{userId}";
+        var response = await _client.GetAsync(url);
+        if (response.StatusCode == HttpStatusCode.NotFound) return null;
+        
+        EnsureSuccessOrThrowVerbose(response);
+            
+        Console.WriteLine($"Got {url} ; Waiting a second...");
+        await Task.Delay(1000);
+        
+        return JsonConvert.DeserializeObject<VRChatUser>(await response.Content.ReadAsStringAsync());
+    }
+
     private static void EnsureSuccessOrThrowVerbose(HttpResponseMessage response)
     {
         if (!response.IsSuccessStatusCode)

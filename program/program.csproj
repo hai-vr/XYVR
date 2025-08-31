@@ -13,6 +13,7 @@
       <ProjectReference Include="..\api-resonite\api-resonite.csproj" />
       <ProjectReference Include="..\api-vrchat\api-vrchat.csproj" />
       <ProjectReference Include="..\core\core.csproj" />
+      <ProjectReference Include="..\development-scaffold\development-scaffold.csproj" />
     </ItemGroup>
 
 </Project>
