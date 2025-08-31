@@ -3,6 +3,10 @@
 const Account = ({ account }) => {
     const hasNote = account.note && account.note.status === 1 && account.note.text;
 
+    const copyInAppIdentifier = async () => {
+        await navigator.clipboard.writeText(account.inAppIdentifier);
+    };
+
     return (
         <div style={{
             background: '#f8f9fa',
@@ -79,6 +83,44 @@ const Account = ({ account }) => {
                             {account.namedApp === 2 ? 'Friend' : 'Contact'}
                         </span>
                     )}
+                    {account.isTechnical && (
+                        <span style={{
+                            background: '#f8d7da',
+                            color: '#721c24',
+                            padding: '2px 6px',
+                            borderRadius: '4px',
+                            fontSize: '11px',
+                            fontWeight: '500'
+                        }}>
+                            Bot
+                        </span>
+                    )}
+                    <button
+                        onClick={copyInAppIdentifier}
+                        style={{
+                            background: '#f8f9fa',
+                            border: '1px solid #dee2e6',
+                            borderRadius: '4px',
+                            padding: '4px 6px',
+                            fontSize: '11px',
+                            color: '#6c757d',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            transition: 'all 0.2s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.target.style.background = '#e9ecef';
+                            e.target.style.borderColor = '#adb5bd';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.target.style.background = '#f8f9fa';
+                            e.target.style.borderColor = '#dee2e6';
+                        }}
+                        title={`Copy ID: ${account.inAppIdentifier}`}
+                    >
+                        📋
+                    </button>
                 </div>
             </div>
             

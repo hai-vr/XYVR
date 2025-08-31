@@ -11,12 +11,13 @@ public enum Mode
     FetchIndividuals,
     ManualTask,
     Duplicates,
+    ManualMerges,
     FetchNotes,
 }
 
 internal partial class Program
 {
-    private static Mode mode = Mode.FetchNotes;
+    private static Mode mode = Mode.ManualMerges;
 
     [GeneratedRegex(@"usr_[a-f0-9\-]+")]
     private static partial Regex UsrRegex();
@@ -143,6 +144,30 @@ internal partial class Program
                     await Scaffolding.SaveRepository(repository);
                 }
 
+                break;
+            }
+            case Mode.ManualMerges:
+            {
+                // repository.FusionIndividuals(IndividualByAnyAccountId("usr_505d0888-f9f1-4ba1-92d5-71ff09607837"), IndividualByAnyAccountId("U-Hai"));
+                
+                await Scaffolding.SaveRepository(repository);
+                
+                Individual IndividualByAnyAccountId(string id)
+                {
+                    return repository.Individuals.First(individual => individual.accounts.Any(account => account.inAppIdentifier == id));
+                }
+                Account AccountByAnyId(string id)
+                {
+                    foreach (var ind in repository.Individuals)
+                    {
+                        foreach (var indAccount in ind.accounts)
+                        {
+                            if (indAccount.inAppIdentifier == id) return indAccount;
+                        }
+                    }
+
+                    return null;
+                }
                 break;
             }
             case Mode.Duplicates:

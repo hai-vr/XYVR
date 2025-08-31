@@ -43,6 +43,7 @@ public class Account
     public Dictionary<string, string> userData = new();
 
     public Note note = new();
+    public bool isTechnical;
     
     public bool isContact;
 }
