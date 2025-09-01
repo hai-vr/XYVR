@@ -1,6 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using System.Windows;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using XYVR.Core;
 
 namespace XYVR.UI.WebviewUI;
@@ -17,8 +18,20 @@ public interface IAppApi
 
 [ComVisible(true)]
 [ClassInterface(ClassInterfaceType.None)]
-public class AppApi(MainWindow mainWindow) : IAppApi
+public class AppApi : IAppApi
 {
+    private readonly MainWindow _mainWindow;
+    private readonly JsonSerializerSettings _serializer;
+
+    public AppApi(MainWindow mainWindow)
+    {
+        _mainWindow = mainWindow;
+        _serializer = new JsonSerializerSettings
+        {
+            Converters = { new StringEnumConverter() }
+        };
+    }
+
     public string GetAppVersion()
     {
         return VERSION.version;
@@ -26,12 +39,12 @@ public class AppApi(MainWindow mainWindow) : IAppApi
 
     public string GetAllExposedIndividualsOrderedByContact()
     {
-        var responseObj = mainWindow.IndividualRepository.Individuals
+        var responseObj = _mainWindow.IndividualRepository.Individuals
             .Where(individual => individual.isExposed)
             .OrderByDescending(individual => individual.isAnyContact)
             .ToList();
         
-        return JsonConvert.SerializeObject(responseObj);
+        return JsonConvert.SerializeObject(responseObj, Formatting.None, _serializer);
     }
 
     public void ShowMessage(string message)
@@ -48,7 +61,7 @@ public class AppApi(MainWindow mainWindow) : IAppApi
     {
         Application.Current.Dispatcher.Invoke(() =>
         {
-            mainWindow.Close();
+            _mainWindow.Close();
         });
     }
 }

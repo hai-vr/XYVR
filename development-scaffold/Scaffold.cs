@@ -41,14 +41,6 @@ public static class Scaffolding
         return JsonConvert.SerializeObject(trail, Formatting.None, _serializer);
     }
 
-    private static JsonSerializerSettings InitializeSerializer()
-    {
-        return new JsonSerializerSettings
-        {
-            Converters = { new StringEnumConverter() }
-        };
-    }
-
     public static async Task<List<DataCollectionTrail>> RebuildTrail()
     {
         if (!File.Exists(DataCollectionFileName)) return [];
@@ -65,5 +57,13 @@ public static class Scaffolding
         }
 
         return results;
+    }
+
+    private static JsonSerializerSettings InitializeSerializer()
+    {
+        return new JsonSerializerSettings
+        {
+            Converters = { new StringEnumConverter() }
+        };
     }
 }

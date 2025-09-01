@@ -142,13 +142,13 @@ function App() {
         return specialTerms.every(term => {
             switch (term) {
                 case 'app:resonite':
-                    return individual.accounts?.some(account => account.namedApp === 1) || false;
+                    return individual.accounts?.some(account => account.namedApp === "Resonite") || false;
                 
                 case 'app:vrchat':
-                    return individual.accounts?.some(account => account.namedApp === 2) || false;
+                    return individual.accounts?.some(account => account.namedApp === "VRChat") || false;
                 
                 case 'app:cluster':
-                    return individual.accounts?.some(account => account.namedApp === 3) || false;
+                    return individual.accounts?.some(account => account.namedApp === "Cluster") || false;
                 
                 case 'has:bot':
                     return individual.accounts?.some(account => account.isTechnical) || false;
@@ -229,7 +229,7 @@ function App() {
                     const displayNameMatch = removeDiacritics(accountDisplayName.toLowerCase()).includes(variantNormalized);
 
                     // Only search in inAppIdentifier if namedApp equals 3 (Cluster)
-                    const identifierMatch = account.namedApp === 3 &&
+                    const identifierMatch = account.namedApp === "Cluster" &&
                         removeDiacritics(accountIdentifier.toLowerCase()).includes(variantNormalized);
 
                     return noteMatch || displayNameMatch || identifierMatch;
@@ -268,7 +268,7 @@ function App() {
 
         return individual.accounts?.some(account => {
             // Only check identifier for namedApp === 3 (Cluster)
-            if (account.namedApp !== 3) return false;
+            if (account.namedApp !== "Cluster") return false;
 
             const accountIdentifier = account.inAppIdentifier || '';
 

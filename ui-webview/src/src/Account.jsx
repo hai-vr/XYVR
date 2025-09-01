@@ -1,7 +1,7 @@
 ﻿import React from 'react';
 
 const Account = ({ account }) => {
-    const hasNote = account.note && account.note.status === 2 && account.note.text;
+    const hasNote = account.note && account.note.status === "Exists" && account.note.text;
 
     const copyInAppIdentifier = async () => {
         await navigator.clipboard.writeText(account.inAppIdentifier);
@@ -27,9 +27,9 @@ const Account = ({ account }) => {
                         width: '32px',
                         height: '32px',
                         borderRadius: '6px',
-                        background: account.namedApp === 1 ? 'linear-gradient(170deg, #84ea22 20%, #fff834 80%)' :
-                            account.namedApp === 2 ? '#186dcd' :
-                            account.namedApp === 3 ? '#02a8ea' :
+                        background: account.namedApp === "Resonite" ? 'linear-gradient(170deg, #84ea22 20%, #fff834 80%)' :
+                            account.namedApp === "VRChat" ? '#186dcd' :
+                            account.namedApp === "Cluster" ? '#02a8ea' :
                                 '#6c757d',
                         display: 'flex',
                         alignItems: 'center',
@@ -37,9 +37,9 @@ const Account = ({ account }) => {
                         marginRight: '12px',
                         fontSize: '14px'
                     }}>
-                        {account.namedApp === 1 ? '⚡' :
-                            account.namedApp === 2 ? '💬' :
-                            account.namedApp === 3 ? '☁️' : '❓'}
+                        {account.namedApp === "Resonite" ? '⚡' :
+                            account.namedApp === "VRChat" ? '💬' :
+                            account.namedApp === "Cluster" ? '☁️' : '❓'}
                     </div>
                     <div>
                         <div style={{
@@ -56,9 +56,9 @@ const Account = ({ account }) => {
                             marginTop: '2px',
                             textAlign: 'left'
                         }}>
-                            {account.namedApp === 1 ? 'Resonite' :
-                                account.namedApp === 2 ? 'VRChat' :
-                                account.namedApp === 3 ? 'Cluster (@' + account.inAppIdentifier + ')' : account.qualifiedAppName}
+                            {account.namedApp === "Resonite" ? 'Resonite' :
+                                account.namedApp === "VRChat" ? 'VRChat' :
+                                account.namedApp === "Cluster" ? 'Cluster (@' + account.inAppIdentifier + ')' : account.qualifiedAppName}
                         </div>
                     </div>
                 </div>
@@ -84,7 +84,7 @@ const Account = ({ account }) => {
                             fontSize: '11px',
                             fontWeight: '500'
                         }}>
-                            {account.namedApp === 2 ? 'Friend' : 'Contact'}
+                            {account.namedApp === "VRChat" ? 'Friend' : 'Contact'}
                         </span>
                     )}
                     {account.isTechnical && (
