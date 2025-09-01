@@ -62,7 +62,6 @@ public class VRChatCommunicator
                 qualifiedAppName = VRChatQualifiedAppName,
                 inAppIdentifier = friend.id,
                 inAppDisplayName = friend.displayName,
-                liveServerData = friend,
                 callers =
                 [
                     new IncompleteCallerAccount
@@ -85,7 +84,6 @@ public class VRChatCommunicator
                 qualifiedAppName = VRChatQualifiedAppName,
                 inAppIdentifier = full.targetUserId,
                 inAppDisplayName = full.targetUser.displayName,
-                liveServerData = full,
                 callers =
                 [
                     new IncompleteCallerAccount
@@ -166,7 +164,6 @@ public class VRChatCommunicator
             qualifiedAppName = VRChatQualifiedAppName,
             inAppIdentifier = user.id,
             inAppDisplayName = user.displayName,
-            liveServerData = user,
             isContact = user.isFriend,
             note = new Note
             {

@@ -36,17 +36,13 @@ public class Account
     public string inAppIdentifier;
     public string inAppDisplayName;
 
-    public object? liveServerData;
-    public object? previousLiveServerData;
-    public object? preservedServerData;
-    public Dictionary<string, string> userData = new();
-    
     // These two pieces of data should be moved to callers.
     public bool isContact;
     public Note note = new();
     
     public List<CallerAccount> callers = new(); // TODO: New data to support multi-accounts.
 
+    // This field is up to the app users' judgement
     public bool isTechnical;
 }
 
@@ -57,8 +53,6 @@ public class IncompleteAccount
     
     public string inAppIdentifier;
     public string inAppDisplayName;
-
-    public object? liveServerData;
     
     public List<IncompleteCallerAccount> callers = new();
 }

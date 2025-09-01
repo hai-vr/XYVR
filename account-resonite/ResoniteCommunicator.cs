@@ -102,7 +102,6 @@ public class ResoniteCommunicator
             qualifiedAppName = ResoniteQualifiedAppName,
             inAppIdentifier = combined.User.id,
             inAppDisplayName = combined.User.username,
-            liveServerData = combined,
             callers =
             [
                 new CallerAccount

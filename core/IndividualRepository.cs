@@ -71,11 +71,6 @@ public class IndividualRepository
         {
             existingAccount.inAppDisplayName = inputAccount.inAppDisplayName;
             existingAccount.isContact = inputAccount.isContact;
-                        
-            // Order matters
-            var newPreviousLiveServerData = existingAccount.liveServerData;
-            existingAccount.previousLiveServerData = newPreviousLiveServerData;
-            existingAccount.liveServerData = inputAccount.liveServerData;
             return true;
         }
 
