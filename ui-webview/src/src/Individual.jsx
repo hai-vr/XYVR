@@ -9,6 +9,15 @@ function Individual({ individual, index, isVisible = true }) {
         // Generally, prevent links that aren't http:// nor https://
         ?.filter(url => url && (url.startsWith('http://') || url.startsWith('https://'))) || [];
 
+    const copyToClipboard = async (url, event) => {
+        event.stopPropagation(); // Prevent the container click event
+        try {
+            await navigator.clipboard.writeText(url);
+        } catch (err) {
+            
+        }
+    };
+
     return (
         <div style={{ 
             display: isVisible ? 'block' : 'none',
@@ -123,34 +132,77 @@ function Individual({ individual, index, isVisible = true }) {
                         gap: '6px'
                     }}>
                         {vrChatLinks.map((url, linkIndex) => (
-                            <a key={linkIndex}
-                               href={url}
-                                // We don't want target blank because we want to cause clicking to invoke a `NavigationStarting` event in the WebView.
-                                // target="_blank"
-                               rel="noopener noreferrer"
-                               style={{
-                                   color: '#1976d2',
-                                   textDecoration: 'none',
-                                   fontSize: '13px',
-                                   padding: '4px 8px',
-                                   background: '#e3f2fd',
-                                   borderRadius: '4px',
-                                   transition: 'background-color 0.2s ease',
-                                   display: 'inline-block',
-                                   maxWidth: '100%',
-                                   overflow: 'hidden',
-                                   textOverflow: 'ellipsis',
-                                   whiteSpace: 'nowrap',
-                                   wordBreak: 'break-all'
-                               }}
-                               onMouseEnter={(e) => {
-                                   e.target.style.backgroundColor = '#bbdefb';
-                               }}
-                               onMouseLeave={(e) => {
-                                   e.target.style.backgroundColor = '#e3f2fd';
-                               }}>
-                                🔗 {url}
-                            </a>
+                            <div 
+                                key={linkIndex}
+                                style={{
+                                    background: '#e3f2fd',
+                                    border: '1px solid #bbdefb',
+                                    borderRadius: '4px',
+                                    padding: '6px 12px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    maxWidth: '100%',
+                                    overflow: 'hidden',
+                                    transition: 'background-color 0.2s ease'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.target.style.backgroundColor = '#bbdefb';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.target.style.backgroundColor = '#e3f2fd';
+                                }}
+                            >
+                                <a
+                                    href={url}
+                                    rel="noopener noreferrer"
+                                    style={{
+                                        color: '#1976d2',
+                                        textDecoration: 'none',
+                                        fontSize: '13px',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        whiteSpace: 'nowrap',
+                                        marginRight: '8px',
+                                        flex: 1,
+                                        cursor: 'pointer'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.target.style.textDecoration = 'underline';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.target.style.textDecoration = 'none';
+                                    }}
+                                >
+                                    🔗 {url}
+                                </a>
+                                <button
+                                    onClick={(e) => copyToClipboard(url, e)}
+                                    style={{
+                                        background: 'transparent',
+                                        border: 'none',
+                                        color: '#1976d2',
+                                        cursor: 'pointer',
+                                        fontSize: '11px',
+                                        opacity: 0.7,
+                                        padding: '4px 8px',
+                                        borderRadius: '4px',
+                                        transition: 'all 0.2s ease',
+                                        flexShrink: 0
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.target.style.opacity = '1';
+                                        e.target.style.backgroundColor = 'rgba(25, 118, 210, 0.1)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.target.style.opacity = '0.7';
+                                        e.target.style.backgroundColor = 'transparent';
+                                    }}
+                                    title="Copy link to clipboard"
+                                >
+                                    📋 Copy
+                                </button>
+                            </div>
                         ))}
                     </div>
                 </div>
