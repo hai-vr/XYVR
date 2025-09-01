@@ -1,0 +1,129 @@
+﻿.account-container {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.account-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.account-info {
+    display: flex;
+    align-items: center;
+}
+
+.app-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+    font-size: 14px;
+}
+
+.app-icon.resonite {
+    background: linear-gradient(170deg, #84ea22 20%, #fff834 80%);
+}
+
+.app-icon.vrchat {
+    background: #186dcd;
+}
+
+.app-icon.cluster {
+    background: #02a8ea;
+}
+
+.app-icon.default {
+    background: #6c757d;
+}
+
+.account-display-name {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 14px;
+    text-align: left;
+}
+
+.account-app-name {
+    color: #6c757d;
+    font-size: 12px;
+    margin-top: 2px;
+    text-align: left;
+}
+
+.account-badges {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.badge {
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.badge.note {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.badge.contact {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.badge.bot {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.copy-button {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 4px 6px;
+    font-size: 11px;
+    color: #6c757d;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s ease;
+}
+
+.copy-button:hover {
+    background: #e9ecef;
+    border-color: #adb5bd;
+}
+
+.note-container {
+    background: #f0f8ff;
+    border: 1px solid #b3d9ff;
+    border-radius: 6px;
+    padding: 8px;
+    margin-top: 4px;
+}
+
+.note-header {
+    font-size: 12px;
+    color: #1976d2;
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.note-text {
+    font-size: 13px;
+    color: #2c3e50;
+    line-height: 1.4;
+    white-space: pre-wrap;
+}

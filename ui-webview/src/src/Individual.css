@@ -1,0 +1,148 @@
+﻿
+.individual-container {
+    display: block;
+    background: white;
+    border: 1px solid #e1e5e9;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+}
+
+.individual-container.hidden {
+    display: none;
+}
+
+.individual-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #f8f9fa;
+}
+
+.individual-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    margin-right: 12px;
+}
+
+.individual-name {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.contact-badge {
+    margin-left: 12px;
+    background: #e8f5e8;
+    color: #27ae60;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.accounts-container {
+    margin-bottom: 20px;
+}
+
+.accounts-grid {
+    display: grid;
+    gap: 8px;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.no-accounts {
+    text-align: center;
+    padding: 20px;
+    color: #6c757d;
+    font-style: italic;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 2px dashed #dee2e6;
+}
+
+.vrchat-links-container {
+    background: #f0f8ff;
+    border: 1px solid #b3d9ff;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 16px;
+}
+
+.vrchat-links-title {
+    font-size: 14px;
+    color: #1976d2;
+    font-weight: 600;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+}
+
+.vrchat-links-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.vrchat-link-item {
+    background: #e3f2fd;
+    border: 1px solid #bbdefb;
+    border-radius: 4px;
+    padding: 6px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 100%;
+    overflow: hidden;
+    transition: background-color 0.2s ease;
+}
+
+.vrchat-link-item:hover {
+    background-color: #bbdefb;
+}
+
+.vrchat-link {
+    color: #1976d2;
+    text-decoration: none;
+    font-size: 13px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-right: 8px;
+    flex: 1;
+    cursor: pointer;
+}
+
+.vrchat-link:hover {
+    text-decoration: underline;
+}
+
+.copy-button {
+    background: transparent;
+    border: none;
+    color: #1976d2;
+    cursor: pointer;
+    font-size: 11px;
+    opacity: 0.7;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.copy-button:hover {
+    opacity: 1;
+    background-color: rgba(25, 118, 210, 0.1);
+}
