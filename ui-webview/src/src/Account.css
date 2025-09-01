@@ -82,19 +82,19 @@
 .badge.note {
     background: var(--status-note-bg);
     color: var(--status-note-text);
-    border-color: var(--border-secondary);
+    border-color: var(--badge-note-border);
 }
 
 .badge.contact {
     background: var(--status-warning-bg);
     color: var(--status-warning-text);
-    border-color: var(--border-secondary);
+    border-color: var(--badge-contact-border);
 }
 
 .badge.bot {
     background: var(--status-bot-bg);
     color: var(--status-bot-text);
-    border-color: var(--border-secondary);
+    border-color: var(--badge-bot-border);
 }
 
 .copy-button {
@@ -117,8 +117,8 @@
 }
 
 .note-container {
-    background: var(--bg-tertiary);
-    border: 1px solid var(--border-secondary);
+    background: var(--note-container-bg);
+    border: 1px solid var(--note-container-border);
     border-radius: 6px;
     padding: 8px;
     margin-top: 4px;
@@ -136,22 +136,4 @@
     color: var(--text-primary);
     line-height: 1.4;
     white-space: pre-wrap;
-}
-
-/* Light theme specific overrides for badges */
-[data-theme="light"] .badge.note {
-    border-color: #bbdefb;
-}
-
-[data-theme="light"] .badge.contact {
-    border-color: #ffeaa7;
-}
-
-[data-theme="light"] .badge.bot {
-    border-color: #f5c6cb;
-}
-
-[data-theme="light"] .note-container {
-    background: #f0f8ff;
-    border-color: #b3d9ff;
 }

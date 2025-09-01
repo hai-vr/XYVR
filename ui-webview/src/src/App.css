@@ -24,7 +24,7 @@
 }
 
 .logo.react:hover {
-    filter: drop-shadow(0 0 2em #61dafbaa);
+    filter: drop-shadow(0 0 2em var(--logo-react-glow));
 }
 
 @keyframes logo-spin {
@@ -67,8 +67,8 @@
 }
 
 .header-section {
-    background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
-    color: var(--text-primary);
+    background: var(--header-gradient);
+    color: var(--header-text);
     padding: 20px;
     border-radius: 12px;
     margin-bottom: 20px;
@@ -76,7 +76,7 @@
     width: 100%;
     box-sizing: border-box;
     min-width: 0;
-    border: 1px solid var(--border-primary);
+    border: var(--header-border);
 }
 
 .header-content {
@@ -91,12 +91,12 @@
     font-size: 24px;
     font-weight: 600;
     min-width: 0;
-    color: var(--text-primary);
+    color: var(--header-text);
 }
 
 .theme-toggle-btn {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: var(--theme-toggle-bg);
+    border: 1px solid var(--theme-toggle-border);
     border-radius: 50%;
     width: 44px;
     height: 44px;
@@ -111,8 +111,8 @@
 }
 
 .theme-toggle-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
-    border-color: rgba(255, 255, 255, 0.3);
+    background: var(--theme-toggle-hover-bg);
+    border-color: var(--theme-toggle-hover-border);
     transform: scale(1.05);
 }
 
@@ -127,7 +127,7 @@
     min-height: 18px;
     word-break: break-word;
     min-width: 0;
-    color: var(--text-primary);
+    color: var(--header-text);
 }
 
 .search-container {
@@ -142,23 +142,23 @@
     width: 100%;
     padding: 10px 40px 10px 15px;
     border-radius: 25px;
-    border: 1px solid var(--border-primary);
+    border: 1px solid var(--search-input-border);
     font-size: 14px;
     outline: none;
-    background-color: var(--bg-secondary);
-    color: var(--text-primary);
+    background-color: var(--search-input-bg);
+    color: var(--search-input-text);
     box-shadow: 0 2px 8px var(--shadow-light);
     box-sizing: border-box;
     min-width: 0;
 }
 
 .search-input::placeholder {
-    color: var(--text-secondary);
+    color: var(--search-placeholder);
 }
 
 .search-input:focus {
     border-color: var(--accent-primary);
-    box-shadow: 0 2px 8px rgba(104, 151, 187, 0.3);
+    box-shadow: 0 2px 8px var(--search-focus-shadow);
 }
 
 .search-icon {
@@ -166,7 +166,7 @@
     right: 15px;
     top: 50%;
     transform: translateY(-50%);
-    color: var(--text-secondary);
+    color: var(--search-icon-color);
     font-size: 16px;
     pointer-events: none;
 }
@@ -178,7 +178,7 @@
     transform: translateY(-50%);
     background: none;
     border: none;
-    color: var(--text-secondary);
+    color: var(--search-icon-color);
     cursor: pointer;
     font-size: 18px;
     width: 20px;
@@ -190,7 +190,7 @@
 }
 
 .search-clear-button:hover {
-    color: var(--text-primary);
+    color: var(--search-icon-hover);
 }
 
 .individuals-grid {
@@ -245,60 +245,6 @@
     font-size: 14px;
     margin-top: 10px;
     color: var(--text-secondary);
-}
-
-/* Light theme specific overrides */
-[data-theme="light"] .header-section {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    box-shadow: 0 4px 15px var(--shadow-light);
-    border: none;
-}
-
-[data-theme="light"] .header-title {
-    color: white;
-}
-
-[data-theme="light"] .search-results-info {
-    color: white;
-}
-
-[data-theme="light"] .search-input {
-    background-color: rgba(255, 255, 255, 0.9);
-    color: #333;
-    border: none;
-    box-shadow: 0 2px 8px var(--shadow-light);
-}
-
-[data-theme="light"] .search-input::placeholder {
-    color: #666;
-}
-
-[data-theme="light"] .search-input:focus {
-    border: none;
-    box-shadow: 0 2px 8px var(--shadow-medium);
-}
-
-[data-theme="light"] .search-icon {
-    color: #666;
-}
-
-[data-theme="light"] .search-clear-button {
-    color: #666;
-}
-
-[data-theme="light"] .search-clear-button:hover {
-    color: #333;
-}
-
-[data-theme="light"] .theme-toggle-btn {
-    background: rgba(0, 0, 0, 0.05);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-[data-theme="light"] .theme-toggle-btn:hover {
-    background: rgba(0, 0, 0, 0.1);
-    border-color: rgba(0, 0, 0, 0.2);
 }
 
 /* Responsive design for smaller screens */

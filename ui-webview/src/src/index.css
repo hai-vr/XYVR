@@ -31,6 +31,29 @@
     --shadow-medium: rgba(0, 0, 0, 0.3);
     --shadow-heavy: rgba(0, 0, 0, 0.4);
 
+    /* Logo colors */
+    --logo-react-glow: #61dafbaa;
+
+    /* Header specific colors */
+    --header-gradient: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+    --header-text: var(--text-primary);
+    --header-border: 1px solid var(--border-primary);
+
+    /* Theme toggle button colors */
+    --theme-toggle-bg: rgba(255, 255, 255, 0.1);
+    --theme-toggle-border: rgba(255, 255, 255, 0.2);
+    --theme-toggle-hover-bg: rgba(255, 255, 255, 0.2);
+    --theme-toggle-hover-border: rgba(255, 255, 255, 0.3);
+
+    /* Search input colors */
+    --search-input-bg: var(--bg-secondary);
+    --search-input-text: var(--text-primary);
+    --search-input-border: var(--border-primary);
+    --search-placeholder: var(--text-secondary);
+    --search-focus-shadow: rgba(104, 151, 187, 0.3);
+    --search-icon-color: var(--text-secondary);
+    --search-icon-hover: var(--text-primary);
+
     /* Avatar colors */
     --avatar-text: #ffffff;
     --avatar-gradient-light: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
@@ -44,6 +67,15 @@
     --status-bot-text: #d4a6aa;
     --status-warning-bg: #4a4232;
     --status-warning-text: #d4b86a;
+
+    /* Badge border colors */
+    --badge-note-border: #5a5d5f;
+    --badge-contact-border: #5a5d5f;
+    --badge-bot-border: #5a5d5f;
+
+    /* Note container colors */
+    --note-container-bg: #3e4446;
+    --note-container-border: #5a5d5f;
 
     /* VRChat links specific colors */
     --vrchat-links-bg: #3e4446;
@@ -89,6 +121,26 @@
     --shadow-medium: rgba(0, 0, 0, 0.1);
     --shadow-heavy: rgba(0, 0, 0, 0.2);
 
+    /* Header specific colors for light theme */
+    --header-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --header-text: white;
+    --header-border: none;
+
+    /* Theme toggle button colors for light theme */
+    --theme-toggle-bg: rgba(0, 0, 0, 0.05);
+    --theme-toggle-border: rgba(0, 0, 0, 0.1);
+    --theme-toggle-hover-bg: rgba(0, 0, 0, 0.1);
+    --theme-toggle-hover-border: rgba(0, 0, 0, 0.2);
+
+    /* Search input colors for light theme */
+    --search-input-bg: rgba(255, 255, 255, 0.9);
+    --search-input-text: #333;
+    --search-input-border: none;
+    --search-placeholder: #666;
+    --search-focus-shadow: var(--shadow-medium);
+    --search-icon-color: #666;
+    --search-icon-hover: #333;
+
     /* Avatar colors for light theme */
     --avatar-text: #ffffff;
 
@@ -101,6 +153,15 @@
     --status-bot-text: #721c24;
     --status-warning-bg: #fff3cd;
     --status-warning-text: #856404;
+
+    /* Badge border colors for light theme */
+    --badge-note-border: #bbdefb;
+    --badge-contact-border: #ffeaa7;
+    --badge-bot-border: #f5c6cb;
+
+    /* Note container colors for light theme */
+    --note-container-bg: #f0f8ff;
+    --note-container-border: #b3d9ff;
 
     /* VRChat links specific colors for light theme */
     --vrchat-links-bg: #f0f8ff;
