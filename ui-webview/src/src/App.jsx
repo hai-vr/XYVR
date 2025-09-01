@@ -127,7 +127,7 @@ function App() {
         const regularTerms = [];
 
         terms.forEach(term => {
-            if (term.startsWith('app:') || term.startsWith('accounts:') || term === 'has:alt' || term === 'has:bot') {
+            if (term.startsWith('app:') || term.startsWith('accounts:') || term.startsWith('links:') || term === 'has:alt' || term === 'has:bot') {
                 specialTerms.push(term);
             } else {
                 regularTerms.push(term);
@@ -140,6 +140,17 @@ function App() {
     // Check if individual matches special search terms
     const matchesSpecialTerms = (individual, specialTerms) => {
         return specialTerms.every(term => {
+            if (term.startsWith('links:')) {
+                const searchString = term.substring(6); // Remove 'links:' prefix
+                if (!searchString) return true; // Empty search string matches all
+                
+                return individual.accounts?.some(account => 
+                    account.specifics?.urls?.some(url => 
+                        url.toLowerCase().includes(searchString)
+                    )
+                ) || false;
+            }
+        
             switch (term) {
                 case 'app:resonite':
                     return individual.accounts?.some(account => account.namedApp === "Resonite") || false;
@@ -410,7 +421,7 @@ function App() {
                             <div className="no-results-icon">🔍</div>
                             <div className="no-results-text">No individuals found matching "<strong>{searchTerm}</strong>"</div>
                             <div className="no-results-hint">
-                                Try searching by name, note content, or use special terms like app:resonite, app:vrchat, app:cluster, accounts:&gt;1, has:alt, has:bot
+                                Try searching by name, note content, or use special terms like app:resonite, app:vrchat, app:cluster, accounts:&gt;1, has:alt, has:bot, links:misskey
                             </div>
                         </div>
                     )}
