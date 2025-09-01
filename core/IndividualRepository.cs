@@ -103,30 +103,34 @@ public class IndividualRepository
 
     private static void UpdateExistingNote(Note existingNote, Note inputNote)
     {
-        if (existingNote.status != inputNote.status)
+        switch (inputNote.status)
         {
-            if (existingNote.status == NoteState.NeverHad)
+            case NoteState.Exists:
             {
-                existingNote.status = inputNote.status;
+                existingNote.status = NoteState.Exists;
                 existingNote.text = inputNote.text;
+                break;
             }
-            else
+            case NoteState.NeverHad:
             {
-                if (inputNote.status is NoteState.Exists)
+                if (existingNote.status == NoteState.Exists)
                 {
-                    existingNote.status = NoteState.Exists;
-                    existingNote.text = inputNote.text;
-                }
-                else
-                {
-                    existingNote.status = inputNote.status;
+                    existingNote.status = NoteState.WasRemoved;
                     // We don't overwrite the text
                 }
+                break;
             }
-        }
-        else if (existingNote.status == NoteState.Exists && existingNote.text != inputNote.text)
-        {
-            existingNote.text = inputNote.text;
+            case NoteState.WasRemoved:
+            {
+                if (existingNote.status is NoteState.Exists or NoteState.NeverHad)
+                {
+                    existingNote.status = NoteState.WasRemoved;
+                    // We don't overwrite the text
+                }
+                break;
+            }
+            default:
+                throw new ArgumentOutOfRangeException();
         }
     }
 
