@@ -35,15 +35,14 @@ public class Account
     
     public string inAppIdentifier;
     public string inAppDisplayName;
-
-    // These two pieces of data should be moved to callers.
-    [Obsolete] public bool isContact;
-    [Obsolete] public Note note = new();
     
-    public List<CallerAccount> callers = new(); // TODO: New data to support multi-accounts.
+    public List<CallerAccount> callers = new();
 
     // This field is up to the app users' judgement
     public bool isTechnical;
+
+    public bool IsAnyCallerContact() => callers.Any(caller => caller.isContact);
+    public bool HasAnyCallerNote() => callers.Any(caller => caller.note.status == NoteState.Exists);
 }
 
 public class IncompleteAccount

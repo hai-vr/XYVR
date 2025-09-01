@@ -12,8 +12,6 @@ public enum Mode
     ManualTask,
     Duplicates,
     ManualMerges,
-    FetchNotesUsingUserAPI,
-    FetchNotesUsingNotesAPI,
     UpdateExistingIndividuals,
     RebuildFromStorage
 }
@@ -117,122 +115,6 @@ internal partial class Program
 
                 break;
             }
-            case Mode.FetchNotesUsingUserAPI:
-            {
-                var individualsWithVRChatAccount = repository.Individuals
-                    .Where(individual => individual.accounts.Any(account => account.namedApp == NamedApp.VRChat))
-                    .ToList();
-                
-                var numberOfIndividualsUpdated = 0;
-
-                var communicator = new VRChatCommunicator(storage);
-
-                foreach (var individual in individualsWithVRChatAccount)
-                {
-                    var hasIndividualUpdated = false;
-                    var vrchatAccountsOfThatIndividual = individual.accounts.Where(account => account.namedApp == NamedApp.VRChat).ToList();
-                    foreach (var vrcAccount in vrchatAccountsOfThatIndividual)
-                    {
-                        var note = await communicator.TempCollectNoteFromUser(vrcAccount);
-                        if (note is { } realNote)
-                        {
-                            if (realNote.status == NoteState.Exists)
-                            {
-                                if (vrcAccount.note.status != NoteState.Exists || vrcAccount.note.text != realNote.text)
-                                {
-                                    hasIndividualUpdated = true;
-                                }
-                                vrcAccount.note.status = NoteState.Exists;
-                                vrcAccount.note.text = realNote.text;
-                                
-                                Console.WriteLine($"Note of {individual.displayName} is: {realNote.text}");
-                            }
-                            else
-                            {
-                                if (vrcAccount.note.status == NoteState.Exists)
-                                {
-                                    vrcAccount.note.status = NoteState.WasRemoved;
-                                    hasIndividualUpdated = true;
-                                }
-                            }
-                            
-                        }
-                        else
-                        {
-                            Console.WriteLine($"Trying to collect note of {individual.displayName} failed");
-                        }
-                    }
-
-                    if (hasIndividualUpdated)
-                    {
-                        numberOfIndividualsUpdated++;
-                    }
-                }
-
-                if (numberOfIndividualsUpdated > 0)
-                {
-                    Console.WriteLine($"Updated {numberOfIndividualsUpdated} individuals.");
-                    
-                    await Scaffolding.SaveRepository(repository);
-                }
-
-                break;
-            }
-            case Mode.FetchNotesUsingNotesAPI:
-            {
-                var notes = await new VRChatCommunicator(storage).TempGetNotes();
-                foreach (var note in notes)
-                {
-                    Console.WriteLine($"{note.note} for {note.targetUserId} ({note.targetUser.displayName})");
-                    if (AccountByAnyId(note.targetUserId, out var ind) is { } account)
-                    {
-                        if (!string.IsNullOrWhiteSpace(note.note))
-                        {
-                            account.note = new Note
-                            {
-                                status = NoteState.Exists,
-                                text = note.note
-                            };
-                            ind.isExposed = true;
-                        }
-                    }
-                }
-                
-                Account AccountByAnyId(string id, out Individual individual)
-                {
-                    foreach (var ind in repository.Individuals)
-                    {
-                        foreach (var indAccount in ind.accounts)
-                        {
-                            if (indAccount.inAppIdentifier == id)
-                            {
-                                individual = ind;
-                                return indAccount;
-                            }
-                        }
-                    }
-
-                    individual = null;
-                    return null;
-                }
-
-                var undiscoveredAccounts = await new VRChatCommunicator(storage).CollectUndiscoveredLenient(repository, notes.Select(full => full.targetUserId).Distinct().ToList());
-            
-                Console.WriteLine($"There are {undiscoveredAccounts.Count} undiscovered accounts in those notes.");
-                foreach (var undiscoveredAccount in undiscoveredAccounts)
-                {
-                    Console.WriteLine($"- {undiscoveredAccount.inAppDisplayName} ({undiscoveredAccount.inAppIdentifier})");
-                }
-            
-                if (undiscoveredAccounts.Count > 0)
-                {
-                    repository.MergeAccounts(undiscoveredAccounts);
-                }
-
-                await Scaffolding.SaveRepository(repository);
-
-                break;
-            }
             case Mode.ManualMerges:
             {
                 // repository.FusionIndividuals(IndividualByAnyAccountId("usr_505d0888-f9f1-4ba1-92d5-71ff09607837"), IndividualByAnyAccountId("U-Hai"));
@@ -246,7 +128,19 @@ internal partial class Program
                         qualifiedAppName = "cluster",
                         inAppIdentifier = inAppIdentifier,
                         inAppDisplayName = inAppDisplayName,
-                        isContact = true,
+                        callers = [
+                            new CallerAccount
+                            {
+                                isAnonymous = false,
+                                inAppIdentifier = "vr_hai",
+                                isContact = true,
+                                note = new Note
+                                {
+                                    status = NoteState.NeverHad,
+                                    text = null
+                                }
+                            }
+                        ]
                     };
                 }
 
@@ -325,7 +219,6 @@ internal partial class Program
                 Console.WriteLine($"    - qualifiedAppName: {account.qualifiedAppName}");
                 Console.WriteLine($"    - inAppDisplayName: {account.inAppDisplayName}");
                 Console.WriteLine($"    - inAppIdentifier: {account.inAppIdentifier}");
-                Console.WriteLine($"    - isContact: {account.isContact}");
             }
         }
     }

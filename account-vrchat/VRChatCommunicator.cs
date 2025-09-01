@@ -194,12 +194,6 @@ public class VRChatCommunicator
             qualifiedAppName = VRChatQualifiedAppName,
             inAppIdentifier = user.id,
             inAppDisplayName = user.displayName,
-            isContact = user.isFriend,
-            note = new Note
-            {
-                status = string.IsNullOrWhiteSpace(user.note) ? NoteState.NeverHad : NoteState.Exists,
-                text = string.IsNullOrWhiteSpace(user.note) ? null : user.note
-            },
             callers = [
                 new CallerAccount
                 {

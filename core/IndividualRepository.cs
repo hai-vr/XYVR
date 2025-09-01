@@ -71,8 +71,6 @@ public class IndividualRepository
         if (isSameAppAndIdentifier)
         {
             existingAccount.inAppDisplayName = inputAccount.inAppDisplayName;
-            existingAccount.isContact = inputAccount.isContact;
-            UpdateExistingNote(existingAccount.note, inputAccount.note);
             
             foreach (var inputCaller in inputAccount.callers)
             {
@@ -136,10 +134,10 @@ public class IndividualRepository
 
     private static void UpdateIndividualBasedOnAccounts(Individual existingIndividual)
     {
-        existingIndividual.isAnyContact = existingIndividual.accounts.Any(account => account.isContact) || existingIndividual.accounts.SelectMany(account => account.callers).Select(caller => caller.isContact).Any(isContact => isContact);
+        existingIndividual.isAnyContact = existingIndividual.accounts.Any(account => account.IsAnyCallerContact());
         existingIndividual.isExposed = existingIndividual.isAnyContact
                                        || existingIndividual.note.status == NoteState.Exists
-                                       || existingIndividual.accounts.Any(account => account.note.status == NoteState.Exists);
+                                       || existingIndividual.accounts.Any(account => account.HasAnyCallerNote());
         
         if (existingIndividual.accounts.All(it => it.inAppDisplayName != existingIndividual.displayName))
         {
@@ -170,14 +168,14 @@ public class IndividualRepository
     // It is the responsibility of the caller to never call this when that account is already owned by an Individual.
     private Individual CreateNewIndividualFromAccount(Account account)
     {
-        var isAnyContact = account.isContact || account.callers.Select(caller => caller.isContact).Any(isContact => isContact);
+        var isAnyContact = account.IsAnyCallerContact();
         var individual = new Individual
         {
             guid = Guid.NewGuid().ToString(),
             accounts = [account],
             displayName = account.inAppDisplayName,
             isAnyContact = isAnyContact,
-            isExposed = isAnyContact || account.note.status == NoteState.Exists
+            isExposed = isAnyContact || account.HasAnyCallerNote()
         };
         Individuals.Add(individual);
         return individual;
@@ -191,7 +189,7 @@ public class IndividualRepository
         if (indexToDestroy == -1) throw new ArgumentException("Individual not found in this repository");
 
         toAugment.accounts.AddRange(toDestroy.accounts);
-        toAugment.isAnyContact = toAugment.accounts.Any(account => account.isContact) || toAugment.accounts.SelectMany(account => account.callers).Select(caller => caller.isContact).Any(isContact => isContact);
+        toAugment.isAnyContact = toAugment.accounts.Any(account => account.IsAnyCallerContact());
         if (toAugment.note.status == NoteState.NeverHad)
         {
             if (toDestroy.note.status is NoteState.Exists or NoteState.WasRemoved)
@@ -203,7 +201,7 @@ public class IndividualRepository
         // Order matters
         toAugment.isExposed = toAugment.isAnyContact
                               || toAugment.note.status == NoteState.Exists
-                              || toAugment.accounts.Any(account => account.note.status == NoteState.Exists);
+                              || toAugment.accounts.Any(account => account.HasAnyCallerNote());
         
         foreach (var accountFromDestroyed in toDestroy.accounts)
         {

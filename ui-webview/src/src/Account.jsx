@@ -1,7 +1,7 @@
 ﻿import React from 'react';
 
 const Account = ({ account }) => {
-    const hasNote = account.note && account.note.status === "Exists" && account.note.text;
+    const hasNote = account.isAnyCallerNote;
 
     const copyInAppIdentifier = async () => {
         await navigator.clipboard.writeText(account.inAppIdentifier);
@@ -63,7 +63,7 @@ const Account = ({ account }) => {
                     </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    {!account.isContact && hasNote && (
+                    {!account.isAnyCallerContact && hasNote && (
                         <span style={{
                             background: '#e3f2fd',
                             color: '#1976d2',
@@ -75,7 +75,7 @@ const Account = ({ account }) => {
                             📝 Note
                         </span>
                     )}
-                    {account.isContact && (
+                    {account.isAnyCallerContact && (
                         <span style={{
                             background: '#fff3cd',
                             color: '#856404',
@@ -127,9 +127,9 @@ const Account = ({ account }) => {
                     </button>
                 </div>
             </div>
-            
-            {hasNote && (
-                <div style={{
+
+            {account.callers && account.callers.filter(caller => caller.note.status === "Exists").map((caller, index) => (
+                <div key={index} style={{
                     background: '#f0f8ff',
                     border: '1px solid #b3d9ff',
                     borderRadius: '6px',
@@ -150,10 +150,10 @@ const Account = ({ account }) => {
                         lineHeight: '1.4',
                         whiteSpace: 'pre-wrap'
                     }}>
-                        {account.note.text.startsWith('mt ') ? ('Met through ' + account.note.text.substring(3)) : account.note.text}
+                        {caller.note.text.startsWith('mt ') ? ('Met through ' + caller.note.text.substring(3)) : caller.note.text}
                     </div>
                 </div>
-            )}
+            ))}
         </div>
     );
 };
