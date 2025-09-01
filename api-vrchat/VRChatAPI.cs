@@ -20,20 +20,28 @@ public class VRChatAPI
     private const string LogoutUrl = RootUrl + "/logout";
     private const string EmailOtpUrl = RootUrl + "/auth/twofactorauth/emailotp/verify";
     private const string OtpUrl = RootUrl + "/auth/twofactorauth/otp/verify";
+
+    private readonly bool _useRateLimiting;
+    private readonly Random _random = new();
     
     private CookieContainer _cookies;
     private HttpClient _client;
+    private string? _userAgent;
+
     public bool IsLoggedIn { get; private set; }
 
-    public VRChatAPI()
+    public VRChatAPI(bool useRateLimiting = true)
     {
+        _useRateLimiting = useRateLimiting;
+        
         _cookies = new CookieContainer();
         var handler = new HttpClientHandler
         {
             CookieContainer = _cookies
         };
         _client = new HttpClient(handler);
-        _client.DefaultRequestHeaders.UserAgent.ParseAdd($"Hai.HView/{VERSION.version} (docs.hai-vr.dev/docs/products/h-view#user-agent)");
+        _userAgent = $"Hai.XYVR/{VERSION.version} (docs.hai-vr.dev/docs/products/xyvr#user-agent)";
+        _client.DefaultRequestHeaders.UserAgent.ParseAdd(_userAgent);
     }
 
     public string GetAllCookies__Sensitive()
@@ -52,7 +60,7 @@ public class VRChatAPI
             CookieContainer = _cookies
         };
         _client = new HttpClient(handler);
-        _client.DefaultRequestHeaders.UserAgent.ParseAdd($"Hai.HView/{VERSION.version} (docs.hai-vr.dev/docs/products/h-view)");
+        _client.DefaultRequestHeaders.UserAgent.ParseAdd(_userAgent);
         
         // Assume that if the user has an auth cookie, then they're logged in.
         // There is a route to check if the token is still valid, but for privacy, we don't want the application to send a request
@@ -197,37 +205,94 @@ public class VRChatAPI
         return result__sensitive;
     }
 
+    public async Task<VRChatAuthUser> GetAuthUser()
+    {
+        ThrowIfNotLoggedIn();
+        
+        var url = $"{RootUrl}/auth/user";
+        var response = await _client.GetAsync(url);
+            
+        await EnsureRateLimiting(url);
+        
+        EnsureSuccessOrThrowVerbose(response);
+        
+        return JsonConvert.DeserializeObject<VRChatAuthUser>(await response.Content.ReadAsStringAsync());
+    }
+
     public async Task<List<VRChatFriend>> ListFriends(ListFriendsRequestType listFriendsRequestType)
     {
-        if (!IsLoggedIn) throw new HttpRequestException("Not logged in"); // FIXME: Proper error handling
+        ThrowIfNotLoggedIn();
 
-        var allFriends = new List<VRChatFriend>();
-        const int pageSize = 100;
+        var offline = listFriendsRequestType == ListFriendsRequestType.OnlyOffline ? "true" : "false";
+        return await GetPaginatedResults<VRChatFriend>((offset, pageSize) =>
+            Task.FromResult($"{RootUrl}/auth/user/friends?offset={offset}&n={pageSize}&offline={offline}"));
+    }
 
+    public async Task<VRChatUser?> GetUserLenient(string userId)
+    {
+        ThrowIfNotLoggedIn();
+        
+        var url = $"{RootUrl}/users/{userId}";
+        var response = await _client.GetAsync(url);
+            
+        await EnsureRateLimiting(url);
+        
+        if (response.StatusCode == HttpStatusCode.NotFound) return null;
+        
+        EnsureSuccessOrThrowVerbose(response);
+        
+        return JsonConvert.DeserializeObject<VRChatUser>(await response.Content.ReadAsStringAsync());
+    }
+
+    public async Task<List<VRChatNoteFull>> ListUserNotes()
+    {
+        ThrowIfNotLoggedIn();
+        
+        return await GetPaginatedResults<VRChatNoteFull>((offset, pageSize) =>
+            Task.FromResult($"{RootUrl}/userNotes?offset={offset}&n={pageSize}"));
+    }
+
+    public async Task<VRChatNote?> GetUserNoteByUserNoteId(string userNoteId)
+    {
+        ThrowIfNotLoggedIn();
+        
+        var url = $"{RootUrl}/userNotes/{userNoteId}";
+        var response = await _client.GetAsync(url);
+            
+        await EnsureRateLimiting(url);
+
+        if (response.StatusCode == HttpStatusCode.NotFound) return null;
+        
+        EnsureSuccessOrThrowVerbose(response);
+        
+        return JsonConvert.DeserializeObject<VRChatNote>(await response.Content.ReadAsStringAsync());
+    }
+    
+    private async Task<List<T>> GetPaginatedResults<T>(Func<int, int, Task<string>> urlBuilder, int pageSize = 100)
+    {
+        var allResults = new List<T>();
         var hasMoreData = true;
         var offset = 0;
+
         while (hasMoreData)
         {
-            // REMINDER: "offline?" returns only offline users if true, returns only online and active users if false
-            var offline = listFriendsRequestType == ListFriendsRequestType.OnlyOffline ? "true" : "false";
-            var url = $"{RootUrl}/auth/user/friends?offset={offset}&n={pageSize}&offline={offline}";
+            var url = await urlBuilder(offset, pageSize);
             var response = await _client.GetAsync(url);
+        
+            await EnsureRateLimiting(url);
+        
             EnsureSuccessOrThrowVerbose(response);
-            
-            Console.WriteLine($"Got {url} ; Waiting a second...");
-            await Task.Delay(1000);
 
-            var friends = JsonConvert.DeserializeObject<List<VRChatFriend>>(await response.Content.ReadAsStringAsync());
-            if (friends == null || friends.Count == 0)
+            var results = JsonConvert.DeserializeObject<List<T>>(await response.Content.ReadAsStringAsync());
+            if (results == null || results.Count == 0)
             {
                 hasMoreData = false;
             }
             else
             {
-                allFriends.AddRange(friends);
+                allResults.AddRange(results);
 
-                // If we received fewer friends than the page size, we've reached the end
-                if (friends.Count < pageSize)
+                if (results.Count < pageSize)
                 {
                     hasMoreData = false;
                 }
@@ -238,24 +303,17 @@ public class VRChatAPI
             }
         }
 
-        return allFriends;
+        return allResults;
     }
 
-    public async Task<VRChatUser?> GetUserLenient(string userId)
+    private async Task EnsureRateLimiting(string urlForLogging)
     {
-        if (!IsLoggedIn) throw new HttpRequestException("Not logged in"); // FIXME: Proper error handling
-        
-        var url = $"{RootUrl}/users/{userId}";
-        var response = await _client.GetAsync(url);
-            
-        Console.WriteLine($"Got {url} ; Waiting a second...");
-        await Task.Delay(1000);
-        
-        if (response.StatusCode == HttpStatusCode.NotFound) return null;
-        
-        EnsureSuccessOrThrowVerbose(response);
-        
-        return JsonConvert.DeserializeObject<VRChatUser>(await response.Content.ReadAsStringAsync());
+        if (!_useRateLimiting) return;
+
+        var millisecondsDelay = _random.Next(700, 1300); // Introduce some irregularity
+        Console.WriteLine($"Got {urlForLogging} ; Waiting {millisecondsDelay}ms...");
+
+        await Task.Delay(millisecondsDelay);
     }
 
     private static void EnsureSuccessOrThrowVerbose(HttpResponseMessage response)
@@ -266,21 +324,9 @@ public class VRChatAPI
         }
     }
 
-    public async Task<VRChatNote?> GetNoteByUserNoteId(string userNoteId)
+    private void ThrowIfNotLoggedIn()
     {
-        if (!IsLoggedIn) throw new HttpRequestException("Not logged in"); // FIXME: Proper error handling
-        
-        var url = $"{RootUrl}/userNotes/{userNoteId}";
-        var response = await _client.GetAsync(url);
-            
-        Console.WriteLine($"Got {url} ; Waiting a second...");
-        await Task.Delay(1000);
-        
-        if (response.StatusCode == HttpStatusCode.NotFound) return null;
-        
-        EnsureSuccessOrThrowVerbose(response);
-        
-        return JsonConvert.DeserializeObject<VRChatNote>(await response.Content.ReadAsStringAsync());
+        if (!IsLoggedIn) throw new HttpRequestException("Application does not have the cookie to be logged in.");
     }
 }
 

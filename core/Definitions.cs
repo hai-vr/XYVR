@@ -40,10 +40,41 @@ public class Account
     public object? previousLiveServerData;
     public object? preservedServerData;
     public Dictionary<string, string> userData = new();
-
-    public Note note = new();
-    public bool isTechnical;
     
+    // These two pieces of data should be moved to callers.
+    public bool isContact;
+    public Note note = new();
+    
+    public List<CallerAccount> callers = new(); // TODO: New data to support multi-accounts.
+
+    public bool isTechnical;
+}
+
+public class IncompleteAccount
+{
+    public NamedApp namedApp;
+    public string qualifiedAppName;
+    
+    public string inAppIdentifier;
+    public string inAppDisplayName;
+
+    public object? liveServerData;
+    
+    public List<IncompleteCallerAccount> callers = new();
+}
+
+public class IncompleteCallerAccount
+{
+    public bool isAnonymous;
+    public string? inAppIdentifier;
+}
+
+public class CallerAccount
+{
+    public bool isAnonymous;
+    public string? inAppIdentifier; // Can only be null if it's an anonymous caller.
+    
+    public Note note = new();
     public bool isContact;
 }
 
@@ -55,7 +86,7 @@ public class Note
 
 public enum NoteState
 {
-    NeverHad = 1,
+    NeverHad = 1, // FIXME: Made a mistake, this entire enum is shifted 1
     Exists = 2,
     WasRemoved = 3,
 }

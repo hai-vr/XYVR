@@ -23,19 +23,22 @@ public class ResoniteCommunicator
         }
     }
     
+    /// Calls the User Contacts API to collect possible accounts haven't been collected yet.<br/>
+    /// Only returns user IDs that aren't in the repository yet.
     public async Task<List<Account>> FindUndiscoveredAccounts(IndividualRepository individualRepository)
     {
         var resoniteAccountIdentifiers = individualRepository.CollectAllInAppIdentifiers(NamedApp.Resonite);
         
         var api = new ResoniteAPI(Guid.NewGuid().ToString(), _uid);
         
-        await api.Login(_username__sensitive, _password__sensitive);
+        var loginResult = await api.Login(_username__sensitive, _password__sensitive);
+        var callerUserId = loginResult.entity.userId;
 
         var contacts = await api.GetUserContacts();
         
         var undiscoveredContacts = contacts.Where(contact => !resoniteAccountIdentifiers.Contains(contact.id)).ToList();
-
         if (undiscoveredContacts.Count == 0) return [];
+        
         var undiscoveredContactIdToUser = new Dictionary<string, CombinedContactAndUser>();
         foreach (var undiscoveredContact in undiscoveredContacts)
         {
@@ -45,11 +48,11 @@ public class ResoniteCommunicator
         }
 
         return undiscoveredContactIdToUser.Values
-            .Select(AsAccount)
+            .Select(user => AsAccount(user, callerUserId, true))
             .ToList();
     }
 
-    private static Account AsAccount(CombinedContactAndUser combined)
+    private static Account AsAccount(CombinedContactAndUser combined, string callerUserId, bool isContact)
     {
         return new Account
         {
@@ -58,7 +61,20 @@ public class ResoniteCommunicator
             inAppIdentifier = combined.User.id,
             inAppDisplayName = combined.User.username,
             liveServerData = combined,
-            isContact = true,
+            callers =
+            [
+                new CallerAccount
+                {
+                    isAnonymous = false,
+                    inAppIdentifier = callerUserId,
+                    isContact = isContact,
+                    note = new Note
+                    {
+                        status = NoteState.NeverHad,
+                        text = null
+                    }
+                }
+            ]
         };
     }
 }

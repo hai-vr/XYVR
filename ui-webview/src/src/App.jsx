@@ -17,7 +17,7 @@ function App() {
                     setAppVersion(version);
                     
                     // Also load individuals when the component loads
-                    const allIndividuals = await window.chrome.webview.hostObjects.appApi.GetAllExposedIndividuals();
+                    const allIndividuals = await window.chrome.webview.hostObjects.appApi.GetAllExposedIndividualsOrderedByContact();
                     const individualsArray = JSON.parse(allIndividuals);
                     setIndividuals(individualsArray);
 
@@ -328,7 +328,7 @@ function App() {
     const handleGetAllExposedIndividuals = async () => {
         if (window.chrome?.webview?.hostObjects?.appApi) {
             try {
-                const allIndividuals = await window.chrome.webview.hostObjects.appApi.GetAllExposedIndividuals();
+                const allIndividuals = await window.chrome.webview.hostObjects.appApi.GetAllExposedIndividualsOrderedByContact();
                 const individualsArray = JSON.parse(allIndividuals);
                 setIndividuals(individualsArray);
 

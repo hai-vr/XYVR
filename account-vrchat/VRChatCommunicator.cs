@@ -12,6 +12,7 @@ public class VRChatCommunicator
     private readonly string _password__sensitive;
     private readonly string? _twoFactor__sensitive;
     private VRChatAPI? _api;
+    private string _caller;
 
     public VRChatCommunicator()
     {
@@ -22,7 +23,10 @@ public class VRChatCommunicator
         _twoFactor__sensitive = Environment.GetEnvironmentVariable(XYVREnvVar.VRChatTwoFactorCode);
     }
     
-    public async Task<List<Account>> FindUndiscoveredAccounts(IndividualRepository individualRepository)
+    /// Calls various APIs to collect possible accounts haven't been collected yet.<br/>
+    /// This can include friend lists (containing only friends) and the recently updated notes (containing a mix of friends and non-friends).<br/>
+    /// Only returns user IDs that aren't in the repository yet.
+    public async Task<List<IncompleteAccount>> FindUndiscoveredIncompleteAccounts(IndividualRepository individualRepository)
     {
         var vrchatAccountIdentifiers = individualRepository.CollectAllInAppIdentifiers(NamedApp.VRChat);
         
@@ -30,11 +34,52 @@ public class VRChatCommunicator
 
         var onlineFriends = await _api.ListFriends(ListFriendsRequestType.OnlyOnline);
         var offlineFriends = await _api.ListFriends(ListFriendsRequestType.OnlyOffline);
-        
-        return onlineFriends.Concat(offlineFriends)
+        var userNotes = await _api.ListUserNotes();
+
+        var friendsAsAccounts = onlineFriends.Concat(offlineFriends)
             .Where(friend => !vrchatAccountIdentifiers.Contains(friend.id))
-            .Select(AsAccount)
+            .Select(friend => new IncompleteAccount
+            {
+                namedApp = NamedApp.VRChat,
+                qualifiedAppName = "vrchat",
+                inAppIdentifier = friend.id,
+                inAppDisplayName = friend.displayName,
+                liveServerData = friend,
+                callers =
+                [
+                    new IncompleteCallerAccount
+                    {
+                        isAnonymous = false,
+                        inAppIdentifier = _caller
+                    }
+                ]
+            })
             .ToList();
+        
+        var accountsCollectedSoFar = new HashSet<string>(vrchatAccountIdentifiers);
+        accountsCollectedSoFar.UnionWith(friendsAsAccounts.Select(account => account.inAppIdentifier));
+
+        var notesAsAccounts = userNotes
+            .Where(note => !accountsCollectedSoFar.Contains(note.targetUserId))
+            .Select(full => new IncompleteAccount
+            {
+                namedApp = NamedApp.VRChat,
+                qualifiedAppName = "vrchat",
+                inAppIdentifier = full.targetUserId,
+                inAppDisplayName = full.targetUser.displayName,
+                liveServerData = full,
+                callers =
+                [
+                    new IncompleteCallerAccount
+                    {
+                        isAnonymous = false,
+                        inAppIdentifier = _caller
+                    }
+                ]
+            })
+            .ToList();
+
+        return friendsAsAccounts.Concat(notesAsAccounts).ToList();
     }
 
     public async Task<List<Account>> CollectUndiscoveredLenient(IndividualRepository repository, List<string> notNecessarilyValidUserIds)
@@ -84,6 +129,14 @@ public class VRChatCommunicator
         };
     }
 
+    public async Task<List<VRChatNoteFull>> TempGetNotes()
+    {
+        _api ??= await InitializeAPI();
+
+        var resultN = await _api.ListUserNotes();
+        return resultN;
+    }
+
     private Account UserAsAccount(VRChatUser user)
     {
         return new Account
@@ -94,6 +147,11 @@ public class VRChatCommunicator
             inAppDisplayName = user.displayName,
             liveServerData = user,
             isContact = user.isFriend,
+            note = new Note
+            {
+                status = string.IsNullOrWhiteSpace(user.note) ? NoteState.NeverHad : NoteState.Exists,
+                text = user.note
+            }
         };
     }
 
@@ -111,20 +169,10 @@ public class VRChatCommunicator
             await TryLogin(api);
         }
 
-        return api;
-    }
+        var authUser = await api.GetAuthUser();
+        _caller = authUser.id;
 
-    private Account AsAccount(VRChatFriend friend)
-    {
-        return new Account
-        {
-            namedApp = NamedApp.VRChat,
-            qualifiedAppName = "vrchat",
-            inAppIdentifier = friend.id,
-            inAppDisplayName = friend.displayName,
-            liveServerData = friend,
-            isContact = friend.isFriend,
-        };
+        return api;
     }
 
     private async Task TryLogin(VRChatAPI api)

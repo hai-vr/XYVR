@@ -1,7 +1,7 @@
 ﻿using System.Text.RegularExpressions;
-using XYVR.AccountAuthority.Resonite;
 using XYVR.AccountAuthority.VRChat;
 using XYVR.Core;
+using XYVR.Data.Collection;
 using XYVR.Scaffold;
 
 namespace XYVR.Program;
@@ -12,12 +12,13 @@ public enum Mode
     ManualTask,
     Duplicates,
     ManualMerges,
-    FetchNotes,
+    FetchNotesUsingUserAPI,
+    FetchNotesUsingNotesAPI,
 }
 
 internal partial class Program
 {
-    private static Mode mode = Mode.ManualMerges;
+    private static Mode mode = Mode.FetchNotesUsingNotesAPI;
 
     [GeneratedRegex(@"usr_[a-f0-9\-]+")]
     private static partial Regex UsrRegex();
@@ -32,20 +33,9 @@ internal partial class Program
         {
             case Mode.FetchIndividuals:
             {
-                using var cts = new CancellationTokenSource();
-                var whenAll = Task.WhenAll(new[]
-                {
-                    Task.Run(async () => await new ResoniteCommunicator().FindUndiscoveredAccounts(repository), cts.Token),
-                    Task.Run(async () => await new VRChatCommunicator().FindUndiscoveredAccounts(repository), cts.Token)
-                });
-                var undiscoveredAccounts = await Execute(whenAll, cts);
+                var dataCollection = new DataCollection(repository);
 
-                Console.WriteLine($"There are {undiscoveredAccounts.Count} undiscovered accounts.");
-                foreach (var undiscoveredAccount in undiscoveredAccounts)
-                {
-                    Console.WriteLine($"- {undiscoveredAccount.inAppDisplayName}");
-                }
-
+                var undiscoveredAccounts = await dataCollection.CollectAllUndiscoveredAccounts();
                 if (undiscoveredAccounts.Count > 0)
                 {
                     repository.MergeAccounts(undiscoveredAccounts);
@@ -66,7 +56,8 @@ internal partial class Program
                         return match.Success ? match.Value : null;
                     })
                     .Where(result => result != null)
-                    .ToList()!;
+                    .Distinct()
+                    .ToList();
 
                 var undiscoveredAccounts = await new VRChatCommunicator().CollectUndiscoveredLenient(repository, notNecessarilyValidUserIds);
             
@@ -85,7 +76,7 @@ internal partial class Program
 
                 break;
             }
-            case Mode.FetchNotes:
+            case Mode.FetchNotesUsingUserAPI:
             {
                 var individualsWithVRChatAccount = repository.Individuals
                     .Where(individual => individual.accounts.Any(account => account.namedApp == NamedApp.VRChat))
@@ -143,6 +134,61 @@ internal partial class Program
                     
                     await Scaffolding.SaveRepository(repository);
                 }
+
+                break;
+            }
+            case Mode.FetchNotesUsingNotesAPI:
+            {
+                var notes = await new VRChatCommunicator().TempGetNotes();
+                foreach (var note in notes)
+                {
+                    Console.WriteLine($"{note.note} for {note.targetUserId} ({note.targetUser.displayName})");
+                    if (AccountByAnyId(note.targetUserId, out var ind) is { } account)
+                    {
+                        if (!string.IsNullOrWhiteSpace(note.note))
+                        {
+                            account.note = new Note
+                            {
+                                status = NoteState.Exists,
+                                text = note.note
+                            };
+                            ind.isExposed = true;
+                        }
+                    }
+                }
+                
+                Account AccountByAnyId(string id, out Individual individual)
+                {
+                    foreach (var ind in repository.Individuals)
+                    {
+                        foreach (var indAccount in ind.accounts)
+                        {
+                            if (indAccount.inAppIdentifier == id)
+                            {
+                                individual = ind;
+                                return indAccount;
+                            }
+                        }
+                    }
+
+                    individual = null;
+                    return null;
+                }
+
+                var undiscoveredAccounts = await new VRChatCommunicator().CollectUndiscoveredLenient(repository, notes.Select(full => full.targetUserId).Distinct().ToList());
+            
+                Console.WriteLine($"There are {undiscoveredAccounts.Count} undiscovered accounts in those notes.");
+                foreach (var undiscoveredAccount in undiscoveredAccounts)
+                {
+                    Console.WriteLine($"- {undiscoveredAccount.inAppDisplayName} ({undiscoveredAccount.inAppIdentifier})");
+                }
+            
+                if (undiscoveredAccounts.Count > 0)
+                {
+                    repository.MergeAccounts(undiscoveredAccounts);
+                }
+
+                await Scaffolding.SaveRepository(repository);
 
                 break;
             }
@@ -222,19 +268,6 @@ internal partial class Program
         }
 
         // if (undiscoveredAccounts.Count > 0) PrintIndividuals(repository);
-    }
-
-    private static async Task<List<Account>> Execute(Task<List<Account>[]> tasks, CancellationTokenSource cts)
-    {
-        try
-        {
-            return (await tasks).SelectMany(list => list).ToList();
-        }
-        catch
-        {
-            await cts.CancelAsync(); // Cancel any remaining tasks
-            throw;
-        }
     }
 
     private static void PrintIndividuals(List<Individual> repositoryIndividuals)

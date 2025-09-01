@@ -16,6 +16,8 @@ public static class Scaffolding
 
     public static async Task SaveRepository(IndividualRepository repository)
     {
+        // FIXME: If the disk is full, this WILL corrupt the data that already exists, causing irrepairable loss.
+        
         var serialized = JsonConvert.SerializeObject(repository.Individuals, Formatting.Indented);
         await File.WriteAllTextAsync(IndividualsJsonFileName, serialized);
     }

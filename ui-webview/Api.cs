@@ -9,7 +9,7 @@ namespace XYVR.UI.WebviewUI;
 public interface IAppApi
 {
     string GetAppVersion();
-    string GetAllExposedIndividuals();
+    string GetAllExposedIndividualsOrderedByContact();
     void ShowMessage(string message);
     string GetCurrentTime();
     void CloseApp();
@@ -17,24 +17,18 @@ public interface IAppApi
 
 [ComVisible(true)]
 [ClassInterface(ClassInterfaceType.None)]
-public class AppApi : IAppApi
+public class AppApi(MainWindow mainWindow) : IAppApi
 {
-    private readonly MainWindow _mainWindow;
-
-    public AppApi(MainWindow mainWindow)
-    {
-        _mainWindow = mainWindow;
-    }
-
     public string GetAppVersion()
     {
         return VERSION.version;
     }
 
-    public string GetAllExposedIndividuals()
+    public string GetAllExposedIndividualsOrderedByContact()
     {
-        var responseObj = _mainWindow.IndividualRepository.Individuals
+        var responseObj = mainWindow.IndividualRepository.Individuals
             .Where(individual => individual.isExposed)
+            .OrderByDescending(individual => individual.isAnyContact)
             .ToList();
         
         return JsonConvert.SerializeObject(responseObj);
@@ -54,7 +48,7 @@ public class AppApi : IAppApi
     {
         Application.Current.Dispatcher.Invoke(() =>
         {
-            _mainWindow.Close();
+            mainWindow.Close();
         });
     }
 }

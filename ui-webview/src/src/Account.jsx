@@ -1,7 +1,7 @@
 ﻿import React from 'react';
 
 const Account = ({ account }) => {
-    const hasNote = account.note && account.note.status === 1 && account.note.text;
+    const hasNote = account.note && account.note.status === 2 && account.note.text;
 
     const copyInAppIdentifier = async () => {
         await navigator.clipboard.writeText(account.inAppIdentifier);

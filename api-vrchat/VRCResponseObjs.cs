@@ -27,6 +27,12 @@ public class VRChatFriend
     public string userIcon;
 }
 
+public struct VRChatAuthUser
+{
+    public string id;
+    public string displayName;
+}
+
 public struct VRChatUser
 {
     public string ageVerificationStatus;
@@ -83,4 +89,24 @@ public struct VRChatBadge
 public struct VRChatNote
 {
     public string note;
+}
+
+public class VRChatNoteFull
+{
+    public DateTime createdAt;
+    public string id;
+    public string note;
+    public VRChatNoteFullTargetUser targetUser;
+    public string targetUserId;
+    public string userId;
+}
+
+public class VRChatNoteFullTargetUser
+{
+    public string[] currentAvatarTags;
+    public string currentAvatarThumbnailImageUrl;
+    public string displayName;
+    public string id;
+    public string profilePicOverride;
+    public string userIcon;
 }
