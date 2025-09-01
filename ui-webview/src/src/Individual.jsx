@@ -96,7 +96,8 @@ function Individual({ individual, index, isVisible = true }) {
                         {vrChatLinks.map((url, linkIndex) => (
                             <a key={linkIndex}
                                href={url}
-                               target="_blank"
+                               // We don't want target blank because we want to cause clicking to invoke a `NavigationStarting` event in the WebView.
+                               // target="_blank"
                                rel="noopener noreferrer"
                                style={{
                                    color: '#1976d2',

@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Diagnostics;
+using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using XYVR.Core;
@@ -65,5 +66,18 @@ public static class Scaffolding
         {
             Converters = { new StringEnumConverter() }
         };
+    }
+
+    public static void DANGER_OpenUrl(string url)
+    {
+        var isHttp = url.ToLowerInvariant().StartsWith("https://") || url.ToLowerInvariant().StartsWith("http://");
+        if (!isHttp) throw new Exception("URL must be HTTP or HTTPS. This must be caught by the caller, not here!");
+        
+        Process.Start(new ProcessStartInfo
+        {
+            // SECURITY: Don't allow any URL here. Otherwise, this can cause a RCE.
+            FileName = url,
+            UseShellExecute = true
+        });
     }
 }
