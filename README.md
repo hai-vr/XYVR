@@ -13,7 +13,7 @@ The address book remains fully functional even if access to the original account
 If you are a user looking to use this software: Sorry, but this application is not currently readily usable,
 as it involves typing commands.
 
-Please check back another time.
+- ~~**[📘 Open documentation](https://docs.hai-vr.dev/docs/products/xyvr)**~~
 
 If you are a developer, feel free to read below.
 
@@ -42,7 +42,7 @@ This app has the following goals:
 
 The following are **not** goals:
 - It is not a goal to add, edit, or remove friends: All write operations must be done through the original social VR apps or websites.
-- It is not a goal to track friendship status changes: The address book will only show users in the UI who are friends or who have
+- It is not a goal to track removals from friend lists: The address book will only show users in the UI who are friends or who have
   a note attached to them. This application purposefully will not keep track of status changes.
 
 ## Current status of this app
@@ -59,6 +59,8 @@ The following work has been done:
 
 The following work remains to be done:
 - Improve the data structure used to store the original API responses from the various social VR applications.
+- Improve data handling when the owner of the address book has multiple accounts on the same social VR platform with
+  different friend lists.
 - Provide a graphical UI to login into the various social VR applications and update the data.
 - Provide a graphical UI to import an existing set of pre-made requests so that it does not require a direct connection.
 - Make the connection code easily auditable.
@@ -76,3 +78,55 @@ The app is written in .NET 9 and uses a WebView pointing to a React app set up w
 ## Executing the app as a developer
 
 *The instructions to execute this application have not been written yet.*
+
+#### Importing the data
+
+*The instructions to import the data have not been written yet.*
+
+Importing the data is a big hassle right now, I suggest coming back at a later time when a better UI will be made.
+
+If you need to audit the connection code, open `api-resonite` and `api-vrchat` projects. Those are responsible for making the HTTP connections.
+
+Otherwise, if you really want to do this, understand that the current data export format will not be stable.
+- Open `core/XYVREnvVar.cs` this file will give you a good idea of the environment variables needed to execute this app.
+  - Use your IDE to inject the environment variables for the execution of the app. Don't actually go out and change your system environment variables.
+- You will need to edit the `program/Program.cs` source code to execute the `FetchIndividuals` mode (there's a switch-case).
+  - Comment out one of the lines if you don't have a VRChat or Resonite account.
+- The `FetchNotes` mode is a separate task that will slowly retrieve the notes of all the contacts at the extremely slow rate of one
+  contact per second. The retrieval rate may be improved later.
+
+Data is saved to a file called `individuals.json` in the program's execution folder, somewhere in `bin/`
+
+If you logged in to your VRChat account, you'll also have cookies stored in `vrc.cookies.txt` of your `bin/` folder. Don't share this.
+
+#### Build the React app
+
+To run the desktop app, we need to generate the `ui-webview/src/dist/` folder containing the React webapp
+that will be then copied to the desktop application during the .NET build process.
+
+- Requires Node or something.
+- In `ui-webview/src/`, run `npm install` and then `npm run build`
+
+#### Build the desktop app that shows the React app
+
+Build the `ui-webview/` project.
+
+## Project structure
+
+Main application execution projects:
+
+- **program**: This is a developer program to import the data. It is not user-friendly whatsoever.
+- **ui-webview**: This is a WebView program that shows a React app that has been built.
+- **ui-webview/src/**: This is the unbuilt React app. It is meant to be built using `npm run build` so that the .NET program will copy its contents to the desktop app.
+
+Core projects:
+
+- **core** contains data structures shared by many projects in this solution and the repository of Individuals that handles the business logic of ingesting incoming data.
+- **development-scaffold** loads and saves the data into a JSON file.
+
+External system projects:
+
+- **account-resonite** communicates with **api-resonite** and returns core objects.
+- **account-vrchat** communicates with **api-vrchat** and returns core objects.
+- **api-resonite** makes HTTP requests (*and in the future, will receive SignalR*) with the [Resonite API](https://wiki.resonite.com/API).
+- **api-vrchat** makes HTTP requests to the [VRChat API](https://vrchat.community).
