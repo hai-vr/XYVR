@@ -1,13 +1,18 @@
-﻿
-.individual-container {
+﻿.individual-container {
     display: block;
-    background: white;
-    border: 1px solid #e1e5e9;
+    background: #4c5052;
+    border: 1px solid #555555;
     border-radius: 12px;
     padding: 24px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     cursor: pointer;
+}
+
+.individual-container:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    border-color: #6897bb;
 }
 
 .individual-container.hidden {
@@ -19,14 +24,14 @@
     align-items: center;
     margin-bottom: 16px;
     padding-bottom: 12px;
-    border-bottom: 2px solid #f8f9fa;
+    border-bottom: 2px solid #5a5d5f;
 }
 
 .individual-avatar {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    background: linear-gradient(135deg, #6897bb 0%, #9fc5e8 100%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -40,13 +45,13 @@
     margin: 0;
     font-size: 20px;
     font-weight: 600;
-    color: #2c3e50;
+    color: #bbbbbb;
 }
 
 .contact-badge {
     margin-left: 12px;
-    background: #e8f5e8;
-    color: #27ae60;
+    background: #4a6741;
+    color: #90c695;
     padding: 4px 8px;
     border-radius: 12px;
     font-size: 12px;
@@ -66,16 +71,16 @@
 .no-accounts {
     text-align: center;
     padding: 20px;
-    color: #6c757d;
+    color: #888888;
     font-style: italic;
-    background: #f8f9fa;
+    background: #3c3f41;
     border-radius: 8px;
-    border: 2px dashed #dee2e6;
+    border: 2px dashed #666666;
 }
 
 .vrchat-links-container {
-    background: #f0f8ff;
-    border: 1px solid #b3d9ff;
+    background: #3e4446;
+    border: 1px solid #5a5d5f;
     border-radius: 8px;
     padding: 12px;
     margin-bottom: 16px;
@@ -83,7 +88,7 @@
 
 .vrchat-links-title {
     font-size: 14px;
-    color: #1976d2;
+    color: #6897bb;
     font-weight: 600;
     margin-bottom: 8px;
     display: flex;
@@ -97,8 +102,8 @@
 }
 
 .vrchat-link-item {
-    background: #e3f2fd;
-    border: 1px solid #bbdefb;
+    background: #4c5052;
+    border: 1px solid #5a5d5f;
     border-radius: 4px;
     padding: 6px 12px;
     display: flex;
@@ -110,11 +115,12 @@
 }
 
 .vrchat-link-item:hover {
-    background-color: #bbdefb;
+    background-color: #5a5d5f;
+    border-color: #6897bb;
 }
 
 .vrchat-link {
-    color: #1976d2;
+    color: #6897bb;
     text-decoration: none;
     font-size: 13px;
     overflow: hidden;
@@ -127,12 +133,13 @@
 
 .vrchat-link:hover {
     text-decoration: underline;
+    color: #9fc5e8;
 }
 
 .copy-button {
     background: transparent;
     border: none;
-    color: #1976d2;
+    color: #6897bb;
     cursor: pointer;
     font-size: 11px;
     opacity: 0.7;
@@ -144,5 +151,76 @@
 
 .copy-button:hover {
     opacity: 1;
+    background-color: rgba(104, 151, 187, 0.2);
+    color: #9fc5e8;
+}
+
+[data-theme="light"] .individual-container {
+    background: white;
+    border: 1px solid #e1e5e9;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+[data-theme="light"] .individual-container:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    border-color: #646cff;
+}
+
+[data-theme="light"] .individual-header {
+    border-bottom: 2px solid #f8f9fa;
+}
+
+[data-theme="light"] .individual-avatar {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+[data-theme="light"] .individual-name {
+    color: #2c3e50;
+}
+
+[data-theme="light"] .contact-badge {
+    background: #e8f5e8;
+    color: #27ae60;
+}
+
+[data-theme="light"] .no-accounts {
+    color: #6c757d;
+    background: #f8f9fa;
+    border: 2px dashed #dee2e6;
+}
+
+[data-theme="light"] .vrchat-links-container {
+    background: #f0f8ff;
+    border: 1px solid #b3d9ff;
+}
+
+[data-theme="light"] .vrchat-links-title {
+    color: #1976d2;
+}
+
+[data-theme="light"] .vrchat-link-item {
+    background: #e3f2fd;
+    border: 1px solid #bbdefb;
+}
+
+[data-theme="light"] .vrchat-link-item:hover {
+    background-color: #bbdefb;
+    border-color: #bbdefb;
+}
+
+[data-theme="light"] .vrchat-link {
+    color: #1976d2;
+}
+
+[data-theme="light"] .vrchat-link:hover {
+    color: #1976d2;
+}
+
+[data-theme="light"] .copy-button {
+    color: #1976d2;
+}
+
+[data-theme="light"] .copy-button:hover {
     background-color: rgba(25, 118, 210, 0.1);
+    color: #1976d2;
 }

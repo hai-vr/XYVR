@@ -1,11 +1,16 @@
 ﻿.account-container {
-    background: #f8f9fa;
-    border: 1px solid #e9ecef;
+    background: #3c3f41;
+    border: 1px solid #555555;
     border-radius: 8px;
     padding: 12px;
     display: flex;
     flex-direction: column;
     gap: 8px;
+}
+
+.account-container:hover {
+    border-color: #6897bb;
+    background: #3e4446;
 }
 
 .account-header {
@@ -43,18 +48,18 @@
 }
 
 .app-icon.default {
-    background: #6c757d;
+    background: #888888;
 }
 
 .account-display-name {
     font-weight: 600;
-    color: #2c3e50;
+    color: #bbbbbb;
     font-size: 14px;
     text-align: left;
 }
 
 .account-app-name {
-    color: #6c757d;
+    color: #888888;
     font-size: 12px;
     margin-top: 2px;
     text-align: left;
@@ -74,27 +79,30 @@
 }
 
 .badge.note {
-    background: #e3f2fd;
-    color: #1976d2;
+    background: #3e4446;
+    color: #6897bb;
+    border: 1px solid #5a5d5f;
 }
 
 .badge.contact {
-    background: #fff3cd;
-    color: #856404;
+    background: #4a4232;
+    color: #d4b86a;
+    border: 1px solid #5a5d5f;
 }
 
 .badge.bot {
-    background: #f8d7da;
-    color: #721c24;
+    background: #4a3538;
+    color: #d4a6aa;
+    border: 1px solid #5a5d5f;
 }
 
 .copy-button {
-    background: #f8f9fa;
-    border: 1px solid #dee2e6;
+    background: #4c5052;
+    border: 1px solid #5a5d5f;
     border-radius: 4px;
     padding: 4px 6px;
     font-size: 11px;
-    color: #6c757d;
+    color: #888888;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -102,13 +110,14 @@
 }
 
 .copy-button:hover {
-    background: #e9ecef;
-    border-color: #adb5bd;
+    background: #5a5d5f;
+    border-color: #6897bb;
+    color: #bbbbbb;
 }
 
 .note-container {
-    background: #f0f8ff;
-    border: 1px solid #b3d9ff;
+    background: #3e4446;
+    border: 1px solid #5a5d5f;
     border-radius: 6px;
     padding: 8px;
     margin-top: 4px;
@@ -116,14 +125,79 @@
 
 .note-header {
     font-size: 12px;
-    color: #1976d2;
+    color: #6897bb;
     font-weight: 500;
     margin-bottom: 4px;
 }
 
 .note-text {
     font-size: 13px;
-    color: #2c3e50;
+    color: #bbbbbb;
     line-height: 1.4;
     white-space: pre-wrap;
+}
+
+[data-theme="light"] .account-container {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+}
+
+[data-theme="light"] .account-container:hover {
+    border-color: #646cff;
+    background: #f0f0f0;
+}
+
+[data-theme="light"] .app-icon.default {
+    background: #6c757d;
+}
+
+[data-theme="light"] .account-display-name {
+    color: #2c3e50;
+}
+
+[data-theme="light"] .account-app-name {
+    color: #6c757d;
+}
+
+[data-theme="light"] .badge.note {
+    background: #e3f2fd;
+    color: #1976d2;
+    border: none;
+}
+
+[data-theme="light"] .badge.contact {
+    background: #fff3cd;
+    color: #856404;
+    border: none;
+}
+
+[data-theme="light"] .badge.bot {
+    background: #f8d7da;
+    color: #721c24;
+    border: none;
+}
+
+[data-theme="light"] .copy-button {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    color: #6c757d;
+}
+
+[data-theme="light"] .copy-button:hover {
+    background: #e9ecef;
+    border-color: #adb5bd;
+    color: #6c757d;
+}
+
+[data-theme="light"] .note-container {
+    background: #f0f8ff;
+    border: 1px solid #b3d9ff;
+}
+
+[data-theme="light"] .note-header {
+    color: #1976d2;
+}
+
+[data-theme="light"] .note-text {
+    color: #2c3e50;
 }

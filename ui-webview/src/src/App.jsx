@@ -7,6 +7,7 @@ function App() {
     const [appVersion, setAppVersion] = useState('');
     const [individuals, setIndividuals] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
+    const [isDark, setIsDark] = useState(false)
 
     useEffect(() => {
         // Wait for WebView2 API to be available
@@ -39,6 +40,11 @@ function App() {
             document.removeEventListener('DOMContentLoaded', initializeApi);
         };
     }, []);
+
+    // Separate useEffect for theme changes
+    useEffect(() => {
+        document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    }, [isDark]);
 
     // Remove the filteredIndividuals calculation and pass search logic to Individual components
     const removeDiacritics = (str) => {
@@ -382,6 +388,8 @@ function App() {
                             </div>
                         )}
                     </div>
+
+                    <button onClick={() => setIsDark(!isDark)}>{isDark ? 'Light' : 'Dark'} Mode</button>
 
                     {/* Search field */}
                     <div className="search-container">
