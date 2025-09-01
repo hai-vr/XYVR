@@ -3,6 +3,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Newtonsoft.Json;
 using XYVR.Core;
+using XYVR.Data.Collection;
 
 namespace XYVR.API.Resonite;
 
@@ -11,20 +12,22 @@ public class ResoniteAPI
 {
     private static readonly string PrefixWithSlash = "https://api.resonite.com/";
     
-    private readonly CookieContainer _cookies;
-    private readonly HttpClient _client;
-    
     private readonly string _secretMachineId;
     private readonly string _uid;
+    private readonly IDataCollector _dataCollector;
     
+    private readonly CookieContainer _cookies;
+    private readonly HttpClient _client;
+
     private string _authHeader__sensitive;
     private string _myUserId;
 
-    public ResoniteAPI(string secretMachineId_isGuid, string uid_isSha256Hash)
+    public ResoniteAPI(string secretMachineId_isGuid, string uid_isSha256Hash, IDataCollector dataCollector)
     {
         _secretMachineId = secretMachineId_isGuid;
         _uid = uid_isSha256Hash;
-        
+        _dataCollector = dataCollector;
+
         _cookies = new CookieContainer();
         var handler = new HttpClientHandler
         {
@@ -103,29 +106,96 @@ public class ResoniteAPI
         }
     }
     
-    public async Task<ContactResponseElementJsonObject[]> GetUserContacts()
+    public async Task<ContactResponseElementJsonObject[]> GetUserContacts(DataCollectionReason dataCollectionReason)
     {
-        var request = new HttpRequestMessage(HttpMethod.Get, $"{PrefixWithSlash}users/{_myUserId}/contacts");
-        request.Headers.Add("Authorization", _authHeader__sensitive);
+        var url = $"{PrefixWithSlash}users/{_myUserId}/contacts";
+        try
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, url);
+            request.Headers.Add("Authorization", _authHeader__sensitive);
 
-        var response = await _client.SendAsync(request);
-    
-        EnsureSuccessOrThrowVerbose(response);
-    
-        var jsonContent = await response.Content.ReadAsStringAsync();
-        return JsonConvert.DeserializeObject<ContactResponseElementJsonObject[]>(jsonContent);
+            var response = await _client.SendAsync(request);
+
+            EnsureSuccessOrThrowVerbose(response);
+
+            var responseStr = await response.Content.ReadAsStringAsync();
+            DataCollectSuccess(url, responseStr, dataCollectionReason);
+            return JsonConvert.DeserializeObject<ContactResponseElementJsonObject[]>(responseStr);
+        }
+        catch (Exception _)
+        {
+            DataCollectFailure(url, dataCollectionReason);
+            throw;
+        }
     }
     
-    public async Task<UserResponseJsonObject> GetUser(string userId)
+    public async Task<UserResponseJsonObject?> GetUser(string userId, DataCollectionReason dataCollectionReason)
     {
-        var request = new HttpRequestMessage(HttpMethod.Get, $"{PrefixWithSlash}users/{userId}");
-        request.Headers.Add("Authorization", _authHeader__sensitive);
+        var url = $"{PrefixWithSlash}users/{userId}";
+        try
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, url);
+            request.Headers.Add("Authorization", _authHeader__sensitive);
 
-        var response = await _client.SendAsync(request);
+            var response = await _client.SendAsync(request);
+            if (response.StatusCode == HttpStatusCode.NotFound)
+            {
+                DataCollectNotFound(url, await response.Content.ReadAsStringAsync(), dataCollectionReason);
+                return null;
+            }
+
+            EnsureSuccessOrThrowVerbose(response);
+
+            var responseStr = await response.Content.ReadAsStringAsync();
+            DataCollectSuccess(url, responseStr, dataCollectionReason);
+            return JsonConvert.DeserializeObject<UserResponseJsonObject>(responseStr);
+        }
+        catch (Exception _)
+        {
+            DataCollectFailure(url, dataCollectionReason);
+            throw;
+        }
+    }
     
-        EnsureSuccessOrThrowVerbose(response);
+    private void DataCollectSuccess(string url, string responseStr, DataCollectionReason dataCollectionReason)
+    {
+        _dataCollector.Ingest(new DataCollectionTrail
+        {
+            timestamp = _dataCollector.GetCurrentTime(),
+            reason = dataCollectionReason,
+            apiSource = "resonite_web_api",
+            route = url,
+            status = DataCollectionResponseStatus.Success,
+            responseObject = responseStr,
+            metaObject = null,
+        });
+    }
     
-        var jsonContent = await response.Content.ReadAsStringAsync();
-        return JsonConvert.DeserializeObject<UserResponseJsonObject>(jsonContent);
+    private void DataCollectNotFound(string url, string responseStr, DataCollectionReason dataCollectionReason)
+    {
+        _dataCollector.Ingest(new DataCollectionTrail
+        {
+            timestamp = _dataCollector.GetCurrentTime(),
+            reason = dataCollectionReason,
+            apiSource = "resonite_web_api",
+            route = url,
+            status = DataCollectionResponseStatus.NotFound,
+            responseObject = responseStr,
+            metaObject = null,
+        });
+    }
+
+    private void DataCollectFailure(string url, DataCollectionReason dataCollectionReason)
+    {
+        _dataCollector.Ingest(new DataCollectionTrail
+        {
+            timestamp = _dataCollector.GetCurrentTime(),
+            reason = dataCollectionReason,
+            apiSource = "resonite_web_api",
+            route = url,
+            status = DataCollectionResponseStatus.Failure,
+            responseObject = null,
+            metaObject = null,
+        });
     }
 }

@@ -18,13 +18,14 @@ public enum Mode
 
 internal partial class Program
 {
-    private static Mode mode = Mode.FetchNotesUsingNotesAPI;
+    private static Mode mode = Mode.FetchIndividuals;
 
     [GeneratedRegex(@"usr_[a-f0-9\-]+")]
     private static partial Regex UsrRegex();
 
     public static async Task Main()
     {
+        var storage = new DataCollectionStorage();
         var individuals = await Scaffolding.OpenRepository();
         
         var repository = new IndividualRepository(individuals);
@@ -59,7 +60,7 @@ internal partial class Program
                     .Distinct()
                     .ToList();
 
-                var undiscoveredAccounts = await new VRChatCommunicator().CollectUndiscoveredLenient(repository, notNecessarilyValidUserIds);
+                var undiscoveredAccounts = await new VRChatCommunicator(storage).CollectUndiscoveredLenient(repository, notNecessarilyValidUserIds);
             
                 Console.WriteLine($"There are {undiscoveredAccounts.Count} undiscovered accounts in that manual file.");
                 foreach (var undiscoveredAccount in undiscoveredAccounts)
@@ -84,7 +85,7 @@ internal partial class Program
                 
                 var numberOfIndividualsUpdated = 0;
 
-                var communicator = new VRChatCommunicator();
+                var communicator = new VRChatCommunicator(storage);
 
                 foreach (var individual in individualsWithVRChatAccount)
                 {
@@ -92,7 +93,7 @@ internal partial class Program
                     var vrchatAccountsOfThatIndividual = individual.accounts.Where(account => account.namedApp == NamedApp.VRChat).ToList();
                     foreach (var vrcAccount in vrchatAccountsOfThatIndividual)
                     {
-                        var note = await communicator.CollectNoteFromUser(vrcAccount);
+                        var note = await communicator.TempCollectNoteFromUser(vrcAccount);
                         if (note is { } realNote)
                         {
                             if (realNote.status == NoteState.Exists)
@@ -139,7 +140,7 @@ internal partial class Program
             }
             case Mode.FetchNotesUsingNotesAPI:
             {
-                var notes = await new VRChatCommunicator().TempGetNotes();
+                var notes = await new VRChatCommunicator(storage).TempGetNotes();
                 foreach (var note in notes)
                 {
                     Console.WriteLine($"{note.note} for {note.targetUserId} ({note.targetUser.displayName})");
@@ -175,7 +176,7 @@ internal partial class Program
                     return null;
                 }
 
-                var undiscoveredAccounts = await new VRChatCommunicator().CollectUndiscoveredLenient(repository, notes.Select(full => full.targetUserId).Distinct().ToList());
+                var undiscoveredAccounts = await new VRChatCommunicator(storage).CollectUndiscoveredLenient(repository, notes.Select(full => full.targetUserId).Distinct().ToList());
             
                 Console.WriteLine($"There are {undiscoveredAccounts.Count} undiscovered accounts in those notes.");
                 foreach (var undiscoveredAccount in undiscoveredAccounts)

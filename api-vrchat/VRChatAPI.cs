@@ -5,6 +5,7 @@ using System.Web;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using XYVR.Core;
+using XYVR.Data.Collection;
 
 namespace XYVR.API.VRChat;
 
@@ -21,6 +22,8 @@ public class VRChatAPI
     private const string EmailOtpUrl = RootUrl + "/auth/twofactorauth/emailotp/verify";
     private const string OtpUrl = RootUrl + "/auth/twofactorauth/otp/verify";
 
+    private readonly IDataCollector _dataCollector;
+    
     private readonly bool _useRateLimiting;
     private readonly Random _random = new();
     
@@ -30,8 +33,9 @@ public class VRChatAPI
 
     public bool IsLoggedIn { get; private set; }
 
-    public VRChatAPI(bool useRateLimiting = true)
+    public VRChatAPI(IDataCollector dataCollector, bool useRateLimiting = true)
     {
+        _dataCollector = dataCollector;
         _useRateLimiting = useRateLimiting;
         
         _cookies = new CookieContainer();
@@ -205,105 +209,126 @@ public class VRChatAPI
         return result__sensitive;
     }
 
-    public async Task<VRChatAuthUser> GetAuthUser()
+    public async Task<VRChatAuthUser> GetAuthUser(DataCollectionReason dataCollectionReason)
     {
-        ThrowIfNotLoggedIn();
-        
         var url = $"{RootUrl}/auth/user";
-        var response = await _client.GetAsync(url);
-            
-        await EnsureRateLimiting(url);
-        
-        EnsureSuccessOrThrowVerbose(response);
-        
-        return JsonConvert.DeserializeObject<VRChatAuthUser>(await response.Content.ReadAsStringAsync());
+        ThrowIfNotLoggedIn();
+
+        try
+        {
+            var response = await _client.GetAsync(url);
+
+            await EnsureRateLimiting(url);
+
+            EnsureSuccessOrThrowVerbose(response);
+
+            var responseStr = await response.Content.ReadAsStringAsync();
+
+            DataCollectSuccess(url, responseStr, dataCollectionReason);
+
+            return JsonConvert.DeserializeObject<VRChatAuthUser>(responseStr);
+        }
+        catch (Exception _)
+        {
+            DataCollectFailure(url, dataCollectionReason);
+            throw;
+        }
     }
 
-    public async Task<List<VRChatFriend>> ListFriends(ListFriendsRequestType listFriendsRequestType)
+    public async Task<List<VRChatFriend>> ListFriends(ListFriendsRequestType listFriendsRequestType, DataCollectionReason dataCollectionReason)
     {
         ThrowIfNotLoggedIn();
 
         var offline = listFriendsRequestType == ListFriendsRequestType.OnlyOffline ? "true" : "false";
-        return await GetPaginatedResults<VRChatFriend>((offset, pageSize) =>
+        return await GetPaginatedResults<VRChatFriend>(dataCollectionReason, (offset, pageSize) =>
             Task.FromResult($"{RootUrl}/auth/user/friends?offset={offset}&n={pageSize}&offline={offline}"));
     }
 
-    public async Task<VRChatUser?> GetUserLenient(string userId)
+    public async Task<VRChatUser?> GetUserLenient(string userId, DataCollectionReason dataCollectionReason)
     {
         ThrowIfNotLoggedIn();
         
         var url = $"{RootUrl}/users/{userId}";
-        var response = await _client.GetAsync(url);
-            
-        await EnsureRateLimiting(url);
-        
-        if (response.StatusCode == HttpStatusCode.NotFound) return null;
-        
-        EnsureSuccessOrThrowVerbose(response);
-        
-        return JsonConvert.DeserializeObject<VRChatUser>(await response.Content.ReadAsStringAsync());
-    }
-
-    public async Task<List<VRChatNoteFull>> ListUserNotes()
-    {
-        ThrowIfNotLoggedIn();
-        
-        return await GetPaginatedResults<VRChatNoteFull>((offset, pageSize) =>
-            Task.FromResult($"{RootUrl}/userNotes?offset={offset}&n={pageSize}"));
-    }
-
-    public async Task<VRChatNote?> GetUserNoteByUserNoteId(string userNoteId)
-    {
-        ThrowIfNotLoggedIn();
-        
-        var url = $"{RootUrl}/userNotes/{userNoteId}";
-        var response = await _client.GetAsync(url);
-            
-        await EnsureRateLimiting(url);
-
-        if (response.StatusCode == HttpStatusCode.NotFound) return null;
-        
-        EnsureSuccessOrThrowVerbose(response);
-        
-        return JsonConvert.DeserializeObject<VRChatNote>(await response.Content.ReadAsStringAsync());
-    }
-    
-    private async Task<List<T>> GetPaginatedResults<T>(Func<int, int, Task<string>> urlBuilder, int pageSize = 100)
-    {
-        var allResults = new List<T>();
-        var hasMoreData = true;
-        var offset = 0;
-
-        while (hasMoreData)
+        try
         {
-            var url = await urlBuilder(offset, pageSize);
             var response = await _client.GetAsync(url);
-        
+
             await EnsureRateLimiting(url);
-        
+
+            if (response.StatusCode == HttpStatusCode.NotFound)
+            {
+                DataCollectNotFound(url, await response.Content.ReadAsStringAsync(), dataCollectionReason);
+                return null;
+            }
+
             EnsureSuccessOrThrowVerbose(response);
 
-            var results = JsonConvert.DeserializeObject<List<T>>(await response.Content.ReadAsStringAsync());
-            if (results == null || results.Count == 0)
-            {
-                hasMoreData = false;
-            }
-            else
-            {
-                allResults.AddRange(results);
+            var responseStr = await response.Content.ReadAsStringAsync();
+            DataCollectSuccess(url, responseStr, dataCollectionReason);
+            return JsonConvert.DeserializeObject<VRChatUser>(responseStr);
+        }
+        catch (Exception _)
+        {
+            DataCollectFailure(url, dataCollectionReason);
+            throw;
+        }
+    }
 
-                if (results.Count < pageSize)
+    public async Task<List<VRChatNoteFull>> ListUserNotes(DataCollectionReason dataCollectionReason)
+    {
+        ThrowIfNotLoggedIn();
+        
+        return await GetPaginatedResults<VRChatNoteFull>(dataCollectionReason, (offset, pageSize) =>
+            Task.FromResult($"{RootUrl}/userNotes?offset={offset}&n={pageSize}"));
+    }
+    
+    private async Task<List<T>> GetPaginatedResults<T>(DataCollectionReason dataCollectionReason, Func<int, int, Task<string>> urlBuilder, int pageSize = 100)
+    {
+        string? url = null;
+        try
+        {
+            var allResults = new List<T>();
+            var hasMoreData = true;
+            var offset = 0;
+
+            while (hasMoreData)
+            {
+                url = await urlBuilder(offset, pageSize);
+                var response = await _client.GetAsync(url);
+        
+                await EnsureRateLimiting(url);
+        
+                EnsureSuccessOrThrowVerbose(response);
+
+                var responseStr = await response.Content.ReadAsStringAsync();
+                DataCollectSuccess(url, responseStr, dataCollectionReason);
+                var results = JsonConvert.DeserializeObject<List<T>>(responseStr);
+                if (results == null || results.Count == 0)
                 {
                     hasMoreData = false;
                 }
                 else
                 {
-                    offset += pageSize;
+                    allResults.AddRange(results);
+
+                    if (results.Count < pageSize)
+                    {
+                        hasMoreData = false;
+                    }
+                    else
+                    {
+                        offset += pageSize;
+                    }
                 }
             }
-        }
 
-        return allResults;
+            return allResults;
+        }
+        catch (Exception _)
+        {
+            if (url != null) DataCollectFailure(url, dataCollectionReason);
+            throw;
+        }
     }
 
     private async Task EnsureRateLimiting(string urlForLogging)
@@ -327,6 +352,48 @@ public class VRChatAPI
     private void ThrowIfNotLoggedIn()
     {
         if (!IsLoggedIn) throw new HttpRequestException("Application does not have the cookie to be logged in.");
+    }
+    
+    private void DataCollectSuccess(string url, string responseStr, DataCollectionReason dataCollectionReason)
+    {
+        _dataCollector.Ingest(new DataCollectionTrail
+        {
+            timestamp = _dataCollector.GetCurrentTime(),
+            reason = dataCollectionReason,
+            apiSource = "vrchat_web_api",
+            route = url,
+            status = DataCollectionResponseStatus.Success,
+            responseObject = responseStr,
+            metaObject = null,
+        });
+    }
+    
+    private void DataCollectNotFound(string url, string responseStr, DataCollectionReason dataCollectionReason)
+    {
+        _dataCollector.Ingest(new DataCollectionTrail
+        {
+            timestamp = _dataCollector.GetCurrentTime(),
+            reason = dataCollectionReason,
+            apiSource = "vrchat_web_api",
+            route = url,
+            status = DataCollectionResponseStatus.NotFound,
+            responseObject = responseStr,
+            metaObject = null,
+        });
+    }
+
+    private void DataCollectFailure(string url, DataCollectionReason dataCollectionReason)
+    {
+        _dataCollector.Ingest(new DataCollectionTrail
+        {
+            timestamp = _dataCollector.GetCurrentTime(),
+            reason = dataCollectionReason,
+            apiSource = "vrchat_web_api",
+            route = url,
+            status = DataCollectionResponseStatus.Failure,
+            responseObject = null,
+            metaObject = null,
+        });
     }
 }
 

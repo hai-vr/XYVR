@@ -27,6 +27,7 @@ public class VRChatFriend
     public string userIcon;
 }
 
+// Incomplete. This is just what we need from that API.
 public struct VRChatAuthUser
 {
     public string id;

@@ -1,26 +1,44 @@
 ﻿using System.Text;
 using XYVR.API.VRChat;
 using XYVR.Core;
+using XYVR.Data.Collection;
 
 namespace XYVR.AccountAuthority.VRChat;
 
 public class VRChatCommunicator
 {
-    private const string CookieFileName = "vrc.cookies.txt";
+    private const string VRChatQualifiedAppName = "vrchat";
     
+    private readonly IDataCollector _dataCollector;
+    private readonly TimeProvider _timeProvider = TimeProvider.System;
+    
+    private const string CookieFileName = "vrc.cookies.txt";
+
     private readonly string _account__sensitive;
     private readonly string _password__sensitive;
     private readonly string? _twoFactor__sensitive;
     private VRChatAPI? _api;
-    private string _caller;
+    private string _callerUserId;
 
-    public VRChatCommunicator()
+    public VRChatCommunicator(IDataCollector dataCollector)
     {
+        _dataCollector = dataCollector;
+        
         _account__sensitive = Environment.GetEnvironmentVariable(XYVREnvVar.VRChatAccount)!;
         _password__sensitive = Environment.GetEnvironmentVariable(XYVREnvVar.VRChatPassword)!;
         if (_account__sensitive == null || _password__sensitive == null) throw new ArgumentException("Missing environment variables");
         
         _twoFactor__sensitive = Environment.GetEnvironmentVariable(XYVREnvVar.VRChatTwoFactorCode);
+    }
+
+    public async Task<Account> CallerAccount()
+    {
+        _api ??= await InitializeAPI();
+
+        var user = await _api.GetUserLenient(_callerUserId, DataCollectionReason.CollectCallerAccount);
+        if (user == null) throw new Exception("Unable to get the caller's account data"); // FIXME: Get a better exception type.
+
+        return UserAsAccount((VRChatUser)user);
     }
     
     /// Calls various APIs to collect possible accounts haven't been collected yet.<br/>
@@ -32,16 +50,16 @@ public class VRChatCommunicator
         
         _api ??= await InitializeAPI();
 
-        var onlineFriends = await _api.ListFriends(ListFriendsRequestType.OnlyOnline);
-        var offlineFriends = await _api.ListFriends(ListFriendsRequestType.OnlyOffline);
-        var userNotes = await _api.ListUserNotes();
+        var onlineFriends = await _api.ListFriends(ListFriendsRequestType.OnlyOnline, DataCollectionReason.FindUndiscoveredAccounts);
+        var offlineFriends = await _api.ListFriends(ListFriendsRequestType.OnlyOffline, DataCollectionReason.FindUndiscoveredAccounts);
+        var userNotes = await _api.ListUserNotes(DataCollectionReason.FindUndiscoveredAccounts);
 
         var friendsAsAccounts = onlineFriends.Concat(offlineFriends)
             .Where(friend => !vrchatAccountIdentifiers.Contains(friend.id))
             .Select(friend => new IncompleteAccount
             {
                 namedApp = NamedApp.VRChat,
-                qualifiedAppName = "vrchat",
+                qualifiedAppName = VRChatQualifiedAppName,
                 inAppIdentifier = friend.id,
                 inAppDisplayName = friend.displayName,
                 liveServerData = friend,
@@ -50,7 +68,7 @@ public class VRChatCommunicator
                     new IncompleteCallerAccount
                     {
                         isAnonymous = false,
-                        inAppIdentifier = _caller
+                        inAppIdentifier = _callerUserId
                     }
                 ]
             })
@@ -64,7 +82,7 @@ public class VRChatCommunicator
             .Select(full => new IncompleteAccount
             {
                 namedApp = NamedApp.VRChat,
-                qualifiedAppName = "vrchat",
+                qualifiedAppName = VRChatQualifiedAppName,
                 inAppIdentifier = full.targetUserId,
                 inAppDisplayName = full.targetUser.displayName,
                 liveServerData = full,
@@ -73,7 +91,7 @@ public class VRChatCommunicator
                     new IncompleteCallerAccount
                     {
                         isAnonymous = false,
-                        inAppIdentifier = _caller
+                        inAppIdentifier = _callerUserId
                     }
                 ]
             })
@@ -82,6 +100,9 @@ public class VRChatCommunicator
         return friendsAsAccounts.Concat(notesAsAccounts).ToList();
     }
 
+    /// Given a list of user IDs that may or may not exist, return a list of accounts.<br/>
+    /// The returned list may be smaller than the input list, especially if some accounts no longer exist.<br/>
+    /// User IDs do not necessarily start with usr_ as this supports some oldschool accounts.
     public async Task<List<Account>> CollectUndiscoveredLenient(IndividualRepository repository, List<string> notNecessarilyValidUserIds)
     {
         var vrchatAccountIdentifiers = repository.CollectAllInAppIdentifiers(NamedApp.VRChat);
@@ -95,7 +116,7 @@ public class VRChatCommunicator
         var accounts = new List<Account>();
         foreach (var userId in undiscoveredAndNotNecessarilyValidUserIds)
         {
-            var user = await _api.GetUserLenient(userId);
+            var user = await _api.GetUserLenient(userId, DataCollectionReason.CollectUndiscoveredAccount);
             if (user != null)
             {
                 accounts.Add(UserAsAccount((VRChatUser)user));
@@ -105,11 +126,11 @@ public class VRChatCommunicator
         return accounts;
     }
 
-    public async Task<Note?> CollectNoteFromUser(Account vrcAccount)
+    public async Task<Note?> TempCollectNoteFromUser(Account vrcAccount)
     {
         _api ??= await InitializeAPI();
         
-        var resultN = await _api.GetUserLenient(vrcAccount.inAppIdentifier);
+        var resultN = await _api.GetUserLenient(vrcAccount.inAppIdentifier, DataCollectionReason.ManualRequest);
         if (resultN == null) return null;
         
         var result = (VRChatUser)resultN;
@@ -133,7 +154,7 @@ public class VRChatCommunicator
     {
         _api ??= await InitializeAPI();
 
-        var resultN = await _api.ListUserNotes();
+        var resultN = await _api.ListUserNotes(DataCollectionReason.ManualRequest);
         return resultN;
     }
 
@@ -142,7 +163,7 @@ public class VRChatCommunicator
         return new Account
         {
             namedApp = NamedApp.VRChat,
-            qualifiedAppName = "vrchat",
+            qualifiedAppName = VRChatQualifiedAppName,
             inAppIdentifier = user.id,
             inAppDisplayName = user.displayName,
             liveServerData = user,
@@ -157,7 +178,7 @@ public class VRChatCommunicator
 
     private async Task<VRChatAPI> InitializeAPI()
     {
-        var api = new VRChatAPI();
+        var api = new VRChatAPI(_dataCollector);
         if (File.Exists(CookieFileName))
         {
             var userinput_cookies__sensitive = await File.ReadAllTextAsync(CookieFileName, Encoding.UTF8);
@@ -169,8 +190,8 @@ public class VRChatCommunicator
             await TryLogin(api);
         }
 
-        var authUser = await api.GetAuthUser();
-        _caller = authUser.id;
+        var authUser = await api.GetAuthUser(DataCollectionReason.CollectCallerAccount);
+        _callerUserId = authUser.id;
 
         return api;
     }

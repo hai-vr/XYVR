@@ -1,0 +1,29 @@
+﻿namespace XYVR.Data.Collection;
+
+public class DataCollectionTrail
+{
+    public DateTime timestamp;
+    
+    public DataCollectionReason reason;
+    public string apiSource;
+    public string route;
+
+    public DataCollectionResponseStatus status;
+    public object? responseObject;
+    public object? metaObject;
+}
+
+public enum DataCollectionReason
+{
+    ManualRequest,
+    CollectCallerAccount,
+    FindUndiscoveredAccounts,
+    CollectUndiscoveredAccount,
+}
+
+public enum DataCollectionResponseStatus
+{
+    Success,
+    NotFound,
+    Failure
+}
