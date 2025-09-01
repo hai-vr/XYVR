@@ -60,6 +60,7 @@ public class AppApi : IAppApi
                     qualifiedAppName = account.qualifiedAppName,
                     inAppIdentifier = account.inAppIdentifier,
                     inAppDisplayName = account.inAppDisplayName,
+                    specifics = account.specifics,
                     callers = account.callers,
                     isTechnical = account.isTechnical,
                     isAnyCallerContact = account.callers.Any(caller => caller.isContact),
@@ -111,4 +112,5 @@ internal class FrontAccount
     public bool isTechnical;
     public bool isAnyCallerContact;
     public bool isAnyCallerNote;
+    public object? specifics;
 }

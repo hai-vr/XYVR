@@ -41,7 +41,7 @@ public struct VRChatUser
     public bool allowAvatarCopying;
     public VRChatBadge[] badges;
     public string bio;
-    public string[] bioLinks;
+    public string?[]? bioLinks;
     public string currentAvatarImageUrl;
     public string currentAvatarThumbnailImageUrl;
     public string[] currentAvatarTags;

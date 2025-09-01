@@ -4,3 +4,8 @@ ui-webview/src/node_modules/
 ui-webview/src/dist/
 .idea
 *.DotSettings.user
+
+# Prevent accidents
+individuals.json
+vrc.cookies.txt
+data-collection.jsonl

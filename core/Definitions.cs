@@ -1,4 +1,6 @@
-﻿namespace XYVR.Core;
+﻿using Newtonsoft.Json;
+
+namespace XYVR.Core;
 
 // - Every individual must have at least one account.
 // - An individual may have one or more accounts across several apps.
@@ -35,6 +37,9 @@ public class Account
     
     public string inAppIdentifier;
     public string inAppDisplayName;
+
+    [JsonConverter(typeof(SpecificsConverter))]
+    public object? specifics;
     
     public List<CallerAccount> callers = new();
 
@@ -69,6 +74,11 @@ public class CallerAccount
     
     public Note note = new();
     public bool isContact;
+}
+
+public class VRChatSpecifics
+{
+    public List<string> urls = new();
 }
 
 public class Note

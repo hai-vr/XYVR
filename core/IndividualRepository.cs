@@ -12,6 +12,11 @@ public class IndividualRepository
         EvaluateDataMigrations(Individuals);
 
         _namedAppToInAppIdToIndividual = new Dictionary<NamedApp, Dictionary<string, Individual>>();
+        RebuildAccountDictionary();
+    }
+
+    private void RebuildAccountDictionary()
+    {
         foreach (var namedApp in Enum.GetValues<NamedApp>())
         {
             _namedAppToInAppIdToIndividual[namedApp] = CreateAccountDictionary(namedApp);
@@ -26,7 +31,46 @@ public class IndividualRepository
         {
             UpdateIndividualBasedOnAccounts(individual);
         }
+
+        var duplicateRecords = individuals.SelectMany(individual => individual.accounts)
+            .Select(account => new DiscriminatorRecord(account.qualifiedAppName, account.inAppIdentifier))
+            .GroupBy(record => record)
+            .Select(records => records.ToList())
+            .Where(list => list.Count > 1)
+            .Select(list => list.First())
+            .ToList();
+
+        if (duplicateRecords.Count > 0)
+        {
+            Console.WriteLine($"Made a mistake, we have duplicate records:");
+            foreach (var discriminatorRecord in duplicateRecords)
+            {
+                Console.WriteLine($"{discriminatorRecord.AccountQualifiedAppName} {discriminatorRecord.AccountInAppIdentifier}");
+            }
+            
+            // Detect problematic duplicates
+            foreach (var discriminatorRecord in duplicateRecords)
+            {
+                var problematics = individuals
+                    .Where(individual => individual.accounts.Any(account => account.qualifiedAppName == discriminatorRecord.AccountQualifiedAppName && account.inAppIdentifier == discriminatorRecord.AccountInAppIdentifier))
+                    .ToList();
+                Console.WriteLine($"Problematic ({problematics.Count}): {string.Join(",", problematics.Select(individual => individual.accounts.Count).ToList())}");
+                if (problematics.Any(individual => individual.accounts.Count > 1))
+                {
+                    var max = problematics.Max(individual => individual.accounts.Count);
+                    var maximumInd = problematics.First(individual => individual.accounts.Count == max);
+                    problematics.Remove(maximumInd);
+                    
+                    // foreach (var problematic in problematics)
+                    // {
+                    //     individuals.Remove(problematic);
+                    // }
+                }
+            }
+        }
     }
+
+    internal record DiscriminatorRecord(string AccountQualifiedAppName, string AccountInAppIdentifier);
 
     public HashSet<string> CollectAllInAppIdentifiers(NamedApp namedApp)
     {
@@ -39,9 +83,20 @@ public class IndividualRepository
 
     private Dictionary<string, Individual> CreateAccountDictionary(NamedApp namedApp)
     {
-        var withResoniteAccount = Individuals.Where(individual => individual.accounts.Any(account => account.namedApp == namedApp)).ToList();
-        return withResoniteAccount
-            .ToDictionary(individual => individual.accounts.First(account => account.namedApp == namedApp).inAppIdentifier);
+        var results = new Dictionary<string, Individual>();
+        
+        foreach (var individual in Individuals)
+        {
+            foreach (var account in individual.accounts)
+            {
+                if (account.namedApp == namedApp)
+                {
+                    results[account.inAppIdentifier] = individual;
+                }
+            }
+        }
+        
+        return results;
     }
 
     public void MergeAccounts(List<Account> accounts)
@@ -59,6 +114,7 @@ public class IndividualRepository
             }
             else
             {
+                Console.WriteLine($"Creating new individual: {inputAccount.namedApp} {inputAccount.inAppIdentifier} {inputAccount.inAppDisplayName}");
                 var newIndividual = CreateNewIndividualFromAccount(inputAccount);
                 _namedAppToInAppIdToIndividual[inputAccount.namedApp].Add(inputAccount.inAppIdentifier, newIndividual);
             }
@@ -71,6 +127,9 @@ public class IndividualRepository
         if (isSameAppAndIdentifier)
         {
             existingAccount.inAppDisplayName = inputAccount.inAppDisplayName;
+            
+            // Specifics are always replaced entirely
+            existingAccount.specifics = inputAccount.specifics;
             
             foreach (var inputCaller in inputAccount.callers)
             {

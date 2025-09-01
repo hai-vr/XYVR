@@ -194,6 +194,10 @@ public class VRChatCommunicator
             qualifiedAppName = VRChatQualifiedAppName,
             inAppIdentifier = user.id,
             inAppDisplayName = user.displayName,
+            specifics = new VRChatSpecifics
+            {
+                urls = user.bioLinks == null ? [] : user.bioLinks.Where(s => s != null).Cast<string>().ToList()
+            },
             callers = [
                 new CallerAccount
                 {

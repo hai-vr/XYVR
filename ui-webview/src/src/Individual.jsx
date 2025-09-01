@@ -1,6 +1,11 @@
 ﻿import Account from "./Account.jsx";
 
 function Individual({ individual, index, isVisible = true }) {
+    // Get all VRChat account links
+    const vrChatLinks = individual.accounts
+        ?.filter(account => account.namedApp === "VRChat" && account.specifics?.urls?.length > 0)
+        ?.flatMap(account => account.specifics.urls) || [];
+
     return (
         <div style={{ 
             display: isVisible ? 'block' : 'none',
@@ -64,6 +69,62 @@ function Individual({ individual, index, isVisible = true }) {
                     </span>
                 )}
             </div>
+
+            {vrChatLinks.length > 0 && (
+                <div style={{
+                    background: '#f0f8ff',
+                    border: '1px solid #b3d9ff',
+                    borderRadius: '8px',
+                    padding: '12px',
+                    marginBottom: '16px'
+                }}>
+                    <div style={{
+                        fontSize: '14px',
+                        color: '#1976d2',
+                        fontWeight: '600',
+                        marginBottom: '8px',
+                        display: 'flex',
+                        alignItems: 'center'
+                    }}>
+                        💬 VRChat Links:
+                    </div>
+                    <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '6px'
+                    }}>
+                        {vrChatLinks.map((url, linkIndex) => (
+                            <a key={linkIndex}
+                               href={url}
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               style={{
+                                   color: '#1976d2',
+                                   textDecoration: 'none',
+                                   fontSize: '13px',
+                                   padding: '4px 8px',
+                                   background: '#e3f2fd',
+                                   borderRadius: '4px',
+                                   transition: 'background-color 0.2s ease',
+                                   display: 'inline-block',
+                                   maxWidth: '100%',
+                                   overflow: 'hidden',
+                                   textOverflow: 'ellipsis',
+                                   whiteSpace: 'nowrap',
+                                   wordBreak: 'break-all'
+                               }}
+                               onMouseEnter={(e) => {
+                                   e.target.style.backgroundColor = '#bbdefb';
+                               }}
+                               onMouseLeave={(e) => {
+                                   e.target.style.backgroundColor = '#e3f2fd';
+                               }}>
+                                🔗 {url}
+                            </a>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             <div>
                 {individual.accounts && individual.accounts.length > 0 ? (
