@@ -72,37 +72,62 @@ public class IndividualRepository
         {
             existingAccount.inAppDisplayName = inputAccount.inAppDisplayName;
             existingAccount.isContact = inputAccount.isContact;
+            UpdateExistingNote(existingAccount.note, inputAccount.note);
             
-            if (existingAccount.note.status != inputAccount.note.status)
+            foreach (var inputCaller in inputAccount.callers)
             {
-                if (existingAccount.note.status == NoteState.NeverHad)
+                var callerExists = false;
+                foreach (var existingCaller in existingAccount.callers)
                 {
-                    existingAccount.note.status = inputAccount.note.status;
-                    existingAccount.note.text = inputAccount.note.text;
-                }
-                else
-                {
-                    if (inputAccount.note.status is NoteState.Exists)
+                    if (inputCaller.isAnonymous && existingCaller.isAnonymous
+                         || !inputCaller.isAnonymous && !existingCaller.isAnonymous && existingCaller.inAppIdentifier == inputCaller.inAppIdentifier)
                     {
-                        existingAccount.note.status = NoteState.Exists;
-                        existingAccount.note.text = inputAccount.note.text;
-                    }
-                    else
-                    {
-                        existingAccount.note.status = inputAccount.note.status;
-                        // We don't overwrite the text
+                        callerExists = true;
+                        existingCaller.isContact = inputCaller.isContact;
+                        UpdateExistingNote(existingCaller.note, inputCaller.note);
+                        
+                        break;
                     }
                 }
-            }
-            else if (existingAccount.note.status == NoteState.Exists && existingAccount.note.text != inputAccount.note.text)
-            {
-                existingAccount.note.text = inputAccount.note.text;
+                if (!callerExists)
+                {
+                    existingAccount.callers.Add(inputCaller);
+                }
             }
             
             return true;
         }
 
         return false;
+    }
+
+    private static void UpdateExistingNote(Note existingNote, Note inputNote)
+    {
+        if (existingNote.status != inputNote.status)
+        {
+            if (existingNote.status == NoteState.NeverHad)
+            {
+                existingNote.status = inputNote.status;
+                existingNote.text = inputNote.text;
+            }
+            else
+            {
+                if (inputNote.status is NoteState.Exists)
+                {
+                    existingNote.status = NoteState.Exists;
+                    existingNote.text = inputNote.text;
+                }
+                else
+                {
+                    existingNote.status = inputNote.status;
+                    // We don't overwrite the text
+                }
+            }
+        }
+        else if (existingNote.status == NoteState.Exists && existingNote.text != inputNote.text)
+        {
+            existingNote.text = inputNote.text;
+        }
     }
 
     private static void UpdateIndividualBasedOnAccounts(Individual existingIndividual)

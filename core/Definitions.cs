@@ -37,8 +37,8 @@ public class Account
     public string inAppDisplayName;
 
     // These two pieces of data should be moved to callers.
-    public bool isContact;
-    public Note note = new();
+    [Obsolete] public bool isContact;
+    [Obsolete] public Note note = new();
     
     public List<CallerAccount> callers = new(); // TODO: New data to support multi-accounts.
 
