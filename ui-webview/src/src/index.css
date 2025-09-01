@@ -4,23 +4,100 @@
     font-weight: 400;
 
     color-scheme: light dark;
-    color: #bbbbbb;
-    background-color: #3c3f41;
-
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+
+    /* Dark theme colors */
+    --bg-primary: #3c3f41;
+    --bg-secondary: #4c5052;
+    --bg-tertiary: #3e4446;
+    --bg-quaternary: #5a5d5f;
+
+    --text-primary: #bbbbbb;
+    --text-secondary: #888888;
+    --text-muted: #666666;
+
+    --border-primary: #555555;
+    --border-secondary: #5a5d5f;
+    --border-accent: #6897bb;
+
+    --accent-primary: #6897bb;
+    --accent-secondary: #9fc5e8;
+
+    --shadow-light: rgba(0, 0, 0, 0.2);
+    --shadow-medium: rgba(0, 0, 0, 0.3);
+    --shadow-heavy: rgba(0, 0, 0, 0.4);
+
+    /* Status colors */
+    --status-contact-bg: #4a6741;
+    --status-contact-text: #90c695;
+    --status-note-bg: #3e4446;
+    --status-note-text: #6897bb;
+    --status-bot-bg: #4a3538;
+    --status-bot-text: #d4a6aa;
+    --status-warning-bg: #4a4232;
+    --status-warning-text: #d4b86a;
+
+    /* App icon colors */
+    --app-resonite: linear-gradient(170deg, #84ea22 20%, #fff834 80%);
+    --app-vrchat: #186dcd;
+    --app-cluster: #02a8ea;
+    --app-default: #888888;
+
+    /* Set initial colors */
+    color: var(--text-primary);
+    background-color: var(--bg-primary);
+}
+
+/* Light theme color overrides */
+:root[data-theme="light"] {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8f9fa;
+    --bg-tertiary: #f0f0f0;
+    --bg-quaternary: #e9ecef;
+
+    --text-primary: #2c3e50;
+    --text-secondary: #6c757d;
+    --text-muted: #495057;
+
+    --border-primary: #e1e5e9;
+    --border-secondary: #dee2e6;
+    --border-accent: #646cff;
+
+    --accent-primary: #1976d2;
+    --accent-secondary: #1976d2;
+
+    --shadow-light: rgba(0, 0, 0, 0.06);
+    --shadow-medium: rgba(0, 0, 0, 0.1);
+    --shadow-heavy: rgba(0, 0, 0, 0.2);
+
+    /* Status colors for light theme */
+    --status-contact-bg: #e8f5e8;
+    --status-contact-text: #27ae60;
+    --status-note-bg: #e3f2fd;
+    --status-note-text: #1976d2;
+    --status-bot-bg: #f8d7da;
+    --status-bot-text: #721c24;
+    --status-warning-bg: #fff3cd;
+    --status-warning-text: #856404;
+
+    /* App icon colors remain the same for light theme */
+    --app-default: #6c757d;
+
+    color: var(--text-primary);
+    background-color: var(--bg-primary);
 }
 
 a {
     font-weight: 500;
-    color: #6897bb;
+    color: var(--accent-primary);
     text-decoration: inherit;
 }
 
 a:hover {
-    color: #9fc5e8;
+    color: var(--accent-secondary);
 }
 
 body {
@@ -34,62 +111,29 @@ body {
 h1 {
     font-size: 3.2em;
     line-height: 1.1;
-    color: #bbbbbb;
+    color: var(--text-primary);
 }
 
 button {
     border-radius: 8px;
-    border: 1px solid #555555;
+    border: 1px solid var(--border-primary);
     padding: 0.6em 1.2em;
     font-size: 1em;
     font-weight: 500;
     font-family: inherit;
-    background-color: #4c5052;
-    color: #bbbbbb;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
     cursor: pointer;
     transition: border-color 0.25s, background-color 0.25s;
 }
 
 button:hover {
-    border-color: #6897bb;
-    background-color: #5a5d5f;
+    border-color: var(--accent-primary);
+    background-color: var(--bg-quaternary);
 }
 
 button:focus,
 button:focus-visible {
-    outline: 2px solid #6897bb;
+    outline: 2px solid var(--accent-primary);
     outline-offset: 2px;
-}
-
-:root[data-theme="light"] {
-    color: #213547;
-    background-color: #ffffff;
-}
-
-[data-theme="light"] a {
-    color: #646cff;
-}
-
-[data-theme="light"] a:hover {
-    color: #747bff;
-}
-
-[data-theme="light"] h1 {
-    color: #213547;
-}
-
-[data-theme="light"] button {
-    background-color: #f9f9f9;
-    color: #213547;
-    border: 1px solid #cccccc;
-}
-
-[data-theme="light"] button:hover {
-    border-color: #646cff;
-    background-color: #f0f0f0;
-}
-
-[data-theme="light"] button:focus,
-[data-theme="light"] button:focus-visible {
-    outline: 2px solid #646cff;
 }

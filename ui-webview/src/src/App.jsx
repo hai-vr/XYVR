@@ -375,9 +375,19 @@ function App() {
             {individuals.length > 0 && (
                 <div className="individuals-container">
                     <div className="header-section">
-                        <h2 className="header-title">
-                            👥 Users & Accounts ({visibleIndividualsCount})
-                        </h2>
+                        <div className="header-content">
+                            <h2 className="header-title">
+                                👥 Users & Accounts ({visibleIndividualsCount})
+                            </h2>
+                            
+                            <button 
+                                className="theme-toggle-btn" 
+                                onClick={() => setIsDark(!isDark)}
+                                title={`Switch to ${isDark ? 'Light' : 'Dark'} Mode`}
+                            >
+                                {isDark ? '☀️' : '🌙'}
+                            </button>
+                        </div>
 
                         {searchTerm && (
                             <div className="search-results-info">
@@ -388,8 +398,6 @@ function App() {
                             </div>
                         )}
                     </div>
-
-                    <button onClick={() => setIsDark(!isDark)}>{isDark ? 'Light' : 'Dark'} Mode</button>
 
                     {/* Search field */}
                     <div className="search-container">
@@ -419,7 +427,7 @@ function App() {
                                 key={individual.id || index}
                                 individual={individual}
                                 index={index}
-                                isVisible={true} // Always visible since we're already filtering
+                                isVisible={true}
                             />
                         ))}
                     </div>
