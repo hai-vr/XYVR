@@ -1,3 +1,4 @@
+
 :root {
     font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
     line-height: 1.5;
@@ -30,6 +31,10 @@
     --shadow-medium: rgba(0, 0, 0, 0.3);
     --shadow-heavy: rgba(0, 0, 0, 0.4);
 
+    /* Avatar colors */
+    --avatar-text: #ffffff;
+    --avatar-gradient-light: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+
     /* Status colors */
     --status-contact-bg: #4a6741;
     --status-contact-text: #90c695;
@@ -39,6 +44,17 @@
     --status-bot-text: #d4a6aa;
     --status-warning-bg: #4a4232;
     --status-warning-text: #d4b86a;
+
+    /* VRChat links specific colors */
+    --vrchat-links-bg: #3e4446;
+    --vrchat-links-border: #5a5d5f;
+    --vrchat-link-item-bg: #4c5052;
+    --vrchat-link-item-border: #5a5d5f;
+    --vrchat-link-item-hover-bg: #5a5d5f;
+    --vrchat-link-item-hover-border: #6897bb;
+
+    /* Copy button hover */
+    --copy-button-hover-bg: rgba(104, 151, 187, 0.2);
 
     /* App icon colors */
     --app-resonite: linear-gradient(170deg, #84ea22 20%, #fff834 80%);
@@ -73,6 +89,9 @@
     --shadow-medium: rgba(0, 0, 0, 0.1);
     --shadow-heavy: rgba(0, 0, 0, 0.2);
 
+    /* Avatar colors for light theme */
+    --avatar-text: #ffffff;
+
     /* Status colors for light theme */
     --status-contact-bg: #e8f5e8;
     --status-contact-text: #27ae60;
@@ -83,7 +102,18 @@
     --status-warning-bg: #fff3cd;
     --status-warning-text: #856404;
 
-    /* App icon colors remain the same for light theme */
+    /* VRChat links specific colors for light theme */
+    --vrchat-links-bg: #f0f8ff;
+    --vrchat-links-border: #b3d9ff;
+    --vrchat-link-item-bg: #e3f2fd;
+    --vrchat-link-item-border: #bbdefb;
+    --vrchat-link-item-hover-bg: #bbdefb;
+    --vrchat-link-item-hover-border: #bbdefb;
+
+    /* Copy button hover for light theme */
+    --copy-button-hover-bg: rgba(25, 118, 210, 0.1);
+
+    /* App icon colors remain the same for light theme except default */
     --app-default: #6c757d;
 
     color: var(--text-primary);
