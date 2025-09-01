@@ -58,11 +58,10 @@ The following work has been done:
 - Expose code APIs to fusion accounts belonging to the same individual.
 - Expose backend APIs to a React application frontend.
 - Create an address book frontend UI.
+- Improve the data structure used to store the original API responses from the various social VR applications.
+- Improve data handling when the owner of the address book has multiple accounts on the same social VR platform with different friend lists.
 
 The following work remains to be done:
-- Improve the data structure used to store the original API responses from the various social VR applications.
-- Improve data handling when the owner of the address book has multiple accounts on the same social VR platform with
-  different friend lists.
 - Provide a graphical UI to login into the various social VR applications and update the data.
 - Provide a graphical UI to import an existing set of pre-made requests so that it does not require a direct connection.
 - Make the connection code easily auditable.
