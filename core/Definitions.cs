@@ -79,6 +79,8 @@ public class CallerAccount
 public class VRChatSpecifics
 {
     public List<string> urls = new();
+    public string bio;
+    public string pronouns;
 }
 
 public class Note

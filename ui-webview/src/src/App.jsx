@@ -134,7 +134,7 @@ function App() {
         const regularTerms = [];
 
         terms.forEach(term => {
-            if (term.startsWith('app:') || term.startsWith('accounts:') || term.startsWith('links:') || term === 'has:alt' || term === 'has:bot') {
+            if (term.startsWith('app:') || term.startsWith('accounts:') || term.startsWith('links:') || term.startsWith('bio:') || term === 'has:alt' || term === 'has:bot') {
                 specialTerms.push(term);
             } else {
                 regularTerms.push(term);
@@ -155,6 +155,15 @@ function App() {
                     account.specifics?.urls?.some(url =>
                         url.toLowerCase().includes(searchString)
                     )
+                ) || false;
+            }
+
+            if (term.startsWith('bio:')) {
+                const searchString = term.substring(4); // Remove 'bio:' prefix
+                if (!searchString) return true; // Empty search string matches all
+
+                return individual.accounts?.some(account =>
+                    account.specifics?.bio?.toLowerCase().includes(searchString)
                 ) || false;
             }
 
@@ -395,6 +404,13 @@ function App() {
     // Calculate visible individuals count using the sorted array
     const visibleIndividualsCount = sortedAndFilteredIndividuals.length;
 
+    // Add this after the existing parseSearchTerms function call in isIndividualVisible or create a new useMemo
+    const showBio = useMemo(() => {
+        if (!searchTerm) return false;
+        const { specialTerms } = parseSearchTerms(searchTerm);
+        return specialTerms.some(term => term.startsWith('bio:'));
+    }, [searchTerm]);
+    
     return (
         <>
             {individuals.length > 0 && (
@@ -463,6 +479,7 @@ function App() {
                                 individual={individual}
                                 index={index}
                                 isVisible={true}
+                                showBio={showBio}
                             />
                         ))}
                     </div>
@@ -472,7 +489,7 @@ function App() {
                             <div className="no-results-icon">🔍</div>
                             <div className="no-results-text">No individuals found matching "<strong>{searchTerm}</strong>"</div>
                             <div className="no-results-hint">
-                                Try searching by name, note content, or use special terms like app:resonite, app:vrchat, app:cluster, accounts:&gt;1, has:alt, has:bot, links:misskey
+                                Try searching by name, note content, or use special terms like app:resonite, app:vrchat, app:cluster, accounts:&gt;1, has:alt, has:bot, links:misskey, bio:creator
                             </div>
                         </div>
                     )}

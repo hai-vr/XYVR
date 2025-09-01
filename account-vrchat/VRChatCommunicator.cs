@@ -196,7 +196,9 @@ public class VRChatCommunicator
             inAppDisplayName = user.displayName,
             specifics = new VRChatSpecifics
             {
-                urls = user.bioLinks == null ? [] : user.bioLinks.Where(s => s != null).Cast<string>().ToList()
+                urls = user.bioLinks == null ? [] : user.bioLinks.Where(s => s != null).Cast<string>().ToList(),
+                bio = user.bio ?? "",
+                pronouns = user.pronouns ?? ""
             },
             callers = [
                 new CallerAccount

@@ -1,7 +1,7 @@
 ﻿import Account from "./Account.jsx";
 import "./Individual.css";
 
-function Individual({ individual, index, isVisible = true }) {
+function Individual({ individual, index, isVisible = true, showBio = false }) {
     // Get all VRChat account links and filter to only show http/https URLs
     const vrChatLinks = individual.accounts
         ?.filter(account => account.namedApp === "VRChat" && account.specifics?.urls?.length > 0)
@@ -9,6 +9,12 @@ function Individual({ individual, index, isVisible = true }) {
         // Some users have links that are an empty string. We don't want this because clicking it causes the page to reload.
         // Generally, prevent links that aren't http:// nor https://
         ?.filter(url => url && (url.startsWith('http://') || url.startsWith('https://'))) || [];
+
+    // Get all VRChat account bios
+    const vrcBios = showBio && individual.accounts
+        ?.filter(account => account.namedApp === "VRChat" && account.specifics?.bio)
+        ?.map(account => account.specifics.bio)
+        ?.filter(bio => bio.trim() !== '') || [];
 
     const copyToClipboard = async (url, event) => {
         event.stopPropagation(); // Prevent the container click event
@@ -71,6 +77,23 @@ function Individual({ individual, index, isVisible = true }) {
                                 >
                                     📋 Copy
                                 </button>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {vrcBios.length > 0 && showBio && (
+                <div className="vrchat-bios-container">
+                    <div className="vrchat-links-list">
+                        {vrcBios.map((bio, bioIndex) => (
+                            <div key={bioIndex} className="vrchat-bio-item">
+                                {bio.split('\n').map((line, lineIndex) => (
+                                    <span key={lineIndex}>
+                                        {line}
+                                        {lineIndex < bio.split('\n').length - 1 && <br/>}
+                                    </span>
+                                ))}
                             </div>
                         ))}
                     </div>
