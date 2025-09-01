@@ -385,7 +385,7 @@ function App() {
                                 onClick={() => setIsDark(!isDark)}
                                 title={`Switch to ${isDark ? 'Light' : 'Dark'} Mode`}
                             >
-                                {isDark ? '☀️' : '🌙'}
+                                {isDark ? '🌙' : '☀️'}
                             </button>
                         </div>
 
