@@ -237,7 +237,8 @@ function App() {
             const accountDisplayName = account.inAppDisplayName || '';
             const accountIdentifier = account.inAppIdentifier || '';
 
-            return regularTerms.every(term => {
+            // Check account-level matches
+            const accountMatch = regularTerms.every(term => {
                 const kanaVariants = generateKanaVariants(term);
 
                 return kanaVariants.some(variant => {
@@ -252,6 +253,24 @@ function App() {
                     return noteMatch || displayNameMatch || identifierMatch;
                 });
             });
+
+            if (accountMatch) return true;
+
+            // Check caller notes
+            const callerNotesMatch = account.callers?.some(caller => {
+                const callerNote = caller.note?.text || '';
+            
+                return regularTerms.every(term => {
+                    const kanaVariants = generateKanaVariants(term);
+                
+                    return kanaVariants.some(variant => {
+                        const variantNormalized = removeDiacritics(variant);
+                        return removeDiacritics(callerNote.toLowerCase()).includes(variantNormalized);
+                    });
+                });
+            }) || false;
+
+            return callerNotesMatch;
         }) || false;
 
         return accountNotesMatch;
