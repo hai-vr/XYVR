@@ -13,6 +13,8 @@ The address book remains fully functional even if access to the original account
 If you are a user looking to use this software: Sorry, but this application is not currently readily usable,
 as it involves typing commands.
 
+Please check back at another time.
+
 - ~~**[📘 Open documentation](https://docs.hai-vr.dev/docs/products/xyvr)**~~
 
 If you are a developer, feel free to read below.
