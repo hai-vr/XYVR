@@ -38,7 +38,7 @@ public class VRChatCommunicator
         var user = await _api.GetUserLenient(_callerUserId, DataCollectionReason.CollectCallerAccount);
         if (user == null) throw new Exception("Unable to get the caller's account data"); // FIXME: Get a better exception type.
 
-        return UserAsAccount((VRChatUser)user);
+        return UserAsAccount((VRChatUser)user, _callerUserId);
     }
     
     /// Calls various APIs to collect possible accounts haven't been collected yet.<br/>
@@ -118,7 +118,7 @@ public class VRChatCommunicator
             var user = await _api.GetUserLenient(userId, DataCollectionReason.CollectUndiscoveredAccount);
             if (user != null)
             {
-                accounts.Add(UserAsAccount((VRChatUser)user));
+                accounts.Add(UserAsAccount((VRChatUser)user, _callerUserId));
             }
         }
 
@@ -142,7 +142,7 @@ public class VRChatCommunicator
             var user = await _api.GetUserLenient(userId, DataCollectionReason.CollectExistingAccount);
             if (user != null)
             {
-                accounts.Add(UserAsAccount((VRChatUser)user));
+                accounts.Add(UserAsAccount((VRChatUser)user, _callerUserId));
             }
         }
 
@@ -181,7 +181,12 @@ public class VRChatCommunicator
         return resultN;
     }
 
-    private Account UserAsAccount(VRChatUser user)
+    public Account ConvertUserAsAccount(VRChatUser user, string callerUserId)
+    {
+        return UserAsAccount(user, callerUserId);
+    }
+
+    private static Account UserAsAccount(VRChatUser user, string callerUserId)
     {
         return new Account
         {
@@ -193,8 +198,21 @@ public class VRChatCommunicator
             note = new Note
             {
                 status = string.IsNullOrWhiteSpace(user.note) ? NoteState.NeverHad : NoteState.Exists,
-                text = user.note
-            }
+                text = string.IsNullOrWhiteSpace(user.note) ? null : user.note
+            },
+            callers = [
+                new CallerAccount
+                {
+                    isAnonymous = false,
+                    inAppIdentifier = callerUserId,
+                    isContact = user.isFriend,
+                    note = new Note
+                    {
+                        status = string.IsNullOrWhiteSpace(user.note) ? NoteState.NeverHad : NoteState.Exists,
+                        text = string.IsNullOrWhiteSpace(user.note) ? null : user.note
+                    }
+                }
+            ]
         };
     }
 

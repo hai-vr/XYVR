@@ -14,12 +14,13 @@ public enum Mode
     ManualMerges,
     FetchNotesUsingUserAPI,
     FetchNotesUsingNotesAPI,
-    UpdateExistingIndividuals
+    UpdateExistingIndividuals,
+    RebuildFromStorage
 }
 
 internal partial class Program
 {
-    private static Mode mode = Mode.UpdateExistingIndividuals;
+    private static Mode mode = Mode.RebuildFromStorage;
 
     [GeneratedRegex(@"usr_[a-f0-9\-]+")]
     private static partial Regex UsrRegex();
@@ -33,6 +34,30 @@ internal partial class Program
 
         switch (mode)
         {
+            case Mode.RebuildFromStorage:
+            {
+                var trail = await Scaffolding.RebuildTrail();
+                
+                var dataCollection = new DataCollection(repository);
+                
+                foreach (var ind in repository.Individuals)
+                {
+                    foreach (var acc in ind.accounts)
+                    {
+                        acc.callers.Clear();
+                    }
+                }
+                
+                var rebuiltAccounts = await dataCollection.RebuildFromDataCollectionStorage(trail);
+                if (rebuiltAccounts.Count > 0)
+                {
+                    repository.MergeAccounts(rebuiltAccounts);
+
+                    await Scaffolding.SaveRepository(repository);
+                }
+                
+                break;
+            }
             case Mode.FetchIndividuals:
             {
                 var dataCollection = new DataCollection(repository);

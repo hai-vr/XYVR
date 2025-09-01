@@ -105,31 +105,41 @@ public class ResoniteCommunicator
             var userN = await _api.GetUser(userId, DataCollectionReason.CollectExistingAccount);
             if (userN is { } user)
             {
-                accounts.Add(new Account
-                {
-                    namedApp = NamedApp.Resonite,
-                    qualifiedAppName = ResoniteQualifiedAppName,
-                    inAppIdentifier = user.id,
-                    inAppDisplayName = user.username,
-                    callers =
-                    [
-                        new CallerAccount
-                        {
-                            isAnonymous = false,
-                            inAppIdentifier = user.id,
-                            isContact = resoniteContactIds.Contains(user.id),
-                            note = new Note
-                            {
-                                status = NoteState.NeverHad,
-                                text = null
-                            }
-                        }
-                    ]
-                });
+                accounts.Add(UserAsAccount(user, _callerUserId, resoniteContactIds));
             }
         }
 
         return accounts;
+    }
+
+    public Account ConvertUserAsAccount(UserResponseJsonObject user, string callerUserId, HashSet<string> resoniteContactIds)
+    {
+        return UserAsAccount(user, callerUserId, resoniteContactIds);
+    }
+
+    private static Account UserAsAccount(UserResponseJsonObject user, string callerUserId, HashSet<string> resoniteContactIds)
+    {
+        return new Account
+        {
+            namedApp = NamedApp.Resonite,
+            qualifiedAppName = ResoniteQualifiedAppName,
+            inAppIdentifier = user.id,
+            inAppDisplayName = user.username,
+            callers =
+            [
+                new CallerAccount
+                {
+                    isAnonymous = false,
+                    inAppIdentifier = callerUserId,
+                    isContact = resoniteContactIds.Contains(user.id),
+                    note = new Note
+                    {
+                        status = NoteState.NeverHad,
+                        text = null
+                    }
+                }
+            ]
+        };
     }
 
     private async Task<ResoniteAPI> InitializeApi()

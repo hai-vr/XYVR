@@ -3,7 +3,9 @@
 public class DataCollectionTrail
 {
     public DateTime timestamp;
-    
+    public string trailGuid;
+    public string requestGuid;
+
     public DataCollectionReason reason;
     public string apiSource;
     public string route;

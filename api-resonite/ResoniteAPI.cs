@@ -110,6 +110,7 @@ public class ResoniteAPI
     public async Task<ContactResponseElementJsonObject[]> GetUserContacts(DataCollectionReason dataCollectionReason)
     {
         var url = $"{PrefixWithSlash}users/{_myUserId}/contacts";
+        var requestGuid = Guid.NewGuid().ToString();
         try
         {
             var request = new HttpRequestMessage(HttpMethod.Get, url);
@@ -120,12 +121,12 @@ public class ResoniteAPI
             EnsureSuccessOrThrowVerbose(response);
 
             var responseStr = await response.Content.ReadAsStringAsync();
-            DataCollectSuccess(url, responseStr, dataCollectionReason);
+            DataCollectSuccess(url, requestGuid, responseStr, dataCollectionReason);
             return JsonConvert.DeserializeObject<ContactResponseElementJsonObject[]>(responseStr);
         }
         catch (Exception _)
         {
-            DataCollectFailure(url, dataCollectionReason);
+            DataCollectFailure(url, requestGuid, dataCollectionReason);
             throw;
         }
     }
@@ -133,6 +134,7 @@ public class ResoniteAPI
     public async Task<UserResponseJsonObject?> GetUser(string userId, DataCollectionReason dataCollectionReason)
     {
         var url = $"{PrefixWithSlash}users/{userId}";
+        var requestGuid = Guid.NewGuid().ToString();
         try
         {
             var request = new HttpRequestMessage(HttpMethod.Get, url);
@@ -141,28 +143,30 @@ public class ResoniteAPI
             var response = await _client.SendAsync(request);
             if (response.StatusCode == HttpStatusCode.NotFound)
             {
-                DataCollectNotFound(url, await response.Content.ReadAsStringAsync(), dataCollectionReason);
+                DataCollectNotFound(url, requestGuid, await response.Content.ReadAsStringAsync(), dataCollectionReason);
                 return null;
             }
 
             EnsureSuccessOrThrowVerbose(response);
 
             var responseStr = await response.Content.ReadAsStringAsync();
-            DataCollectSuccess(url, responseStr, dataCollectionReason);
+            DataCollectSuccess(url, requestGuid, responseStr, dataCollectionReason);
             return JsonConvert.DeserializeObject<UserResponseJsonObject>(responseStr);
         }
         catch (Exception _)
         {
-            DataCollectFailure(url, dataCollectionReason);
+            DataCollectFailure(url, requestGuid, dataCollectionReason);
             throw;
         }
     }
     
-    private void DataCollectSuccess(string url, string responseStr, DataCollectionReason dataCollectionReason)
+    private void DataCollectSuccess(string url, string requestGuid, string responseStr, DataCollectionReason dataCollectionReason)
     {
         _dataCollector.Ingest(new DataCollectionTrail
         {
             timestamp = _dataCollector.GetCurrentTime(),
+            trailGuid = Guid.NewGuid().ToString(),
+            requestGuid = requestGuid,
             reason = dataCollectionReason,
             apiSource = ResoniteApiSourceName,
             route = url,
@@ -172,11 +176,13 @@ public class ResoniteAPI
         });
     }
     
-    private void DataCollectNotFound(string url, string responseStr, DataCollectionReason dataCollectionReason)
+    private void DataCollectNotFound(string url, string requestGuid, string responseStr, DataCollectionReason dataCollectionReason)
     {
         _dataCollector.Ingest(new DataCollectionTrail
         {
             timestamp = _dataCollector.GetCurrentTime(),
+            trailGuid = Guid.NewGuid().ToString(),
+            requestGuid = requestGuid,
             reason = dataCollectionReason,
             apiSource = ResoniteApiSourceName,
             route = url,
@@ -186,11 +192,13 @@ public class ResoniteAPI
         });
     }
 
-    private void DataCollectFailure(string url, DataCollectionReason dataCollectionReason)
+    private void DataCollectFailure(string url, string requestGuid, DataCollectionReason dataCollectionReason)
     {
         _dataCollector.Ingest(new DataCollectionTrail
         {
             timestamp = _dataCollector.GetCurrentTime(),
+            trailGuid = Guid.NewGuid().ToString(),
+            requestGuid = requestGuid,
             reason = dataCollectionReason,
             apiSource = ResoniteApiSourceName,
             route = url,
