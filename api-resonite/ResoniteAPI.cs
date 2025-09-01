@@ -10,7 +10,8 @@ namespace XYVR.API.Resonite;
 // Based on https://wiki.resonite.com/API
 public class ResoniteAPI
 {
-    private static readonly string PrefixWithSlash = "https://api.resonite.com/";
+    private const string ResoniteApiSourceName = "resonite_web_api";
+    private const string PrefixWithSlash = "https://api.resonite.com/";
     
     private readonly string _secretMachineId;
     private readonly string _uid;
@@ -163,7 +164,7 @@ public class ResoniteAPI
         {
             timestamp = _dataCollector.GetCurrentTime(),
             reason = dataCollectionReason,
-            apiSource = "resonite_web_api",
+            apiSource = ResoniteApiSourceName,
             route = url,
             status = DataCollectionResponseStatus.Success,
             responseObject = responseStr,
@@ -177,7 +178,7 @@ public class ResoniteAPI
         {
             timestamp = _dataCollector.GetCurrentTime(),
             reason = dataCollectionReason,
-            apiSource = "resonite_web_api",
+            apiSource = ResoniteApiSourceName,
             route = url,
             status = DataCollectionResponseStatus.NotFound,
             responseObject = responseStr,
@@ -191,7 +192,7 @@ public class ResoniteAPI
         {
             timestamp = _dataCollector.GetCurrentTime(),
             reason = dataCollectionReason,
-            apiSource = "resonite_web_api",
+            apiSource = ResoniteApiSourceName,
             route = url,
             status = DataCollectionResponseStatus.Failure,
             responseObject = null,

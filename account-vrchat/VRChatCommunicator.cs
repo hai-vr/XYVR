@@ -99,6 +99,7 @@ public class VRChatCommunicator
     }
 
     /// Given a list of user IDs that may or may not exist, return a list of accounts.<br/>
+    /// This does not return accounts that already exist in the repository.<br/>
     /// The returned list may be smaller than the input list, especially if some accounts no longer exist.<br/>
     /// User IDs do not necessarily start with usr_ as this supports some oldschool accounts.
     public async Task<List<Account>> CollectUndiscoveredLenient(IndividualRepository repository, List<string> notNecessarilyValidUserIds)
@@ -115,6 +116,30 @@ public class VRChatCommunicator
         foreach (var userId in undiscoveredAndNotNecessarilyValidUserIds)
         {
             var user = await _api.GetUserLenient(userId, DataCollectionReason.CollectUndiscoveredAccount);
+            if (user != null)
+            {
+                accounts.Add(UserAsAccount((VRChatUser)user));
+            }
+        }
+
+        return accounts;
+    }
+
+    /// Given a list of user IDs that may or may not exist, return a list of accounts.<br/>
+    /// The returned list may be smaller than the input list, especially if some accounts no longer exist.<br/>
+    /// User IDs do not necessarily start with usr_ as this supports some oldschool accounts.
+    public async Task<List<Account>> CollectAllLenient(List<string> notNecessarilyValidUserIds)
+    {
+        var distinctNotNecessarilyValidUserIds = notNecessarilyValidUserIds
+            .Distinct() // Get rid of duplicates
+            .ToList();
+        
+        _api ??= await InitializeAPI();
+
+        var accounts = new List<Account>();
+        foreach (var userId in distinctNotNecessarilyValidUserIds)
+        {
+            var user = await _api.GetUserLenient(userId, DataCollectionReason.CollectExistingAccount);
             if (user != null)
             {
                 accounts.Add(UserAsAccount((VRChatUser)user));

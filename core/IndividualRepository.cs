@@ -67,10 +67,38 @@ public class IndividualRepository
 
     private static bool SynchronizeAccount(Account existingAccount, Account inputAccount)
     {
-        if (IsSameApp(existingAccount, inputAccount) && existingAccount.inAppIdentifier == inputAccount.inAppIdentifier)
+        var isSameAppAndIdentifier = IsSameApp(existingAccount, inputAccount) && existingAccount.inAppIdentifier == inputAccount.inAppIdentifier;
+        if (isSameAppAndIdentifier)
         {
             existingAccount.inAppDisplayName = inputAccount.inAppDisplayName;
             existingAccount.isContact = inputAccount.isContact;
+            
+            if (existingAccount.note.status != inputAccount.note.status)
+            {
+                if (existingAccount.note.status == NoteState.NeverHad)
+                {
+                    existingAccount.note.status = inputAccount.note.status;
+                    existingAccount.note.text = inputAccount.note.text;
+                }
+                else
+                {
+                    if (inputAccount.note.status is NoteState.Exists)
+                    {
+                        existingAccount.note.status = NoteState.Exists;
+                        existingAccount.note.text = inputAccount.note.text;
+                    }
+                    else
+                    {
+                        existingAccount.note.status = inputAccount.note.status;
+                        // We don't overwrite the text
+                    }
+                }
+            }
+            else if (existingAccount.note.status == NoteState.Exists && existingAccount.note.text != inputAccount.note.text)
+            {
+                existingAccount.note.text = inputAccount.note.text;
+            }
+            
             return true;
         }
 

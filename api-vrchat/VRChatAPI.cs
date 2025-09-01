@@ -11,6 +11,8 @@ namespace XYVR.API.VRChat;
 
 public class VRChatAPI
 {
+    private const string VRChatApiSourceName = "vrchat_web_api";
+    
     // https://github.com/vrchatapi/specification/commit/558c0ca50202c45194a49d515f27e64f62079ba4#diff-5fa520d3bb34f9ae444cdbdf2b9eccff2361eb89a0cd3f4dba1e2e0fa9bba452R15
     // https://discord.com/channels/418093857394262020/418512124529344523/1303873667473866752
     // "Yes, going forward, all API requests need to go through api.vrchat.cloud instead"
@@ -360,7 +362,7 @@ public class VRChatAPI
         {
             timestamp = _dataCollector.GetCurrentTime(),
             reason = dataCollectionReason,
-            apiSource = "vrchat_web_api",
+            apiSource = VRChatApiSourceName,
             route = url,
             status = DataCollectionResponseStatus.Success,
             responseObject = responseStr,
@@ -374,7 +376,7 @@ public class VRChatAPI
         {
             timestamp = _dataCollector.GetCurrentTime(),
             reason = dataCollectionReason,
-            apiSource = "vrchat_web_api",
+            apiSource = VRChatApiSourceName,
             route = url,
             status = DataCollectionResponseStatus.NotFound,
             responseObject = responseStr,
@@ -388,7 +390,7 @@ public class VRChatAPI
         {
             timestamp = _dataCollector.GetCurrentTime(),
             reason = dataCollectionReason,
-            apiSource = "vrchat_web_api",
+            apiSource = VRChatApiSourceName,
             route = url,
             status = DataCollectionResponseStatus.Failure,
             responseObject = null,

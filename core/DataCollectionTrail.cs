@@ -19,6 +19,7 @@ public enum DataCollectionReason
     CollectCallerAccount,
     FindUndiscoveredAccounts,
     CollectUndiscoveredAccount,
+    CollectExistingAccount,
 }
 
 public enum DataCollectionResponseStatus

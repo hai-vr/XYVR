@@ -77,6 +77,61 @@ public class ResoniteCommunicator
             .ToList();
     }
 
+    /// Get the list of user contact IDs for the purposes of combining it with the users data.<br/>
+    /// The intended purpose of this endpoint is to provide missing information about the user,
+    /// as contact information is not available in the users endpoint.
+    public async Task<HashSet<string>> CollectContactUserIdsToCombineWithUsers()
+    {
+        _api ??= await InitializeApi();
+
+        var contacts = await _api.GetUserContacts(DataCollectionReason.CollectExistingAccount);
+
+        return contacts
+            .Select(contact => contact.id)
+            .ToHashSet();
+    }
+
+    public async Task<List<Account>> CollectAllLenient(List<string> notNecessarilyValidUserIds, HashSet<string> resoniteContactIds)
+    {
+        var distinctNotNecessarilyValidUserIds = notNecessarilyValidUserIds
+            .Distinct() // Get rid of duplicates
+            .ToList();
+
+        _api ??= await InitializeApi();
+
+        var accounts = new List<Account>();
+        foreach (var userId in distinctNotNecessarilyValidUserIds)
+        {
+            var userN = await _api.GetUser(userId, DataCollectionReason.CollectExistingAccount);
+            if (userN is { } user)
+            {
+                accounts.Add(new Account
+                {
+                    namedApp = NamedApp.Resonite,
+                    qualifiedAppName = ResoniteQualifiedAppName,
+                    inAppIdentifier = user.id,
+                    inAppDisplayName = user.username,
+                    callers =
+                    [
+                        new CallerAccount
+                        {
+                            isAnonymous = false,
+                            inAppIdentifier = user.id,
+                            isContact = resoniteContactIds.Contains(user.id),
+                            note = new Note
+                            {
+                                status = NoteState.NeverHad,
+                                text = null
+                            }
+                        }
+                    ]
+                });
+            }
+        }
+
+        return accounts;
+    }
+
     private async Task<ResoniteAPI> InitializeApi()
     {
         var api = new ResoniteAPI(Guid.NewGuid().ToString(), _uid, _dataCollector);
