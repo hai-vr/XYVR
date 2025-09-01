@@ -8,6 +8,7 @@ function App() {
     const [individuals, setIndividuals] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [isDark, setIsDark] = useState(false)
+    const [showOnlyContacts, setShowOnlyContacts] = useState(false)
 
     useEffect(() => {
         // Wait for WebView2 API to be available
@@ -16,7 +17,7 @@ function App() {
                 try {
                     const version = await window.chrome.webview.hostObjects.appApi.GetAppVersion();
                     setAppVersion(version);
-                    
+
                     // Also load individuals when the component loads
                     const allIndividuals = await window.chrome.webview.hostObjects.appApi.GetAllExposedIndividualsOrderedByContact();
                     const individualsArray = JSON.parse(allIndividuals);
@@ -52,14 +53,14 @@ function App() {
             .replace(/[\u0300-\u036f]/g, '') // Replaces diacritics
             .replace(/\u2024/g, '.') // Replaces the crappy "one dot leader" character with a proper period
             .replace(/[\uFF00-\uFFEF]/g, (char) => {
-                    // Convert full-width characters to half-width
-                    const code = char.charCodeAt(0);
-                    if (code >= 0xFF01 && code <= 0xFF5E) {
-                        // Full-width ASCII characters
-                        return String.fromCharCode(code - 0xFEE0);
-                    }
-                    return char;
-                });
+                // Convert full-width characters to half-width
+                const code = char.charCodeAt(0);
+                if (code >= 0xFF01 && code <= 0xFF5E) {
+                    // Full-width ASCII characters
+                    return String.fromCharCode(code - 0xFEE0);
+                }
+                return char;
+            });
 
     };
 
@@ -149,30 +150,30 @@ function App() {
             if (term.startsWith('links:')) {
                 const searchString = term.substring(6); // Remove 'links:' prefix
                 if (!searchString) return true; // Empty search string matches all
-                
-                return individual.accounts?.some(account => 
-                    account.specifics?.urls?.some(url => 
+
+                return individual.accounts?.some(account =>
+                    account.specifics?.urls?.some(url =>
                         url.toLowerCase().includes(searchString)
                     )
                 ) || false;
             }
-        
+
             switch (term) {
                 case 'app:resonite':
                     return individual.accounts?.some(account => account.namedApp === "Resonite") || false;
-                
+
                 case 'app:vrchat':
                     return individual.accounts?.some(account => account.namedApp === "VRChat") || false;
-                
+
                 case 'app:cluster':
                     return individual.accounts?.some(account => account.namedApp === "Cluster") || false;
-                
+
                 case 'has:bot':
                     return individual.accounts?.some(account => account.isTechnical) || false;
-                
+
                 case 'has:alt': {
                     if (!individual.accounts) return false;
-                    
+
                     // Group accounts by namedApp, excluding technical accounts
                     const accountGroups = {};
                     individual.accounts.forEach(account => {
@@ -183,16 +184,16 @@ function App() {
                             accountGroups[account.namedApp]++;
                         }
                     });
-                    
+
                     // Check if any namedApp has more than one account
                     return Object.values(accountGroups).some(count => count > 1);
                 }
-                
+
                 default:
                     if (term.startsWith('accounts:>')) {
                         const minCount = parseInt(term.substring(10));
                         if (isNaN(minCount)) return false;
-                        
+
                         const accountCount = individual.accounts?.length || 0;
                         return accountCount > minCount;
                     }
@@ -202,6 +203,11 @@ function App() {
     };
 
     const isIndividualVisible = (individual, searchTerm) => {
+        // First apply the contact filter
+        if (showOnlyContacts && !individual.isAnyContact) {
+            return false;
+        }
+
         if (!searchTerm) return true;
 
         const { specialTerms, regularTerms } = parseSearchTerms(searchTerm);
@@ -259,10 +265,10 @@ function App() {
             // Check caller notes
             const callerNotesMatch = account.callers?.some(caller => {
                 const callerNote = caller.note?.text || '';
-            
+
                 return regularTerms.every(term => {
                     const kanaVariants = generateKanaVariants(term);
-                
+
                     return kanaVariants.some(variant => {
                         const variantNormalized = removeDiacritics(variant);
                         return removeDiacritics(callerNote.toLowerCase()).includes(variantNormalized);
@@ -347,7 +353,7 @@ function App() {
             // If both have the same priority level, maintain original order
             return 0;
         });
-    }, [individuals, searchTerm]);
+    }, [individuals, searchTerm, showOnlyContacts]);
 
 
     const handleGetTime = async () => {
@@ -398,14 +404,24 @@ function App() {
                             <h2 className="header-title">
                                 👥 Users & Accounts ({visibleIndividualsCount})
                             </h2>
-                            
-                            <button 
-                                className="theme-toggle-btn" 
-                                onClick={() => setIsDark(!isDark)}
-                                title={`Switch to ${isDark ? 'Light' : 'Dark'} Mode`}
-                            >
-                                {isDark ? '🌙' : '☀️'}
-                            </button>
+
+                            <div className="header-buttons">
+                                <button
+                                    className={`contacts-filter-btn ${showOnlyContacts ? 'active' : ''}`}
+                                    onClick={() => setShowOnlyContacts(!showOnlyContacts)}
+                                    title={`${showOnlyContacts ? 'Show all individuals' : 'Show only contacts'}`}
+                                >
+                                    Only Contacts
+                                </button>
+
+                                <button
+                                    className="theme-toggle-btn"
+                                    onClick={() => setIsDark(!isDark)}
+                                    title={`Switch to ${isDark ? 'Light' : 'Dark'} Mode`}
+                                >
+                                    {isDark ? '🌙' : '☀️'}
+                                </button>
+                            </div>
                         </div>
 
                         {searchTerm && (

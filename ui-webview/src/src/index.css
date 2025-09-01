@@ -97,6 +97,15 @@
     /* Set initial colors */
     color: var(--text-primary);
     background-color: var(--bg-primary);
+
+    /* Contact filter button colors (reusing existing semantic variables) */
+    --contacts-btn-border: var(--border-secondary);
+    --contacts-btn-text: var(--text-secondary);
+    --contacts-btn-border-hover: var(--accent-primary);
+    --contacts-btn-text-hover: var(--accent-primary);
+    --contacts-btn-bg-active: var(--accent-primary);
+    --contacts-btn-text-active: #ffffff;
+
 }
 
 /* Light theme color overrides */
@@ -179,6 +188,8 @@
 
     color: var(--text-primary);
     background-color: var(--bg-primary);
+
+    --contacts-btn-text-active: #ffffff;
 }
 
 a {

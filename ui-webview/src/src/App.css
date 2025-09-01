@@ -247,6 +247,40 @@
     color: var(--text-secondary);
 }
 
+/* Header buttons container */
+.header-buttons {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Contacts filter button */
+.contacts-filter-btn {
+    padding: 8px 16px;
+    border: 2px solid var(--contacts-btn-border);
+    border-radius: 6px;
+    background: var(--bg-secondary);
+    color: var(--contacts-btn-text);
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.contacts-filter-btn:hover {
+    border-color: var(--contacts-btn-border-hover);
+    color: var(--contacts-btn-text-hover);
+    background-color: var(--bg-tertiary);
+}
+
+.contacts-filter-btn.active {
+    border-color: var(--contacts-btn-bg-active);
+    background-color: var(--contacts-btn-bg-active);
+    color: var(--contacts-btn-text-active);
+    box-shadow: 0 2px 8px rgba(104, 151, 187, 0.3);
+}
+
 /* Responsive design for smaller screens */
 @media (max-width: 480px) {
     .individuals-container {
@@ -282,5 +316,35 @@
 
     .theme-toggle-btn {
         align-self: center;
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .header-buttons {
+        gap: 8px;
+    }
+    
+    .contacts-filter-btn {
+        padding: 6px 12px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    .header-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    
+    .header-buttons {
+        align-self: stretch;
+        justify-content: space-between;
+    }
+    
+    .contacts-filter-btn {
+        flex: 1;
+        text-align: center;
     }
 }
