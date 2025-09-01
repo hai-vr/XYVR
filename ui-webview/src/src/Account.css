@@ -97,7 +97,7 @@
     border-color: var(--badge-bot-border);
 }
 
-.copy-button {
+.any-button {
     background: var(--bg-secondary);
     border: 1px solid var(--border-secondary);
     border-radius: 4px;
@@ -110,7 +110,7 @@
     transition: all 0.2s ease;
 }
 
-.copy-button:hover {
+.any-button:hover {
     background: var(--bg-quaternary);
     border-color: var(--border-accent);
     color: var(--text-primary);

@@ -79,9 +79,19 @@ const Account = ({ account }) => {
                             Bot
                         </span>
                     )}
+                    {account.namedApp === "VRChat" && (
+                        <a
+                            href={`https://vrchat.com/home/user/${account.inAppIdentifier}`}
+                            rel="noopener noreferrer"
+                            className="any-button"
+                            title="Open VRChat Profile"
+                        >
+                            🌍
+                        </a>
+                    )}
                     <button
                         onClick={copyInAppIdentifier}
-                        className="copy-button"
+                        className="any-button"
                         title={`Copy ID: ${account.inAppIdentifier}`}
                     >
                         📋
