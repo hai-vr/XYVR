@@ -1,10 +1,13 @@
 ﻿import Account from "./Account.jsx";
 
 function Individual({ individual, index, isVisible = true }) {
-    // Get all VRChat account links
+    // Get all VRChat account links and filter to only show http/https URLs
     const vrChatLinks = individual.accounts
         ?.filter(account => account.namedApp === "VRChat" && account.specifics?.urls?.length > 0)
-        ?.flatMap(account => account.specifics.urls) || [];
+        ?.flatMap(account => account.specifics.urls)
+        // Some users have links that are an empty string. We don't want this because clicking it causes the page to reload.
+        // Generally, prevent links that aren't http:// nor https://
+        ?.filter(url => url && (url.startsWith('http://') || url.startsWith('https://'))) || [];
 
     return (
         <div style={{ 
@@ -70,6 +73,32 @@ function Individual({ individual, index, isVisible = true }) {
                 )}
             </div>
 
+            <div style={{ marginBottom: '20px' }}>
+                {individual.accounts && individual.accounts.length > 0 ? (
+                    <div style={{
+                        display: 'grid',
+                        gap: '8px',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))'
+                    }}>
+                        {individual.accounts.map((account, accountIndex) => (
+                            <Account key={accountIndex} account={account} />
+                        ))}
+                    </div>
+                ) : (
+                    <div style={{
+                        textAlign: 'center',
+                        padding: '20px',
+                        color: '#6c757d',
+                        fontStyle: 'italic',
+                        background: '#f8f9fa',
+                        borderRadius: '8px',
+                        border: '2px dashed #dee2e6'
+                    }}>
+                        📭 No accounts found
+                    </div>
+                )}
+            </div>
+
             {vrChatLinks.length > 0 && (
                 <div style={{
                     background: '#f0f8ff',
@@ -96,8 +125,8 @@ function Individual({ individual, index, isVisible = true }) {
                         {vrChatLinks.map((url, linkIndex) => (
                             <a key={linkIndex}
                                href={url}
-                               // We don't want target blank because we want to cause clicking to invoke a `NavigationStarting` event in the WebView.
-                               // target="_blank"
+                                // We don't want target blank because we want to cause clicking to invoke a `NavigationStarting` event in the WebView.
+                                // target="_blank"
                                rel="noopener noreferrer"
                                style={{
                                    color: '#1976d2',
@@ -126,32 +155,6 @@ function Individual({ individual, index, isVisible = true }) {
                     </div>
                 </div>
             )}
-
-            <div>
-                {individual.accounts && individual.accounts.length > 0 ? (
-                    <div style={{
-                        display: 'grid',
-                        gap: '8px',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))'
-                    }}>
-                        {individual.accounts.map((account, accountIndex) => (
-                            <Account key={accountIndex} account={account} />
-                        ))}
-                    </div>
-                ) : (
-                    <div style={{
-                        textAlign: 'center',
-                        padding: '20px',
-                        color: '#6c757d',
-                        fontStyle: 'italic',
-                        background: '#f8f9fa',
-                        borderRadius: '8px',
-                        border: '2px dashed #dee2e6'
-                    }}>
-                        📭 No accounts found
-                    </div>
-                )}
-            </div>
         </div>
     );
 }
