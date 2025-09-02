@@ -1,10 +1,8 @@
-import { useEffect, useState, useMemo, useCallback } from 'react'
-import './App.css'
-import Individual from "./Individual.jsx";
+﻿import { useEffect, useState, useMemo, useCallback } from 'react'
+import './AddressBookPage.css'
+import Individual from "../Individual.jsx"
 
-function App() {
-    const [count, setCount] = useState(0)
-    const [appVersion, setAppVersion] = useState('');
+function AddressBookPage() {
     const [individuals, setIndividuals] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
@@ -31,10 +29,7 @@ function App() {
         const initializeApi = async () => {
             if (window.chrome && window.chrome.webview && window.chrome.webview.hostObjects) {
                 try {
-                    const version = await window.chrome.webview.hostObjects.appApi.GetAppVersion();
-                    setAppVersion(version);
-
-                    // Also load individuals when the component loads
+                    // Load individuals when the component loads
                     const allIndividuals = await window.chrome.webview.hostObjects.appApi.GetAllExposedIndividualsOrderedByContact();
                     const individualsArray = JSON.parse(allIndividuals);
                     setIndividuals(individualsArray);
@@ -424,42 +419,6 @@ function App() {
         return () => window.removeEventListener('scroll', handleScroll);
     }, [loadMoreItems, displayedCount, sortedAndFilteredIndividuals.length, isLoading]);
 
-    const handleGetTime = async () => {
-        if (window.chrome?.webview?.hostObjects?.appApi) {
-            try {
-                const time = await window.chrome.webview.hostObjects.appApi.GetCurrentTime();
-                alert(`Current Time: ${time}`);
-            } catch (error) {
-                console.error('Error calling API:', error);
-            }
-        }
-    };
-
-    const handleGetAllExposedIndividuals = async () => {
-        if (window.chrome?.webview?.hostObjects?.appApi) {
-            try {
-                const allIndividuals = await window.chrome.webview.hostObjects.appApi.GetAllExposedIndividualsOrderedByContact();
-                const individualsArray = JSON.parse(allIndividuals);
-                setIndividuals(individualsArray);
-
-            } catch (error) {
-                console.error('Error calling API:', error);
-            }
-        }
-    };
-
-    const handleShowMessage = () => {
-        if (window.chrome?.webview?.hostObjects?.appApi) {
-            window.chrome.webview.hostObjects.appApi.ShowMessage('Hello from React!');
-        }
-    };
-
-    const handleCloseApp = () => {
-        if (window.chrome?.webview?.hostObjects?.appApi) {
-            window.chrome.webview.hostObjects.appApi.CloseApp();
-        }
-    };
-
     // Calculate visible individuals count using the sorted array
     const totalFilteredCount = sortedAndFilteredIndividuals.length;
 
@@ -580,4 +539,4 @@ function App() {
     )
 }
 
-export default App
+export default AddressBookPage
