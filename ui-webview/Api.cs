@@ -14,6 +14,7 @@ public interface IAppApi
     void ShowMessage(string message);
     string GetCurrentTime();
     void CloseApp();
+    void DataCollectionTriggerTest();
 }
 
 [ComVisible(true)]
@@ -89,6 +90,11 @@ public class AppApi : IAppApi
         {
             _mainWindow.Close();
         });
+    }
+
+    public void DataCollectionTriggerTest()
+    {
+        MessageBox.Show("data collection trigger", "From WebView", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 }
 

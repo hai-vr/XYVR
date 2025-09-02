@@ -1,6 +1,6 @@
 ﻿.navigation {
     background-color: var(--bg-secondary);
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--border-primary);
     padding: 0 1rem;
     position: sticky;
     top: 0;
@@ -27,7 +27,7 @@
 
 .nav-link:hover {
     color: var(--text-primary);
-    background-color: var(--bg-hover);
+    background-color: var(--bg-quaternary);
 }
 
 .nav-link.active {
@@ -37,5 +37,5 @@
 
 [data-theme="dark"] .navigation {
     background-color: var(--bg-secondary);
-    border-bottom-color: var(--border);
+    border-bottom-color: var(--border-primary);
 }

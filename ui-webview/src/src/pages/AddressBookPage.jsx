@@ -1,4 +1,5 @@
 ﻿import { useEffect, useState, useMemo, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import './AddressBookPage.css'
 import Individual from "../components/Individual.jsx"
 import {
@@ -9,6 +10,7 @@ import {
 } from './searchUtils.js'
 
 function AddressBookPage({ isDark, setIsDark }) {
+    const navigate = useNavigate()
     const [individuals, setIndividuals] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
@@ -154,6 +156,14 @@ function AddressBookPage({ isDark, setIsDark }) {
 
                         <div className="header-buttons">
                             <button
+                                className="data-collection-btn"
+                                onClick={() => navigate('/data-collection')}
+                                title="Go to Data Collection"
+                            >
+                                📊 Data Collection
+                            </button>
+
+                            <button
                                 className={`contacts-filter-btn ${showOnlyContacts ? 'active' : ''}`}
                                 onClick={() => setShowOnlyContacts(!showOnlyContacts)}
                                 title={`${showOnlyContacts ? 'Show all individuals' : 'Show only contacts'}`}
@@ -241,8 +251,14 @@ function AddressBookPage({ isDark, setIsDark }) {
                             "<strong>{debouncedSearchTerm}</strong>"
                         </div>
                         <div className="no-results-hint">
-                            Try searching by name, note content, or use special terms like app:resonite, app:vrchat,
-                            app:cluster, accounts:&gt;1, has:alt, has:bot, links:misskey, bio:creator
+                            <p>Try searching by name, note content, or use special terms like:</p>
+                            <p><code className="inline-code-clickable" onClick={() => setSearchTerm('app:resonite')}>app:resonite</code> for Resonite account owners.</p>
+                            <p><code className="inline-code-clickable" onClick={() => setSearchTerm('app:vrchat')}>app:vrchat</code> for VRChat account owners.</p>
+                            <p><code className="inline-code-clickable" onClick={() => setSearchTerm('app:cluster')}>app:cluster</code> for Cluster account owners.</p>
+                            <p><code className="inline-code-clickable" onClick={() => setSearchTerm('accounts:>1')}>accounts:&gt;1</code> for users who have more than one account.</p>
+                            <p><code className="inline-code-clickable" onClick={() => setSearchTerm('has:alt')}>has:alt</code> for users who have more than one non-bot account on the same app.</p>
+                            <p><code className="inline-code-clickable" onClick={() => setSearchTerm('links:')}>links:<i>misskey</i></code> to search in the links.</p>
+                            <p><code className="inline-code-clickable" onClick={() => setSearchTerm('bio:')}>bio:<i>creator</i></code> to display and search in the bio.</p>
                         </div>
                     </div>
                 )}
