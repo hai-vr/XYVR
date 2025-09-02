@@ -119,21 +119,6 @@
     right: 35px;
     top: 50%;
     transform: translateY(-50%);
-    background: none;
-    border: none;
-    color: var(--search-icon-color);
-    cursor: pointer;
-    font-size: 18px;
-    width: 20px;
-    height: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.search-clear-button:hover {
-    color: var(--search-icon-hover);
 }
 
 .individuals-grid {
@@ -197,31 +182,7 @@
     gap: 10px;
 }
 
-/* Contacts filter button */
-.contacts-filter-btn {
-    padding: 8px 16px;
-    border: 2px solid var(--contacts-btn-border);
-    border-radius: 6px;
-    background: var(--bg-secondary);
-    color: var(--contacts-btn-text);
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    white-space: nowrap;
-}
-
-.contacts-filter-btn:hover {
-    border-color: var(--contacts-btn-border-hover);
-    color: var(--contacts-btn-text-hover);
-    background-color: var(--bg-tertiary);
-}
-
-.contacts-filter-btn.active {
-    border-color: var(--contacts-btn-bg-active);
-    background-color: var(--contacts-btn-bg-active);
-    color: var(--contacts-btn-text-active);
-    box-shadow: 0 2px 8px rgba(104, 151, 187, 0.3);
-}
+/* Contacts filter now uses normal button styling; no special visuals. */
 
 .load-more-section {
     display: flex;
@@ -231,20 +192,7 @@
     margin-top: 20px;
 }
 
-.load-more-button {
-    background: var(--accent-primary);
-    color: white;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-}
-
-.load-more-button:hover {
-    background: var(--accent-secondary);
-}
+/* Load more uses normal button styling */
 
 .loading-indicator {
     display: flex;
@@ -311,10 +259,7 @@
         gap: 8px;
     }
 
-    .contacts-filter-btn {
-        padding: 6px 12px;
-        font-size: 13px;
-    }
+    /* contacts filter uses normal button; no special responsive overrides */
 }
 
 @media (max-width: 480px) {
@@ -329,31 +274,7 @@
         justify-content: space-between;
     }
 
-    .contacts-filter-btn {
-        flex: 1;
-        text-align: center;
-    }
+    /* contacts filter uses normal button; no special responsive overrides */
 }
 
-.data-collection-btn {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.data-collection-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-}
-
-.data-collection-btn:active {
-    transform: translateY(0);
-}
+/* Data collection navigation uses normal button styling */

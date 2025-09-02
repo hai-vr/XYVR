@@ -11,13 +11,12 @@ const Connector = ({ connector, onDeleteClick, deleteState }) => {
 
             <div className="connector-actions">
                 <button
-                    className="connector-action-btn"
                     title="Update"
                 >
                     📋 Update TODO
                 </button>
                 <button
-                    className={`connector-action-btn delete-btn ${deleteState?.confirming ? 'confirming' : ''}`}
+                    className={`delete-button ${deleteState?.confirming ? '' : ''}`}
                     onClick={() => onDeleteClick(connector.guid)}
                     title={deleteState?.confirming ? 'Click again to confirm delete' : 'Delete connector (requires double-click)'}
                 >

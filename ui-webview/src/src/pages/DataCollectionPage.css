@@ -22,7 +22,7 @@
     padding: 4rem 2rem;
     background-color: var(--bg-secondary);
     border-radius: 8px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-primary);
     margin-top: 2rem;
     width: 100%;
     box-sizing: border-box;
@@ -51,26 +51,10 @@
 
 [data-theme="dark"] .empty-state {
     background-color: var(--bg-secondary);
-    border-color: var(--border);
+    border-color: var(--border-primary);
 }
 
-.data-collection-btn {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.data-collection-btn:active {
-    transform: translateY(0);
-}
+/* Data collection buttons now use normal button styling */
 
 .inline-code-clickable {
     cursor: pointer;

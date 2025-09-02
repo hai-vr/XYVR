@@ -167,7 +167,6 @@ function AddressBookPage({ isDark, setIsDark }) {
 
                         <div className="header-buttons">
                             <button
-                                className="data-collection-btn"
                                 onClick={() => navigate('/data-collection')}
                                 title="Go to Data Collection"
                             >
@@ -175,8 +174,8 @@ function AddressBookPage({ isDark, setIsDark }) {
                             </button>
 
                             <button
-                                className={`contacts-filter-btn ${showOnlyContacts ? 'active' : ''}`}
                                 onClick={() => setShowOnlyContacts(!showOnlyContacts)}
+                                aria-pressed={showOnlyContacts}
                                 title={`${showOnlyContacts ? 'Show all individuals' : 'Show only contacts'}`}
                             >
                                 Only Contacts
@@ -208,7 +207,7 @@ function AddressBookPage({ isDark, setIsDark }) {
                     {searchTerm && (
                         <button
                             onClick={() => setSearchTerm('')}
-                            className="search-clear-button"
+                            className="icon-button search-clear-button"
                         >
                             ✕
                         </button>
@@ -249,7 +248,6 @@ function AddressBookPage({ isDark, setIsDark }) {
                         ) : (
                             <button
                                 onClick={loadMoreItems}
-                                className="load-more-button"
                             >
                                 Load More ({totalFilteredCount - displayedCount} remaining)
                             </button>

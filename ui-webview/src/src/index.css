@@ -236,7 +236,7 @@ button:focus-visible {
     outline-offset: 2px;
 }
 
-.any-button {
+.icon-button {
     background: var(--bg-secondary);
     border: 1px solid var(--border-secondary);
     border-radius: 4px;
@@ -258,8 +258,21 @@ button:focus-visible {
     flex-shrink: 0;
 }
 
-.any-button:hover {
+.icon-button:hover {
     background: var(--bg-quaternary);
     border-color: var(--border-accent);
     color: var(--text-primary);
+}
+
+/* Delete button (standardized) */
+.delete-button {
+    background: #dc3545;
+    color: #ffffff;
+    border: 1px solid #dc3545;
+    padding: 0.6em 1.2em;
+}
+
+.delete-button:hover {
+    background: #c82333;
+    border-color: #c82333;
 }

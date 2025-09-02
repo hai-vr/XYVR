@@ -89,7 +89,7 @@ const Account = ({ account }) => {
                         <a
                             href={`${account.namedApp === "VRChat" && 'https://vrchat.com/home/user/' || 'https://hub.chilloutvr.net/social/profile?guid='}${account.inAppIdentifier}`}
                             rel="noopener noreferrer"
-                            className="any-button"
+                            className="icon-button"
                             title={`Open ${account.namedApp} Profile`}
                         >
                             🌍
@@ -97,7 +97,7 @@ const Account = ({ account }) => {
                     )}
                     <button
                         onClick={copyInAppIdentifier}
-                        className="any-button"
+                        className="icon-button"
                         title={`Copy ID: ${account.inAppIdentifier}`}
                     >
                         📋

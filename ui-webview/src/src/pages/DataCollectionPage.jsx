@@ -100,7 +100,6 @@ function DataCollectionPage({ isDark, setIsDark }) {
 
                     <div className="header-buttons">
                         <button
-                            className="data-collection-btn"
                             onClick={() => navigate('/address-book')}
                             title="Go to Address Book"
                         >
@@ -134,7 +133,6 @@ function DataCollectionPage({ isDark, setIsDark }) {
             )}
             <div className="connector-actions">
                 <button
-                    className="connector-action-btn"
                     onClick={() => createNewConnector()}
                     title="Create new connection"
                 >
