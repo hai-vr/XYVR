@@ -2,11 +2,10 @@
 import './AddressBookPage.css'
 import Individual from "../components/Individual.jsx"
 
-function AddressBookPage() {
+function AddressBookPage({ isDark, setIsDark }) {
     const [individuals, setIndividuals] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
-    const [isDark, setIsDark] = useState(false)
     const [showOnlyContacts, setShowOnlyContacts] = useState(false)
 
     // Infinite scrolling state
@@ -52,11 +51,6 @@ function AddressBookPage() {
             document.removeEventListener('DOMContentLoaded', initializeApi);
         };
     }, []);
-
-    // Separate useEffect for theme changes
-    useEffect(() => {
-        document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-    }, [isDark]);
 
     // Reset displayed count when debounced search term or filter changes
     useEffect(() => {
@@ -434,107 +428,108 @@ function AddressBookPage() {
 
     return (
         <>
-            {individuals.length > 0 && (
-                <div className="individuals-container">
-                    <div className="header-section">
-                        <div className="header-content">
-                            <h2 className="header-title">
-                                Users & Accounts ({totalFilteredCount})
-                            </h2>
+            <div className="individuals-container">
+                <div className="header-section">
+                    <div className="header-content">
+                        <h2 className="header-title">
+                            Users & Accounts ({totalFilteredCount})
+                        </h2>
 
-                            <div className="header-buttons">
-                                <button
-                                    className={`contacts-filter-btn ${showOnlyContacts ? 'active' : ''}`}
-                                    onClick={() => setShowOnlyContacts(!showOnlyContacts)}
-                                    title={`${showOnlyContacts ? 'Show all individuals' : 'Show only contacts'}`}
-                                >
-                                    Only Contacts
-                                </button>
-
-                                <button
-                                    className="theme-toggle-btn"
-                                    onClick={() => setIsDark(!isDark)}
-                                    title={`Switch to ${isDark ? 'Light' : 'Dark'} Mode`}
-                                >
-                                    {isDark ? '🌙' : '☀️'}
-                                </button>
-                            </div>
-                        </div>
-
-                        {debouncedSearchTerm && (
-                            <div className="search-results-info">
-                                {totalFilteredCount === 0
-                                    ? `No results found for "${debouncedSearchTerm}"`
-                                    : `Showing ${displayedCount} of ${totalFilteredCount} results${displayedCount < totalFilteredCount ? ' (scroll for more)' : ''}`
-                                }
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Search field */}
-                    <div className="search-container">
-                        <input
-                            type="text"
-                            placeholder="Search by name or note..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="search-input"
-                        />
-                        <span className="search-icon">
-                            🔍
-                        </span>
-                        {searchTerm && (
+                        <div className="header-buttons">
                             <button
-                                onClick={() => setSearchTerm('')}
-                                className="search-clear-button"
+                                className={`contacts-filter-btn ${showOnlyContacts ? 'active' : ''}`}
+                                onClick={() => setShowOnlyContacts(!showOnlyContacts)}
+                                title={`${showOnlyContacts ? 'Show all individuals' : 'Show only contacts'}`}
                             >
-                                ✕
+                                Only Contacts
                             </button>
-                        )}
-                    </div>
 
-                    <div className="individuals-grid">
-                        {displayedIndividuals.map((individual, index) => (
-                            <Individual
-                                key={individual.id || index}
-                                individual={individual}
-                                index={index}
-                                isVisible={true}
-                                showBio={showBio}
-                            />
-                        ))}
-                    </div>
-
-                    {/* Loading indicator and load more button */}
-                    {hasMoreItems && (
-                        <div className="load-more-section">
-                            {isLoading ? (
-                                <div className="loading-indicator">
-                                    <div className="loading-spinner"></div>
-                                    <span>Loading more results...</span>
-                                </div>
-                            ) : (
-                                <button
-                                    onClick={loadMoreItems}
-                                    className="load-more-button"
-                                >
-                                    Load More ({totalFilteredCount - displayedCount} remaining)
-                                </button>
-                            )}
+                            <button
+                                className="theme-toggle-btn"
+                                onClick={() => setIsDark(!isDark)}
+                                title={`Switch to ${isDark ? 'Light' : 'Dark'} Mode`}
+                            >
+                                {isDark ? '🌙' : '☀️'}
+                            </button>
                         </div>
-                    )}
+                    </div>
 
-                    {debouncedSearchTerm && totalFilteredCount === 0 && (
-                        <div className="no-results-message">
-                            <div className="no-results-icon">🔍</div>
-                            <div className="no-results-text">No individuals found matching "<strong>{debouncedSearchTerm}</strong>"</div>
-                            <div className="no-results-hint">
-                                Try searching by name, note content, or use special terms like app:resonite, app:vrchat, app:cluster, accounts:&gt;1, has:alt, has:bot, links:misskey, bio:creator
-                            </div>
+                    {debouncedSearchTerm && (
+                        <div className="search-results-info">
+                            {totalFilteredCount === 0
+                                ? `No results found for "${debouncedSearchTerm}"`
+                                : `Showing ${displayedCount} of ${totalFilteredCount} results${displayedCount < totalFilteredCount ? ' (scroll for more)' : ''}`
+                            }
                         </div>
                     )}
                 </div>
-            )}
+
+                {/* Search field */}
+                <div className="search-container">
+                    <input
+                        type="text"
+                        placeholder="Search by name or note..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="search-input"
+                    />
+                    <span className="search-icon">
+                        🔍
+                    </span>
+                    {searchTerm && (
+                        <button
+                            onClick={() => setSearchTerm('')}
+                            className="search-clear-button"
+                        >
+                            ✕
+                        </button>
+                    )}
+                </div>
+
+                <div className="individuals-grid">
+                    {displayedIndividuals.map((individual, index) => (
+                        <Individual
+                            key={individual.id || index}
+                            individual={individual}
+                            index={index}
+                            isVisible={true}
+                            showBio={showBio}
+                        />
+                    ))}
+                </div>
+
+                {/* Loading indicator and load more button */}
+                {hasMoreItems && (
+                    <div className="load-more-section">
+                        {isLoading ? (
+                            <div className="loading-indicator">
+                                <div className="loading-spinner"></div>
+                                <span>Loading more results...</span>
+                            </div>
+                        ) : (
+                            <button
+                                onClick={loadMoreItems}
+                                className="load-more-button"
+                            >
+                                Load More ({totalFilteredCount - displayedCount} remaining)
+                            </button>
+                        )}
+                    </div>
+                )}
+
+                {debouncedSearchTerm && totalFilteredCount === 0 && (
+                    <div className="no-results-message">
+                        <div className="no-results-icon">🔍</div>
+                        <div className="no-results-text">No individuals found matching
+                            "<strong>{debouncedSearchTerm}</strong>"
+                        </div>
+                        <div className="no-results-hint">
+                            Try searching by name, note content, or use special terms like app:resonite, app:vrchat,
+                            app:cluster, accounts:&gt;1, has:alt, has:bot, links:misskey, bio:creator
+                        </div>
+                    </div>
+                )}
+            </div>
         </>
     )
 }
