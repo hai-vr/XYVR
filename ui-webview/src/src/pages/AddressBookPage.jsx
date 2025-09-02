@@ -1,6 +1,6 @@
 ﻿import { useEffect, useState, useMemo, useCallback } from 'react'
 import './AddressBookPage.css'
-import Individual from "../Individual.jsx"
+import Individual from "../components/Individual.jsx"
 
 function AddressBookPage() {
     const [individuals, setIndividuals] = useState([]);
