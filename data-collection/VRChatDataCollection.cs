@@ -5,10 +5,9 @@ using XYVR.Core;
 
 namespace XYVR.Data.Collection;
 
-public class VRChatDataCollection(IndividualRepository repository) : IDataCollection
+public class VRChatDataCollection(IndividualRepository repository, DataCollectionStorage dataCollectionStorage) : IDataCollection
 {
-    private static readonly DataCollectionStorage DataCollectionStorage = new();
-    private readonly VRChatCommunicator _vrChatCommunicator = new(DataCollectionStorage);
+    private readonly VRChatCommunicator _vrChatCommunicator = new(dataCollectionStorage);
 
     /// Collects all VRChat accounts from upstream but only returns accounts that have not been discovered yet.<br/>
     /// This does not return information about existing accounts, even if those existing accounts had been modified upstream.<br/>
