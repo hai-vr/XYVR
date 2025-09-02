@@ -21,11 +21,32 @@ function Individual({ individual, isVisible = true, showBio = false }) {
         await navigator.clipboard.writeText(url);
     };
 
+    // Helper function to get the first non-punctuation character
+    const getFirstNonPunctuationChar = (str) => {
+        if (!str) return '?';
+
+        // Regular expression to match various punctuation marks including:
+        // - Basic ASCII punctuation
+        // - Unicode punctuation categories (Pc, Pd, Pe, Pf, Pi, Po, Ps)
+        // - Common CJK punctuation symbols like 【】「」〈〉《》etc.
+        const punctuationRegex = /[\p{P}\u3000-\u303F\uFF00-\uFFEF\u2000-\u206F\u2E00-\u2E7F]/u;
+
+        for (let i = 0; i < str.length; i++) {
+            const char = str.charAt(i);
+            if (!punctuationRegex.test(char) && char.trim() !== '') {
+                return char.toUpperCase();
+            }
+        }
+
+        // If all characters are punctuation or whitespace, return the first character or '?'
+        return str.charAt(0).toUpperCase() || '?';
+    };
+
     return (
         <div className={`individual-container ${!isVisible ? 'hidden' : ''}`}>
             <div className="individual-header">
                 <div className="individual-avatar">
-                    {individual.displayName?.charAt(0).toUpperCase() || '?'}
+                    {getFirstNonPunctuationChar(individual.displayName)}
                 </div>
                 <h3 className="individual-name">
                     {individual.displayName}
