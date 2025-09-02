@@ -56,21 +56,44 @@ public class CredentialsManagement
                 // ????????????????????????
             }
             _connectorGuidToCredentialsStorageState.Remove(guid, out _);
+
+            var callerAccount = await communicator.CallerAccount();
+            var connectorAccount = AsConnectorAccount(callerAccount);
+
+            return new ConnectionAttemptResult
+            {
+                guid = guid,
+                type = ConnectionAttemptResultType.Success,
+                account = connectorAccount
+            };
         }
 
         return result switch
         {
-            LoginResponseStatus.Success => new ConnectionAttemptResult { type = ConnectionAttemptResultType.Success },
-            LoginResponseStatus.RequiresTwofer => new ConnectionAttemptResult { type = ConnectionAttemptResultType.NeedsTwoFactorCode },
-            _ => new ConnectionAttemptResult { type = ConnectionAttemptResultType.Failure }
+            LoginResponseStatus.Success => new ConnectionAttemptResult { guid = guid, type = ConnectionAttemptResultType.Success },
+            LoginResponseStatus.RequiresTwofer => new ConnectionAttemptResult { guid = guid, type = ConnectionAttemptResultType.NeedsTwoFactorCode },
+            _ => new ConnectionAttemptResult { guid = guid, type = ConnectionAttemptResultType.Failure }
         };
     }
 
     private async Task<ConnectionAttemptResult> ConnectToResonite(ConnectionAttempt connectionAttempt)
     {
+        var guid = connectionAttempt.connector.guid;
+        
         await Task.CompletedTask;
         
         // TODO: implement resonite
-        return new ConnectionAttemptResult { type = ConnectionAttemptResultType.Failure };
+        return new ConnectionAttemptResult { guid = guid, type = ConnectionAttemptResultType.Failure };
+    }
+
+    private static ConnectorAccount AsConnectorAccount(Account callerAccount)
+    {
+        return new ConnectorAccount
+        {
+            namedApp = callerAccount.namedApp,
+            qualifiedAppName = callerAccount.qualifiedAppName,
+            inAppIdentifier = callerAccount.inAppIdentifier,
+            inAppDisplayName = callerAccount.inAppDisplayName,
+        };
     }
 }

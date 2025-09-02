@@ -93,6 +93,14 @@ function DataCollectionPage({ isDark, setIsDark }) {
         }
     }
 
+    const refreshConnectors = async () => {
+        if (window.chrome && window.chrome.webview && window.chrome.webview.hostObjects) {
+            const json = await window.chrome.webview.hostObjects.dataCollectionApi.GetConnectors();
+            const arr = JSON.parse(json);
+            setConnectors(arr);
+        }
+    }
+
     return (
         <div className="data-collection-container">
             <div className="header-group">
@@ -130,6 +138,7 @@ function DataCollectionPage({ isDark, setIsDark }) {
                                     connector={connector}
                                     onDeleteClick={handleDeleteClick}
                                     deleteState={deleteStates[connector.guid]}
+                                    onConnectorUpdated={refreshConnectors}
                                 />
                             ))}
                         </div>

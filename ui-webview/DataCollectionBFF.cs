@@ -60,6 +60,7 @@ public class DataCollectionBFF : IDataCollectionBFF
             password__sensitive = password__sensitive,
             stayLoggedIn = stayLoggedIn
         });
+        await ContinueLogin(connectionResult);
     
         return ToJSON(connectionResult);
     }
@@ -73,8 +74,21 @@ public class DataCollectionBFF : IDataCollectionBFF
             twoFactorCode__sensitive = twoFactorCode__sensitive,
             stayLoggedIn = stayLoggedIn
         });
+        await ContinueLogin(connectionResult);
     
         return ToJSON(connectionResult);
+    }
+
+    private async Task ContinueLogin(ConnectionAttemptResult connectionResult)
+    {
+        if (connectionResult.type == ConnectionAttemptResultType.Success)
+        {
+            var connector = _mainWindow.ConnectorsMgt.GetConnector(connectionResult.guid);
+            connector.account = connectionResult.account;
+            _mainWindow.ConnectorsMgt.UpdateConnector(connector);
+            
+            await Scaffolding.SaveConnectors(_mainWindow.ConnectorsMgt);
+        }
     }
 
     public void DataCollectionTriggerTest()

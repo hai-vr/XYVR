@@ -3,7 +3,7 @@ import Account from './Account.jsx';
 import './Connector.css';
 import '../InputFields.css';
 
-const Connector = ({ connector, onDeleteClick, deleteState }) => {
+const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated }) => {
     const [login, setLogin] = useState('');
     const [password, setPassword] = useState('');
     const [twoFactorCode, setTwoFactorCode] = useState('');
@@ -29,12 +29,17 @@ const Connector = ({ connector, onDeleteClick, deleteState }) => {
                 if (obj.type === 'NeedsTwoFactorCode') {
                     setIsInTwoFactorMode(true);
                 }
+                else if (obj.type === 'Success') {
+                    setIsInTwoFactorMode(false);
+                    onConnectorUpdated();
+                }
             }
             else {
                 const json = await window.chrome.webview.hostObjects.dataCollectionApi.TryTwoFactor(connector.guid, twoFactorCode, stayLoggedIn);
                 const obj = JSON.parse(json);
                 if (obj.type === 'Success') {
                     setIsInTwoFactorMode(false);
+                    onConnectorUpdated();
                 }
             }
         }
@@ -95,7 +100,7 @@ const Connector = ({ connector, onDeleteClick, deleteState }) => {
                             placeholder="2FA Code"
                             value={twoFactorCode}
                             onChange={(e) => setTwoFactorCode(e.target.value)}
-                            className="two-factor-input"
+                            className="login-input"
                         />
                         <button title="Confirm" onClick={() => tryLogin()} disabled={!twoFactorCode}>Confirm</button>
                     </>

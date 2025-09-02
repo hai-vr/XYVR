@@ -13,7 +13,9 @@ public class ConnectionAttempt
 
 public class ConnectionAttemptResult
 {
+    public string guid;
     public ConnectionAttemptResultType type;
+    public ConnectorAccount account;
 }
 
 public enum ConnectionAttemptResultType
