@@ -1,4 +1,5 @@
-import { useEffect, useState, useMemo } from 'react'
+
+import { useEffect, useState, useMemo, useCallback } from 'react'
 import './App.css'
 import Individual from "./Individual.jsx";
 
@@ -9,6 +10,11 @@ function App() {
     const [searchTerm, setSearchTerm] = useState('');
     const [isDark, setIsDark] = useState(false)
     const [showOnlyContacts, setShowOnlyContacts] = useState(false)
+
+    // Infinite scrolling state
+    const [displayedCount, setDisplayedCount] = useState(50); // Start with 50 items
+    const [isLoading, setIsLoading] = useState(false);
+    const ITEMS_PER_LOAD = 25; // Load 25 more items each time
 
     useEffect(() => {
         // Wait for WebView2 API to be available
@@ -46,6 +52,11 @@ function App() {
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
     }, [isDark]);
+
+    // Reset displayed count when search term or filter changes
+    useEffect(() => {
+        setDisplayedCount(50);
+    }, [searchTerm, showOnlyContacts]);
 
     // Remove the filteredIndividuals calculation and pass search logic to Individual components
     const removeDiacritics = (str) => {
@@ -364,6 +375,44 @@ function App() {
         });
     }, [individuals, searchTerm, showOnlyContacts]);
 
+    // Get the currently displayed individuals (for infinite scrolling)
+    const displayedIndividuals = useMemo(() => {
+        return sortedAndFilteredIndividuals.slice(0, displayedCount);
+    }, [sortedAndFilteredIndividuals, displayedCount]);
+
+    // Infinite scroll handler
+    const loadMoreItems = useCallback(() => {
+        if (isLoading) return;
+
+        setIsLoading(true);
+
+        // Simulate a small delay for better UX
+        setTimeout(() => {
+            setDisplayedCount(prev => Math.min(prev + ITEMS_PER_LOAD, sortedAndFilteredIndividuals.length));
+            setIsLoading(false);
+        }, 100);
+    }, [isLoading, sortedAndFilteredIndividuals.length]);
+
+    // Scroll event handler
+    useEffect(() => {
+        const handleScroll = () => {
+            if (isLoading) return;
+
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            const windowHeight = window.innerHeight;
+            const documentHeight = document.documentElement.offsetHeight;
+
+            // Load more when user is 200px from the bottom
+            if (scrollTop + windowHeight >= documentHeight - 200) {
+                if (displayedCount < sortedAndFilteredIndividuals.length) {
+                    loadMoreItems();
+                }
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [loadMoreItems, displayedCount, sortedAndFilteredIndividuals.length, isLoading]);
 
     const handleGetTime = async () => {
         if (window.chrome?.webview?.hostObjects?.appApi) {
@@ -402,7 +451,7 @@ function App() {
     };
 
     // Calculate visible individuals count using the sorted array
-    const visibleIndividualsCount = sortedAndFilteredIndividuals.length;
+    const totalFilteredCount = sortedAndFilteredIndividuals.length;
 
     // Add this after the existing parseSearchTerms function call in isIndividualVisible or create a new useMemo
     const showBio = useMemo(() => {
@@ -410,7 +459,10 @@ function App() {
         const { specialTerms } = parseSearchTerms(searchTerm);
         return specialTerms.some(term => term.startsWith('bio:'));
     }, [searchTerm]);
-    
+
+    // Show load more button helper
+    const hasMoreItems = displayedCount < totalFilteredCount;
+
     return (
         <>
             {individuals.length > 0 && (
@@ -418,7 +470,7 @@ function App() {
                     <div className="header-section">
                         <div className="header-content">
                             <h2 className="header-title">
-                                Users & Accounts ({visibleIndividualsCount})
+                                Users & Accounts ({totalFilteredCount})
                             </h2>
 
                             <div className="header-buttons">
@@ -442,9 +494,9 @@ function App() {
 
                         {searchTerm && (
                             <div className="search-results-info">
-                                {visibleIndividualsCount === 0
+                                {totalFilteredCount === 0
                                     ? `No results found for "${searchTerm}"`
-                                    : `Showing ${visibleIndividualsCount} of ${individuals.length} results`
+                                    : `Showing ${displayedCount} of ${totalFilteredCount} results${displayedCount < totalFilteredCount ? ' (scroll for more)' : ''}`
                                 }
                             </div>
                         )}
@@ -473,7 +525,7 @@ function App() {
                     </div>
 
                     <div className="individuals-grid">
-                        {sortedAndFilteredIndividuals.map((individual, index) => (
+                        {displayedIndividuals.map((individual, index) => (
                             <Individual
                                 key={individual.id || index}
                                 individual={individual}
@@ -484,7 +536,26 @@ function App() {
                         ))}
                     </div>
 
-                    {searchTerm && visibleIndividualsCount === 0 && (
+                    {/* Loading indicator and load more button */}
+                    {hasMoreItems && (
+                        <div className="load-more-section">
+                            {isLoading ? (
+                                <div className="loading-indicator">
+                                    <div className="loading-spinner"></div>
+                                    <span>Loading more results...</span>
+                                </div>
+                            ) : (
+                                <button
+                                    onClick={loadMoreItems}
+                                    className="load-more-button"
+                                >
+                                    Load More ({totalFilteredCount - displayedCount} remaining)
+                                </button>
+                            )}
+                        </div>
+                    )}
+
+                    {searchTerm && totalFilteredCount === 0 && (
                         <div className="no-results-message">
                             <div className="no-results-icon">🔍</div>
                             <div className="no-results-text">No individuals found matching "<strong>{searchTerm}</strong>"</div>
