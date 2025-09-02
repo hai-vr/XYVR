@@ -85,7 +85,7 @@ function Individual({ individual, isVisible = true, showBio = false }) {
                             </a>
                             <button
                                 onClick={(e) => copyToClipboard(url, e)}
-                                className="copy-button"
+                                className="any-button"
                                 title="Copy link to clipboard"
                             >
                                 📋

@@ -49,7 +49,6 @@
     justify-content: center;
     cursor: pointer;
     font-size: 20px;
-    transition: all 0.2s ease;
     backdrop-filter: blur(10px);
     flex-shrink: 0;
 }
@@ -208,7 +207,6 @@
     cursor: pointer;
     font-size: 14px;
     font-weight: 500;
-    transition: all 0.3s ease;
     white-space: nowrap;
 }
 
@@ -242,7 +240,6 @@
     cursor: pointer;
     font-size: 14px;
     font-weight: 500;
-    transition: background-color 0.2s ease;
 }
 
 .load-more-button:hover {
@@ -263,7 +260,6 @@
     border: 2px solid var(--border-primary);
     border-top: 2px solid var(--accent-primary);
     border-radius: 50%;
-    animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
@@ -348,7 +344,6 @@
     cursor: pointer;
     font-size: 14px;
     font-weight: 500;
-    transition: all 0.2s ease;
     display: flex;
     align-items: center;
     gap: 6px;

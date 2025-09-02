@@ -219,7 +219,6 @@ button {
     background-color: var(--bg-secondary);
     color: var(--text-primary);
     cursor: pointer;
-    transition: border-color 0.25s, background-color 0.25s;
 }
 
 button:hover {
@@ -227,8 +226,39 @@ button:hover {
     background-color: var(--bg-quaternary);
 }
 
-button:focus,
+button:focus {
+    outline: none;
+}
+
 button:focus-visible {
     outline: 2px solid var(--accent-primary);
     outline-offset: 2px;
+}
+
+.any-button {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-secondary);
+    border-radius: 4px;
+    width: 24px !important;
+    height: 24px !important;
+    min-width: 24px;
+    min-height: 24px;
+    max-width: 24px;
+    max-height: 24px;
+    font-size: 14px;
+    line-height: 1;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    box-sizing: border-box;
+    flex-shrink: 0;
+}
+
+.any-button:hover {
+    background: var(--bg-quaternary);
+    border-color: var(--border-accent);
+    color: var(--text-primary);
 }

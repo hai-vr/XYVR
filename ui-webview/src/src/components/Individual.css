@@ -5,16 +5,8 @@
     border-radius: 12px;
     padding: 24px;
     box-shadow: 0 2px 8px var(--shadow-medium);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
     cursor: pointer;
 }
-
-.individual-container:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 16px var(--shadow-heavy);
-    border-color: var(--border-accent);
-}
-
 .individual-container.hidden {
     display: none;
 }
@@ -111,12 +103,6 @@
     justify-content: space-between;
     max-width: 100%;
     overflow: hidden;
-    transition: background-color 0.2s ease;
-}
-
-.vrchat-link-item:hover {
-    background-color: var(--vrchat-link-item-hover-bg);
-    border-color: var(--vrchat-link-item-hover-border);
 }
 
 .vrchat-link {
@@ -134,26 +120,6 @@
 .vrchat-link:hover {
     text-decoration: underline;
     color: var(--accent-secondary);
-}
-
-.copy-button {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-secondary);
-    border-radius: 4px;
-    padding: 4px 6px;
-    font-size: 11px;
-    color: var(--text-secondary);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    transition: all 0.2s ease;
-    flex-shrink: 0;
-}
-
-.copy-button:hover {
-    background: var(--bg-quaternary);
-    border-color: var(--border-accent);
-    color: var(--text-primary);
 }
 
 /* Light theme specific overrides */

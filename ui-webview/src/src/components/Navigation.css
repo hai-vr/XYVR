@@ -22,7 +22,6 @@
     color: var(--text-secondary);
     font-weight: 500;
     border-bottom: 2px solid transparent;
-    transition: all 0.2s ease;
 }
 
 .nav-link:hover {

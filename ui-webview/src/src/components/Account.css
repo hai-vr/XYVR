@@ -8,11 +8,6 @@
     gap: 8px;
 }
 
-.account-container:hover {
-    border-color: var(--border-accent);
-    background: var(--bg-tertiary);
-}
-
 .account-header {
     display: flex;
     align-items: center;
@@ -95,25 +90,6 @@
     background: var(--status-bot-bg);
     color: var(--status-bot-text);
     border-color: var(--badge-bot-border);
-}
-
-.any-button {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-secondary);
-    border-radius: 4px;
-    padding: 4px 6px;
-    font-size: 11px;
-    color: var(--text-secondary);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    transition: all 0.2s ease;
-}
-
-.any-button:hover {
-    background: var(--bg-quaternary);
-    border-color: var(--border-accent);
-    color: var(--text-primary);
 }
 
 .note-container {
