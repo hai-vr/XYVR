@@ -418,7 +418,7 @@ function App() {
                     <div className="header-section">
                         <div className="header-content">
                             <h2 className="header-title">
-                                👥 Users & Accounts ({visibleIndividualsCount})
+                                Users & Accounts ({visibleIndividualsCount})
                             </h2>
 
                             <div className="header-buttons">

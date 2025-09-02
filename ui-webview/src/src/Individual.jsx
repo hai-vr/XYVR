@@ -18,11 +18,7 @@ function Individual({ individual, index, isVisible = true, showBio = false }) {
 
     const copyToClipboard = async (url, event) => {
         event.stopPropagation(); // Prevent the container click event
-        try {
-            await navigator.clipboard.writeText(url);
-        } catch (err) {
-            
-        }
+        await navigator.clipboard.writeText(url);
     };
 
     return (
@@ -56,30 +52,25 @@ function Individual({ individual, index, isVisible = true, showBio = false }) {
             </div>
 
             {vrChatLinks.length > 0 && (
-                <div className="vrchat-links-container">
-                    <div className="vrchat-links-title">
-                        💬 VRChat Links:
-                    </div>
-                    <div className="vrchat-links-list">
-                        {vrChatLinks.map((url, linkIndex) => (
-                            <div key={linkIndex} className="vrchat-link-item">
-                                <a
-                                    href={url}
-                                    rel="noopener noreferrer"
-                                    className="vrchat-link"
-                                >
-                                    🔗 {url}
-                                </a>
-                                <button
-                                    onClick={(e) => copyToClipboard(url, e)}
-                                    className="copy-button"
-                                    title="Copy link to clipboard"
-                                >
-                                    📋 Copy
-                                </button>
-                            </div>
-                        ))}
-                    </div>
+                <div className="vrchat-links-list">
+                    {vrChatLinks.map((url, linkIndex) => (
+                        <div key={linkIndex} className="vrchat-link-item">
+                            <a
+                                href={url}
+                                rel="noopener noreferrer"
+                                className="vrchat-link"
+                            >
+                                🔗 {url}
+                            </a>
+                            <button
+                                onClick={(e) => copyToClipboard(url, e)}
+                                className="copy-button"
+                                title="Copy link to clipboard"
+                            >
+                                📋
+                            </button>
+                        </div>
+                    ))}
                 </div>
             )}
 

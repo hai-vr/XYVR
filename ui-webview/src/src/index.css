@@ -26,6 +26,7 @@
 
     --accent-primary: #6897bb;
     --accent-secondary: #9fc5e8;
+    --accent-alternate: #6897bb;
 
     --shadow-light: rgba(0, 0, 0, 0.2);
     --shadow-medium: rgba(0, 0, 0, 0.3);
@@ -63,27 +64,26 @@
     --status-contact-text: #90c695;
     --status-note-bg: #3e4446;
     --status-note-text: #6897bb;
-    --status-bot-bg: #4a3538;
-    --status-bot-text: #d4a6aa;
+    --status-bot-bg: #1a3d1a;
+    --status-bot-text: #00ff41;
     --status-warning-bg: #4a4232;
     --status-warning-text: #d4b86a;
 
     /* Badge border colors */
     --badge-note-border: #5a5d5f;
     --badge-contact-border: #5a5d5f;
-    --badge-bot-border: #5a5d5f;
+    --badge-bot-border: #2d5a2d;
 
     /* Note container colors */
     --note-container-bg: #3e4446;
     --note-container-border: #5a5d5f;
 
-    /* VRChat links specific colors */
-    --vrchat-links-bg: #3e4446;
-    --vrchat-links-border: #5a5d5f;
-    --vrchat-link-item-bg: #4c5052;
-    --vrchat-link-item-border: #5a5d5f;
-    --vrchat-link-item-hover-bg: #5a5d5f;
-    --vrchat-link-item-hover-border: #6897bb;
+    --vrchat-links-bg: var(--bg-primary);
+    --vrchat-links-border: var(--border-primary);
+    --vrchat-link-item-bg: var(--bg-primary);
+    --vrchat-link-item-border: var(--border-primary);
+    --vrchat-link-item-hover-bg: var(--bg-tertiary);
+    --vrchat-link-item-hover-border: var(--border-accent);
 
     /* Copy button hover */
     --copy-button-hover-bg: rgba(104, 151, 187, 0.2);
@@ -103,7 +103,7 @@
     --contacts-btn-text: var(--text-secondary);
     --contacts-btn-border-hover: var(--accent-primary);
     --contacts-btn-text-hover: var(--accent-primary);
-    --contacts-btn-bg-active: var(--accent-primary);
+    --contacts-btn-bg-active: var(--accent-alternate);
     --contacts-btn-text-active: #ffffff;
 
 }
@@ -125,6 +125,7 @@
 
     --accent-primary: #1976d2;
     --accent-secondary: #1976d2;
+    --accent-alternate: #8c0dd6;
 
     --shadow-light: rgba(0, 0, 0, 0.06);
     --shadow-medium: rgba(0, 0, 0, 0.1);
@@ -158,27 +159,19 @@
     --status-contact-text: #27ae60;
     --status-note-bg: #e3f2fd;
     --status-note-text: #1976d2;
-    --status-bot-bg: #f8d7da;
-    --status-bot-text: #721c24;
+    --status-bot-bg: #e8ffe8;
+    --status-bot-text: #00b300;
     --status-warning-bg: #fff3cd;
     --status-warning-text: #856404;
 
     /* Badge border colors for light theme */
     --badge-note-border: #bbdefb;
     --badge-contact-border: #ffeaa7;
-    --badge-bot-border: #f5c6cb;
+    --badge-bot-border: #c8e6c8;
 
     /* Note container colors for light theme */
     --note-container-bg: #f0f8ff;
     --note-container-border: #b3d9ff;
-
-    /* VRChat links specific colors for light theme */
-    --vrchat-links-bg: #f0f8ff;
-    --vrchat-links-border: #b3d9ff;
-    --vrchat-link-item-bg: #e3f2fd;
-    --vrchat-link-item-border: #bbdefb;
-    --vrchat-link-item-hover-bg: #bbdefb;
-    --vrchat-link-item-hover-border: #bbdefb;
 
     /* Copy button hover for light theme */
     --copy-button-hover-bg: rgba(25, 118, 210, 0.1);
