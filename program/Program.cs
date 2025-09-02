@@ -30,14 +30,13 @@ internal partial class Program
         var individuals = await Scaffolding.OpenRepository();
         
         var repository = new IndividualRepository(individuals);
+        var dataCollection = new CompoundDataCollection([new ResoniteDataCollection(repository), new VRChatDataCollection(repository)]);
 
         switch (mode)
         {
             case Mode.RebuildFromStorage:
             {
                 var trail = await Scaffolding.RebuildTrail();
-                
-                var dataCollection = new DataCollection(repository);
                 
                 foreach (var ind in repository.Individuals)
                 {
@@ -59,8 +58,6 @@ internal partial class Program
             }
             case Mode.FetchIndividuals:
             {
-                var dataCollection = new DataCollection(repository);
-
                 var undiscoveredAccounts = await dataCollection.CollectAllUndiscoveredAccounts();
                 if (undiscoveredAccounts.Count > 0)
                 {
@@ -73,8 +70,6 @@ internal partial class Program
             }
             case Mode.UpdateExistingIndividuals:
             {
-                var dataCollection = new DataCollection(repository);
-
                 var undiscoveredAccounts = await dataCollection.CollectExistingAccounts();
                 if (undiscoveredAccounts.Count > 0)
                 {
@@ -87,8 +82,6 @@ internal partial class Program
             }
             case Mode.UpdateAndGetNew:
             {
-                var dataCollection = new DataCollection(repository);
-
                 var undiscoveredAccounts2 = await dataCollection.CollectExistingAccounts();
                 if (undiscoveredAccounts2.Count > 0)
                 {
