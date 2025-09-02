@@ -31,6 +31,14 @@ public class IndividualRepository
         {
             UpdateIndividualBasedOnAccounts(individual);
         }
+        
+        foreach (var individual in individuals)
+        {
+            if (individual.note.status == 0)
+            {
+                individual.note.status = NoteState.NeverHad;
+            }
+        }
 
         var duplicateRecords = individuals.SelectMany(individual => individual.accounts)
             .Select(account => new DiscriminatorRecord(account.qualifiedAppName, account.inAppIdentifier))
