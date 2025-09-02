@@ -13,6 +13,7 @@ import {
 function AddressBookPage({ isDark, setIsDark }) {
     const navigate = useNavigate()
     const searchInputRef = useRef(null)
+    const [initialized, setInitialized] = useState(false);
     const [individuals, setIndividuals] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
@@ -42,6 +43,7 @@ function AddressBookPage({ isDark, setIsDark }) {
                     const allIndividuals = await window.chrome.webview.hostObjects.appApi.GetAllExposedIndividualsOrderedByContact();
                     const individualsArray = JSON.parse(allIndividuals);
                     setIndividuals(individualsArray);
+                    setInitialized(true);
 
                 } catch (error) {
                     console.error('API not ready yet:', error);
@@ -110,7 +112,14 @@ function AddressBookPage({ isDark, setIsDark }) {
 
         // Simulate a small delay for better UX
         setTimeout(() => {
-            setDisplayedCount(prev => Math.min(prev + ITEMS_PER_LOAD, sortedAndFilteredIndividuals.length));
+            setDisplayedCount(prev => {
+                let nextCount = Math.min(prev + ITEMS_PER_LOAD, sortedAndFilteredIndividuals.length);
+                if (nextCount > 199) {
+                    // If the user scrolls too much, just show everything immediately
+                    return sortedAndFilteredIndividuals.length;
+                }
+                return nextCount;
+            });
             setIsLoading(false);
         }, 100);
     }, [isLoading, sortedAndFilteredIndividuals.length]);
@@ -164,7 +173,7 @@ function AddressBookPage({ isDark, setIsDark }) {
                     <div className="header-section">
                         <div className="header-content">
                             <h2 className="header-title">
-                                {showOnlyContacts && 'Contacts' || 'Contacts & Notes'} ({totalFilteredCount})
+                                {showOnlyContacts && 'Contacts' || 'Contacts & Notes'} {initialized && <>({totalFilteredCount})</> || <>(...)</>}
                             </h2>
 
                             <div className="header-buttons">

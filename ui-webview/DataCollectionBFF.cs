@@ -1,6 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using System.Windows;
 using Newtonsoft.Json;
+using XYVR.Core;
 using XYVR.Scaffold;
 
 namespace XYVR.UI.WebviewUI;
@@ -10,7 +11,7 @@ public interface IDataCollectionBFF
 {
     void DataCollectionTriggerTest();
     string GetConnectors();
-    Task<string> CreateConnector();
+    Task<string> CreateConnector(string connectorType);
     Task DeleteConnector(string guid);
 }
 
@@ -32,9 +33,9 @@ public class DataCollectionBFF : IDataCollectionBFF
         return ToJSON(_mainWindow.ConnectorsMgt.Connectors);
     }
 
-    public async Task<string> CreateConnector()
+    public async Task<string> CreateConnector(string connectorType)
     {
-        var newConnector = _mainWindow.ConnectorsMgt.CreateNewConnector();
+        var newConnector = _mainWindow.ConnectorsMgt.CreateNewConnector(Enum.Parse<ConnectorType>(connectorType));
         await Scaffolding.SaveConnectors(_mainWindow.ConnectorsMgt);
         
         return ToJSON(newConnector);

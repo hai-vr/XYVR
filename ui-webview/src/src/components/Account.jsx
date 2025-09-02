@@ -1,7 +1,7 @@
 ﻿import React from 'react';
 import './Account.css';
 
-const Account = ({ account }) => {
+const Account = ({ account, imposter }) => {
     const hasNote = account.isAnyCallerNote;
 
     const copyInAppIdentifier = async () => {
@@ -69,7 +69,7 @@ const Account = ({ account }) => {
                         </div>
                     </div>
                 </div>
-                <div className="account-badges">
+                {!imposter && (<div className="account-badges">
                     {!account.isAnyCallerContact && hasNote && (
                         <span className="badge note">
                             📝 Note
@@ -102,7 +102,7 @@ const Account = ({ account }) => {
                     >
                         📋
                     </button>
-                </div>
+                </div>)}
             </div>
 
             {account.callers && account.callers.filter(caller => caller.note.status === "Exists").map((caller, index) => (

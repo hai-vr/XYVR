@@ -7,6 +7,7 @@ import Connector from "../components/Connector.jsx";
 
 function DataCollectionPage({ isDark, setIsDark }) {
     const navigate = useNavigate()
+    const [initialized, setInitialized] = useState(false);
     const [connectors, setConnectors] = useState([]);
     const [deleteStates, setDeleteStates] = useState({}); // Track delete confirmation states
 
@@ -17,6 +18,7 @@ function DataCollectionPage({ isDark, setIsDark }) {
                     const json = await window.chrome.webview.hostObjects.dataCollectionApi.GetConnectors();
                     const arr = JSON.parse(json);
                     setConnectors(arr);
+                    setInitialized(true);
                 } catch (error) {
                     console.error('API not ready yet:', error);
                 }
@@ -35,9 +37,9 @@ function DataCollectionPage({ isDark, setIsDark }) {
         };
     }, []);
 
-    const createNewConnector = async () => {
+    const createNewConnector = async (connectorType) => {
         if (window.chrome && window.chrome.webview && window.chrome.webview.hostObjects) {
-            await window.chrome.webview.hostObjects.dataCollectionApi.CreateConnector();
+            await window.chrome.webview.hostObjects.dataCollectionApi.CreateConnector(connectorType);
 
             const json = await window.chrome.webview.hostObjects.dataCollectionApi.GetConnectors();
             const arr = JSON.parse(json);
@@ -118,28 +120,42 @@ function DataCollectionPage({ isDark, setIsDark }) {
                 </div>
             </div>
 
-            {connectors && connectors.length > 0 && (
-                <div className="connectors-section">
-                    <div className="connectors-grid">
-                        {connectors.map((connector, index) => (
-                            <Connector
-                                key={index}
-                                connector={connector}
-                                onDeleteClick={handleDeleteClick}
-                                deleteState={deleteStates[connector.guid]}
-                            />
-                        ))}
+            {initialized && (
+                <>
+                    <div className="connectors-section">
+                        <div className="connectors-grid">
+                            {connectors.map((connector, index) => (
+                                <Connector
+                                    key={index}
+                                    connector={connector}
+                                    onDeleteClick={handleDeleteClick}
+                                    deleteState={deleteStates[connector.guid]}
+                                />
+                            ))}
+                        </div>
                     </div>
-                </div>
+                    <div className="connector-actions">
+                        <button
+                            onClick={() => createNewConnector('ResoniteAPI')}
+                            title="Create new Resonite connection"
+                        >
+                            + Add Resonite connection
+                        </button>
+                        <button
+                            onClick={() => createNewConnector('VRChatAPI')}
+                            title="Create new VRChat connection"
+                        >
+                            + Add VRChat connection
+                        </button>
+                        <button
+                            onClick={() => createNewConnector('Offline')}
+                            title="Create offline connection"
+                        >
+                            + Import offline data
+                        </button>
+                    </div>
+                </>
             )}
-            <div className="connector-actions">
-                <button
-                    onClick={() => createNewConnector()}
-                    title="Create new connection"
-                >
-                    + Create new connection
-                </button>
-            </div>
         </div>
     )
 }

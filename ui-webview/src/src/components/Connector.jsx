@@ -1,26 +1,70 @@
-﻿import React from 'react';
+﻿import React, { useState } from 'react';
 import Account from './Account.jsx';
 import './Connector.css';
+import '../InputFields.css';
 
 const Connector = ({ connector, onDeleteClick, deleteState }) => {
+    const [login, setLogin] = useState('');
+    const [password, setPassword] = useState('');
+
+    let virtualApp = connector.type === 'VRChatAPI' && 'VRChat'
+        || connector.type === 'ResoniteAPI' && 'Resonite'
+        || 'Offline';
+
+    const tempAccount = {
+        inAppDisplayName: `Adding a new ${virtualApp} connection...`,
+        inAppIdentifier: '???',
+        namedApp: virtualApp,
+        isTechnical: false
+    };
+
     return (
         <div className="connector-card">
             {connector.account && (
                 <Account account={connector.account} />
             )}
+            {!connector.account && (
+                <Account account={tempAccount} imposter={true} />
+            )}
+
+            <div className="input-fields">
+                {connector.type !== 'Offline' && (
+                    <>
+                        <h3 className="input-title">Connect to your {virtualApp} account</h3>
+                        <input
+                            type="text"
+                            placeholder={connector.type === 'VRChatAPI' && "Username/Email" || "Username"}
+                            value={login}
+                            onChange={(e) => setLogin(e.target.value)}
+                            className="login-input"
+                        />
+                        <input
+                            type="password"
+                            placeholder="Password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="password-input"
+                        />
+                        {connector.type === 'ResoniteAPI' && login.toLowerCase().startsWith('u-')
+                            && <p className="warning-message">
+                                <span className="warning-icon">⚠️</span>
+                                Please enter your username; not your user ID.
+                            </p>
+                        }
+                        <button title="Login">Login</button>
+                        {connector.type === 'ResoniteAPI' && <p className="info-message">We do not store your username and password, only a connection token.</p>
+                            || <p className="info-message">We do not store your username and password, only a cookie.</p>}
+                    </>
+                )}
+            </div>
 
             <div className="connector-actions">
                 <button
-                    title="Update"
-                >
-                    📋 Update TODO
-                </button>
-                <button
                     className={`delete-button ${deleteState?.confirming ? '' : ''}`}
                     onClick={() => onDeleteClick(connector.guid)}
-                    title={deleteState?.confirming ? 'Click again to confirm delete' : 'Delete connector (requires double-click)'}
+                    title={deleteState?.confirming ? 'Click again to confirm remove' : 'Remove connector'}
                 >
-                    {deleteState?.confirming ? '⚠️ Really remove?' : '🗑️ Remove'}
+                    {deleteState?.confirming ? '⚠️ Really remove?' : '❌ Remove'}
                 </button>
             </div>
         </div>
