@@ -32,7 +32,7 @@ internal partial class Program
             case Mode.SetupConnectors:
             {
                 {
-                    var resonite = connectors.CreateNewConnector();
+                    var resonite = connectors.CreateNewConnector(ConnectorType.ResoniteAPI);
                     
                     resonite.account = new ConnectorAccount
                     {
@@ -48,7 +48,7 @@ internal partial class Program
                     connectors.UpdateConnector(resonite);
                 }
                 {
-                    var vrchat = connectors.CreateNewConnector();
+                    var vrchat = connectors.CreateNewConnector(ConnectorType.VRChatAPI);
                     
                     vrchat.account = new ConnectorAccount
                     {
@@ -64,7 +64,7 @@ internal partial class Program
                     connectors.UpdateConnector(vrchat);
                 }
                 {
-                    var vrchat = connectors.CreateNewConnector();
+                    var vrchat = connectors.CreateNewConnector(ConnectorType.VRChatAPI);
                     
                     vrchat.account = new ConnectorAccount
                     {

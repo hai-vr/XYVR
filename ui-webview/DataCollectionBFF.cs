@@ -2,6 +2,7 @@
 using System.Windows;
 using Newtonsoft.Json;
 using XYVR.Core;
+using XYVR.Data.Collection;
 using XYVR.Scaffold;
 
 namespace XYVR.UI.WebviewUI;
@@ -13,6 +14,8 @@ public interface IDataCollectionBFF
     string GetConnectors();
     Task<string> CreateConnector(string connectorType);
     Task DeleteConnector(string guid);
+    Task<string> TryLogin(string guid, string login__sensitive, string password__sensitive, bool stayLoggedIn);
+    Task<string> TryTwoFactor(string guid, string twoFactorCode__sensitive, bool stayLoggedIn);
 }
 
 [ComVisible(true)]
@@ -45,6 +48,33 @@ public class DataCollectionBFF : IDataCollectionBFF
     {
         _mainWindow.ConnectorsMgt.DeleteConnector(guid);
         await Scaffolding.SaveConnectors(_mainWindow.ConnectorsMgt);
+    }
+
+    public async Task<string> TryLogin(string guid, string login__sensitive, string password__sensitive, bool stayLoggedIn)
+    {
+        var connector = _mainWindow.ConnectorsMgt.GetConnector(guid);
+        var connectionResult = await _mainWindow.CredentialsMgt.TryConnect(connector, new ConnectionAttempt
+        {
+            connector = connector,
+            login__sensitive = login__sensitive,
+            password__sensitive = password__sensitive,
+            stayLoggedIn = stayLoggedIn
+        });
+    
+        return ToJSON(connectionResult);
+    }
+
+    public async Task<string> TryTwoFactor(string guid, string twoFactorCode__sensitive, bool stayLoggedIn)
+    {
+        var connector = _mainWindow.ConnectorsMgt.GetConnector(guid);
+        var connectionResult = await _mainWindow.CredentialsMgt.TryConnect(connector, new ConnectionAttempt
+        {
+            connector = connector,
+            twoFactorCode__sensitive = twoFactorCode__sensitive,
+            stayLoggedIn = stayLoggedIn
+        });
+    
+        return ToJSON(connectionResult);
     }
 
     public void DataCollectionTriggerTest()

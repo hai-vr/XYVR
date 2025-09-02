@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using core;
 using XYVR.API.VRChat;
 using XYVR.Core;
 using XYVR.Data.Collection;
@@ -11,24 +12,29 @@ public class VRChatCommunicator
     
     private readonly IDataCollector _dataCollector;
     private readonly TimeProvider _timeProvider = TimeProvider.System;
-    
-    private const string CookieFileName = "vrc.cookies.txt";
 
-    private readonly string _account__sensitive;
-    private readonly string _password__sensitive;
+    private readonly string? _account__sensitive;
+    private readonly string? _password__sensitive;
     private readonly string? _twoFactor__sensitive;
+    private readonly ICredentialsStorage _credentialsStorage;
     private VRChatAPI? _api;
     private string _callerUserId;
 
-    public VRChatCommunicator(IDataCollector dataCollector)
+    public VRChatCommunicator(
+        IDataCollector dataCollector,
+        string emailOrUsername__sensitive,
+        string password__sensitive,
+        string? twoFactor__sensitive,
+        ICredentialsStorage credentialsStorage
+    )
     {
         _dataCollector = dataCollector;
         
-        _account__sensitive = Environment.GetEnvironmentVariable(XYVREnvVar.VRChatAccount)!;
-        _password__sensitive = Environment.GetEnvironmentVariable(XYVREnvVar.VRChatPassword)!;
-        if (_account__sensitive == null || _password__sensitive == null) throw new ArgumentException("Missing environment variables");
+        _account__sensitive = emailOrUsername__sensitive;
+        _password__sensitive = password__sensitive;
+        _twoFactor__sensitive = twoFactor__sensitive;
         
-        _twoFactor__sensitive = Environment.GetEnvironmentVariable(XYVREnvVar.VRChatTwoFactorCode);
+        _credentialsStorage = credentialsStorage;
     }
 
     public async Task<Account> CallerAccount()
@@ -216,12 +222,62 @@ public class VRChatCommunicator
         };
     }
 
+    public async Task<LoginResponseStatus> VrcLoginUsingUsernameAndPassword()
+    {
+        var api = new VRChatAPI(_dataCollector);
+        var userinput_cookies__sensitive = await _credentialsStorage.RequireCookieOrToken();
+        if (userinput_cookies__sensitive != null)
+        {
+            api.ProvideCookies(userinput_cookies__sensitive);
+        }
+        
+        var loginResult = await api.Login(_account__sensitive, _password__sensitive);
+        if (loginResult.Status == LoginResponseStatus.RequiresTwofer)
+        {
+            await SaveToken(api);
+            return LoginResponseStatus.RequiresTwofer;
+        }
+        
+        if (loginResult.Status == LoginResponseStatus.Success)
+        {
+            await SaveToken(api);
+            return LoginResponseStatus.Success;
+        }
+
+        return loginResult.Status;
+    }
+
+    public async Task<LoginResponseStatus> VrcLoginContinuationUsingTwoFactor()
+    {
+        var api = new VRChatAPI(_dataCollector);
+        var userinput_cookies__sensitive = await _credentialsStorage.RequireCookieOrToken();
+        if (userinput_cookies__sensitive != null)
+        {
+            api.ProvideCookies(userinput_cookies__sensitive);
+        }
+
+        var loginResult = await api.VerifyTwofer(_twoFactor__sensitive, TwoferMethod.Email);
+        if (loginResult.Status == LoginResponseStatus.RequiresTwofer)
+        {
+            await SaveToken(api);
+            return LoginResponseStatus.RequiresTwofer;
+        }
+        
+        if (loginResult.Status == LoginResponseStatus.Success)
+        {
+            await SaveToken(api);
+            return LoginResponseStatus.Success;
+        }
+
+        return loginResult.Status;
+    }
+
     private async Task<VRChatAPI> InitializeAPI()
     {
         var api = new VRChatAPI(_dataCollector);
-        if (File.Exists(CookieFileName))
+        var userinput_cookies__sensitive = await _credentialsStorage.RequireCookieOrToken();
+        if (userinput_cookies__sensitive != null)
         {
-            var userinput_cookies__sensitive = await File.ReadAllTextAsync(CookieFileName, Encoding.UTF8);
             api.ProvideCookies(userinput_cookies__sensitive);
         }
 
@@ -243,7 +299,7 @@ public class VRChatCommunicator
             var result = await api.VerifyTwofer(_twoFactor__sensitive, TwoferMethod.Email); // FIXME: Only email 2FA is supported here
             if (result.Status == LoginResponseStatus.Success)
             {
-                await SaveCookiesIntoFile(api);
+                await SaveToken(api);
                 return; // Success
             }
             else
@@ -256,13 +312,13 @@ public class VRChatCommunicator
         var loginResult = await api.Login(_account__sensitive, _password__sensitive);
         if (loginResult.Status == LoginResponseStatus.RequiresTwofer)
         {
-            await SaveCookiesIntoFile(api);
+            await SaveToken(api);
             throw new ArgumentException($"Needs two factor authentication, check your {loginResult.TwoferMethod}");
         }
     }
 
-    private async Task SaveCookiesIntoFile(VRChatAPI api)
+    private async Task SaveToken(VRChatAPI api)
     {
-        await File.WriteAllTextAsync(CookieFileName, api.GetAllCookies__Sensitive(), Encoding.UTF8);
+        await _credentialsStorage.StoreCookieOrToken(api.GetAllCookies__Sensitive());
     }
 }

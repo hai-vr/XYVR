@@ -39,4 +39,9 @@ public class ConnectorManagement
     {
         Connectors.Remove(Connectors.First(conn => conn.guid == guid));
     }
+
+    public Connector GetConnector(string guid)
+    {
+        return Connectors.First(conn => conn.guid == guid);
+    }
 }

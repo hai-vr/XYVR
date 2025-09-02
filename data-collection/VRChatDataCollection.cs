@@ -2,12 +2,19 @@
 using XYVR.AccountAuthority.VRChat;
 using XYVR.API.VRChat;
 using XYVR.Core;
+using XYVR.Scaffold;
 
 namespace XYVR.Data.Collection;
 
 public class VRChatDataCollection(IndividualRepository repository, DataCollectionStorage dataCollectionStorage) : IDataCollection
 {
-    private readonly VRChatCommunicator _vrChatCommunicator = new(dataCollectionStorage);
+    private readonly VRChatCommunicator _vrChatCommunicator = new(
+        dataCollectionStorage,
+        Environment.GetEnvironmentVariable(XYVREnvVar.VRChatAccount)!,
+        Environment.GetEnvironmentVariable(XYVREnvVar.VRChatPassword)!,
+        Environment.GetEnvironmentVariable(XYVREnvVar.VRChatTwoFactorCode),
+        new FlawedSingleGlobalCookieCredentialsStorage()
+    );
 
     /// Collects all VRChat accounts from upstream but only returns accounts that have not been discovered yet.<br/>
     /// This does not return information about existing accounts, even if those existing accounts had been modified upstream.<br/>

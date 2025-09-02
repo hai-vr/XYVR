@@ -2,8 +2,61 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    margin-right: auto;
-    min-width: 200px;
+    align-items: center;
+    width: 400px;
+    margin: 0 auto;
+}
+
+.input-fields > * {
+    width: 100%;
+}
+
+.checkbox-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text-primary);
+    user-select: none;
+}
+
+.checkbox-container input[type="checkbox"] {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--border-primary);
+    border-radius: 4px;
+    background: var(--bg-primary);
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.checkbox-container input[type="checkbox"]:hover {
+    border-color: var(--accent-primary);
+}
+
+.checkbox-container input[type="checkbox"]:checked {
+    background: var(--accent-primary);
+    border-color: var(--accent-primary);
+}
+
+.checkbox-container input[type="checkbox"]:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.checkbox-container input[type="checkbox"]:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--accent-primary-alpha);
 }
 
 .login-input,

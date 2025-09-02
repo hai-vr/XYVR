@@ -2,6 +2,7 @@
 using System.Windows;
 using Microsoft.Web.WebView2.Core;
 using XYVR.Core;
+using XYVR.Data.Collection;
 using XYVR.Scaffold;
 
 namespace XYVR.UI.WebviewUI;
@@ -15,6 +16,7 @@ public partial class MainWindow : Window
 
     public IndividualRepository IndividualRepository { get; private set; }
     public ConnectorManagement ConnectorsMgt { get; private set; }
+    public CredentialsManagement CredentialsMgt { get; private set; }
 
     public MainWindow()
     {
@@ -31,6 +33,7 @@ public partial class MainWindow : Window
     {
         IndividualRepository = new IndividualRepository(await Scaffolding.OpenRepository());
         ConnectorsMgt = new ConnectorManagement(await Scaffolding.OpenConnectors());
+        CredentialsMgt = new CredentialsManagement();
         
         await WebView.EnsureCoreWebView2Async();
         WebView.CoreWebView2.AddHostObjectToScript("appApi", _appBff);

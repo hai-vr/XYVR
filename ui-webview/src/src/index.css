@@ -240,6 +240,20 @@ button:focus-visible {
     outline-offset: 2px;
 }
 
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: var(--bg-secondary);
+    border-color: var(--border-primary);
+    color: var(--text-secondary);
+}
+
+button:disabled:hover {
+    background-color: var(--bg-secondary);
+    border-color: var(--border-primary);
+    color: var(--text-secondary);
+}
+
 .icon-button {
     background: var(--bg-secondary);
     border: 1px solid var(--border-secondary);
