@@ -1,4 +1,3 @@
-
 import { useEffect, useState, useMemo, useCallback } from 'react'
 import './App.css'
 import Individual from "./Individual.jsx";
@@ -8,6 +7,7 @@ function App() {
     const [appVersion, setAppVersion] = useState('');
     const [individuals, setIndividuals] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
+    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
     const [isDark, setIsDark] = useState(false)
     const [showOnlyContacts, setShowOnlyContacts] = useState(false)
 
@@ -15,6 +15,16 @@ function App() {
     const [displayedCount, setDisplayedCount] = useState(50); // Start with 50 items
     const [isLoading, setIsLoading] = useState(false);
     const ITEMS_PER_LOAD = 25; // Load 25 more items each time
+    const SEARCH_DELAY = 100; // 300ms delay for search
+
+    // Debounce search term
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearchTerm(searchTerm);
+        }, SEARCH_DELAY);
+
+        return () => clearTimeout(timer);
+    }, [searchTerm, SEARCH_DELAY]);
 
     useEffect(() => {
         // Wait for WebView2 API to be available
@@ -53,10 +63,10 @@ function App() {
         document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
     }, [isDark]);
 
-    // Reset displayed count when search term or filter changes
+    // Reset displayed count when debounced search term or filter changes
     useEffect(() => {
         setDisplayedCount(50);
-    }, [searchTerm, showOnlyContacts]);
+    }, [debouncedSearchTerm, showOnlyContacts]);
 
     // Remove the filteredIndividuals calculation and pass search logic to Individual components
     const removeDiacritics = (str) => {
@@ -345,20 +355,20 @@ function App() {
         }) || false;
     };
 
-    // Create sorted and filtered individuals array
+    // Create sorted and filtered individuals array (now using debouncedSearchTerm)
     const sortedAndFilteredIndividuals = useMemo(() => {
-        const visibleIndividuals = individuals.filter(ind => isIndividualVisible(ind, searchTerm));
+        const visibleIndividuals = individuals.filter(ind => isIndividualVisible(ind, debouncedSearchTerm));
 
-        if (!searchTerm) {
+        if (!debouncedSearchTerm) {
             return visibleIndividuals;
         }
 
         // Sort by priority: display name matches first, then identifier matches, then original order
         return visibleIndividuals.sort((a, b) => {
-            const aHasDisplayNameMatch = hasDisplayNameMatch(a, searchTerm);
-            const bHasDisplayNameMatch = hasDisplayNameMatch(b, searchTerm);
-            const aHasIdentifierMatch = hasIdentifierMatch(a, searchTerm);
-            const bHasIdentifierMatch = hasIdentifierMatch(b, searchTerm);
+            const aHasDisplayNameMatch = hasDisplayNameMatch(a, debouncedSearchTerm);
+            const bHasDisplayNameMatch = hasDisplayNameMatch(b, debouncedSearchTerm);
+            const aHasIdentifierMatch = hasIdentifierMatch(a, debouncedSearchTerm);
+            const bHasIdentifierMatch = hasIdentifierMatch(b, debouncedSearchTerm);
 
             // First priority: display name matches
             if (aHasDisplayNameMatch && !bHasDisplayNameMatch) return -1;
@@ -373,7 +383,7 @@ function App() {
             // If both have the same priority level, maintain original order
             return 0;
         });
-    }, [individuals, searchTerm, showOnlyContacts]);
+    }, [individuals, debouncedSearchTerm, showOnlyContacts]);
 
     // Get the currently displayed individuals (for infinite scrolling)
     const displayedIndividuals = useMemo(() => {
@@ -453,12 +463,12 @@ function App() {
     // Calculate visible individuals count using the sorted array
     const totalFilteredCount = sortedAndFilteredIndividuals.length;
 
-    // Add this after the existing parseSearchTerms function call in isIndividualVisible or create a new useMemo
+    // Add this after the existing parseSearchTerms function call in isIndividualVisible or create a new useMemo (now using debouncedSearchTerm)
     const showBio = useMemo(() => {
-        if (!searchTerm) return false;
-        const { specialTerms } = parseSearchTerms(searchTerm);
+        if (!debouncedSearchTerm) return false;
+        const { specialTerms } = parseSearchTerms(debouncedSearchTerm);
         return specialTerms.some(term => term.startsWith('bio:'));
-    }, [searchTerm]);
+    }, [debouncedSearchTerm]);
 
     // Show load more button helper
     const hasMoreItems = displayedCount < totalFilteredCount;
@@ -492,10 +502,10 @@ function App() {
                             </div>
                         </div>
 
-                        {searchTerm && (
+                        {debouncedSearchTerm && (
                             <div className="search-results-info">
                                 {totalFilteredCount === 0
-                                    ? `No results found for "${searchTerm}"`
+                                    ? `No results found for "${debouncedSearchTerm}"`
                                     : `Showing ${displayedCount} of ${totalFilteredCount} results${displayedCount < totalFilteredCount ? ' (scroll for more)' : ''}`
                                 }
                             </div>
@@ -555,10 +565,10 @@ function App() {
                         </div>
                     )}
 
-                    {searchTerm && totalFilteredCount === 0 && (
+                    {debouncedSearchTerm && totalFilteredCount === 0 && (
                         <div className="no-results-message">
                             <div className="no-results-icon">🔍</div>
-                            <div className="no-results-text">No individuals found matching "<strong>{searchTerm}</strong>"</div>
+                            <div className="no-results-text">No individuals found matching "<strong>{debouncedSearchTerm}</strong>"</div>
                             <div className="no-results-hint">
                                 Try searching by name, note content, or use special terms like app:resonite, app:vrchat, app:cluster, accounts:&gt;1, has:alt, has:bot, links:misskey, bio:creator
                             </div>
