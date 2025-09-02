@@ -1,4 +1,5 @@
-﻿using XYVR.Core;
+﻿using core;
+using XYVR.Core;
 using XYVR.Data.Collection;
 using XYVR.Scaffold;
 
@@ -10,23 +11,80 @@ public enum Mode
     ManualMerges,
     UpdateExistingIndividuals,
     RebuildFromStorage,
-    UpdateAndGetNew
+    UpdateAndGetNew,
+    SetupConnectors,
 }
 
 internal partial class Program
 {
-    private static Mode mode = Mode.UpdateAndGetNew;
+    private static Mode mode = Mode.FindNewIndividuals;
 
     public static async Task Main()
     {
         var storage = new DataCollectionStorage();
-        var individuals = await Scaffolding.OpenRepository();
+
+        var repository = new IndividualRepository(await Scaffolding.OpenRepository());
+        var connectors = new ConnectorManagement(await Scaffolding.OpenConnectors());
         
-        var repository = new IndividualRepository(individuals);
         var dataCollection = new CompoundDataCollection([new ResoniteDataCollection(repository, storage), new VRChatDataCollection(repository, storage)]);
 
         switch (mode)
         {
+            case Mode.SetupConnectors:
+            {
+                {
+                    var resonite = connectors.CreateNewConnector();
+                    
+                    resonite.account = new ConnectorAccount
+                    {
+                        namedApp = NamedApp.Resonite,
+                        qualifiedAppName = "resonite",
+
+                        inAppDisplayName = "Haï~",
+                        inAppIdentifier = "U-Hai",
+                    };
+                    resonite.refreshMode = RefreshMode.ManualUpdatesOnly;
+                    resonite.type = ConnectorType.ResoniteAPI;
+                    
+                    connectors.UpdateConnector(resonite);
+                }
+                {
+                    var vrchat = connectors.CreateNewConnector();
+                    
+                    vrchat.account = new ConnectorAccount
+                    {
+                        namedApp = NamedApp.VRChat,
+                        qualifiedAppName = "vrchat",
+
+                        inAppDisplayName = "Haï~",
+                        inAppIdentifier = "usr_505d0888-f9f1-4ba1-92d5-71ff09607837",
+                    };
+                    vrchat.refreshMode = RefreshMode.ManualUpdatesOnly;
+                    vrchat.type = ConnectorType.VRChatAPI;
+                    
+                    connectors.UpdateConnector(vrchat);
+                }
+                {
+                    var vrchat = connectors.CreateNewConnector();
+                    
+                    vrchat.account = new ConnectorAccount
+                    {
+                        namedApp = NamedApp.VRChat,
+                        qualifiedAppName = "vrchat",
+
+                        inAppDisplayName = "Baï~",
+                        inAppIdentifier = "usr_3892108f-eb79-4120-980d-3fdc130f3b3b",
+                    };
+                    vrchat.refreshMode = RefreshMode.ManualUpdatesOnly;
+                    vrchat.type = ConnectorType.VRChatAPI;
+                    
+                    connectors.UpdateConnector(vrchat);
+                }
+                
+                await Scaffolding.SaveConnectors(connectors);
+
+                break;
+            }
             case Mode.RebuildFromStorage:
             {
                 var trail = await Scaffolding.RebuildTrail();
