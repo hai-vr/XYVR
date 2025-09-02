@@ -139,7 +139,7 @@
     --header-right: #667eea;
     --header-gradient: linear-gradient(135deg, var(--header-left) 0%, var(--header-right) 100%);
     --header-text: white;
-    --header-border: none;
+    --header-border: 1px solid var(--border-primary);
 
     /* Theme toggle button colors for light theme */
     --theme-toggle-bg: rgba(0, 0, 0, 0.05);
@@ -150,7 +150,7 @@
     /* Search input colors for light theme */
     --search-input-bg: rgba(255, 255, 255, 0.9);
     --search-input-text: #333;
-    --search-input-border: none;
+    --search-input-border: var(--border-primary);
     --search-placeholder: #666;
     --search-focus-shadow: var(--shadow-medium);
     --search-icon-color: #666;
