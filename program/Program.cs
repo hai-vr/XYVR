@@ -13,12 +13,13 @@ public enum Mode
     Duplicates,
     ManualMerges,
     UpdateExistingIndividuals,
-    RebuildFromStorage
+    RebuildFromStorage,
+    UpdateAndGetNew
 }
 
 internal partial class Program
 {
-    private static Mode mode = Mode.RebuildFromStorage;
+    private static Mode mode = Mode.UpdateAndGetNew;
 
     [GeneratedRegex(@"usr_[a-f0-9\-]+")]
     private static partial Regex UsrRegex();
@@ -75,6 +76,28 @@ internal partial class Program
                 var dataCollection = new DataCollection(repository);
 
                 var undiscoveredAccounts = await dataCollection.CollectExistingAccounts();
+                if (undiscoveredAccounts.Count > 0)
+                {
+                    repository.MergeAccounts(undiscoveredAccounts);
+
+                    await Scaffolding.SaveRepository(repository);
+                }
+
+                break;
+            }
+            case Mode.UpdateAndGetNew:
+            {
+                var dataCollection = new DataCollection(repository);
+
+                var undiscoveredAccounts2 = await dataCollection.CollectExistingAccounts();
+                if (undiscoveredAccounts2.Count > 0)
+                {
+                    repository.MergeAccounts(undiscoveredAccounts2);
+
+                    await Scaffolding.SaveRepository(repository);
+                }
+
+                var undiscoveredAccounts = await dataCollection.CollectAllUndiscoveredAccounts();
                 if (undiscoveredAccounts.Count > 0)
                 {
                     repository.MergeAccounts(undiscoveredAccounts);
