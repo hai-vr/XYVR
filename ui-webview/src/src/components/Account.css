@@ -42,6 +42,10 @@
     background: var(--app-cluster);
 }
 
+.app-icon.chilloutvr {
+    background: var(--app-chilloutvr);
+}
+
 .app-icon.default {
     background: var(--app-default);
 }

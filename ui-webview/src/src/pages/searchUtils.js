@@ -127,6 +127,9 @@ export const matchesSpecialTerms = (individual, specialTerms) => {
             case 'app:cluster':
                 return individual.accounts?.some(account => account.namedApp === "Cluster") || false;
 
+            case 'app:chilloutvr':
+                return individual.accounts?.some(account => account.namedApp === "ChilloutVR") || false;
+
             case 'has:bot':
                 return individual.accounts?.some(account => account.isTechnical) || false;
 

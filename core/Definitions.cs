@@ -102,4 +102,5 @@ public enum NamedApp
     Resonite = 1,
     VRChat = 2,
     Cluster = 3,
+    ChilloutVR = 4,
 }

@@ -16,6 +16,8 @@ const Account = ({ account }) => {
                 return "app-icon vrchat";
             case "Cluster":
                 return "app-icon cluster";
+            case "ChilloutVR":
+                return "app-icon chilloutvr";
             default:
                 return "app-icon default";
         }
@@ -29,6 +31,8 @@ const Account = ({ account }) => {
                 return '💬';
             case "Cluster":
                 return '☁️';
+            case "ChilloutVR":
+                return '🌆';
             default:
                 return '❓';
         }
@@ -42,6 +46,8 @@ const Account = ({ account }) => {
                 return 'VRChat';
             case "Cluster":
                 return `Cluster (@${account.inAppIdentifier})`;
+            case "ChilloutVR":
+                return 'ChilloutVR';
             default:
                 return account.qualifiedAppName;
         }
@@ -71,7 +77,7 @@ const Account = ({ account }) => {
                     )}
                     {account.isAnyCallerContact && (
                         <span className="badge contact">
-                            {account.namedApp === "VRChat" ? 'Friend' : 'Contact'}
+                            {account.namedApp === "VRChat" || account.namedApp === "ChilloutVR" ? 'Friend' : 'Contact'}
                         </span>
                     )}
                     {account.isTechnical && (
@@ -79,12 +85,12 @@ const Account = ({ account }) => {
                             Bot
                         </span>
                     )}
-                    {account.namedApp === "VRChat" && (
+                    {(account.namedApp === "VRChat" || account.namedApp === "ChilloutVR") && (
                         <a
-                            href={`https://vrchat.com/home/user/${account.inAppIdentifier}`}
+                            href={`${account.namedApp === "VRChat" && 'https://vrchat.com/home/user/' || 'https://hub.chilloutvr.net/social/profile?guid='}${account.inAppIdentifier}`}
                             rel="noopener noreferrer"
                             className="any-button"
-                            title="Open VRChat Profile"
+                            title={`Open ${account.namedApp} Profile`}
                         >
                             🌍
                         </a>
