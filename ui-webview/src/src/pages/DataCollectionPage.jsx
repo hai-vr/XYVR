@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './DataCollectionPage.css'
+import '../Header.css'
 import Connector from "../components/Connector.jsx";
 
 function DataCollectionPage({ isDark, setIsDark }) {
@@ -92,28 +93,28 @@ function DataCollectionPage({ isDark, setIsDark }) {
 
     return (
         <div className="data-collection-container">
-            <div className="header-section">
-                <div className="header-content">
-                    <h2 className="header-title">
-                        Data Collection
-                    </h2>
+            <div className="header-group">
+                <div className="header-section">
+                    <div className="header-content">
+                        <h2 className="header-title">
+                            Connections
+                        </h2>
 
-                    <div className="header-buttons">
-                        <button
-                            onClick={() => navigate('/address-book')}
-                            title="Go to Address Book"
-                        >
-                            Back
-                        </button>
-                        
-                        <button
-                            className="theme-toggle-btn"
-                            onClick={() => setIsDark(!isDark)}
-                            title={`Switch to ${isDark ? 'Light' : 'Dark'} Mode`}
-                        >
-                            {isDark ? '🌙' : '☀️'}
-                        </button>
+                        <div className="header-buttons">
+                            <button
+                                className="theme-toggle-btn"
+                                onClick={() => setIsDark(!isDark)}
+                                title={`Switch to ${isDark ? 'Light' : 'Dark'} Mode`}
+                            >
+                                {isDark ? '🌙' : '☀️'}
+                            </button>
+                        </div>
                     </div>
+                </div>
+                <div className="header-thin-right">
+                    <h2 className="header-title">
+                        <button className="header-nav" onClick={() => navigate('/address-book')}>✕</button>
+                    </h2>
                 </div>
             </div>
 

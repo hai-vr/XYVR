@@ -37,6 +37,8 @@
 
     /* Header specific colors */
     --header-gradient: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+    --header-left: var(--bg-secondary);
+    --header-right: var(--bg-primary);
     --header-text: var(--text-primary);
     --header-border: 1px solid var(--border-primary);
 
@@ -133,7 +135,9 @@
     --shadow-heavy: rgba(0, 0, 0, 0.2);
 
     /* Header specific colors for light theme */
-    --header-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --header-left: #667eea;
+    --header-right: #667eea;
+    --header-gradient: linear-gradient(135deg, var(--header-left) 0%, var(--header-right) 100%);
     --header-text: white;
     --header-border: none;
 

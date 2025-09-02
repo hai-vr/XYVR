@@ -10,38 +10,10 @@
     flex: 1;
 }
 
-.header-section {
-    background: var(--header-gradient);
-    color: var(--header-text);
-    padding: 20px;
-    border-radius: 12px;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 15px var(--shadow-medium);
-    width: 100%;
-    box-sizing: border-box;
-    min-width: 0;
-    border: var(--header-border);
-}
-
-.header-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-}
-
-.header-title {
-    margin: 0;
-    font-size: 24px;
-    font-weight: 600;
-    min-width: 0;
-    color: var(--header-text);
-}
-
 .theme-toggle-btn {
     background: var(--theme-toggle-bg);
     border: 1px solid var(--theme-toggle-border);
-    border-radius: 50%;
+    border-radius: 20%;
     width: 44px;
     height: 44px;
     display: flex;
@@ -175,13 +147,6 @@
     color: var(--text-secondary);
 }
 
-/* Header buttons container */
-.header-buttons {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
 /* Contacts filter now uses normal button styling; no special visuals. */
 
 .load-more-section {
@@ -221,20 +186,6 @@
         padding: 0 10px;
     }
 
-    .header-section {
-        padding: 15px;
-    }
-
-    .header-title {
-        font-size: 20px;
-    }
-
-    .header-content {
-        flex-direction: column;
-        gap: 15px;
-        align-items: flex-start;
-    }
-
     .theme-toggle-btn {
         align-self: flex-end;
         width: 40px;
@@ -244,37 +195,7 @@
 }
 
 @media (max-width: 320px) {
-    .header-content {
-        align-items: center;
-    }
-
     .theme-toggle-btn {
         align-self: center;
     }
 }
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .header-buttons {
-        gap: 8px;
-    }
-
-    /* contacts filter uses normal button; no special responsive overrides */
-}
-
-@media (max-width: 480px) {
-    .header-content {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 12px;
-    }
-
-    .header-buttons {
-        align-self: stretch;
-        justify-content: space-between;
-    }
-
-    /* contacts filter uses normal button; no special responsive overrides */
-}
-
-/* Data collection navigation uses normal button styling */

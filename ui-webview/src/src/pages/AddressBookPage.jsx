@@ -1,6 +1,7 @@
 ﻿import { useEffect, useState, useMemo, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './AddressBookPage.css'
+import '../Header.css'
 import Individual from "../components/Individual.jsx"
 import {
     isIndividualVisible,
@@ -159,36 +160,36 @@ function AddressBookPage({ isDark, setIsDark }) {
     return (
         <>
             <div className="individuals-container">
-                <div className="header-section">
-                    <div className="header-content">
-                        <h2 className="header-title">
-                            {showOnlyContacts && 'Contacts' || 'Contacts & Notes'} ({totalFilteredCount})
-                        </h2>
+                <div className="header-group">
+                    <div className="header-section">
+                        <div className="header-content">
+                            <h2 className="header-title">
+                                {showOnlyContacts && 'Contacts' || 'Contacts & Notes'} ({totalFilteredCount})
+                            </h2>
 
-                        <div className="header-buttons">
-                            <button
-                                onClick={() => navigate('/data-collection')}
-                                title="Go to Data Collection"
-                            >
-                                📊 Data Collection
-                            </button>
+                            <div className="header-buttons">
+                                <button
+                                    onClick={() => setShowOnlyContacts(!showOnlyContacts)}
+                                    aria-pressed={showOnlyContacts}
+                                    title={`${showOnlyContacts ? 'Show all individuals' : 'Show only contacts'}`}
+                                >
+                                    Only Contacts
+                                </button>
 
-                            <button
-                                onClick={() => setShowOnlyContacts(!showOnlyContacts)}
-                                aria-pressed={showOnlyContacts}
-                                title={`${showOnlyContacts ? 'Show all individuals' : 'Show only contacts'}`}
-                            >
-                                Only Contacts
-                            </button>
-
-                            <button
-                                className="theme-toggle-btn"
-                                onClick={() => setIsDark(!isDark)}
-                                title={`Switch to ${isDark ? 'Light' : 'Dark'} Mode`}
-                            >
-                                {isDark ? '🌙' : '☀️'}
-                            </button>
+                                <button
+                                    className="theme-toggle-btn"
+                                    onClick={() => setIsDark(!isDark)}
+                                    title={`Switch to ${isDark ? 'Light' : 'Dark'} Mode`}
+                                >
+                                    {isDark ? '🌙' : '☀️'}
+                                </button>
+                            </div>
                         </div>
+                    </div>
+                    <div className="header-thin-right">
+                        <h2 className="header-title">
+                            <button className="header-nav" onClick={() => navigate('/data-collection')}>⚙️</button>
+                        </h2>
                     </div>
                 </div>
 
