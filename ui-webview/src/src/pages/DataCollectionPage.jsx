@@ -2,18 +2,12 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './DataCollectionPage.css'
-import Account from "../components/Account.jsx";
+import Connector from "../components/Connector.jsx";
 
-function DataCollectionPage() {
+function DataCollectionPage({ isDark, setIsDark }) {
     const navigate = useNavigate()
-    const [isDark, setIsDark] = useState(false)
     const [connectors, setConnectors] = useState([]);
     const [deleteStates, setDeleteStates] = useState({}); // Track delete confirmation states
-
-    // Separate useEffect for theme changes
-    useEffect(() => {
-        document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-    }, [isDark]);
 
     useEffect(() => {
         const initializeApi = async () => {
@@ -128,27 +122,12 @@ function DataCollectionPage() {
                 <div className="connectors-section">
                     <div className="connectors-grid">
                         {connectors.map((connector, index) => (
-                            <div key={index} className="connector-card">
-                                {connector.account && (
-                                    <Account account={connector.account} />
-                                )}
-
-                                <div className="connector-actions">
-                                    <button
-                                        className="connector-action-btn"
-                                        title="Update"
-                                    >
-                                        📋 Update TODO
-                                    </button>
-                                    <button
-                                        className={`connector-action-btn delete-btn ${deleteStates[connector.guid]?.confirming ? 'confirming' : ''}`}
-                                        onClick={() => handleDeleteClick(connector.guid)}
-                                        title={deleteStates[connector.guid]?.confirming ? 'Click again to confirm delete' : 'Delete connector (requires double-click)'}
-                                    >
-                                        {deleteStates[connector.guid]?.confirming ? '⚠️ Really remove?' : '🗑️ Remove'}
-                                    </button>
-                                </div>
-                            </div>
+                            <Connector
+                                key={index}
+                                connector={connector}
+                                onDeleteClick={handleDeleteClick}
+                                deleteState={deleteStates[connector.guid]}
+                            />
                         ))}
                     </div>
                 </div>

@@ -6,11 +6,28 @@ import Navigation from './Navigation.jsx'
 import './AppRouter.css'
 
 function AppRouter() {
-    const [isDark, setIsDark] = useState(false)
+    const [isDark, setIsDark] = useState(() => {
+        // Initialize from localStorage or prefers-color-scheme
+        try {
+            const stored = localStorage.getItem('theme');
+            if (stored === 'dark') return true;
+            if (stored === 'light') return false;
+        } catch {
+            // localStorage may be unavailable; fall back to media query
+            void 0;
+        }
+        return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    })
 
-    // Handle theme changes
+    // Apply theme and persist
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light')
+        try {
+            localStorage.setItem('theme', isDark ? 'dark' : 'light')
+        } catch {
+            // Ignore persistence errors (e.g., storage disabled)
+            void 0;
+        }
     }, [isDark])
 
     return (
