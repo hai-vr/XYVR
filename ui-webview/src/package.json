@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build-and-copy": "npm run build && xcopy /E /I /Y dist\\* ..\\bin\\Debug\\net9.0-windows\\src\\dist\\",
     "lint": "eslint .",
     "preview": "vite preview"
   },

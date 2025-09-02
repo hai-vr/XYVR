@@ -151,7 +151,7 @@ function AddressBookPage({ isDark, setIsDark }) {
                 <div className="header-section">
                     <div className="header-content">
                         <h2 className="header-title">
-                            Users & Accounts ({totalFilteredCount})
+                            {showOnlyContacts && 'Contacts' || 'Contacts & Notes'} ({totalFilteredCount})
                         </h2>
 
                         <div className="header-buttons">
@@ -180,18 +180,8 @@ function AddressBookPage({ isDark, setIsDark }) {
                             </button>
                         </div>
                     </div>
-
-                    {debouncedSearchTerm && (
-                        <div className="search-results-info">
-                            {totalFilteredCount === 0
-                                ? `No results found for "${debouncedSearchTerm}"`
-                                : `Showing ${displayedCount} of ${totalFilteredCount} results${displayedCount < totalFilteredCount ? ' (scroll for more)' : ''}`
-                            }
-                        </div>
-                    )}
                 </div>
 
-                {/* Search field */}
                 <div className="search-container">
                     <input
                         type="text"
@@ -212,20 +202,29 @@ function AddressBookPage({ isDark, setIsDark }) {
                         </button>
                     )}
                 </div>
+                
+                <div>
+                    {debouncedSearchTerm && (
+                        <div className="search-results-info">
+                            {totalFilteredCount === 0
+                                ? `No results found for "${debouncedSearchTerm}"`
+                                : `Showing ${displayedCount} of ${totalFilteredCount} results`
+                            }
+                        </div>
+                    )}
+                </div>
 
                 <div className="individuals-grid">
                     {displayedIndividuals.map((individual, index) => (
                         <Individual
                             key={individual.id || index}
                             individual={individual}
-                            index={index}
                             isVisible={true}
                             showBio={showBio}
                         />
                     ))}
                 </div>
 
-                {/* Loading indicator and load more button */}
                 {hasMoreItems && (
                     <div className="load-more-section">
                         {isLoading ? (

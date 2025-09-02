@@ -14,7 +14,7 @@ function DataCollectionPage() {
 
     const handleButtonClick = async () => {
         if (window.chrome && window.chrome.webview && window.chrome.webview.hostObjects) {
-            const result = await window.chrome.webview.hostObjects.appApi.DataCollectionTriggerTest();
+            const result = await window.chrome.webview.hostObjects.dataCollectionApi.DataCollectionTriggerTest();
         }
     }
 

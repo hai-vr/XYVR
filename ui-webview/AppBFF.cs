@@ -7,30 +7,26 @@ using XYVR.Core;
 namespace XYVR.UI.WebviewUI;
 
 [ComVisible(true)]
-public interface IAppApi
+public interface IAppBFF
 {
     string GetAppVersion();
     string GetAllExposedIndividualsOrderedByContact();
     void ShowMessage(string message);
     string GetCurrentTime();
     void CloseApp();
-    void DataCollectionTriggerTest();
 }
 
 [ComVisible(true)]
 [ClassInterface(ClassInterfaceType.None)]
-public class AppApi : IAppApi
+public class AppBFF : IAppBFF
 {
     private readonly MainWindow _mainWindow;
     private readonly JsonSerializerSettings _serializer;
 
-    public AppApi(MainWindow mainWindow)
+    public AppBFF(MainWindow mainWindow)
     {
         _mainWindow = mainWindow;
-        _serializer = new JsonSerializerSettings
-        {
-            Converters = { new StringEnumConverter() }
-        };
+        _serializer = BFFUtils.NewSerializer();
     }
 
     public string GetAppVersion()
@@ -90,11 +86,6 @@ public class AppApi : IAppApi
         {
             _mainWindow.Close();
         });
-    }
-
-    public void DataCollectionTriggerTest()
-    {
-        MessageBox.Show("data collection trigger", "From WebView", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 }
 

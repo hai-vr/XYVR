@@ -1,7 +1,7 @@
 ﻿import Account from "./Account.jsx";
 import "./Individual.css";
 
-function Individual({ individual, index, isVisible = true, showBio = false }) {
+function Individual({ individual, isVisible = true, showBio = false }) {
     // Get all VRChat account links and filter to only show http/https URLs
     const vrChatLinks = individual.accounts
         ?.filter(account => account.namedApp === "VRChat" && account.specifics?.urls?.length > 0)
@@ -60,7 +60,7 @@ function Individual({ individual, index, isVisible = true, showBio = false }) {
                                 rel="noopener noreferrer"
                                 className="vrchat-link"
                             >
-                                🔗 {url}
+                                {url}
                             </a>
                             <button
                                 onClick={(e) => copyToClipboard(url, e)}

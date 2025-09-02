@@ -66,12 +66,12 @@
 
 .search-results-info {
     margin-top: 10px;
+    margin-bottom: 10px;
     font-size: 14px;
     opacity: 0.9;
     min-height: 18px;
     word-break: break-word;
     min-width: 0;
-    color: var(--header-text);
 }
 
 .search-container {
