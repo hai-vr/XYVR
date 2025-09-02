@@ -68,11 +68,6 @@
     gap: 6px;
 }
 
-.data-collection-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-}
-
 .data-collection-btn:active {
     transform: translateY(0);
 }
@@ -86,3 +81,371 @@
     font-family: monospace;
     display: inline-block;
 }
+
+.connectors-section {
+    margin: 2rem 0;
+    width: 100%;
+}
+
+.connectors-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.connectors-grid {
+    display: grid;
+    gap: 1.5rem;
+    width: 100%;
+    grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+    .connectors-grid {
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    }
+}
+
+@media (min-width: 1200px) {
+    .connectors-grid {
+        grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+    }
+}
+
+.connector-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px var(--shadow-light);
+    position: relative;
+    overflow: hidden;
+}
+
+.connector-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.connector-icon {
+    width: 48px;
+    height: 48px;
+    background: var(--accent-primary);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(104, 151, 187, 0.3);
+}
+
+.connector-main-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.connector-id {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+    word-break: break-all;
+    font-family: monospace;
+    background: var(--bg-tertiary);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+.connector-type {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    text-transform: capitalize;
+}
+
+.connector-badges {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-end;
+}
+
+.badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.badge.live-mode {
+    background: var(--status-success-bg, #d4edda);
+    color: var(--status-success-text, #155724);
+    border: 1px solid var(--status-success-border, #c3e6cb);
+}
+
+.badge.refresh-mode {
+    background: var(--status-info-bg, #cce7ff);
+    color: var(--status-info-text, #004085);
+    border: 1px solid var(--status-info-border, #b3d9ff);
+}
+
+.connector-account {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-secondary);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.account-header-section {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.account-icon {
+    width: 32px;
+    height: 32px;
+    background: var(--bg-tertiary);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.account-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.account-display-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    margin-bottom: 0.2rem;
+    word-break: break-word;
+}
+
+.account-app-name {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    text-transform: capitalize;
+}
+
+.account-identifier {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background: var(--bg-tertiary);
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
+.identifier-label {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.identifier-value {
+    color: var(--text-primary);
+    font-family: monospace;
+    word-break: break-all;
+    flex: 1;
+}
+
+.connector-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-secondary);
+}
+
+.connector-action-btn {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border-primary);
+    border-radius: 6px;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    flex: 1;
+}
+
+.connector-action-btn:hover {
+    background: var(--bg-tertiary);
+    border-color: var(--accent-primary);
+    transform: translateY(-1px);
+}
+
+.connector-action-btn.primary {
+    background: var(--accent-primary);
+    color: white;
+    border-color: var(--accent-primary);
+}
+
+.connector-action-btn.primary:hover {
+    background: var(--accent-secondary);
+    border-color: var(--accent-secondary);
+}
+
+
+.connector-action-btn.primary {
+    background: var(--accent-primary);
+    color: white;
+    border-color: var(--accent-primary);
+}
+
+.connector-action-btn.primary:hover {
+    background: var(--accent-secondary);
+    border-color: var(--accent-secondary);
+}
+
+/* Delete button styling */
+.connector-action-btn.delete-btn {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    color: white;
+    border-color: #dc3545;
+    position: relative;
+    overflow: hidden;
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
+}
+
+.connector-action-btn.delete-btn:hover {
+    background: linear-gradient(135deg, #c82333, #bd2130);
+    border-color: #c82333;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.4);
+}
+
+.connector-action-btn.delete-btn.confirming {
+    background: linear-gradient(135deg, #ff6b35, #ff4d1a);
+    border-color: #ff4d1a;
+    animation: pulse-delete 1s ease-in-out infinite;
+    box-shadow:
+            0 2px 4px rgba(255, 107, 53, 0.4),
+            0 0 0 2px rgba(255, 107, 53, 0.3);
+}
+
+.connector-action-btn.delete-btn.confirming:hover {
+    background: linear-gradient(135deg, #ff4d1a, #e63900);
+    transform: translateY(-2px);
+    box-shadow:
+            0 4px 8px rgba(255, 107, 53, 0.5),
+            0 0 0 2px rgba(255, 107, 53, 0.4);
+}
+
+@keyframes pulse-delete {
+    0%, 100% {
+        box-shadow:
+                0 2px 4px rgba(255, 107, 53, 0.4),
+                0 0 0 2px rgba(255, 107, 53, 0.3);
+    }
+    50% {
+        box-shadow:
+                0 2px 4px rgba(255, 107, 53, 0.6),
+                0 0 0 4px rgba(255, 107, 53, 0.2);
+    }
+}
+
+/* Dark theme adjustments for delete button */
+[data-theme="dark"] .connector-action-btn.delete-btn {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    border-color: #e74c3c;
+    box-shadow: 0 2px 4px rgba(231, 76, 60, 0.3);
+}
+
+[data-theme="dark"] .connector-action-btn.delete-btn:hover {
+    background: linear-gradient(135deg, #c0392b, #a93226);
+    border-color: #c0392b;
+    box-shadow: 0 4px 8px rgba(231, 76, 60, 0.4);
+}
+
+[data-theme="dark"] .connector-action-btn.delete-btn.confirming {
+    background: linear-gradient(135deg, #ff7043, #ff5722);
+    border-color: #ff5722;
+    box-shadow:
+            0 2px 4px rgba(255, 112, 67, 0.4),
+            0 0 0 2px rgba(255, 112, 67, 0.3);
+}
+
+[data-theme="dark"] .connector-action-btn.delete-btn.confirming:hover {
+    background: linear-gradient(135deg, #ff5722, #e64a19);
+    box-shadow:
+            0 4px 8px rgba(255, 112, 67, 0.5),
+            0 0 0 2px rgba(255, 112, 67, 0.4);
+}
+
+/* Dark theme adjustments */
+[data-theme="dark"] .badge.live-mode {
+    background: rgba(40, 167, 69, 0.2);
+    color: #9fdf9f;
+    border-color: rgba(40, 167, 69, 0.3);
+}
+
+[data-theme="dark"] .badge.refresh-mode {
+    background: rgba(23, 162, 184, 0.2);
+    color: #9fdfff;
+    border-color: rgba(23, 162, 184, 0.3);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .connectors-grid {
+        gap: 1rem;
+    }
+
+    .connector-card {
+        padding: 1rem;
+    }
+
+    .connector-header {
+        gap: 0.75rem;
+    }
+
+    .connector-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.25rem;
+    }
+
+    .connector-actions {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .connector-badges {
+        align-items: stretch;
+    }
+
+    .badge {
+        text-align: center;
+        justify-content: center;
+    }
+}
+

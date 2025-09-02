@@ -1,5 +1,4 @@
-﻿using core;
-using XYVR.Core;
+﻿using XYVR.Core;
 using XYVR.Data.Collection;
 using XYVR.Scaffold;
 

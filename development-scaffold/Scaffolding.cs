@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using System.Text;
-using core;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using XYVR.Core;
@@ -16,7 +15,7 @@ public static class Scaffolding
     
     private static readonly Encoding Encoding = Encoding.UTF8;
     
-    private static JsonSerializerSettings _serializer = new()
+    private static readonly JsonSerializerSettings Serializer = new()
     {
         Converters = { new StringEnumConverter() }
     };
@@ -29,7 +28,7 @@ public static class Scaffolding
 
     public static string SerializeAsSingleLine(DataCollectionTrail trail)
     {
-        return JsonConvert.SerializeObject(trail, Formatting.None, _serializer);
+        return JsonConvert.SerializeObject(trail, Formatting.None, Serializer);
     }
 
     public static async Task<List<DataCollectionTrail>> RebuildTrail()
@@ -43,7 +42,7 @@ public static class Scaffolding
         {
             if (!string.IsNullOrWhiteSpace(line))
             {
-                results.Add(JsonConvert.DeserializeObject<DataCollectionTrail>(line, _serializer));
+                results.Add(JsonConvert.DeserializeObject<DataCollectionTrail>(line, Serializer));
             }
         }
 
@@ -53,14 +52,14 @@ public static class Scaffolding
     private static async Task<T> OpenIfExists<T>(string fileName, Func<T> defaultGen)
     {
         return File.Exists(fileName)
-            ? JsonConvert.DeserializeObject<T>(await File.ReadAllTextAsync(fileName, Encoding), _serializer)!
+            ? JsonConvert.DeserializeObject<T>(await File.ReadAllTextAsync(fileName, Encoding), Serializer)!
             : defaultGen();
     }
 
     private static async Task SaveTo(object element, string fileName)
     {
         // FIXME: If the disk is full, this WILL corrupt the data that already exists, causing irrepairable loss.
-        var serialized = JsonConvert.SerializeObject(element, Formatting.Indented, _serializer);
+        var serialized = JsonConvert.SerializeObject(element, Formatting.Indented, Serializer);
         await File.WriteAllTextAsync(fileName, serialized, Encoding);
     }
 

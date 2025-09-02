@@ -1,6 +1,4 @@
-﻿using XYVR.Core;
-
-namespace core;
+﻿namespace XYVR.Core;
 
 public class ConnectorManagement
 {
@@ -36,5 +34,10 @@ public class ConnectorManagement
         existingConnector.refreshMode = connector.refreshMode;
         existingConnector.liveMode = connector.liveMode;
         existingConnector.account = connector.account;
+    }
+
+    public void DeleteConnector(string guid)
+    {
+        Connectors.Remove(Connectors.First(conn => conn.guid == guid));
     }
 }

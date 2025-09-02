@@ -12,8 +12,9 @@ public partial class MainWindow : Window
     
     private readonly AppBFF _appBff;
     private readonly DataCollectionBFF _dataCollectionBff;
-    
+
     public IndividualRepository IndividualRepository { get; private set; }
+    public ConnectorManagement ConnectorsMgt { get; private set; }
 
     public MainWindow()
     {
@@ -29,6 +30,7 @@ public partial class MainWindow : Window
     private async void MainWindow_Loaded(object sender, RoutedEventArgs evt)
     {
         IndividualRepository = new IndividualRepository(await Scaffolding.OpenRepository());
+        ConnectorsMgt = new ConnectorManagement(await Scaffolding.OpenConnectors());
         
         await WebView.EnsureCoreWebView2Async();
         WebView.CoreWebView2.AddHostObjectToScript("appApi", _appBff);
