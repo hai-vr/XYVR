@@ -12,11 +12,6 @@ public class ResoniteDataCollection(IndividualRepository repository, DataCollect
         credentialsStorage
     );
 
-    /// Collects all Resonite accounts from upstream but only returns accounts that have not been discovered yet.<br/>
-    /// This does not return information about existing accounts, even if those existing accounts had been modified upstream.<br/>
-    /// Internally, this lists all current friends and notes but only retrieves and returns the full account information of IDs that aren't in the repository yet.<br/>
-    /// <br/>
-    /// This does not modify the repository.
     public async Task<List<Account>> CollectAllUndiscoveredAccounts()
     {
         var resoniteCaller = await _resoniteCommunicator.CallerAccount();
@@ -41,12 +36,18 @@ public class ResoniteDataCollection(IndividualRepository repository, DataCollect
 
         return undiscoveredAccounts;
     }
+
+    public async Task<List<Account>> CollectReturnedAccounts()
+    {
+        var resoniteCaller = await _resoniteCommunicator.CallerAccount();
+
+        var incompleteAccounts = await _resoniteCommunicator.FindIncompleteAccounts();
+
+        return incompleteAccounts
+            .Concat([resoniteCaller])
+            .ToList();
+    }
     
-    /// Collects the Resonite accounts accounts that are in the repository.<br/>
-    /// This does return new accounts, even some calls have implied the existence of new accounts.<br/>
-    /// This can return fewer accounts than there actually are in the repository if some accounts were removed upstream.<br/>
-    /// <br/>
-    /// This does not modify the repository.
     public async Task<List<Account>> CollectExistingAccounts()
     {
         var resoniteContactIds = await _resoniteCommunicator.CollectContactUserIdsToCombineWithUsers();
@@ -58,7 +59,6 @@ public class ResoniteDataCollection(IndividualRepository repository, DataCollect
         return undiscoveredAccounts;
     }
     
-    /// Using a data collection storage, try to rebuild account data.
     public async Task<List<Account>> RebuildFromDataCollectionStorage(List<DataCollectionTrail> trails)
     {
         await Task.CompletedTask;

@@ -101,6 +101,56 @@ public class VRChatCommunicator
 
         return friendsAsAccounts.Concat(notesAsAccounts).ToList();
     }
+    
+    public async Task<List<IncompleteAccount>> FindIncompleteAccounts()
+    {
+        _api ??= await InitializeAPI();
+
+        var onlineFriends = await _api.ListFriends(ListFriendsRequestType.OnlyOnline, DataCollectionReason.FindUndiscoveredAccounts);
+        var offlineFriends = await _api.ListFriends(ListFriendsRequestType.OnlyOffline, DataCollectionReason.FindUndiscoveredAccounts);
+        var userNotes = await _api.ListUserNotes(DataCollectionReason.FindUndiscoveredAccounts);
+
+        var friendsAsAccounts = onlineFriends.Concat(offlineFriends)
+            .Select(friend => new IncompleteAccount
+            {
+                namedApp = NamedApp.VRChat,
+                qualifiedAppName = VRChatQualifiedAppName,
+                inAppIdentifier = friend.id,
+                inAppDisplayName = friend.displayName,
+                callers =
+                [
+                    new IncompleteCallerAccount
+                    {
+                        isAnonymous = false,
+                        inAppIdentifier = _callerUserId
+                    }
+                ]
+            })
+            .ToList();
+        
+        var accountsCollectedSoFar = new HashSet<string>(friendsAsAccounts.Select(account => account.inAppIdentifier));
+
+        var notesAsAccounts = userNotes
+            .Where(note => !accountsCollectedSoFar.Contains(note.targetUserId))
+            .Select(full => new IncompleteAccount
+            {
+                namedApp = NamedApp.VRChat,
+                qualifiedAppName = VRChatQualifiedAppName,
+                inAppIdentifier = full.targetUserId,
+                inAppDisplayName = full.targetUser.displayName,
+                callers =
+                [
+                    new IncompleteCallerAccount
+                    {
+                        isAnonymous = false,
+                        inAppIdentifier = _callerUserId
+                    }
+                ]
+            })
+            .ToList();
+
+        return friendsAsAccounts.Concat(notesAsAccounts).ToList();
+    }
 
     /// Given a list of user IDs that may or may not exist, return a list of accounts.<br/>
     /// This does not return accounts that already exist in the repository.<br/>

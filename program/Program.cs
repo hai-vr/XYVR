@@ -10,13 +10,14 @@ public enum Mode
     ManualMerges,
     UpdateExistingIndividuals,
     RebuildFromStorage,
-    UpdateAndGetNew,
+    UpdateAllAndGetNew,
+    UpdateOnlyThoseReturned,
     SetupConnectors,
 }
 
 internal partial class Program
 {
-    private static Mode mode = Mode.UpdateAndGetNew;
+    private static Mode mode = Mode.UpdateOnlyThoseReturned;
 
     public static async Task Main()
     {
@@ -32,8 +33,10 @@ internal partial class Program
             .Where(collection => collection != null)
             .Cast<IDataCollection>()
             .ToList();
+        
+        Console.WriteLine($"{collectionsFromConnectors.Count} items");
 
-        var dataCollection = new CompoundDataCollection(collectionsFromConnectors);
+        IDataCollection dataCollection = new CompoundDataCollection(collectionsFromConnectors);
 
         switch (mode)
         {
@@ -138,7 +141,7 @@ internal partial class Program
 
                 break;
             }
-            case Mode.UpdateAndGetNew:
+            case Mode.UpdateAllAndGetNew:
             {
                 var undiscoveredAccounts2 = await dataCollection.CollectExistingAccounts();
                 if (undiscoveredAccounts2.Count > 0)
@@ -152,6 +155,18 @@ internal partial class Program
                 if (undiscoveredAccounts.Count > 0)
                 {
                     repository.MergeAccounts(undiscoveredAccounts);
+
+                    await Scaffolding.SaveRepository(repository);
+                }
+
+                break;
+            }
+            case Mode.UpdateOnlyThoseReturned:
+            {
+                var returnedAccounts = await dataCollection.CollectReturnedAccounts();
+                if (returnedAccounts.Count > 0)
+                {
+                    repository.MergeAccounts(returnedAccounts);
 
                     await Scaffolding.SaveRepository(repository);
                 }

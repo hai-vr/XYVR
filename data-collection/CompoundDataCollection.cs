@@ -23,8 +23,22 @@ public class CompoundDataCollection : IDataCollection
         return results;
     }
 
+    public async Task<List<Account>> CollectReturnedAccounts()
+    {
+        var results = new List<Account>();
+        
+        foreach (var dataCollection in _collectors)
+        {
+            results.AddRange(await dataCollection.CollectReturnedAccounts());
+        }
+
+        return results;
+    }
+
     public async Task<List<Account>> CollectExistingAccounts()
     {
+        // TODO: We need special handling when two collectors are of the same type so that we don't iterate on both.
+        
         var results = new List<Account>();
         
         foreach (var dataCollection in _collectors)

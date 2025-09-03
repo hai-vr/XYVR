@@ -180,9 +180,9 @@ function AddressBookPage({ isDark, setIsDark }) {
                                 <button
                                     onClick={() => setShowOnlyContacts(!showOnlyContacts)}
                                     aria-pressed={showOnlyContacts}
-                                    title={`${showOnlyContacts ? 'Show all individuals' : 'Show only contacts'}`}
+                                    title={`${showOnlyContacts ? 'Show contacts and users with notes' : 'Show only contacts'}`}
                                 >
-                                    Only Contacts
+                                    📝
                                 </button>
 
                                 <button
@@ -197,7 +197,7 @@ function AddressBookPage({ isDark, setIsDark }) {
                     </div>
                     <div className="header-thin-right">
                         <h2 className="header-title">
-                            <button className="header-nav" onClick={() => navigate('/data-collection')}>⚙️</button>
+                            <button className="header-nav" title="Configure connections" onClick={() => navigate('/data-collection')}>⚙️</button>
                         </h2>
                     </div>
                 </div>

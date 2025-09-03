@@ -146,13 +146,11 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated }
                     )}
                 </div>
             )}
-            {connector.isLoggedIn && (
-                <div className="input-fields">
-                    <button title="Confirm" onClick={() => tryLogout()} disabled={isRequestInProgress}>Log out</button>
-                </div>
-            )}
 
             <div className="connector-actions">
+                {connector.isLoggedIn && (
+                    <button title="Confirm" className="delete-button" onClick={() => tryLogout()} disabled={isRequestInProgress}>Log out</button>
+                )}
                 <button
                     disabled={isRequestInProgress || !isInTwoFactorMode && (login || password) || isInTwoFactorMode && twoFactorCode}
                     className={`delete-button ${deleteState?.confirming ? '' : ''}`}

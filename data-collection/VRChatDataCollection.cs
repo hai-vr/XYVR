@@ -13,11 +13,6 @@ public class VRChatDataCollection(IndividualRepository repository, DataCollectio
         credentialsStorage
     );
 
-    /// Collects all VRChat accounts from upstream but only returns accounts that have not been discovered yet.<br/>
-    /// This does not return information about existing accounts, even if those existing accounts had been modified upstream.<br/>
-    /// Internally, this lists all current friends and notes but only retrieves and returns the full account information of IDs that aren't in the repository yet.<br/>
-    /// <br/>
-    /// This does not modify the repository.
     public async Task<List<Account>> CollectAllUndiscoveredAccounts()
     {
         var vrcCaller = await _vrChatCommunicator.CallerAccount();
@@ -48,12 +43,23 @@ public class VRChatDataCollection(IndividualRepository repository, DataCollectio
 
         return undiscoveredAccounts;
     }
+
+    public async Task<List<Account>> CollectReturnedAccounts()
+    {
+        var vrcCaller = await _vrChatCommunicator.CallerAccount();
+        
+        var incompleteAccounts = await _vrChatCommunicator.FindIncompleteAccounts();
+        var undiscoveredUserIds = incompleteAccounts
+            .Select(account => account.inAppIdentifier)
+            .Distinct()
+            .ToList();
+
+        var collectUndiscoveredLenient = await _vrChatCommunicator.CollectAllLenient(undiscoveredUserIds);
+        return collectUndiscoveredLenient
+            .Concat([vrcCaller])
+            .ToList();
+    }
     
-    /// Collects the VRChat accounts that are in the repository.<br/>
-    /// This does return new accounts, even some calls have implied the existence of new accounts.<br/>
-    /// This can return fewer accounts than there actually are in the repository if some accounts were removed upstream.<br/>
-    /// <br/>
-    /// This does not modify the repository.
     public async Task<List<Account>> CollectExistingAccounts()
     {
         var vrcAccounts = await _vrChatCommunicator.CollectAllLenient(repository.CollectAllInAppIdentifiers(NamedApp.VRChat).ToList());
@@ -64,7 +70,6 @@ public class VRChatDataCollection(IndividualRepository repository, DataCollectio
         return undiscoveredAccounts;
     }
     
-    /// Using a data collection storage, try to rebuild account data.
     public async Task<List<Account>> RebuildFromDataCollectionStorage(List<DataCollectionTrail> trails)
     {
         await Task.CompletedTask;

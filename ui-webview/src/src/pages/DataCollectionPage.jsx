@@ -123,7 +123,7 @@ function DataCollectionPage({ isDark, setIsDark }) {
                 </div>
                 <div className="header-thin-right">
                     <h2 className="header-title">
-                        <button className="header-nav" onClick={() => navigate('/address-book')}>✕</button>
+                        <button className="header-nav" title="Back to address book" onClick={() => navigate('/address-book')}>✕</button>
                     </h2>
                 </div>
             </div>

@@ -85,6 +85,31 @@ public class ResoniteCommunicator
             .Select(user => AsAccount(user, _callerUserId, true))
             .ToList();
     }
+    
+    public async Task<List<Account>> FindIncompleteAccounts()
+    {
+        _api ??= await InitializeApi();
+
+        var contacts = await _api.GetUserContacts(DataCollectionReason.FindUndiscoveredAccounts);
+        
+        var undiscoveredContacts = contacts.ToList();
+        if (undiscoveredContacts.Count == 0) return [];
+        
+        var undiscoveredContactIdToUser = new Dictionary<string, CombinedContactAndUser>();
+        foreach (var undiscoveredContact in undiscoveredContacts)
+        {
+            // Don't parallelize this. We don't want to abuse the Resonite API.
+            var userN = await _api.GetUser(undiscoveredContact.id, DataCollectionReason.CollectUndiscoveredAccount);
+            if (userN is { } user)
+            {
+                undiscoveredContactIdToUser.Add(undiscoveredContact.id, new CombinedContactAndUser(undiscoveredContact.id, undiscoveredContact, user));
+            }
+        }
+
+        return undiscoveredContactIdToUser.Values
+            .Select(user => AsAccount(user, _callerUserId, true))
+            .ToList();
+    }
 
     /// Get the list of user contact IDs for the purposes of combining it with the users data.<br/>
     /// The intended purpose of this endpoint is to provide missing information about the user,
