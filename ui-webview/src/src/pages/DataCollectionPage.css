@@ -59,11 +59,12 @@
 .inline-code-clickable {
     cursor: pointer;
     padding: 2px 4px;
-    background-color: #f4f4f4;
-    border: 1px solid #ddd;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
     border-radius: 3px;
     font-family: monospace;
     display: inline-block;
+    color: var(--text-primary);
 }
 
 .connectors-section {

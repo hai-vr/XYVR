@@ -7,7 +7,7 @@ import {
     isIndividualVisible,
     hasDisplayNameMatch,
     hasIdentifierMatch,
-    shouldShowBio
+    shouldShowBio, shouldShowHelp
 } from './searchUtils.js'
 
 function AddressBookPage({ isDark, setIsDark }) {
@@ -153,6 +153,10 @@ function AddressBookPage({ isDark, setIsDark }) {
         return shouldShowBio(debouncedSearchTerm);
     }, [debouncedSearchTerm]);
 
+    const showHelp = useMemo(() => {
+        return shouldShowHelp(debouncedSearchTerm);
+    }, [debouncedSearchTerm]);
+
     // Function to focus search input and move cursor to end
     const focusSearchInput = () => {
         if (searchInputRef.current) {
@@ -223,13 +227,36 @@ function AddressBookPage({ isDark, setIsDark }) {
                         </button>
                     )}
                 </div>
+
+                {debouncedSearchTerm && (totalFilteredCount === 0 || showHelp) && (
+                    <div className="no-results-message">
+                        <div className="no-results-icon">🔍</div>
+                        {!showHelp && <>
+                            <div className="no-results-text">No individuals found matching
+                                "<strong>{debouncedSearchTerm}</strong>"
+                            </div>
+                        </>}
+                        <div className="no-results-hint">
+                            <p>Try searching by name, note content, or use special terms like:</p>
+                            <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('bio:'); focusSearchInput(); }}>bio:<i>creator</i></code> to display and search in the bio.</p>
+                            <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('links:'); focusSearchInput(); }}>links:<i>misskey</i></code> to search in the links.</p>
+                            <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('accounts:>1 '); focusSearchInput(); }}>accounts:&gt;1</code> for users who have more than one account.</p>
+                            <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('has:alt '); focusSearchInput(); }}>has:alt</code> for users who have more than one non-bot account on the same app.</p>
+                            <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('app:resonite '); focusSearchInput(); }}>app:resonite</code> for Resonite account owners.</p>
+                            <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('app:vrchat '); focusSearchInput(); }}>app:vrchat</code> for VRChat account owners.</p>
+                            <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('app:cluster '); focusSearchInput(); }}>app:cluster</code> for Cluster account owners.</p>
+                            <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('app:chilloutvr '); focusSearchInput(); }}>app:chilloutvr</code> for ChilloutVR account owners.</p>
+                            <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('app:resonite app:vrchat '); focusSearchInput(); }}>app:resonite app:vrchat</code> for Resonite account owners who also have a VRChat account.</p>
+                        </div>
+                    </div>
+                )}
                 
                 <div>
                     {debouncedSearchTerm && (
                         <div className="search-results-info">
                             {totalFilteredCount === 0
                                 ? `No results found for "${debouncedSearchTerm}"`
-                                : <>Showing {totalFilteredCount} results.
+                                : <>{totalFilteredCount > 1 && `Showing ${totalFilteredCount} results. ` || `Only one result. `}
                                     Type <code className="inline-code-clickable"onClick={() => { setSearchTerm(':help '); focusSearchInput(); }}>:help</code> for help.
                                     Type <code className="inline-code-clickable"onClick={() => { setSearchTerm(searchTerm + ' bio:'); focusSearchInput(); }}>bio:</code> to show bios.</>
                             }
@@ -262,27 +289,6 @@ function AddressBookPage({ isDark, setIsDark }) {
                                 Load More ({totalFilteredCount - displayedCount} remaining)
                             </button>
                         )}
-                    </div>
-                )}
-
-                {debouncedSearchTerm && totalFilteredCount === 0 && (
-                    <div className="no-results-message">
-                        <div className="no-results-icon">🔍</div>
-                        <div className="no-results-text">No individuals found matching
-                            "<strong>{debouncedSearchTerm}</strong>"
-                        </div>
-                        <div className="no-results-hint">
-                            <p>Try searching by name, note content, or use special terms like:</p>
-                            <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('app:resonite '); focusSearchInput(); }}>app:resonite</code> for Resonite account owners.</p>
-                            <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('app:vrchat '); focusSearchInput(); }}>app:vrchat</code> for VRChat account owners.</p>
-                            <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('app:cluster '); focusSearchInput(); }}>app:cluster</code> for Cluster account owners.</p>
-                            <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('app:chilloutvr '); focusSearchInput(); }}>app:chilloutvr</code> for ChilloutVR account owners.</p>
-                            <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('app:resonite app:vrchat '); focusSearchInput(); }}>app:resonite app:vrchat</code> for Resonite account owners who also have a VRChat account.</p>
-                            <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('accounts:>1 '); focusSearchInput(); }}>accounts:&gt;1</code> for users who have more than one account.</p>
-                            <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('has:alt '); focusSearchInput(); }}>has:alt</code> for users who have more than one non-bot account on the same app.</p>
-                            <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('links:'); focusSearchInput(); }}>links:<i>misskey</i></code> to search in the links.</p>
-                            <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('bio:'); focusSearchInput(); }}>bio:<i>creator</i></code> to display and search in the bio.</p>
-                        </div>
                     </div>
                 )}
             </div>

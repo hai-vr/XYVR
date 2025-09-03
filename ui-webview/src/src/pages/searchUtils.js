@@ -84,7 +84,7 @@ export const parseSearchTerms = (searchTerm) => {
     const regularTerms = [];
 
     terms.forEach(term => {
-        if (term.startsWith('app:') || term.startsWith('accounts:') || term.startsWith('links:') || term.startsWith('bio:') || term === 'has:alt' || term === 'has:bot') {
+        if (term.startsWith('app:') || term.startsWith('accounts:') || term.startsWith('links:') || term.startsWith('bio:') || term === 'has:alt' || term === 'has:bot' || term === ':help') {
             specialTerms.push(term);
         } else {
             regularTerms.push(term);
@@ -292,4 +292,10 @@ export const shouldShowBio = (searchTerm) => {
     if (!searchTerm) return false;
     const { specialTerms } = parseSearchTerms(searchTerm);
     return specialTerms.some(term => term.startsWith('bio:'));
+};
+
+export const shouldShowHelp = (searchTerm) => {
+    if (!searchTerm) return false;
+    const { specialTerms } = parseSearchTerms(searchTerm);
+    return specialTerms.some(term => term === ':help');
 };
