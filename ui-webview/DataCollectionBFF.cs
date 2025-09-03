@@ -11,11 +11,12 @@ namespace XYVR.UI.WebviewUI;
 public interface IDataCollectionBFF
 {
     void DataCollectionTriggerTest();
-    string GetConnectors();
+    Task<string> GetConnectors();
     Task<string> CreateConnector(string connectorType);
     Task DeleteConnector(string guid);
     Task<string> TryLogin(string guid, string login__sensitive, string password__sensitive, bool stayLoggedIn);
     Task<string> TryTwoFactor(string guid, string twoFactorCode__sensitive, bool stayLoggedIn);
+    Task<string> TryLogout(string guid);
 }
 
 [ComVisible(true)]
@@ -31,9 +32,15 @@ public class DataCollectionBFF : IDataCollectionBFF
         _serializer = BFFUtils.NewSerializer();
     }
 
-    public string GetConnectors()
+    public async Task<string> GetConnectors()
     {
-        return ToJSON(_mainWindow.ConnectorsMgt.Connectors);
+        var connectors = _mainWindow.ConnectorsMgt.Connectors;
+        
+        var connectorF = (await Task.WhenAll(connectors
+            .Select(async connector => new FrontConnector(connector, await _mainWindow.CredentialsMgt.IsLoggedIn(connector)))
+            .ToList())).ToList();
+        
+        return ToJSON(connectorF);
     }
 
     public async Task<string> CreateConnector(string connectorType)
@@ -61,6 +68,14 @@ public class DataCollectionBFF : IDataCollectionBFF
             stayLoggedIn = stayLoggedIn
         });
         await ContinueLogin(connectionResult);
+    
+        return ToJSON(connectionResult);
+    }
+
+    public async Task<string> TryLogout(string guid)
+    {
+        var connector = _mainWindow.ConnectorsMgt.GetConnector(guid);
+        var connectionResult = await _mainWindow.CredentialsMgt.TryLogout(connector);
     
         return ToJSON(connectionResult);
     }

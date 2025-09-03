@@ -308,6 +308,10 @@ public class VRChatCommunicator
             }
             // Otherwise, login again
         }
+        else if (_account__sensitive == null || _password__sensitive == null)
+        {
+            throw new ArgumentException("Not in state to log in");
+        }
         
         var loginResult = await api.Login(_account__sensitive, _password__sensitive);
         if (loginResult.Status == LoginResponseStatus.RequiresTwofer)
@@ -320,5 +324,23 @@ public class VRChatCommunicator
     private async Task SaveToken(VRChatAPI api)
     {
         await _credentialsStorage.StoreCookieOrToken(api.GetAllCookies__Sensitive());
+    }
+
+    public async Task<bool> SoftIsLoggedIn()
+    {
+        var api = new VRChatAPI(_dataCollector);
+        var userinput_cookies__sensitive = await _credentialsStorage.RequireCookieOrToken();
+        if (userinput_cookies__sensitive != null)
+        {
+            api.ProvideCookies(userinput_cookies__sensitive);
+        }
+
+        return api.IsLoggedIn;
+    }
+
+    public async Task<LogoutResponseStatus> Logout()
+    {
+        _api ??= await InitializeAPI();
+        return await _api.Logout();
     }
 }

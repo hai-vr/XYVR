@@ -410,6 +410,22 @@ public class VRChatAPI
             metaObject = null,
         });
     }
+
+    public async Task<LogoutResponseStatus> Logout()
+    {
+        if (!IsLoggedIn) return LogoutResponseStatus.NotLoggedIn;
+        IsLoggedIn = false;
+    
+        var request = new HttpRequestMessage(HttpMethod.Put, LogoutUrl);
+    
+        var response = await _client.SendAsync(request);
+        return response.StatusCode switch
+        {
+            HttpStatusCode.OK => LogoutResponseStatus.Success,
+            HttpStatusCode.Unauthorized => LogoutResponseStatus.Unauthorized,
+            _ => LogoutResponseStatus.OutsideProtocol
+        };
+    }
 }
 
 public enum ListFriendsRequestType
@@ -427,6 +443,11 @@ public struct LoginResponse
 public enum LoginResponseStatus
 {
     Unresolved, OutsideProtocol, Failure, Success, RequiresTwofer
+}
+
+public enum LogoutResponseStatus
+{
+    Unresolved, OutsideProtocol, Success, Unauthorized, NotLoggedIn
 }
 
 public enum TwoferMethod

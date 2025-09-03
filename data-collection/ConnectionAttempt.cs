@@ -23,4 +23,5 @@ public enum ConnectionAttemptResultType
     Failure,
     Success,
     NeedsTwoFactorCode,
+    LoggedOut
 }

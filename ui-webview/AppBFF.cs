@@ -88,26 +88,3 @@ public class AppBFF : IAppBFF
         });
     }
 }
-
-internal class FrontIndividual
-{
-    public string guid;
-    public List<FrontAccount> accounts = new();
-    public string displayName;
-    public Note note = new();
-    public bool isAnyContact;
-    public bool isExposed;
-}
-
-internal class FrontAccount
-{
-    public NamedApp namedApp;
-    public string qualifiedAppName;
-    public string inAppIdentifier;
-    public string inAppDisplayName;
-    public List<CallerAccount> callers;
-    public bool isTechnical;
-    public bool isAnyCallerContact;
-    public bool isAnyCallerNote;
-    public object? specifics;
-}
