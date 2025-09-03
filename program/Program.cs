@@ -16,7 +16,7 @@ public enum Mode
 
 internal partial class Program
 {
-    private static Mode mode = Mode.FindNewIndividuals;
+    private static Mode mode = Mode.UpdateAndGetNew;
 
     public static async Task Main()
     {
@@ -24,8 +24,16 @@ internal partial class Program
 
         var repository = new IndividualRepository(await Scaffolding.OpenRepository());
         var connectors = new ConnectorManagement(await Scaffolding.OpenConnectors());
-        
-        var dataCollection = new CompoundDataCollection([new ResoniteDataCollection(repository, storage), new VRChatDataCollection(repository, storage)]);
+        var credentials = new CredentialsManagement(await Scaffolding.OpenCredentials(), Scaffolding.ResoniteUIDLateInitializerFn());
+
+        var collectionsFromConnectors = (await Task.WhenAll(connectors.Connectors
+                .Select(async connector => await credentials.GetConnectedDataCollection(connector, repository, storage))
+                .ToList()))
+            .Where(collection => collection != null)
+            .Cast<IDataCollection>()
+            .ToList();
+
+        var dataCollection = new CompoundDataCollection(collectionsFromConnectors);
 
         switch (mode)
         {

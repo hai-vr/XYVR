@@ -5,9 +5,12 @@ using XYVR.Core;
 
 namespace XYVR.Data.Collection;
 
-public class ResoniteDataCollection(IndividualRepository repository, DataCollectionStorage dataCollectionStorage) : IDataCollection
+public class ResoniteDataCollection(IndividualRepository repository, DataCollectionStorage dataCollectionStorage, string resoniteUid, ICredentialsStorage credentialsStorage) : IDataCollection
 {
-    private readonly ResoniteCommunicator _resoniteCommunicator = new(dataCollectionStorage);
+    private readonly ResoniteCommunicator _resoniteCommunicator = new(dataCollectionStorage,
+        null, null, resoniteUid,
+        credentialsStorage
+    );
 
     /// Collects all Resonite accounts from upstream but only returns accounts that have not been discovered yet.<br/>
     /// This does not return information about existing accounts, even if those existing accounts had been modified upstream.<br/>

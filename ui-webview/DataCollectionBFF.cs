@@ -67,7 +67,7 @@ public class DataCollectionBFF : IDataCollectionBFF
             password__sensitive = password__sensitive,
             stayLoggedIn = stayLoggedIn
         });
-        await ContinueLogin(connectionResult);
+        await ContinueLogin(connectionResult, stayLoggedIn);
     
         return ToJSON(connectionResult);
     }
@@ -76,6 +76,7 @@ public class DataCollectionBFF : IDataCollectionBFF
     {
         var connector = _mainWindow.ConnectorsMgt.GetConnector(guid);
         var connectionResult = await _mainWindow.CredentialsMgt.TryLogout(connector);
+        await Scaffolding.SaveCredentials(await _mainWindow.CredentialsMgt.SerializeCredentials());
     
         return ToJSON(connectionResult);
     }
@@ -89,15 +90,20 @@ public class DataCollectionBFF : IDataCollectionBFF
             twoFactorCode__sensitive = twoFactorCode__sensitive,
             stayLoggedIn = stayLoggedIn
         });
-        await ContinueLogin(connectionResult);
+        await ContinueLogin(connectionResult, stayLoggedIn);
     
         return ToJSON(connectionResult);
     }
 
-    private async Task ContinueLogin(ConnectionAttemptResult connectionResult)
+    private async Task ContinueLogin(ConnectionAttemptResult connectionResult, bool stayLoggedIn)
     {
         if (connectionResult.type == ConnectionAttemptResultType.Success)
         {
+            if (stayLoggedIn)
+            {
+                await Scaffolding.SaveCredentials(await _mainWindow.CredentialsMgt.SerializeCredentials());
+            }
+            
             var connector = _mainWindow.ConnectorsMgt.GetConnector(connectionResult.guid);
             connector.account = connectionResult.account;
             _mainWindow.ConnectorsMgt.UpdateConnector(connector);

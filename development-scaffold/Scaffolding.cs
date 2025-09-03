@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Security.Cryptography;
 using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -11,7 +12,9 @@ public static class Scaffolding
 {
     private const string IndividualsJsonFileName = "individuals.json";
     private const string ConnectorsJsonFileName = "connectors.json";
+    private const string TEMP__CredentialsJsonFileName = "TEMP__credentials.json";
     public const string DataCollectionFileName = "data-collection.jsonl";
+    public const string ResoniteUid = "resonite.uid";
     
     private static readonly Encoding Encoding = Encoding.UTF8;
     
@@ -25,6 +28,12 @@ public static class Scaffolding
     
     public static async Task<Connector[]> OpenConnectors() => await OpenIfExists<Connector[]>(ConnectorsJsonFileName, () => []);
     public static async Task SaveConnectors(ConnectorManagement management) => await SaveTo(management.Connectors, ConnectorsJsonFileName);
+    
+    public static async Task<SerializedCredentials> OpenCredentials() => await OpenIfExists<SerializedCredentials>(TEMP__CredentialsJsonFileName, () => new SerializedCredentials());
+    public static async Task SaveCredentials(SerializedCredentials serialized) => await SaveTo(serialized, TEMP__CredentialsJsonFileName);
+    
+    public static async Task<string> OpenResoniteUID() => await OpenIfExists<string>(ResoniteUid, RandomUID__NotCryptographicallySecure);
+    public static async Task SaveResoniteUID(string serialized) => await SaveTo(serialized, ResoniteUid);
 
     public static string SerializeAsSingleLine(DataCollectionTrail trail)
     {
@@ -74,5 +83,30 @@ public static class Scaffolding
             FileName = url,
             UseShellExecute = true
         });
+    }
+
+    public static string RandomUID__NotCryptographicallySecure()
+    {
+        var randomBytes = new byte[32];
+        using (var rng = RandomNumberGenerator.Create())
+        {
+            rng.GetBytes(randomBytes);
+        }
+        
+        using (var sha256 = SHA256.Create())
+        {
+            var hashBytes = sha256.ComputeHash(randomBytes);
+            return Convert.ToHexString(hashBytes).ToLowerInvariant();
+        }
+    }
+
+    public static Func<Task<string>> ResoniteUIDLateInitializerFn()
+    {
+        return async () =>
+        {
+            var uid = await Scaffolding.OpenResoniteUID();
+            await Scaffolding.SaveResoniteUID(uid);
+            return uid;
+        };
     }
 }

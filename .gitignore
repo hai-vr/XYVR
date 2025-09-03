@@ -7,5 +7,7 @@ ui-webview/src/dist/
 
 # Prevent accidents
 individuals.json
+TEMP__credentials.json
+credentials.json
 vrc.cookies.txt
 data-collection.jsonl

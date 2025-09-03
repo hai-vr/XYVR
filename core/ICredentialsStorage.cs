@@ -1,4 +1,4 @@
-﻿namespace core;
+﻿namespace XYVR.Core;
 
 public interface ICredentialsStorage
 {

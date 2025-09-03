@@ -20,8 +20,8 @@ public class ResoniteAPI
     private readonly CookieContainer _cookies;
     private readonly HttpClient _client;
 
-    private string _authHeader__sensitive;
     private string _myUserId;
+    private string _token__sensitive;
 
     public ResoniteAPI(string secretMachineId_isGuid, string uid_isSha256Hash, IDataCollector dataCollector)
     {
@@ -61,9 +61,9 @@ public class ResoniteAPI
 
         var response = JsonConvert.DeserializeObject<LoginResponseJsonObject>(await response__sensitive.Content.ReadAsStringAsync());
 
-        _authHeader__sensitive = ToAuthHeader(response);
         _myUserId = response.entity.userId;
-        
+        _token__sensitive = response.entity.token;
+
         return response;
     }
 
@@ -91,14 +91,7 @@ public class ResoniteAPI
             return Convert.ToHexString(hashBytes).ToLowerInvariant();
         }
     }
-
-    public static string ToAuthHeader(LoginResponseJsonObject response)
-    {
-        var userId = response.entity.userId;
-        var authHeader = $"res {userId}:{response.entity.token}";
-        return authHeader;
-    }
-
+    
     private static void EnsureSuccessOrThrowVerbose(HttpResponseMessage response)
     {
         if (!response.IsSuccessStatusCode)
@@ -114,7 +107,7 @@ public class ResoniteAPI
         try
         {
             var request = new HttpRequestMessage(HttpMethod.Get, url);
-            request.Headers.Add("Authorization", _authHeader__sensitive);
+            request.Headers.Add("Authorization", $"res {_myUserId}:{_token__sensitive}");
 
             var response = await _client.SendAsync(request);
 
@@ -130,7 +123,12 @@ public class ResoniteAPI
             throw;
         }
     }
-    
+
+    public async Task<UserResponseJsonObject> GetUser__self(DataCollectionReason dataCollectionReason)
+    {
+        return (UserResponseJsonObject)(await GetUser(_myUserId, dataCollectionReason))!;
+    }
+
     public async Task<UserResponseJsonObject?> GetUser(string userId, DataCollectionReason dataCollectionReason)
     {
         var url = $"{PrefixWithSlash}users/{userId}";
@@ -138,7 +136,7 @@ public class ResoniteAPI
         try
         {
             var request = new HttpRequestMessage(HttpMethod.Get, url);
-            request.Headers.Add("Authorization", _authHeader__sensitive);
+            request.Headers.Add("Authorization", $"res {_myUserId}:{_token__sensitive}");
 
             var response = await _client.SendAsync(request);
             if (response.StatusCode == HttpStatusCode.NotFound)
@@ -207,4 +205,27 @@ public class ResoniteAPI
             metaObject = null,
         });
     }
+
+    public string GetAllUserAndToken__Sensitive()
+    {
+        return JsonConvert.SerializeObject(new ResAuthenticationStorage
+        {
+            userId = _myUserId,
+            token = _token__sensitive
+        });
+    }
+
+    public void ProvideUserAndToken(string userAndToken__sensitive)
+    {
+        var resAuthenticationStorage__sensitive = JsonConvert.DeserializeObject<ResAuthenticationStorage>(userAndToken__sensitive);
+        _myUserId = resAuthenticationStorage__sensitive.userId;
+        _token__sensitive = resAuthenticationStorage__sensitive.token;
+    }
+}
+
+[Serializable]
+public class ResAuthenticationStorage
+{
+    public string userId;
+    public string token;
 }

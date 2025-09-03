@@ -60,9 +60,10 @@ The following work has been done:
 - Create an address book frontend UI.
 - Improve the data structure used to store the original API responses from the various social VR applications.
 - Improve data handling when the owner of the address book has multiple accounts on the same social VR platform with different friend lists.
+- Provide a graphical UI to login into the various social VR applications.
 
 The following work remains to be done:
-- Provide a graphical UI to login into the various social VR applications and update the data.
+- Provide a graphical UI to update the data.
 - Provide a graphical UI to import an existing set of pre-made requests so that it does not require a direct connection.
 - Make the connection code easily auditable.
 - Provide a graphical UI to group accounts belonging to a single individual.
@@ -80,26 +81,6 @@ The app is written in .NET 9 and uses a WebView pointing to a React app set up w
 
 *The instructions to execute this application have not been written yet.*
 
-#### Importing the data
-
-*The instructions to import the data have not been written yet.*
-
-Importing the data is a big hassle right now, I suggest coming back at a later time when a better UI will be made.
-
-If you need to audit the connection code, open `api-resonite` and `api-vrchat` projects. Those are responsible for making the HTTP connections.
-
-Otherwise, if you really want to do this, understand that the current data export format will not be stable.
-- Open `core/XYVREnvVar.cs` this file will give you a good idea of the environment variables needed to execute this app.
-  - Use your IDE to inject the environment variables for the execution of the app. Don't actually go out and change your system environment variables.
-- You will need to edit the `program/Program.cs` source code to execute the `FetchIndividuals` mode (there's a switch-case).
-  - Comment out one of the lines if you don't have a VRChat or Resonite account.
-- The `FetchNotes` mode is a separate task that will slowly retrieve the notes of all the contacts at the extremely slow rate of one
-  contact per second. The retrieval rate may be improved later.
-
-Data is saved to a file called `individuals.json` in the program's execution folder, somewhere in `bin/`
-
-If you logged in to your VRChat account, you'll also have cookies stored in `vrc.cookies.txt` of your `bin/` folder. Don't share this.
-
 #### Build the React app
 
 To run the desktop app, we need to generate the `ui-webview/src/dist/` folder containing the React webapp
@@ -111,6 +92,26 @@ that will be then copied to the desktop application during the .NET build proces
 #### Build the desktop app that shows the React app
 
 Build the `ui-webview/` project.
+
+#### Importing the data
+
+*The instructions to import the data have not been written yet.*
+
+Importing the data is a big hassle right now, I suggest coming back at a later time when a better UI will be made.
+
+If you need to audit the connection code, open `api-resonite` and `api-vrchat` projects. Those are responsible for making the HTTP connections.
+
+- Login to the VRChat and Resonite accounts using the `ui-webview` project by launching the WebView application.
+- You will need to edit the `program/Program.cs` source code to execute the `FetchIndividuals` mode (there's a switch-case).
+  - Comment out one of the lines if you don't have a VRChat or Resonite account.
+- The `FetchNotes` mode is a separate task that will slowly retrieve the notes of all the contacts at the extremely slow rate of one
+  contact per second. The retrieval rate may be improved later.
+
+Data is saved to a file called `individuals.json` in the program's execution folder, somewhere in `bin/`
+
+There is also a request execution log in `data-collection.jsonl` in the program's execution folder, somewhere in `bin/`
+
+If you logged in to your accounts, you'll also have cookies and tokens stored in `TEMP__credentials.json` of your `bin/` folder. Don't share this.
 
 ## Project structure
 

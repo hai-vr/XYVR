@@ -9,7 +9,8 @@ public class ResoniteCommunicator
     private const string ResoniteQualifiedAppName = "resonite";
     
     private readonly IDataCollector _dataCollector;
-    
+    private readonly ICredentialsStorage _credentialsStorage;
+
     private readonly string _username__sensitive;
     private readonly string _password__sensitive;
     private readonly string _uid;
@@ -18,20 +19,28 @@ public class ResoniteCommunicator
     private string _callerUserId;
     private string _callerDisplayName;
 
-    public ResoniteCommunicator(IDataCollector dataCollector)
+    public ResoniteCommunicator(IDataCollector dataCollector, string? username__sensitive, string? password__sensitive, string uid__sensitive, ICredentialsStorage credentialsStorage)
     {
         _dataCollector = dataCollector;
+        _credentialsStorage = credentialsStorage;
+
+        _username__sensitive = username__sensitive!;
+        _password__sensitive = password__sensitive!;
+        _uid = uid__sensitive;
         
-        _username__sensitive = Environment.GetEnvironmentVariable(XYVREnvVar.ResoniteUsername)!;
-        _password__sensitive = Environment.GetEnvironmentVariable(XYVREnvVar.ResonitePassword)!;
-        _uid = Environment.GetEnvironmentVariable(XYVREnvVar.ResoniteUid)!;
-        
-        if (_username__sensitive == null || _password__sensitive == null) throw new ArgumentException("Missing environment variables");
         if (_uid == null)
         {
             Console.Error.WriteLine($"UID missing. Do you need one? Here's a random UID: {ResoniteAPI.RandomUID__NotCryptographicallySecure()}");
             throw new ArgumentException("Missing UID");
         }
+    }
+
+    public async Task ResoniteLogin()
+    {
+        var api = new ResoniteAPI(Guid.NewGuid().ToString(), _uid, _dataCollector);
+        
+        _ = await api.Login(_username__sensitive, _password__sensitive);
+        await _credentialsStorage.StoreCookieOrToken(api.GetAllUserAndToken__Sensitive());
     }
 
     public async Task<Account> CallerAccount()
@@ -145,8 +154,21 @@ public class ResoniteCommunicator
     private async Task<ResoniteAPI> InitializeApi()
     {
         var api = new ResoniteAPI(Guid.NewGuid().ToString(), _uid, _dataCollector);
+
+        var userAndToken__sensitive = await _credentialsStorage.RequireCookieOrToken();
+        if (userAndToken__sensitive != null)
+        {
+            api.ProvideUserAndToken(userAndToken__sensitive);
+            var user = await api.GetUser__self(DataCollectionReason.CollectCallerAccount);
+            _callerUserId = user.id;
+            _callerDisplayName = user.username;
+            
+            return api;
+        }
         
         var loginResult = await api.Login(_username__sensitive, _password__sensitive);
+        await _credentialsStorage.StoreCookieOrToken(api.GetAllUserAndToken__Sensitive());
+        
         var callerUserN = await api.GetUser(loginResult.entity.userId, DataCollectionReason.CollectCallerAccount);
         if (callerUserN == null)
         {

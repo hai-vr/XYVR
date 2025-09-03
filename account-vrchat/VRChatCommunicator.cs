@@ -1,6 +1,4 @@
-﻿using System.Text;
-using core;
-using XYVR.API.VRChat;
+﻿using XYVR.API.VRChat;
 using XYVR.Core;
 using XYVR.Data.Collection;
 
