@@ -32,6 +32,8 @@ public class Individual
 
 public class Account
 {
+    public string guid;
+    
     public NamedApp namedApp;
     public string qualifiedAppName;
     

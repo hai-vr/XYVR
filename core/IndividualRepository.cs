@@ -38,6 +38,14 @@ public class IndividualRepository
             {
                 individual.note.status = NoteState.NeverHad;
             }
+
+            foreach (var account in individual.accounts)
+            {
+                if (string.IsNullOrWhiteSpace(account.guid))
+                {
+                    account.guid = Guid.NewGuid().ToString();
+                }
+            }
         }
 
         var duplicateRecords = individuals.SelectMany(individual => individual.accounts)

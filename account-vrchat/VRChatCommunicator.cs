@@ -244,6 +244,7 @@ public class VRChatCommunicator
     {
         return new Account
         {
+            guid = Guid.NewGuid().ToString(),
             namedApp = NamedApp.VRChat,
             qualifiedAppName = VRChatQualifiedAppName,
             inAppIdentifier = user.id,

@@ -50,6 +50,7 @@ public class ResoniteCommunicator
 
         return new Account
         {
+            guid = Guid.NewGuid().ToString(),
             namedApp = NamedApp.Resonite,
             qualifiedAppName = ResoniteQualifiedAppName,
             inAppIdentifier = _callerUserId,
@@ -155,6 +156,7 @@ public class ResoniteCommunicator
     {
         return new Account
         {
+            guid = Guid.NewGuid().ToString(),
             namedApp = NamedApp.Resonite,
             qualifiedAppName = ResoniteQualifiedAppName,
             inAppIdentifier = user.id,
@@ -210,6 +212,7 @@ public class ResoniteCommunicator
     {
         return new Account
         {
+            guid = Guid.NewGuid().ToString(),
             namedApp = NamedApp.Resonite,
             qualifiedAppName = ResoniteQualifiedAppName,
             inAppIdentifier = combined.User.id,

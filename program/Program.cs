@@ -184,6 +184,7 @@ internal partial class Program
                 {
                     return new Account
                     {
+                        guid = Guid.NewGuid().ToString(),
                         namedApp = NamedApp.Cluster,
                         qualifiedAppName = "cluster",
                         inAppIdentifier = inAppIdentifier,
