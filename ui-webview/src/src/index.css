@@ -190,6 +190,31 @@
     --contacts-btn-text-active: #ffffff;
 }
 
+::-webkit-scrollbar {
+    width: 14px;
+    height: 14px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-primary);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--bg-quaternary);
+    border-radius: 4px;
+    border: 2px solid var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-primary);
+}
+
+::-webkit-scrollbar-corner {
+    background: var(--bg-primary);
+}
+
+
 a {
     font-weight: 500;
     color: var(--accent-primary);
