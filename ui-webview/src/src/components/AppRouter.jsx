@@ -6,18 +6,10 @@ import Navigation from './Navigation.jsx'
 import './AppRouter.css'
 
 function AppRouter() {
-    const [isDark, setIsDark] = useState(() => {
-        // Initialize from localStorage or prefers-color-scheme
-        try {
-            const stored = localStorage.getItem('theme');
-            if (stored === 'dark') return true;
-            if (stored === 'light') return false;
-        } catch {
-            // localStorage may be unavailable; fall back to media query
-            void 0;
-        }
-        return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    })
+    const [isDark, setIsDark] = useState(true)
+    const [showOnlyContacts, setShowOnlyContacts] = useState(false)
+    const [preferences, setPreferences] = useState({})
+    const [isPreferencesObtained, setIsPreferencesObtained] = useState(false)
 
     // Apply theme and persist
     useEffect(() => {
@@ -28,7 +20,44 @@ function AppRouter() {
             // Ignore persistence errors (e.g., storage disabled)
             void 0;
         }
+
+        const updatedPreferences = { ...preferences, isDark };
+        setPreferences(updatedPreferences);
+
     }, [isDark])
+
+    useEffect(() => {
+        const updatedPreferences = { ...preferences, showOnlyContacts };
+        setPreferences(updatedPreferences);
+
+    }, [showOnlyContacts])
+
+    useEffect(() => {
+        const updatePreferences = async () => {
+            if (isPreferencesObtained) {
+                await window.chrome.webview.hostObjects.preferencesApi.SetPreferences(JSON.stringify(preferences));
+            }
+        };
+
+        updatePreferences();
+
+    }, [preferences])
+
+    useEffect(() => {
+        const initializeApi = async () => {
+            if (window.chrome && window.chrome.webview && window.chrome.webview.hostObjects) {
+                if (!isPreferencesObtained) {
+                    const prefs = JSON.parse(await window.chrome.webview.hostObjects.preferencesApi.GetPreferences());
+                    setPreferences(prefs);
+                    setIsDark(prefs.isDark);
+                    setShowOnlyContacts(prefs.showOnlyContacts);
+                    setIsPreferencesObtained(true);
+                }
+            }
+        };
+
+        initializeApi();
+    }, [])
 
     return (
         <Router>
@@ -37,7 +66,7 @@ function AppRouter() {
                 <main className="page-content">
                     <Routes>
                         <Route path="/" element={<Navigate to="/address-book" replace />} />
-                        <Route path="/address-book" element={<AddressBookPage isDark={isDark} setIsDark={setIsDark} />} />
+                        <Route path="/address-book" element={<AddressBookPage isDark={isDark} setIsDark={setIsDark} showOnlyContacts={showOnlyContacts} setShowOnlyContacts={setShowOnlyContacts} />} />
                         <Route path="/data-collection" element={<DataCollectionPage isDark={isDark} setIsDark={setIsDark} />} />
                     </Routes>
                 </main>

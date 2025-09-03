@@ -13,6 +13,7 @@ public partial class MainWindow : Window
     
     private readonly AppBFF _appBff;
     private readonly DataCollectionBFF _dataCollectionBff;
+    private readonly PreferencesBFF _preferencesBff;
 
     public IndividualRepository IndividualRepository { get; private set; }
     public ConnectorManagement ConnectorsMgt { get; private set; }
@@ -23,10 +24,17 @@ public partial class MainWindow : Window
         InitializeComponent();
         _appBff = new AppBFF(this);
         _dataCollectionBff = new DataCollectionBFF(this);
+        _preferencesBff = new PreferencesBFF(this);
 
         Title = "XYVR";
         
         Loaded += MainWindow_Loaded;
+        Closed += OnClosed;
+    }
+
+    private void OnClosed(object? sender, EventArgs e)
+    {
+        _preferencesBff.OnClosed();
     }
 
     private async void MainWindow_Loaded(object sender, RoutedEventArgs evt)
@@ -38,6 +46,7 @@ public partial class MainWindow : Window
         await WebView.EnsureCoreWebView2Async();
         WebView.CoreWebView2.AddHostObjectToScript("appApi", _appBff);
         WebView.CoreWebView2.AddHostObjectToScript("dataCollectionApi", _dataCollectionBff);
+        WebView.CoreWebView2.AddHostObjectToScript("preferencesApi", _preferencesBff);
 
         // Intercept clicks on links
         WebView.CoreWebView2.NavigationStarting += CoreWebView2_NavigationStarting;

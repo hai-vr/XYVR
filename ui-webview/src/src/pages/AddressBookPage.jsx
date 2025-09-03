@@ -10,14 +10,13 @@ import {
     shouldShowBio, shouldShowHelp
 } from './searchUtils.js'
 
-function AddressBookPage({ isDark, setIsDark }) {
+function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyContacts }) {
     const navigate = useNavigate()
     const searchInputRef = useRef(null)
     const [initialized, setInitialized] = useState(false);
     const [individuals, setIndividuals] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
-    const [showOnlyContacts, setShowOnlyContacts] = useState(false)
 
     // Infinite scrolling state
     const [displayedCount, setDisplayedCount] = useState(50); // Start with 50 items

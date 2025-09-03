@@ -20,6 +20,7 @@ public static class Scaffolding
         internal const string TEMP__CredentialsJsonFileName = "TEMP__credentials.json";
         internal const string DataCollectionFileName = "data-collection.jsonl";
         internal const string ResoniteUidFileName = "resonite.uid";
+        internal const string ReactAppJsonFileName = "ui-preferences.json";
     }
     
     private static string IndividualsJsonFilePath => Path.Combine(SavePath(), ScaffoldingFileNames.IndividualsJsonFileName);
@@ -27,6 +28,7 @@ public static class Scaffolding
     private static string TEMP__CredentialsJsonFilePath => Path.Combine(SavePath(), ScaffoldingFileNames.TEMP__CredentialsJsonFileName);
     private static string DataCollectionFilePath => Path.Combine(SavePath(), ScaffoldingFileNames.DataCollectionFileName);
     private static string ResoniteUidFilePath => Path.Combine(SavePath(), ScaffoldingFileNames.ResoniteUidFileName);
+    private static string ReactAppJsonFilePath => Path.Combine(SavePath(), ScaffoldingFileNames.ReactAppJsonFileName);
     
     private static readonly Encoding Encoding = Encoding.UTF8;
     private static readonly JsonSerializerSettings Serializer = new()
@@ -96,6 +98,9 @@ public static class Scaffolding
     
     public static async Task<string> OpenResoniteUID() => await OpenIfExists<string>(ResoniteUidFilePath, RandomUID__NotCryptographicallySecure);
     public static async Task SaveResoniteUID(string serialized) => await SaveTo(serialized, ResoniteUidFilePath);
+    
+    public static async Task<ReactAppPreferences> OpenReactAppPreferences() => await OpenIfExists<ReactAppPreferences>(ReactAppJsonFilePath, () => new ReactAppPreferences());
+    public static async Task SaveReactAppPreferences(ReactAppPreferences serialized) => await SaveTo(serialized, ReactAppJsonFilePath);
 
     public static async Task<List<DataCollectionTrail>> RebuildTrail()
     {

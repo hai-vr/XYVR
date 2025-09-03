@@ -124,7 +124,7 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated }
                                     If your username has a @ symbol in it, ignore this message and continue to login.
                                 </p>
                             }
-                            <button title="Login" onClick={() => tryLogin()} disabled={!login || !password || isRequestInProgress}>Login</button>
+                            <button title={`Login to ${virtualApp}`} onClick={() => tryLogin()} disabled={!login || !password || isRequestInProgress}>Login to {virtualApp}</button>
                             {stayLoggedIn && <>{connector.type === 'ResoniteAPI' && <p className="info-message">We do not store your username and password, only a connection token that expires in 30 days.</p>
                                 || <p className="info-message">We do not store your username and password, only a cookie.</p>}</>}
 
