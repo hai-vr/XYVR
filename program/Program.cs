@@ -19,8 +19,10 @@ internal partial class Program
 {
     private static Mode mode = Mode.UpdateOnlyThoseReturned;
 
-    public static async Task Main()
+    public static async Task Main(string[] args)
     {
+        Scaffolding.DefineSavePathFromArgsOrUseDefault(args);
+        
         var storage = new DataCollectionStorage();
 
         var repository = new IndividualRepository(await Scaffolding.OpenRepository());

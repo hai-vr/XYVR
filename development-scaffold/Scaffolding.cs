@@ -10,43 +10,100 @@ namespace XYVR.Scaffold;
 
 public static class Scaffolding
 {
-    private const string IndividualsJsonFileName = "individuals.json";
-    private const string ConnectorsJsonFileName = "connectors.json";
-    private const string TEMP__CredentialsJsonFileName = "TEMP__credentials.json";
-    public const string DataCollectionFileName = "data-collection.jsonl";
-    public const string ResoniteUid = "resonite.uid";
+    private const string DefaultAppSaveFolder = "XYVR";
+    private const string DefaultSubProfileFolder = "MainProfile";
+
+    private static class ScaffoldingFileNames
+    {
+        internal const string IndividualsJsonFileName = "individuals.json";
+        internal const string ConnectorsJsonFileName = "connectors.json";
+        internal const string TEMP__CredentialsJsonFileName = "TEMP__credentials.json";
+        internal const string DataCollectionFileName = "data-collection.jsonl";
+        internal const string ResoniteUidFileName = "resonite.uid";
+    }
+    
+    private static string IndividualsJsonFilePath => Path.Combine(SavePath(), ScaffoldingFileNames.IndividualsJsonFileName);
+    private static string ConnectorsJsonFilePath => Path.Combine(SavePath(), ScaffoldingFileNames.ConnectorsJsonFileName);
+    private static string TEMP__CredentialsJsonFilePath => Path.Combine(SavePath(), ScaffoldingFileNames.TEMP__CredentialsJsonFileName);
+    private static string DataCollectionFilePath => Path.Combine(SavePath(), ScaffoldingFileNames.DataCollectionFileName);
+    private static string ResoniteUidFilePath => Path.Combine(SavePath(), ScaffoldingFileNames.ResoniteUidFileName);
     
     private static readonly Encoding Encoding = Encoding.UTF8;
-    
     private static readonly JsonSerializerSettings Serializer = new()
     {
         Converters = { new StringEnumConverter() }
     };
-
-    public static async Task<Individual[]> OpenRepository() => await OpenIfExists<Individual[]>(IndividualsJsonFileName, () => []);
-    public static async Task SaveRepository(IndividualRepository repository) => await SaveTo(repository.Individuals, IndividualsJsonFileName);
     
-    public static async Task<Connector[]> OpenConnectors() => await OpenIfExists<Connector[]>(ConnectorsJsonFileName, () => []);
-    public static async Task SaveConnectors(ConnectorManagement management) => await SaveTo(management.Connectors, ConnectorsJsonFileName);
+    private static readonly SemaphoreSlim DataCollectionFileLock = new(1, 1);
+    private static bool _folderCreated;
     
-    public static async Task<SerializedCredentials> OpenCredentials() => await OpenIfExists<SerializedCredentials>(TEMP__CredentialsJsonFileName, () => new SerializedCredentials());
-    public static async Task SaveCredentials(SerializedCredentials serialized) => await SaveTo(serialized, TEMP__CredentialsJsonFileName);
+    private static string _pathLateInit;
     
-    public static async Task<string> OpenResoniteUID() => await OpenIfExists<string>(ResoniteUid, RandomUID__NotCryptographicallySecure);
-    public static async Task SaveResoniteUID(string serialized) => await SaveTo(serialized, ResoniteUid);
-
-    public static string SerializeAsSingleLine(DataCollectionTrail trail)
+    public static string DefaultSavePathAbsolute()
     {
-        return JsonConvert.SerializeObject(trail, Formatting.None, Serializer);
+        return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), DefaultAppSaveFolder, DefaultSubProfileFolder);
     }
+
+    public static void DefineSavePathFromArgsOrUseDefault(string[] args)
+    {
+        DefineSavePath(FindSavePathInArgsOrNull(args) ?? DefaultSavePathAbsolute());
+    }
+
+    private static string? FindSavePathInArgsOrNull(string[] args)
+    {
+        var watchNext = false;
+        foreach (var arg in args)
+        {
+            if (watchNext)
+            {
+                var path = arg;
+                if (path.StartsWith("\"") && path.EndsWith("\""))
+                {
+                    path = path.Substring(1, path.Length - 2);
+                }
+
+                return path;
+            }
+            else if (arg.ToLowerInvariant() == "--savepath")
+            {
+                watchNext = true;
+            }
+        }
+
+        return null;
+    }
+
+    private static string SavePath()
+    {
+        if (_pathLateInit == null) throw new Exception("SavePath() called before initialization!");
+        return _pathLateInit;
+    }
+
+    public static void DefineSavePath(string savePath)
+    {
+        if (_pathLateInit != null) throw new Exception("SavePath() already defined!");
+        _pathLateInit = savePath;
+    }
+
+    public static async Task<Individual[]> OpenRepository() => await OpenIfExists<Individual[]>(IndividualsJsonFilePath, () => []);
+    public static async Task SaveRepository(IndividualRepository repository) => await SaveTo(repository.Individuals, IndividualsJsonFilePath);
+    
+    public static async Task<Connector[]> OpenConnectors() => await OpenIfExists<Connector[]>(ConnectorsJsonFilePath, () => []);
+    public static async Task SaveConnectors(ConnectorManagement management) => await SaveTo(management.Connectors, ConnectorsJsonFilePath);
+    
+    public static async Task<SerializedCredentials> OpenCredentials() => await OpenIfExists<SerializedCredentials>(TEMP__CredentialsJsonFilePath, () => new SerializedCredentials());
+    public static async Task SaveCredentials(SerializedCredentials serialized) => await SaveTo(serialized, TEMP__CredentialsJsonFilePath);
+    
+    public static async Task<string> OpenResoniteUID() => await OpenIfExists<string>(ResoniteUidFilePath, RandomUID__NotCryptographicallySecure);
+    public static async Task SaveResoniteUID(string serialized) => await SaveTo(serialized, ResoniteUidFilePath);
 
     public static async Task<List<DataCollectionTrail>> RebuildTrail()
     {
-        if (!File.Exists(DataCollectionFileName)) return [];
+        if (!File.Exists(DataCollectionFilePath)) return [];
         
         var results = new List<DataCollectionTrail>();
         
-        var lines = await File.ReadAllLinesAsync(DataCollectionFileName, Encoding);
+        var lines = await File.ReadAllLinesAsync(DataCollectionFilePath, Encoding);
         foreach (var line in lines)
         {
             if (!string.IsNullOrWhiteSpace(line))
@@ -67,6 +124,8 @@ public static class Scaffolding
 
     private static async Task SaveTo(object element, string fileName)
     {
+        EnsureFolderCreated();
+        
         // FIXME: If the disk is full, this WILL corrupt the data that already exists, causing irrepairable loss.
         var serialized = JsonConvert.SerializeObject(element, Formatting.Indented, Serializer);
         await File.WriteAllTextAsync(fileName, serialized, Encoding);
@@ -108,5 +167,35 @@ public static class Scaffolding
             await Scaffolding.SaveResoniteUID(uid);
             return uid;
         };
+    }
+
+    public static async Task WriteToDataCollectionFile(DataCollectionTrail trail)
+    {
+        // Caution: Can be called by different threads.
+
+        await DataCollectionFileLock.WaitAsync();
+        try
+        {
+            EnsureFolderCreated();
+            var jsonLine = SerializeAsSingleLine(trail);
+            await File.AppendAllTextAsync(DataCollectionFilePath, jsonLine + Environment.NewLine, Encoding.UTF8);
+        }
+        finally
+        {
+            DataCollectionFileLock.Release();
+        }
+    }
+
+    private static void EnsureFolderCreated()
+    {
+        if (_folderCreated) return;
+        
+        Directory.CreateDirectory(SavePath());
+        _folderCreated = true;
+    }
+
+    private static string SerializeAsSingleLine(DataCollectionTrail trail)
+    {
+        return JsonConvert.SerializeObject(trail, Formatting.None, Serializer);
     }
 }
