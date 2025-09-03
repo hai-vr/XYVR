@@ -1,6 +1,6 @@
 ﻿.navigation {
     background-color: var(--bg-secondary);
-    border-bottom: 1px solid var(--border-primary);
+    border-bottom: 1px solid var(--brd-primary);
     padding: 0 1rem;
     position: sticky;
     top: 0;
@@ -36,5 +36,5 @@
 
 [data-theme="dark"] .navigation {
     background-color: var(--bg-secondary);
-    border-bottom-color: var(--border-primary);
+    border-bottom-color: var(--brd-primary);
 }

@@ -20,9 +20,9 @@
     --text-secondary: #888888;
     --text-muted: #666666;
 
-    --border-primary: #555555;
-    --border-secondary: #5a5d5f;
-    --border-accent: #6897bb;
+    --brd-primary: #555555;
+    --brd-secondary: #5a5d5f;
+    --brd-accent: #6897bb;
 
     --accent-primary: #6897bb;
     --accent-secondary: #9fc5e8;
@@ -40,7 +40,7 @@
     --header-left: var(--bg-secondary);
     --header-right: var(--bg-primary);
     --header-text: var(--text-primary);
-    --header-border: 1px solid var(--border-primary);
+    --header-border: 1px solid var(--brd-primary);
 
     /* Theme toggle button colors */
     --theme-toggle-bg: rgba(255, 255, 255, 0.1);
@@ -51,7 +51,7 @@
     /* Search input colors */
     --search-input-bg: var(--bg-secondary);
     --search-input-text: var(--text-primary);
-    --search-input-border: var(--border-primary);
+    --search-input-border: var(--brd-primary);
     --search-placeholder: var(--text-secondary);
     --search-focus-shadow: rgba(104, 151, 187, 0.3);
     --search-icon-color: var(--text-secondary);
@@ -81,11 +81,11 @@
     --note-container-border: #5a5d5f;
 
     --vrchat-links-bg: var(--bg-primary);
-    --vrchat-links-border: var(--border-primary);
+    --vrchat-links-border: var(--brd-primary);
     --vrchat-link-item-bg: var(--bg-primary);
-    --vrchat-link-item-border: var(--border-primary);
+    --vrchat-link-item-border: var(--brd-primary);
     --vrchat-link-item-hover-bg: var(--bg-tertiary);
-    --vrchat-link-item-hover-border: var(--border-accent);
+    --vrchat-link-item-hover-border: var(--brd-accent);
 
     /* Copy button hover */
     --copy-button-hover-bg: rgba(104, 151, 187, 0.2);
@@ -102,7 +102,7 @@
     background-color: var(--bg-primary);
 
     /* Contact filter button colors (reusing existing semantic variables) */
-    --contacts-btn-border: var(--border-secondary);
+    --contacts-btn-border: var(--brd-secondary);
     --contacts-btn-text: var(--text-secondary);
     --contacts-btn-border-hover: var(--accent-primary);
     --contacts-btn-text-hover: var(--accent-primary);
@@ -122,9 +122,9 @@
     --text-secondary: #6c757d;
     --text-muted: #495057;
 
-    --border-primary: #e1e5e9;
-    --border-secondary: #dee2e6;
-    --border-accent: #646cff;
+    --brd-primary: #e1e5e9;
+    --brd-secondary: #dee2e6;
+    --brd-accent: #646cff;
 
     --accent-primary: #1976d2;
     --accent-secondary: #1976d2;
@@ -139,7 +139,7 @@
     --header-right: #667eea;
     --header-gradient: linear-gradient(135deg, var(--header-left) 0%, var(--header-right) 100%);
     --header-text: white;
-    --header-border: 1px solid var(--border-primary);
+    --header-border: 1px solid var(--brd-primary);
 
     /* Theme toggle button colors for light theme */
     --theme-toggle-bg: rgba(0, 0, 0, 0.05);
@@ -150,7 +150,7 @@
     /* Search input colors for light theme */
     --search-input-bg: rgba(255, 255, 255, 0.9);
     --search-input-text: #333;
-    --search-input-border: var(--border-primary);
+    --search-input-border: var(--brd-primary);
     --search-placeholder: #666;
     --search-focus-shadow: var(--shadow-medium);
     --search-icon-color: #666;
@@ -216,7 +216,7 @@ h1 {
 
 button {
     border-radius: 8px;
-    border: 1px solid var(--border-primary);
+    border: 1px solid var(--brd-primary);
     padding: 0.6em 1.2em;
     font-size: 1em;
     font-weight: 500;
@@ -244,7 +244,7 @@ button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
     background-color: var(--bg-secondary);
-    border-color: var(--border-primary);
+    border-color: var(--brd-primary);
     color: var(--text-secondary);
 }
 
@@ -252,19 +252,19 @@ input:disabled {
     opacity: 0.5;
     cursor: not-allowed;
     background-color: var(--bg-secondary);
-    border-color: var(--border-primary);
+    border-color: var(--brd-primary);
     color: var(--text-secondary);
 }
 
 button:disabled:hover {
     background-color: var(--bg-secondary);
-    border-color: var(--border-primary);
+    border-color: var(--brd-primary);
     color: var(--text-secondary);
 }
 
 .icon-button {
     background: var(--bg-secondary);
-    border: 1px solid var(--border-secondary);
+    border: 1px solid var(--brd-secondary);
     border-radius: 4px;
     width: 24px !important;
     height: 24px !important;
@@ -286,7 +286,7 @@ button:disabled:hover {
 
 .icon-button:hover {
     background: var(--bg-quaternary);
-    border-color: var(--border-accent);
+    border-color: var(--brd-accent);
     color: var(--text-primary);
 }
 

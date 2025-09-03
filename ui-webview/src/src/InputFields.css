@@ -25,7 +25,7 @@
     appearance: none;
     width: 18px;
     height: 18px;
-    border: 2px solid var(--border-primary);
+    border: 2px solid var(--brd-primary);
     border-radius: 4px;
     background: var(--bg-primary);
     cursor: pointer;
@@ -62,7 +62,7 @@
 .login-input,
 .password-input {
     padding: 8px 12px;
-    border: 1px solid var(--border-primary);
+    border: 1px solid var(--brd-primary);
     border-radius: 6px;
     background: var(--bg-primary);
     color: var(--text-primary);
@@ -85,7 +85,7 @@
 .login-input,
 .password-input {
     padding: 8px 12px;
-    border: 1px solid var(--border-primary);
+    border: 1px solid var(--brd-primary);
     border-radius: 6px;
     background: var(--bg-primary);
     color: var(--text-primary);
@@ -126,7 +126,7 @@
 .info-message {
     background: var(--bg-primary);
     color: var(--text-secondary);
-    border: 1px solid var(--border-secondary);
+    border: 1px solid var(--brd-secondary);
     border-radius: 6px;
     padding: 8px 12px;
     font-size: 13px;

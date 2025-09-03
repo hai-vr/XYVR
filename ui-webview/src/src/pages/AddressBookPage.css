@@ -121,7 +121,7 @@
     font-size: 16px;
     background: var(--bg-secondary);
     border-radius: 12px;
-    border: 2px dashed var(--border-secondary);
+    border: 2px dashed var(--brd-secondary);
     width: 100%;
     box-sizing: border-box;
     min-width: 0;
@@ -170,7 +170,7 @@
 .loading-spinner {
     width: 20px;
     height: 20px;
-    border: 2px solid var(--border-primary);
+    border: 2px solid var(--brd-primary);
     border-top: 2px solid var(--accent-primary);
     border-radius: 50%;
 }

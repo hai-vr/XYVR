@@ -1,6 +1,6 @@
 ﻿.connector-card {
     background: var(--bg-secondary);
-    border: 1px solid var(--border-primary);
+    border: 1px solid var(--brd-primary);
     border-radius: 12px;
     padding: 1.5rem;
     box-shadow: 0 2px 8px var(--shadow-light);
@@ -14,7 +14,7 @@
     justify-content: flex-end;
     margin-top: 1rem;
     padding-top: 1rem;
-    border-top: 1px solid var(--border-secondary);
+    border-top: 1px solid var(--brd-secondary);
 }
 
 /* Button visuals are standardized globally in index.css (normal, icon-button, delete-button). */
