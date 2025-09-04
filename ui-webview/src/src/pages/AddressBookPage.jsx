@@ -251,6 +251,8 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                             <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('app:cluster '); focusSearchInput(); }}>app:cluster</code> for Cluster account owners.</p>
                             <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('app:chilloutvr '); focusSearchInput(); }}>app:chilloutvr</code> for ChilloutVR account owners.</p>
                             <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('app:resonite app:vrchat '); focusSearchInput(); }}>app:resonite app:vrchat</code> for Resonite account owners who also have a VRChat account.</p>
+                            
+                            <p>Open the <a title="Open https://docs.hai-vr.dev/docs/products/xyvr/search in your browser" href="https://docs.hai-vr.dev/docs/products/xyvr/search">search documentation</a> in your browser.</p>
                         </div>
                     </div>
                 )}
