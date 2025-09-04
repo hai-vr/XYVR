@@ -5,10 +5,10 @@ using XYVR.Core;
 
 namespace XYVR.Data.Collection;
 
-public class VRChatDataCollection(IndividualRepository repository, DataCollectionStorage dataCollectionStorage, ICredentialsStorage credentialsStorage) : IDataCollection
+public class VRChatDataCollection(IndividualRepository repository, ResponseCollectionStorage responseCollectionStorage, ICredentialsStorage credentialsStorage) : IDataCollection
 {
     private readonly VRChatCommunicator _vrChatCommunicator = new(
-        dataCollectionStorage,
+        responseCollectionStorage,
         null, null, null,
         credentialsStorage
     );
@@ -70,7 +70,7 @@ public class VRChatDataCollection(IndividualRepository repository, DataCollectio
         return undiscoveredAccounts;
     }
     
-    public async Task<List<Account>> RebuildFromDataCollectionStorage(List<DataCollectionTrail> trails)
+    public async Task<List<Account>> RebuildFromDataCollectionStorage(List<ResponseCollectionTrail> trails)
     {
         await Task.CompletedTask;
 

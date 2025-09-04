@@ -8,7 +8,7 @@ public class ResoniteCommunicator
 {
     private const string ResoniteQualifiedAppName = "resonite";
     
-    private readonly IDataCollector _dataCollector;
+    private readonly IResponseCollector _responseCollector;
     private readonly ICredentialsStorage _credentialsStorage;
 
     private readonly string _username__sensitive;
@@ -19,9 +19,9 @@ public class ResoniteCommunicator
     private string _callerUserId;
     private string _callerDisplayName;
 
-    public ResoniteCommunicator(IDataCollector dataCollector, string? username__sensitive, string? password__sensitive, string uid__sensitive, ICredentialsStorage credentialsStorage)
+    public ResoniteCommunicator(IResponseCollector responseCollector, string? username__sensitive, string? password__sensitive, string uid__sensitive, ICredentialsStorage credentialsStorage)
     {
-        _dataCollector = dataCollector;
+        _responseCollector = responseCollector;
         _credentialsStorage = credentialsStorage;
 
         _username__sensitive = username__sensitive!;
@@ -37,7 +37,7 @@ public class ResoniteCommunicator
 
     public async Task ResoniteLogin()
     {
-        var api = new ResoniteAPI(Guid.NewGuid().ToString(), _uid, _dataCollector);
+        var api = new ResoniteAPI(Guid.NewGuid().ToString(), _uid, _responseCollector);
         
         _ = await api.Login(_username__sensitive, _password__sensitive);
         await _credentialsStorage.StoreCookieOrToken(api.GetAllUserAndToken__Sensitive());
@@ -180,7 +180,7 @@ public class ResoniteCommunicator
 
     private async Task<ResoniteAPI> InitializeApi()
     {
-        var api = new ResoniteAPI(Guid.NewGuid().ToString(), _uid, _dataCollector);
+        var api = new ResoniteAPI(Guid.NewGuid().ToString(), _uid, _responseCollector);
 
         var userAndToken__sensitive = await _credentialsStorage.RequireCookieOrToken();
         if (userAndToken__sensitive != null)

@@ -25,13 +25,14 @@ internal partial class Program
     {
         Scaffolding.DefineSavePathFromArgsOrUseDefault(args);
         
-        var storage = new DataCollectionStorage();
+        var storage = new ResponseCollectionStorage();
 
         var repository = new IndividualRepository(await Scaffolding.OpenRepository());
         var connectors = new ConnectorManagement(await Scaffolding.OpenConnectors());
         var credentials = new CredentialsManagement(await Scaffolding.OpenCredentials(), Scaffolding.ResoniteUIDLateInitializerFn());
 
         var dataCollection = new CompoundDataCollection(repository, (await Task.WhenAll(connectors.Connectors
+                .Where(connector => connector.refreshMode != RefreshMode.ManualUpdatesOnly)
                 .Select(async connector => await credentials.GetConnectedDataCollectionOrNull(connector, repository, storage))
                 .ToList()))
             .Where(collection => collection != null)

@@ -1,6 +1,6 @@
 ﻿namespace XYVR.Data.Collection;
 
-public class DataCollectionTrail
+public class ResponseCollectionTrail
 {
     public DateTime timestamp;
     public string trailGuid;

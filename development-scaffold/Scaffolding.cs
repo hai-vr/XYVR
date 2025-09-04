@@ -19,6 +19,7 @@ public static class Scaffolding
         internal const string ConnectorsJsonFileName = "connectors.json";
         internal const string TEMP__CredentialsJsonFileName = "TEMP__credentials.json";
         internal const string DataCollectionFileName = "data-collection.jsonl";
+        internal const string ResponseCollectionFileName = "response-collection.jsonl";
         internal const string ResoniteUidFileName = "resonite.uid";
         internal const string ReactAppJsonFileName = "ui-preferences.json";
     }
@@ -27,6 +28,7 @@ public static class Scaffolding
     private static string ConnectorsJsonFilePath => Path.Combine(SavePath(), ScaffoldingFileNames.ConnectorsJsonFileName);
     private static string TEMP__CredentialsJsonFilePath => Path.Combine(SavePath(), ScaffoldingFileNames.TEMP__CredentialsJsonFileName);
     private static string DataCollectionFilePath => Path.Combine(SavePath(), ScaffoldingFileNames.DataCollectionFileName);
+    private static string ResponseCollectionFilePath => Path.Combine(SavePath(), ScaffoldingFileNames.ResponseCollectionFileName);
     private static string ResoniteUidFilePath => Path.Combine(SavePath(), ScaffoldingFileNames.ResoniteUidFileName);
     private static string ReactAppJsonFilePath => Path.Combine(SavePath(), ScaffoldingFileNames.ReactAppJsonFileName);
     
@@ -102,18 +104,18 @@ public static class Scaffolding
     public static async Task<ReactAppPreferences> OpenReactAppPreferences() => await OpenIfExists<ReactAppPreferences>(ReactAppJsonFilePath, () => new ReactAppPreferences());
     public static async Task SaveReactAppPreferences(ReactAppPreferences serialized) => await SaveTo(serialized, ReactAppJsonFilePath);
 
-    public static async Task<List<DataCollectionTrail>> RebuildTrail()
+    public static async Task<List<ResponseCollectionTrail>> RebuildTrail()
     {
-        if (!File.Exists(DataCollectionFilePath)) return [];
+        if (!File.Exists(ResponseCollectionFilePath)) return [];
         
-        var results = new List<DataCollectionTrail>();
+        var results = new List<ResponseCollectionTrail>();
         
-        var lines = await File.ReadAllLinesAsync(DataCollectionFilePath, Encoding);
+        var lines = await File.ReadAllLinesAsync(ResponseCollectionFilePath, Encoding);
         foreach (var line in lines)
         {
             if (!string.IsNullOrWhiteSpace(line))
             {
-                results.Add(JsonConvert.DeserializeObject<DataCollectionTrail>(line, Serializer));
+                results.Add(JsonConvert.DeserializeObject<ResponseCollectionTrail>(line, Serializer));
             }
         }
 
@@ -174,7 +176,7 @@ public static class Scaffolding
         };
     }
 
-    public static async Task WriteToDataCollectionFile(DataCollectionTrail trail)
+    public static async Task WriteToResponseCollectionFile(ResponseCollectionTrail trail)
     {
         // Caution: Can be called by different threads.
 
@@ -183,7 +185,7 @@ public static class Scaffolding
         {
             EnsureFolderCreated();
             var jsonLine = SerializeAsSingleLine(trail);
-            await File.AppendAllTextAsync(DataCollectionFilePath, jsonLine + Environment.NewLine, Encoding.UTF8);
+            await File.AppendAllTextAsync(ResponseCollectionFilePath, jsonLine + Environment.NewLine, Encoding.UTF8);
         }
         finally
         {
@@ -199,7 +201,7 @@ public static class Scaffolding
         _folderCreated = true;
     }
 
-    private static string SerializeAsSingleLine(DataCollectionTrail trail)
+    private static string SerializeAsSingleLine(ResponseCollectionTrail trail)
     {
         return JsonConvert.SerializeObject(trail, Formatting.None, Serializer);
     }

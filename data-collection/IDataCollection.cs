@@ -25,7 +25,7 @@ public interface IDataCollection
     Task<List<Account>> CollectExistingAccounts();
 
     /// Using a data collection storage, try to rebuild account data.
-    Task<List<Account>> RebuildFromDataCollectionStorage(List<DataCollectionTrail> trails);
+    Task<List<Account>> RebuildFromDataCollectionStorage(List<ResponseCollectionTrail> trails);
     
     Task<List<AccountIdentification>> IncrementalUpdateRepository(Func<List<AccountIdentification>, Task> incrementFn);
     

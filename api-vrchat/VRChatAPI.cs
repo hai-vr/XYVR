@@ -24,7 +24,7 @@ public class VRChatAPI
     private const string EmailOtpUrl = RootUrl + "/auth/twofactorauth/emailotp/verify";
     private const string OtpUrl = RootUrl + "/auth/twofactorauth/otp/verify";
 
-    private readonly IDataCollector _dataCollector;
+    private readonly IResponseCollector _responseCollector;
     
     private readonly bool _useRateLimiting;
     private readonly Random _random = new();
@@ -35,9 +35,9 @@ public class VRChatAPI
 
     public bool IsLoggedIn { get; private set; }
 
-    public VRChatAPI(IDataCollector dataCollector, bool useRateLimiting = true)
+    public VRChatAPI(IResponseCollector responseCollector, bool useRateLimiting = true)
     {
-        _dataCollector = dataCollector;
+        _responseCollector = responseCollector;
         _useRateLimiting = useRateLimiting;
         
         _cookies = new CookieContainer();
@@ -365,9 +365,9 @@ public class VRChatAPI
     
     private void DataCollectSuccess(string url, string requestGuid, string responseStr, DataCollectionReason dataCollectionReason)
     {
-        _dataCollector.Ingest(new DataCollectionTrail
+        _responseCollector.Ingest(new ResponseCollectionTrail
         {
-            timestamp = _dataCollector.GetCurrentTime(),
+            timestamp = _responseCollector.GetCurrentTime(),
             trailGuid = Guid.NewGuid().ToString(),
             requestGuid = requestGuid,
             reason = dataCollectionReason,
@@ -381,9 +381,9 @@ public class VRChatAPI
     
     private void DataCollectNotFound(string url, string requestGuid, string responseStr, DataCollectionReason dataCollectionReason)
     {
-        _dataCollector.Ingest(new DataCollectionTrail
+        _responseCollector.Ingest(new ResponseCollectionTrail
         {
-            timestamp = _dataCollector.GetCurrentTime(),
+            timestamp = _responseCollector.GetCurrentTime(),
             trailGuid = Guid.NewGuid().ToString(),
             requestGuid = requestGuid,
             reason = dataCollectionReason,
@@ -397,9 +397,9 @@ public class VRChatAPI
 
     private void DataCollectFailure(string url, string requestGuid, DataCollectionReason dataCollectionReason)
     {
-        _dataCollector.Ingest(new DataCollectionTrail
+        _responseCollector.Ingest(new ResponseCollectionTrail
         {
-            timestamp = _dataCollector.GetCurrentTime(),
+            timestamp = _responseCollector.GetCurrentTime(),
             trailGuid = Guid.NewGuid().ToString(),
             requestGuid = requestGuid,
             reason = dataCollectionReason,

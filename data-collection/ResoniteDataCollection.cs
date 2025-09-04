@@ -5,9 +5,9 @@ using XYVR.Core;
 
 namespace XYVR.Data.Collection;
 
-public class ResoniteDataCollection(IndividualRepository repository, DataCollectionStorage dataCollectionStorage, string resoniteUid, ICredentialsStorage credentialsStorage) : IDataCollection
+public class ResoniteDataCollection(IndividualRepository repository, ResponseCollectionStorage responseCollectionStorage, string resoniteUid, ICredentialsStorage credentialsStorage) : IDataCollection
 {
-    private readonly ResoniteCommunicator _resoniteCommunicator = new(dataCollectionStorage,
+    private readonly ResoniteCommunicator _resoniteCommunicator = new(responseCollectionStorage,
         null, null, resoniteUid,
         credentialsStorage
     );
@@ -59,7 +59,7 @@ public class ResoniteDataCollection(IndividualRepository repository, DataCollect
         return undiscoveredAccounts;
     }
     
-    public async Task<List<Account>> RebuildFromDataCollectionStorage(List<DataCollectionTrail> trails)
+    public async Task<List<Account>> RebuildFromDataCollectionStorage(List<ResponseCollectionTrail> trails)
     {
         await Task.CompletedTask;
 

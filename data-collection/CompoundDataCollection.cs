@@ -45,7 +45,7 @@ public class CompoundDataCollection(IndividualRepository repository, List<IDataC
         return results;
     }
 
-    public async Task<List<Account>> RebuildFromDataCollectionStorage(List<DataCollectionTrail> trails)
+    public async Task<List<Account>> RebuildFromDataCollectionStorage(List<ResponseCollectionTrail> trails)
     {
         var results = new List<Account>();
         

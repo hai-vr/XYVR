@@ -15,7 +15,7 @@ public class ResoniteAPI
     
     private readonly string _secretMachineId;
     private readonly string _uid;
-    private readonly IDataCollector _dataCollector;
+    private readonly IResponseCollector _responseCollector;
     
     private readonly CookieContainer _cookies;
     private readonly HttpClient _client;
@@ -23,11 +23,11 @@ public class ResoniteAPI
     private string _myUserId;
     private string _token__sensitive;
 
-    public ResoniteAPI(string secretMachineId_isGuid, string uid_isSha256Hash, IDataCollector dataCollector)
+    public ResoniteAPI(string secretMachineId_isGuid, string uid_isSha256Hash, IResponseCollector responseCollector)
     {
         _secretMachineId = secretMachineId_isGuid;
         _uid = uid_isSha256Hash;
-        _dataCollector = dataCollector;
+        _responseCollector = responseCollector;
 
         _cookies = new CookieContainer();
         var handler = new HttpClientHandler
@@ -160,9 +160,9 @@ public class ResoniteAPI
     
     private void DataCollectSuccess(string url, string requestGuid, string responseStr, DataCollectionReason dataCollectionReason)
     {
-        _dataCollector.Ingest(new DataCollectionTrail
+        _responseCollector.Ingest(new ResponseCollectionTrail
         {
-            timestamp = _dataCollector.GetCurrentTime(),
+            timestamp = _responseCollector.GetCurrentTime(),
             trailGuid = Guid.NewGuid().ToString(),
             requestGuid = requestGuid,
             reason = dataCollectionReason,
@@ -176,9 +176,9 @@ public class ResoniteAPI
     
     private void DataCollectNotFound(string url, string requestGuid, string responseStr, DataCollectionReason dataCollectionReason)
     {
-        _dataCollector.Ingest(new DataCollectionTrail
+        _responseCollector.Ingest(new ResponseCollectionTrail
         {
-            timestamp = _dataCollector.GetCurrentTime(),
+            timestamp = _responseCollector.GetCurrentTime(),
             trailGuid = Guid.NewGuid().ToString(),
             requestGuid = requestGuid,
             reason = dataCollectionReason,
@@ -192,9 +192,9 @@ public class ResoniteAPI
 
     private void DataCollectFailure(string url, string requestGuid, DataCollectionReason dataCollectionReason)
     {
-        _dataCollector.Ingest(new DataCollectionTrail
+        _responseCollector.Ingest(new ResponseCollectionTrail
         {
-            timestamp = _dataCollector.GetCurrentTime(),
+            timestamp = _responseCollector.GetCurrentTime(),
             trailGuid = Guid.NewGuid().ToString(),
             requestGuid = requestGuid,
             reason = dataCollectionReason,

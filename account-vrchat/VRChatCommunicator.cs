@@ -8,7 +8,7 @@ public class VRChatCommunicator
 {
     private const string VRChatQualifiedAppName = "vrchat";
     
-    private readonly IDataCollector _dataCollector;
+    private readonly IResponseCollector _responseCollector;
     private readonly TimeProvider _timeProvider = TimeProvider.System;
 
     private readonly string? _account__sensitive;
@@ -19,14 +19,14 @@ public class VRChatCommunicator
     private string _callerUserId;
 
     public VRChatCommunicator(
-        IDataCollector dataCollector,
+        IResponseCollector responseCollector,
         string emailOrUsername__sensitive,
         string password__sensitive,
         string? twoFactor__sensitive,
         ICredentialsStorage credentialsStorage
     )
     {
-        _dataCollector = dataCollector;
+        _responseCollector = responseCollector;
         
         _account__sensitive = emailOrUsername__sensitive;
         _password__sensitive = password__sensitive;
@@ -278,7 +278,7 @@ public class VRChatCommunicator
 
     public async Task<LoginResponseStatus> VrcLoginUsingUsernameAndPassword()
     {
-        var api = new VRChatAPI(_dataCollector);
+        var api = new VRChatAPI(_responseCollector);
         var userinput_cookies__sensitive = await _credentialsStorage.RequireCookieOrToken();
         if (userinput_cookies__sensitive != null)
         {
@@ -303,7 +303,7 @@ public class VRChatCommunicator
 
     public async Task<LoginResponseStatus> VrcLoginContinuationUsingTwoFactor()
     {
-        var api = new VRChatAPI(_dataCollector);
+        var api = new VRChatAPI(_responseCollector);
         var userinput_cookies__sensitive = await _credentialsStorage.RequireCookieOrToken();
         if (userinput_cookies__sensitive != null)
         {
@@ -328,7 +328,7 @@ public class VRChatCommunicator
 
     private async Task<VRChatAPI> InitializeAPI()
     {
-        var api = new VRChatAPI(_dataCollector);
+        var api = new VRChatAPI(_responseCollector);
         var userinput_cookies__sensitive = await _credentialsStorage.RequireCookieOrToken();
         if (userinput_cookies__sensitive != null)
         {
@@ -382,7 +382,7 @@ public class VRChatCommunicator
 
     public async Task<bool> SoftIsLoggedIn()
     {
-        var api = new VRChatAPI(_dataCollector);
+        var api = new VRChatAPI(_responseCollector);
         var userinput_cookies__sensitive = await _credentialsStorage.RequireCookieOrToken();
         if (userinput_cookies__sensitive != null)
         {

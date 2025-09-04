@@ -2,8 +2,8 @@
 
 namespace XYVR.Core;
 
-public interface IDataCollector
+public interface IResponseCollector
 {
     public DateTime GetCurrentTime();
-    void Ingest(DataCollectionTrail data);
+    void Ingest(ResponseCollectionTrail response);
 }

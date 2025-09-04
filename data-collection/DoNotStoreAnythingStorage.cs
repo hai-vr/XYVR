@@ -2,8 +2,8 @@ using XYVR.Core;
 
 namespace XYVR.Data.Collection;
 
-internal class DoNotStoreAnythingStorage : IDataCollector
+internal class DoNotStoreAnythingStorage : IResponseCollector
 {
     public DateTime GetCurrentTime() { return DateTime.Now; }
-    public void Ingest(DataCollectionTrail data) { }
+    public void Ingest(ResponseCollectionTrail response) { }
 }
