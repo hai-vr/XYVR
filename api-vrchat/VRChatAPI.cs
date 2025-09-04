@@ -22,7 +22,7 @@ public class VRChatAPI
     private const string AuthUrl = RootUrl + "/auth/user";
     private const string LogoutUrl = RootUrl + "/logout";
     private const string EmailOtpUrl = RootUrl + "/auth/twofactorauth/emailotp/verify";
-    private const string OtpUrl = RootUrl + "/auth/twofactorauth/otp/verify";
+    private const string TotpUrl = RootUrl + "/auth/twofactorauth/totp/verify";
 
     private readonly IResponseCollector _responseCollector;
     
@@ -167,7 +167,7 @@ public class VRChatAPI
         // TODO: Sanitize the user input
         
         // Our client has the auth cookie that was set as a result of a successful auth that lead to a twofer.
-        var request = new HttpRequestMessage(HttpMethod.Post, method == TwoferMethod.Email ? EmailOtpUrl : OtpUrl);
+        var request = new HttpRequestMessage(HttpMethod.Post, method == TwoferMethod.Email ? EmailOtpUrl : TotpUrl);
         request.Content = new StringContent(JObject.FromObject(new TwoferRequestPayload
         {
             code = userinput_twoferCode__sensitive

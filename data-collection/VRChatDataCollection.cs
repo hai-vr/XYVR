@@ -9,7 +9,6 @@ public class VRChatDataCollection(IndividualRepository repository, ResponseColle
 {
     private readonly VRChatCommunicator _vrChatCommunicator = new(
         responseCollectionStorage,
-        null, null, null,
         credentialsStorage
     );
 

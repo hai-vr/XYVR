@@ -84,7 +84,6 @@ public class CredentialsManagement
     {
         var communicator = new VRChatCommunicator(
             new DoNotStoreAnythingStorage(),
-            null, null, null,
             new InMemoryCredentialsStorage(cookieOrToken)
         );
         
@@ -124,30 +123,34 @@ public class CredentialsManagement
         var guid = connectionAttempt.connector.guid;
         
         var credentialsStorage = _connectorGuidToCredentialsStorageState.GetOrAdd(guid, _ => new InMemoryCredentialsStorage(null));
+
+        var vrcApi = new VRChatAPI(new DoNotStoreAnythingStorage());
+        var userinput_cookies__sensitive = await credentialsStorage.RequireCookieOrToken();
+        if (userinput_cookies__sensitive != null)
+        {
+            vrcApi.ProvideCookies(userinput_cookies__sensitive);
+        }
         
-        var communicator = new VRChatCommunicator(
-            new DoNotStoreAnythingStorage(),
-            connectionAttempt.login__sensitive,
-            connectionAttempt.password__sensitive,
-            connectionAttempt.twoFactorCode__sensitive,
-            credentialsStorage
-        );
-        
-        Console.WriteLine("Connecting to VRChat...");
-        LoginResponseStatus result;
+        LoginResponse result;
         if (connectionAttempt.twoFactorCode__sensitive == null)
         {
-            result = await communicator.VrcLoginUsingUsernameAndPassword();
+            Console.WriteLine("Connecting to VRChat...");
+            result = await vrcApi.Login(connectionAttempt.login__sensitive, connectionAttempt.password__sensitive);
+            Console.WriteLine($"The result was {result.Status}");
         }
         else
         {
-            result = await communicator.VrcLoginContinuationUsingTwoFactor();
+            var twoferMethod = connectionAttempt.isTwoFactorEmail ? TwoferMethod.Email : TwoferMethod.Other;
+            Console.WriteLine($"Verifying 2FA for VRChat ({twoferMethod})...");
+            result = await vrcApi.VerifyTwofer(connectionAttempt.twoFactorCode__sensitive, twoferMethod);
+            Console.WriteLine($"The result was {result.Status}");
         }
-        Console.WriteLine($"The result was {result}");
         
-        if (result == LoginResponseStatus.Success)
+        if (result.Status == LoginResponseStatus.Success)
         {
-            var callerAccount = await communicator.CallerAccount();
+            await credentialsStorage.StoreCookieOrToken(vrcApi.GetAllCookies__Sensitive());
+            
+            var callerAccount = await new VRChatCommunicator(new DoNotStoreAnythingStorage(), credentialsStorage).CallerAccount();
             var connectorAccount = AsConnectorAccount(callerAccount);
                 
             if (connectionAttempt.stayLoggedIn)
@@ -163,10 +166,22 @@ public class CredentialsManagement
             };
         }
 
-        return result switch
+        if (result.Status == LoginResponseStatus.RequiresTwofer)
         {
-            LoginResponseStatus.RequiresTwofer => new ConnectionAttemptResult { guid = guid, type = ConnectionAttemptResultType.NeedsTwoFactorCode },
-            _ => new ConnectionAttemptResult { guid = guid, type = ConnectionAttemptResultType.Failure }
+            await credentialsStorage.StoreCookieOrToken(vrcApi.GetAllCookies__Sensitive());
+            
+            return new ConnectionAttemptResult
+            {
+                guid = guid,
+                type = ConnectionAttemptResultType.NeedsTwoFactorCode,
+                isTwoFactorEmail = result.TwoferMethod == TwoferMethod.Email
+            };
+        }
+
+        return new ConnectionAttemptResult
+        {
+            guid = guid,
+            type = ConnectionAttemptResultType.Failure
         };
     }
 
@@ -234,12 +249,14 @@ public class CredentialsManagement
 
     private async Task<ConnectionAttemptResult> VrcLogout(Connector connector, InMemoryCredentialsStorage credentialsStorage)
     {
-        var communicator = new VRChatCommunicator(
-            new DoNotStoreAnythingStorage(),
-            null, null, null,
-            credentialsStorage
-        );
-        var logoutResponse = await communicator.Logout();
+        var vrcApi = new VRChatAPI(new DoNotStoreAnythingStorage());
+        var userinput_cookies__sensitive = await credentialsStorage.RequireCookieOrToken();
+        if (userinput_cookies__sensitive != null)
+        {
+            vrcApi.ProvideCookies(userinput_cookies__sensitive);
+        }
+        
+        var logoutResponse = await vrcApi.Logout();
         switch (logoutResponse)
         {
             case LogoutResponseStatus.Unresolved:

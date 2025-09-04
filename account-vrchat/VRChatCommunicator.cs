@@ -11,27 +11,13 @@ public class VRChatCommunicator
     private readonly IResponseCollector _responseCollector;
     private readonly TimeProvider _timeProvider = TimeProvider.System;
 
-    private readonly string? _account__sensitive;
-    private readonly string? _password__sensitive;
-    private readonly string? _twoFactor__sensitive;
     private readonly ICredentialsStorage _credentialsStorage;
     private VRChatAPI? _api;
     private string _callerUserId;
 
-    public VRChatCommunicator(
-        IResponseCollector responseCollector,
-        string emailOrUsername__sensitive,
-        string password__sensitive,
-        string? twoFactor__sensitive,
-        ICredentialsStorage credentialsStorage
-    )
+    public VRChatCommunicator(IResponseCollector responseCollector, ICredentialsStorage credentialsStorage)
     {
         _responseCollector = responseCollector;
-        
-        _account__sensitive = emailOrUsername__sensitive;
-        _password__sensitive = password__sensitive;
-        _twoFactor__sensitive = twoFactor__sensitive;
-        
         _credentialsStorage = credentialsStorage;
     }
 
@@ -212,38 +198,6 @@ public class VRChatCommunicator
         return accounts;
     }
 
-    public async Task<Note?> TempCollectNoteFromUser(Account vrcAccount)
-    {
-        _api ??= await InitializeAPI();
-        
-        var resultN = await _api.GetUserLenient(vrcAccount.inAppIdentifier, DataCollectionReason.ManualRequest);
-        if (resultN == null) return null;
-        
-        var result = (VRChatUser)resultN;
-        if (string.IsNullOrWhiteSpace(result.note))
-        {
-            return new Note
-            {
-                status = NoteState.NeverHad,
-                text = null
-            };
-        }
-
-        return new Note
-        {
-            status = NoteState.Exists,
-            text = result.note
-        };
-    }
-
-    public async Task<List<VRChatNoteFull>> TempGetNotes()
-    {
-        _api ??= await InitializeAPI();
-
-        var resultN = await _api.ListUserNotes(DataCollectionReason.ManualRequest).ToListAsync();
-        return resultN;
-    }
-
     public Account ConvertUserAsAccount(VRChatUser user, string callerUserId)
     {
         return UserAsAccount(user, callerUserId);
@@ -280,56 +234,6 @@ public class VRChatCommunicator
         };
     }
 
-    public async Task<LoginResponseStatus> VrcLoginUsingUsernameAndPassword()
-    {
-        var api = new VRChatAPI(_responseCollector);
-        var userinput_cookies__sensitive = await _credentialsStorage.RequireCookieOrToken();
-        if (userinput_cookies__sensitive != null)
-        {
-            api.ProvideCookies(userinput_cookies__sensitive);
-        }
-        
-        var loginResult = await api.Login(_account__sensitive, _password__sensitive);
-        if (loginResult.Status == LoginResponseStatus.RequiresTwofer)
-        {
-            await SaveToken(api);
-            return LoginResponseStatus.RequiresTwofer;
-        }
-        
-        if (loginResult.Status == LoginResponseStatus.Success)
-        {
-            await SaveToken(api);
-            return LoginResponseStatus.Success;
-        }
-
-        return loginResult.Status;
-    }
-
-    public async Task<LoginResponseStatus> VrcLoginContinuationUsingTwoFactor()
-    {
-        var api = new VRChatAPI(_responseCollector);
-        var userinput_cookies__sensitive = await _credentialsStorage.RequireCookieOrToken();
-        if (userinput_cookies__sensitive != null)
-        {
-            api.ProvideCookies(userinput_cookies__sensitive);
-        }
-
-        var loginResult = await api.VerifyTwofer(_twoFactor__sensitive, TwoferMethod.Email);
-        if (loginResult.Status == LoginResponseStatus.RequiresTwofer)
-        {
-            await SaveToken(api);
-            return LoginResponseStatus.RequiresTwofer;
-        }
-        
-        if (loginResult.Status == LoginResponseStatus.Success)
-        {
-            await SaveToken(api);
-            return LoginResponseStatus.Success;
-        }
-
-        return loginResult.Status;
-    }
-
     private async Task<VRChatAPI> InitializeAPI()
     {
         var api = new VRChatAPI(_responseCollector);
@@ -341,47 +245,13 @@ public class VRChatCommunicator
 
         if (!api.IsLoggedIn)
         {
-            await TryLogin(api);
+            throw new ArgumentException("User must be already logged in before establishing communication");
         }
 
         var authUser = await api.GetAuthUser(DataCollectionReason.CollectCallerAccount);
         _callerUserId = authUser.id;
 
         return api;
-    }
-
-    private async Task TryLogin(VRChatAPI api)
-    {
-        if (_twoFactor__sensitive != null)
-        {
-            var result = await api.VerifyTwofer(_twoFactor__sensitive, TwoferMethod.Email); // FIXME: Only email 2FA is supported here
-            if (result.Status == LoginResponseStatus.Success)
-            {
-                await SaveToken(api);
-                return; // Success
-            }
-            else
-            {
-                Console.Error.WriteLine($"Two factor authentication failed: {result.Status}");
-            }
-            // Otherwise, login again
-        }
-        else if (_account__sensitive == null || _password__sensitive == null)
-        {
-            throw new ArgumentException("Not in state to log in");
-        }
-        
-        var loginResult = await api.Login(_account__sensitive, _password__sensitive);
-        if (loginResult.Status == LoginResponseStatus.RequiresTwofer)
-        {
-            await SaveToken(api);
-            throw new ArgumentException($"Needs two factor authentication, check your {loginResult.TwoferMethod}");
-        }
-    }
-
-    private async Task SaveToken(VRChatAPI api)
-    {
-        await _credentialsStorage.StoreCookieOrToken(api.GetAllCookies__Sensitive());
     }
 
     public async Task<bool> SoftIsLoggedIn()
@@ -394,11 +264,5 @@ public class VRChatCommunicator
         }
 
         return api.IsLoggedIn;
-    }
-
-    public async Task<LogoutResponseStatus> Logout()
-    {
-        _api ??= await InitializeAPI();
-        return await _api.Logout();
     }
 }

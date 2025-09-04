@@ -13,7 +13,7 @@ public interface IDataCollectionBFF
     Task<string> CreateConnector(string connectorType);
     Task DeleteConnector(string guid);
     Task<string> TryLogin(string guid, string login__sensitive, string password__sensitive, bool stayLoggedIn);
-    Task<string> TryTwoFactor(string guid, string twoFactorCode__sensitive, bool stayLoggedIn);
+    Task<string> TryTwoFactor(string guid, bool isTwoFactorEmail, string twoFactorCode__sensitive, bool stayLoggedIn);
     Task<string> TryLogout(string guid);
     Task StartDataCollection();
 }
@@ -115,14 +115,15 @@ public class DataCollectionBFF : IDataCollectionBFF
         return ToJSON(connectionResult);
     }
 
-    public async Task<string> TryTwoFactor(string guid, string twoFactorCode__sensitive, bool stayLoggedIn)
+    public async Task<string> TryTwoFactor(string guid, bool isTwoFactorEmail, string twoFactorCode__sensitive, bool stayLoggedIn)
     {
         var connector = _mainWindow.ConnectorsMgt.GetConnector(guid);
         var connectionResult = await _mainWindow.CredentialsMgt.TryConnect(connector, new ConnectionAttempt
         {
             connector = connector,
             twoFactorCode__sensitive = twoFactorCode__sensitive,
-            stayLoggedIn = stayLoggedIn
+            stayLoggedIn = stayLoggedIn,
+            isTwoFactorEmail = isTwoFactorEmail
         });
         await ContinueLogin(connectionResult, stayLoggedIn);
     

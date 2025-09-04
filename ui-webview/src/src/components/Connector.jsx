@@ -7,6 +7,7 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated }
     const [login, setLogin] = useState('');
     const [password, setPassword] = useState('');
     const [twoFactorCode, setTwoFactorCode] = useState('');
+    const [isTwoFactorEmail, setIsTwoFactorEmail] = useState(false);
     const [stayLoggedIn, setStayLoggedIn] = useState(true);
     const [isInTwoFactorMode, setIsInTwoFactorMode] = useState(false);
     const [isRequestInProgress, setIsRequestInProgress] = useState(false);
@@ -31,6 +32,7 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated }
                 const obj = JSON.parse(json);
                 if (obj.type === 'NeedsTwoFactorCode') {
                     setIsInTwoFactorMode(true);
+                    setIsTwoFactorEmail(obj.isTwoFactorEmail)
                     setLogin('');
                     setPassword('');
                 }
@@ -38,13 +40,14 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated }
                     setIsInTwoFactorMode(false);
                     setLogin('');
                     setPassword('');
+                    setIsTwoFactorEmail(false)
                     setTwoFactorCode('')
                     connector.isLoggedIn = true; // Prevents the input fields from being shown until the parent fetches the connector state
                     onConnectorUpdated();
                 }
             }
             else {
-                const json = await window.chrome.webview.hostObjects.dataCollectionApi.TryTwoFactor(connector.guid, twoFactorCode, stayLoggedIn);
+                const json = await window.chrome.webview.hostObjects.dataCollectionApi.TryTwoFactor(connector.guid, isTwoFactorEmail, twoFactorCode, stayLoggedIn);
                 setIsRequestInProgress(false);
                 const obj = JSON.parse(json);
                 if (obj.type === 'Success') {
@@ -132,10 +135,10 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated }
                     )}
                     {isInTwoFactorMode && (
                         <>
-                            <h3 className="input-title">Enter your {virtualApp} 2FA code</h3>
+                            <h3 className="input-title">Enter your {virtualApp} 2FA code ({isTwoFactorEmail && `Email` || `Authenticator`})</h3>
                             <input
                                 type="text"
-                                placeholder="2FA Code"
+                                placeholder={`2FA Code (${isTwoFactorEmail ? 'Email' : 'Authenticator'})`}
                                 value={twoFactorCode}
                                 onChange={(e) => setTwoFactorCode(e.target.value)}
                                 className="login-input"
