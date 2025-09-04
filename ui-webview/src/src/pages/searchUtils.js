@@ -204,6 +204,10 @@ export const isIndividualVisible = (individual, searchTerm, showOnlyContacts = f
     if (regularTerms.length === 0) {
         return true;
     }
+    
+    if (regularTerms.some(searchTerm => individual.accounts?.some(account => account.inAppIdentifier === searchTerm))) {
+        return true;
+    }
 
     // Check regular search terms (existing logic)
     const displayName = individual.displayName || '';
