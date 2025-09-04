@@ -10,14 +10,37 @@ The address book remains fully functional even if access to the original account
 
 # User documentation
 
-If you are a user looking to use this software: Sorry, but this application is not currently readily usable,
-as it involves typing commands.
+If you are a user looking to use this software: Sorry, but this application is not currently readily usable, it currently has an issue with 2FA,
+and it is not properly documented, and some features deemed essential for are not available yet.
 
 Please check back at another time.
 
 - ~~**[📘 Open documentation](https://docs.hai-vr.dev/docs/products/xyvr)**~~
 
 If you are a developer, feel free to read below.
+
+&nbsp;
+
+&nbsp;
+
+# Privacy and Data considerations
+
+In a nutshell:
+- **We do not store your email and password.**
+- If you check the "Stay logged in" checkbox, we store your session cookies and tokens in an encrypted file.
+- We store your user ID, real username, and address book in `%APPDATA%/XYVR/connectors.json`
+- We store non-login API responses in `%APPDATA%/XYVR/response-collection.jsonl`
+
+HTTP requests:
+- Requests to the VRChat API are done using the url `https://api.vrchat.cloud/api/1` at the rate of one request per second on average.
+- Requests to the Resonite API are done using the url `https://api.resonite.com/` (**requests are currently unmetered, this needs to be fixed**).
+- **There are no requests to any other external services.**
+    - There is no telemetry, analytics, or tracking of any kind.
+
+For more details regarding privacy and data considerations, please refer to the following page:
+
+**[📘 Privacy and data considerations](https://docs.hai-vr.dev/docs/products/xyvr/privacy)**
+
 
 &nbsp;
 
@@ -61,14 +84,14 @@ The following work has been done:
 - Improve the data structure used to store the original API responses from the various social VR applications.
 - Improve data handling when the owner of the address book has multiple accounts on the same social VR platform with different friend lists.
 - Provide a graphical UI to login into the various social VR applications.
+- Provide a graphical UI to update the data.
+- Make the connection code easily auditable.
+- Set up workflow automation to build the React app and the .NET app.
 
 The following work remains to be done:
-- Provide a graphical UI to update the data.
-- Provide a graphical UI to import an existing set of pre-made requests so that it does not require a direct connection.
-- Make the connection code easily auditable.
 - Provide a graphical UI to group accounts belonging to a single individual.
 - Write the necessary API connectors to fetch live session data and display the current social VR application that a user is playing.
-- Set up workflow automation to build the React app and the .NET app.
+- Provide a graphical UI to import an existing set of pre-made requests so that it does not require a direct connection.
 
 ## Technology in use
 
@@ -97,21 +120,10 @@ Build the `ui-webview/` project.
 
 *The instructions to import the data have not been written yet.*
 
-Importing the data is a big hassle right now, I suggest coming back at a later time when a better UI will be made.
-
-If you need to audit the connection code, open `api-resonite` and `api-vrchat` projects. Those are responsible for making the HTTP connections.
-
 - Login to the VRChat and Resonite accounts using the `ui-webview` project by launching the WebView application.
-- You will need to edit the `program/Program.cs` source code to execute the `FetchIndividuals` mode (there's a switch-case).
-  - Comment out one of the lines if you don't have a VRChat or Resonite account.
-- The `FetchNotes` mode is a separate task that will slowly retrieve the notes of all the contacts at the extremely slow rate of one
-  contact per second. The retrieval rate may be improved later.
-
-Data is saved to a file called `individuals.json` in the program's execution folder, somewhere in `bin/`
-
-There is also a request execution log in `data-collection.jsonl` in the program's execution folder, somewhere in `bin/`
-
-If you logged in to your accounts, you'll also have cookies and tokens stored in `TEMP__credentials.json` of your `bin/` folder. Don't share this.
+  - This app does not currently support 2FA using authenticator, please check back another time.
+- In the Connections tab of the desktop app, click the "Start data collection" button, then go back to the Contacts page and wait.
+  - There is currently no indication of when the data collection is finished.
 
 ## Project structure
 
