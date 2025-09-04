@@ -102,15 +102,19 @@ public class ResoniteDataCollection(IndividualRepository repository, ResponseCol
         return resoniteAccounts;
     }
 
-    public async Task<List<AccountIdentification>> IncrementalUpdateRepository(Func<List<AccountIdentification>, Task> incrementFn)
+    public async Task<List<AccountIdentification>> IncrementalUpdateRepository(IIncrementalDataCollectionJobHandler jobHandler)
     {
+        var eTracker = await jobHandler.NewEnumerationTracker();
+
         var resoniteCaller = await _resoniteCommunicator.CallerAccount();
         repository.MergeAccounts([resoniteCaller]);
-        await incrementFn([resoniteCaller.AsIdentification()]);
+        await jobHandler.NotifyAccountUpdated([resoniteCaller.AsIdentification()]);
+        await jobHandler.NotifyProspective(eTracker);
 
         var incompleteAccounts = await _resoniteCommunicator.FindAccounts();
         repository.MergeAccounts(incompleteAccounts);
-        await incrementFn(incompleteAccounts.Select(account => account.AsIdentification()).ToList());
+        await jobHandler.NotifyAccountUpdated(incompleteAccounts.Select(account => account.AsIdentification()).ToList());
+        await jobHandler.NotifyEnumeration(eTracker, incompleteAccounts.Count, incompleteAccounts.Count);
 
         return new List<AccountIdentification> { resoniteCaller.AsIdentification() }
             .Concat(incompleteAccounts.Select(account => account.AsIdentification()))

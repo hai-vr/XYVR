@@ -27,7 +27,7 @@ public interface IDataCollection
     /// Using a data collection storage, try to rebuild account data.
     Task<List<Account>> RebuildFromDataCollectionStorage(List<ResponseCollectionTrail> trails);
     
-    Task<List<AccountIdentification>> IncrementalUpdateRepository(Func<List<AccountIdentification>, Task> incrementFn);
+    Task<List<AccountIdentification>> IncrementalUpdateRepository(IIncrementalDataCollectionJobHandler jobHandler);
     
     /// Return true if this data collector can attempt an incremental update of the given identification.
     bool CanAttemptIncrementalUpdateOn(AccountIdentification identification);

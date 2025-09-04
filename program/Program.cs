@@ -49,9 +49,7 @@ internal partial class Program
             }
             case Mode.Incremental:
             {
-                await dataCollection.IncrementalUpdateRepository(async updatedThisIncrement => {
-                    Console.WriteLine($"Updated the following {updatedThisIncrement.Count} accounts: {string.Join(", ", updatedThisIncrement)}");
-                });
+                await dataCollection.IncrementalUpdateRepository(new JobHandler());
                 await Scaffolding.SaveRepository(repository);
                 
                 break;
@@ -242,5 +240,30 @@ internal partial class Program
             default:
                 throw new ArgumentOutOfRangeException();
         }
+    }
+}
+
+internal class JobHandler : IIncrementalDataCollectionJobHandler
+{
+    public Task NotifyAccountUpdated(List<AccountIdentification> increment)
+    {
+        Console.WriteLine($"Updated the following {increment.Count} accounts: {string.Join(", ", increment)}");
+        return Task.CompletedTask;
+    }
+
+    public Task<IncrementalEnumerationTracker> NewEnumerationTracker()
+    {
+        return Task.FromResult(new IncrementalEnumerationTracker());
+    }
+
+    public Task NotifyEnumeration(IncrementalEnumerationTracker tracker, int enumerationAccomplished, int enumerationTotalCount_canBeZero)
+    {
+        Console.WriteLine($"Progress: {enumerationAccomplished} / {enumerationTotalCount_canBeZero}");
+        return Task.CompletedTask;
+    }
+
+    public Task NotifyProspective(IncrementalEnumerationTracker tracker)
+    {
+        return Task.CompletedTask;
     }
 }

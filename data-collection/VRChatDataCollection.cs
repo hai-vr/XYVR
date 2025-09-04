@@ -100,11 +100,14 @@ public class VRChatDataCollection(IndividualRepository repository, ResponseColle
         return vrchatAccounts;
     }
 
-    public async Task<List<AccountIdentification>> IncrementalUpdateRepository(Func<List<AccountIdentification>, Task> incrementFn)
+    public async Task<List<AccountIdentification>> IncrementalUpdateRepository(IIncrementalDataCollectionJobHandler jobHandler)
     {
+        var eTracker = await jobHandler.NewEnumerationTracker();
+        
         var vrcCaller = await _vrChatCommunicator.CallerAccount();
         repository.MergeAccounts([vrcCaller]);
-        await incrementFn([vrcCaller.AsIdentification()]);
+        await jobHandler.NotifyAccountUpdated([vrcCaller.AsIdentification()]);
+        await jobHandler.NotifyProspective(eTracker);
         
         var undiscoveredUserIds = new HashSet<string>();
         var incompleteAccounts = new HashSet<AccountIdentification>();
@@ -114,14 +117,19 @@ public class VRChatDataCollection(IndividualRepository repository, ResponseColle
             incompleteAccounts.Add(incompleteAccount.AsIdentification());
             
             repository.MergeIncompleteAccounts([incompleteAccount]);
-            await incrementFn([incompleteAccount.AsIdentification()]);
+            await jobHandler.NotifyAccountUpdated([incompleteAccount.AsIdentification()]);
+            await jobHandler.NotifyEnumeration(eTracker, 0, incompleteAccounts.Count);
         }
-        
+
+        var soFar = 0;
         foreach (var undiscoveredUserId in undiscoveredUserIds)
         {
             var collectUndiscoveredLenient = await _vrChatCommunicator.CollectAllLenient([undiscoveredUserId]);
             repository.MergeAccounts(collectUndiscoveredLenient);
-            await incrementFn(collectUndiscoveredLenient.Select(account => account.AsIdentification()).ToList());
+            await jobHandler.NotifyAccountUpdated(collectUndiscoveredLenient.Select(account => account.AsIdentification()).ToList());
+
+            soFar++;
+            await jobHandler.NotifyEnumeration(eTracker, soFar, incompleteAccounts.Count);
         }
 
         return new List<AccountIdentification> { vrcCaller.AsIdentification() }

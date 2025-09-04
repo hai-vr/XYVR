@@ -57,13 +57,13 @@ public class CompoundDataCollection(IndividualRepository repository, List<IDataC
         return results;
     }
 
-    public async Task<List<AccountIdentification>> IncrementalUpdateRepository(Func<List<AccountIdentification>, Task> incrementFn)
+    public async Task<List<AccountIdentification>> IncrementalUpdateRepository(IIncrementalDataCollectionJobHandler jobHandler)
     {
         var updatedSoFar = new List<AccountIdentification>();
 
         foreach (var dataCollection in _collectors)
         {
-            updatedSoFar.AddRange(await dataCollection.IncrementalUpdateRepository(incrementFn));
+            updatedSoFar.AddRange(await dataCollection.IncrementalUpdateRepository(jobHandler));
         }
 
         var notUpdated = _repository.Individuals
@@ -81,7 +81,7 @@ public class CompoundDataCollection(IndividualRepository repository, List<IDataC
                     if (result != null)
                     {
                         _repository.MergeAccounts([result]);
-                        await incrementFn([toTryUpdate]);
+                        await jobHandler.NotifyAccountUpdated([toTryUpdate]);
                         
                         updatedSoFar.Add(toTryUpdate);
                         
