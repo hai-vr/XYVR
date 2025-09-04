@@ -121,8 +121,17 @@ public class VRChatDataCollection(IndividualRepository repository, ResponseColle
             await jobHandler.NotifyEnumeration(eTracker, 0, incompleteAccounts.Count);
         }
 
+        // We prioritize accounts that are pending update
+        var undiscoveredUserIdsPrioritized = repository.Individuals
+            .SelectMany(individual => individual.accounts)
+            .Where(account => account is { namedApp: NamedApp.VRChat, isPendingUpdate: true })
+            .Select(account => account.inAppIdentifier)
+            .Where(inAppIdentifier => undiscoveredUserIds.Contains(inAppIdentifier))
+            .ToHashSet();
+        undiscoveredUserIdsPrioritized.UnionWith(undiscoveredUserIds);
+
         var soFar = 0;
-        foreach (var undiscoveredUserId in undiscoveredUserIds)
+        foreach (var undiscoveredUserId in undiscoveredUserIdsPrioritized)
         {
             var collectUndiscoveredLenient = await _vrChatCommunicator.CollectAllLenient([undiscoveredUserId]);
             repository.MergeAccounts(collectUndiscoveredLenient);
