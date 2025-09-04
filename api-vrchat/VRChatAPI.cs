@@ -46,7 +46,7 @@ public class VRChatAPI
             CookieContainer = _cookies
         };
         _client = new HttpClient(handler);
-        _userAgent = $"Hai.XYVR/{VERSION.version} (docs.hai-vr.dev/docs/products/xyvr#user-agent)";
+        _userAgent = $"Hai.XYVR/{VERSION.version} (docs.hai-vr.dev/docs/products/xyvr/user-agent)";
         _client.DefaultRequestHeaders.UserAgent.ParseAdd(_userAgent);
     }
 

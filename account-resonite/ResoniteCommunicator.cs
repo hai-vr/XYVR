@@ -87,29 +87,25 @@ public class ResoniteCommunicator
             .ToList();
     }
     
-    public async Task<List<Account>> FindAccounts()
+    public async IAsyncEnumerable<Account> FindAccounts()
     {
         _api ??= await InitializeApi();
 
         var contacts = await _api.GetUserContacts(DataCollectionReason.FindUndiscoveredAccounts);
-        
+    
         var undiscoveredContacts = contacts.ToList();
-        if (undiscoveredContacts.Count == 0) return [];
-        
-        var undiscoveredContactIdToUser = new Dictionary<string, CombinedContactAndUser>();
+        if (undiscoveredContacts.Count == 0) yield break;
+    
         foreach (var undiscoveredContact in undiscoveredContacts)
         {
             // Don't parallelize this. We don't want to abuse the Resonite API.
             var userN = await _api.GetUser(undiscoveredContact.id, DataCollectionReason.CollectUndiscoveredAccount);
             if (userN is { } user)
             {
-                undiscoveredContactIdToUser.Add(undiscoveredContact.id, new CombinedContactAndUser(undiscoveredContact.id, undiscoveredContact, user));
+                var combinedContactAndUser = new CombinedContactAndUser(undiscoveredContact.id, undiscoveredContact, user);
+                yield return AsAccount(combinedContactAndUser, _callerUserId, true);
             }
         }
-
-        return undiscoveredContactIdToUser.Values
-            .Select(user => AsAccount(user, _callerUserId, true))
-            .ToList();
     }
 
     /// Get the list of user contact IDs for the purposes of combining it with the users data.<br/>

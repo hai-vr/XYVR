@@ -16,18 +16,21 @@ public class ResoniteAPI
     private readonly string _secretMachineId;
     private readonly string _uid;
     private readonly IResponseCollector _responseCollector;
-    
+    private readonly bool _useRateLimiting;
+
     private readonly CookieContainer _cookies;
     private readonly HttpClient _client;
+    private readonly Random _random = new();
 
     private string _myUserId;
     private string _token__sensitive;
 
-    public ResoniteAPI(string secretMachineId_isGuid, string uid_isSha256Hash, IResponseCollector responseCollector)
+    public ResoniteAPI(string secretMachineId_isGuid, string uid_isSha256Hash, IResponseCollector responseCollector, bool useRateLimiting = true)
     {
         _secretMachineId = secretMachineId_isGuid;
         _uid = uid_isSha256Hash;
         _responseCollector = responseCollector;
+        _useRateLimiting = useRateLimiting;
 
         _cookies = new CookieContainer();
         var handler = new HttpClientHandler
@@ -110,6 +113,7 @@ public class ResoniteAPI
             request.Headers.Add("Authorization", $"res {_myUserId}:{_token__sensitive}");
 
             var response = await _client.SendAsync(request);
+            await EnsureRateLimiting(url);
 
             EnsureSuccessOrThrowVerbose(response);
 
@@ -139,6 +143,8 @@ public class ResoniteAPI
             request.Headers.Add("Authorization", $"res {_myUserId}:{_token__sensitive}");
 
             var response = await _client.SendAsync(request);
+            await EnsureRateLimiting(url);
+            
             if (response.StatusCode == HttpStatusCode.NotFound)
             {
                 DataCollectNotFound(url, requestGuid, await response.Content.ReadAsStringAsync(), dataCollectionReason);
@@ -220,6 +226,16 @@ public class ResoniteAPI
         var resAuthenticationStorage__sensitive = JsonConvert.DeserializeObject<ResAuthenticationStorage>(userAndToken__sensitive);
         _myUserId = resAuthenticationStorage__sensitive.userId;
         _token__sensitive = resAuthenticationStorage__sensitive.token;
+    }
+
+    private async Task EnsureRateLimiting(string urlForLogging)
+    {
+        if (!_useRateLimiting) return;
+
+        var millisecondsDelay = _random.Next(400, 600); // Introduce some irregularity
+        Console.WriteLine($"Got {urlForLogging} ; Waiting {millisecondsDelay}ms...");
+
+        await Task.Delay(millisecondsDelay);
     }
 }
 
