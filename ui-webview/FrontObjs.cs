@@ -10,10 +10,12 @@ internal class FrontIndividual
     public Note note = new();
     public bool isAnyContact;
     public bool isExposed;
+    public string? customName;
 }
 
 internal class FrontAccount
 {
+    public string guid;
     public NamedApp namedApp;
     public string qualifiedAppName;
     public string inAppIdentifier;
@@ -23,6 +25,7 @@ internal class FrontAccount
     public bool isAnyCallerContact;
     public bool isAnyCallerNote;
     public object? specifics;
+    public List<string> allDisplayNames;
 }
 
 public class FrontConnector(Connector connector, bool isLoggedIn)

@@ -28,6 +28,9 @@ public class Individual
     /// use the API to fetch updates and find out whether any of that Individual's Account has a new Note on them:
     /// Notes are not specific to Contacts and can be attached to anyone.
     public bool isExposed;
+    
+    // This field is up to the app users' judgement
+    public string? customName;
 }
 
 public class Account
@@ -44,6 +47,8 @@ public class Account
     public object? specifics;
     
     public List<CallerAccount> callers = new();
+    
+    public List<string> allDisplayNames = new();
 
     // This field is up to the app users' judgement
     public bool isTechnical;

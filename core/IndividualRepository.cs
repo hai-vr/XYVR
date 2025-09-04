@@ -45,6 +45,11 @@ public class IndividualRepository
                 {
                     account.guid = Guid.NewGuid().ToString();
                 }
+
+                if (account.allDisplayNames == null || account.allDisplayNames.Count == 0)
+                {
+                    account.allDisplayNames = [individual.displayName];
+                }
             }
         }
 
@@ -167,6 +172,14 @@ public class IndividualRepository
                     existingAccount.callers.Add(inputCaller);
                 }
             }
+
+            var workingDisplayNames = existingAccount.allDisplayNames.ToList();
+            workingDisplayNames.AddRange(inputAccount.allDisplayNames);
+            if (!workingDisplayNames.Contains(inputAccount.inAppDisplayName))
+            {
+                workingDisplayNames.Add(inputAccount.inAppDisplayName);
+            }
+            existingAccount.allDisplayNames = workingDisplayNames.Distinct().ToList();
             
             return true;
         }
@@ -214,16 +227,7 @@ public class IndividualRepository
                                        || existingIndividual.note.status == NoteState.Exists
                                        || existingIndividual.accounts.Any(account => account.HasAnyCallerNote());
         
-        if (existingIndividual.accounts.All(it => it.inAppDisplayName != existingIndividual.displayName))
-        {
-            existingIndividual.displayName = MajorMainAccountOf(existingIndividual).inAppDisplayName;
-        }
-    }
-
-    // The "major main account" is the main account of the Individual's major platform.
-    private static Account MajorMainAccountOf(Individual existingIndividual)
-    {
-        return existingIndividual.accounts.First();
+        existingIndividual.displayName = existingIndividual.accounts.First().inAppDisplayName;
     }
 
     private static bool IsSameApp(Account existingAccount, Account inputAccount)
@@ -277,6 +281,11 @@ public class IndividualRepository
         toAugment.isExposed = toAugment.isAnyContact
                               || toAugment.note.status == NoteState.Exists
                               || toAugment.accounts.Any(account => account.HasAnyCallerNote());
+
+        if (toAugment.customName == null && toDestroy.customName != null)
+        {
+            toAugment.customName = toDestroy.customName;
+        }
         
         foreach (var accountFromDestroyed in toDestroy.accounts)
         {

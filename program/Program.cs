@@ -13,11 +13,12 @@ public enum Mode
     UpdateAllAndGetNew,
     UpdateOnlyThoseReturned,
     SetupConnectors,
+    MigrateAndSave,
 }
 
 internal partial class Program
 {
-    private static Mode mode = Mode.UpdateOnlyThoseReturned;
+    private static Mode mode = Mode.MigrateAndSave;
 
     public static async Task Main(string[] args)
     {
@@ -29,19 +30,21 @@ internal partial class Program
         var connectors = new ConnectorManagement(await Scaffolding.OpenConnectors());
         var credentials = new CredentialsManagement(await Scaffolding.OpenCredentials(), Scaffolding.ResoniteUIDLateInitializerFn());
 
-        var collectionsFromConnectors = (await Task.WhenAll(connectors.Connectors
-                .Select(async connector => await credentials.GetConnectedDataCollection(connector, repository, storage))
+        var dataCollection = new CompoundDataCollection((await Task.WhenAll(connectors.Connectors
+                .Select(async connector => await credentials.GetConnectedDataCollectionOrNull(connector, repository, storage))
                 .ToList()))
             .Where(collection => collection != null)
             .Cast<IDataCollection>()
-            .ToList();
-        
-        Console.WriteLine($"{collectionsFromConnectors.Count} items");
-
-        IDataCollection dataCollection = new CompoundDataCollection(collectionsFromConnectors);
+            .ToList()) as IDataCollection;
 
         switch (mode)
         {
+            case Mode.MigrateAndSave:
+            {
+                await Scaffolding.SaveRepository(repository);
+                
+                break;
+            }
             case Mode.SetupConnectors:
             {
                 {

@@ -1,7 +1,7 @@
 ﻿import React from 'react';
 import './Account.css';
 
-const Account = ({ account, imposter }) => {
+const Account = ({ account, imposter, showAlias }) => {
     const hasNote = account.isAnyCallerNote;
 
     const copyInAppIdentifier = async () => {
@@ -61,9 +61,17 @@ const Account = ({ account, imposter }) => {
                         {getAppIcon(account.namedApp)}
                     </div>
                     <div>
-                        <div className="account-display-name">
+                        <div className="account-display-name" title={!imposter && account.allDisplayNames?.join('\n') || ``}>
                             {account.inAppDisplayName}
                         </div>
+                        {!imposter && showAlias && account.allDisplayNames && account.allDisplayNames
+                            .toReversed()
+                            .filter((displayName) => displayName !== account.inAppDisplayName)
+                            .map((displayName, index) => (
+                            <div key={index} className="account-display-name">
+                                {displayName}
+                            </div>
+                        ))}
                         <div className="account-app-name">
                             {getAppDisplayName(account)}
                         </div>

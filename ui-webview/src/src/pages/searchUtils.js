@@ -84,7 +84,7 @@ export const parseSearchTerms = (searchTerm) => {
     const regularTerms = [];
 
     terms.forEach(term => {
-        if (term.startsWith('app:') || term.startsWith('accounts:') || term.startsWith('links:') || term.startsWith('bio:') || term === 'has:alt' || term === 'has:bot' || term === ':help') {
+        if (term.startsWith('app:') || term.startsWith('accounts:') || term.startsWith('links:') || term.startsWith('bio:') || term.startsWith('alias:') || term === 'has:alt' || term === 'has:bot' || term === ':help') {
             specialTerms.push(term);
         } else {
             regularTerms.push(term);
@@ -115,6 +115,26 @@ export const matchesSpecialTerms = (individual, specialTerms) => {
             return individual.accounts?.some(account =>
                 account.specifics?.bio?.toLowerCase().includes(searchString)
             ) || false;
+        }
+
+        if (term.startsWith('alias:')) {
+            const searchString = term.substring(6); // Remove 'alias:' prefix
+            if (!searchString) return true; // Empty search string matches all
+
+            const kanaVariants = generateKanaVariants(searchString);
+
+            return individual.accounts?.some(account => {
+                if (!account.allDisplayNames || !Array.isArray(account.allDisplayNames)) {
+                    return false;
+                }
+
+                return account.allDisplayNames.some(displayName => {
+                    return kanaVariants.some(variant => {
+                        const variantNormalized = removeDiacritics(variant);
+                        return removeDiacritics(displayName.toLowerCase()).includes(variantNormalized);
+                    });
+                });
+            }) || false;
         }
 
         switch (term) {
@@ -298,4 +318,10 @@ export const shouldShowHelp = (searchTerm) => {
     if (!searchTerm) return false;
     const { specialTerms } = parseSearchTerms(searchTerm);
     return specialTerms.some(term => term === ':help');
+};
+
+export const shouldShowAlias = (searchTerm) => {
+    if (!searchTerm) return false;
+    const { specialTerms } = parseSearchTerms(searchTerm);
+    return specialTerms.some(term => term.startsWith('alias:'));
 };

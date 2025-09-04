@@ -7,7 +7,7 @@ import {
     isIndividualVisible,
     hasDisplayNameMatch,
     hasIdentifierMatch,
-    shouldShowBio, shouldShowHelp
+    shouldShowBio, shouldShowHelp, shouldShowAlias,
 } from './searchUtils.js'
 
 function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyContacts }) {
@@ -156,6 +156,10 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
         return shouldShowHelp(debouncedSearchTerm);
     }, [debouncedSearchTerm]);
 
+    const showAlias = useMemo(() => {
+        return shouldShowAlias(debouncedSearchTerm);
+    }, [debouncedSearchTerm]);
+
     // Function to focus search input and move cursor to end
     const focusSearchInput = () => {
         if (searchInputRef.current) {
@@ -239,6 +243,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                             <p>Try searching by name, note content, or use special terms like:</p>
                             <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('bio:'); focusSearchInput(); }}>bio:<i>creator</i></code> to display and search in the bio.</p>
                             <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('links:'); focusSearchInput(); }}>links:<i>misskey</i></code> to search in the links.</p>
+                            <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('alias:'); focusSearchInput(); }}>alias:<i>aoi</i></code> to search in previous user names.</p>
                             <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('accounts:>1 '); focusSearchInput(); }}>accounts:&gt;1</code> for users who have more than one account.</p>
                             <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('has:alt '); focusSearchInput(); }}>has:alt</code> for users who have more than one non-bot account on the same app.</p>
                             <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('app:resonite '); focusSearchInput(); }}>app:resonite</code> for Resonite account owners.</p>
@@ -257,6 +262,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                                 ? `No results found for "${debouncedSearchTerm}"`
                                 : <>{totalFilteredCount > 1 && `Showing ${totalFilteredCount} results. ` || `Only one result. `}
                                     Type <code className="inline-code-clickable"onClick={() => { setSearchTerm(':help '); focusSearchInput(); }}>:help</code> for help.
+                                    Type <code className="inline-code-clickable"onClick={() => { setSearchTerm(searchTerm + ' alias:'); focusSearchInput(); }}>alias:</code> to show previous names.
                                     Type <code className="inline-code-clickable"onClick={() => { setSearchTerm(searchTerm + ' bio:'); focusSearchInput(); }}>bio:</code> to show bios.</>
                             }
                         </div>
@@ -270,6 +276,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                             individual={individual}
                             isVisible={true}
                             showBio={showBio}
+                            showAlias={showAlias}
                         />
                     ))}
                 </div>

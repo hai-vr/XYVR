@@ -53,6 +53,7 @@ public class AppBFF : IAppBFF
             accounts = individual.accounts
                 .Select(account => new FrontAccount
                 {
+                    guid = account.guid,
                     namedApp = account.namedApp,
                     qualifiedAppName = account.qualifiedAppName,
                     inAppIdentifier = account.inAppIdentifier,
@@ -61,12 +62,14 @@ public class AppBFF : IAppBFF
                     callers = account.callers,
                     isTechnical = account.isTechnical,
                     isAnyCallerContact = account.callers.Any(caller => caller.isContact),
-                    isAnyCallerNote = account.callers.Any(caller => caller.note.status == NoteState.Exists)
+                    isAnyCallerNote = account.callers.Any(caller => caller.note.status == NoteState.Exists),
+                    allDisplayNames = account.allDisplayNames
                 }).ToList(),
             displayName = individual.displayName,
             note = individual.note,
             isAnyContact = individual.isAnyContact,
-            isExposed = individual.isExposed
+            isExposed = individual.isExposed,
+            customName = individual.customName
         };
     }
 

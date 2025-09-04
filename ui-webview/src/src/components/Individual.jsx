@@ -1,7 +1,7 @@
 ﻿import Account from "./Account.jsx";
 import "./Individual.css";
 
-function Individual({ individual, isVisible = true, showBio = false }) {
+function Individual({ individual, isVisible = true, showBio = false, showAlias = false }) {
     // Get all VRChat account links and filter to only show http/https URLs
     const vrChatLinks = individual.accounts
         ?.filter(account => account.namedApp === "VRChat" && account.specifics?.urls?.length > 0)
@@ -62,7 +62,7 @@ function Individual({ individual, isVisible = true, showBio = false }) {
                 {individual.accounts && individual.accounts.length > 0 ? (
                     <div className="accounts-grid">
                         {individual.accounts.map((account, accountIndex) => (
-                            <Account key={accountIndex} account={account} />
+                            <Account key={accountIndex} account={account} showAlias={showAlias} />
                         ))}
                     </div>
                 ) : (
