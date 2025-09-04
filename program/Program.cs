@@ -51,8 +51,8 @@ internal partial class Program
             {
                 await dataCollection.IncrementalUpdateRepository(async updatedThisIncrement => {
                     Console.WriteLine($"Updated the following {updatedThisIncrement.Count} accounts: {string.Join(", ", updatedThisIncrement)}");
-                    await Scaffolding.SaveRepository(repository);
                 });
+                await Scaffolding.SaveRepository(repository);
                 
                 break;
             }

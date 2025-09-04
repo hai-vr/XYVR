@@ -54,9 +54,9 @@ public class VRChatCommunicator
         
         _api ??= await InitializeAPI();
 
-        var onlineFriends = await _api.ListFriends(ListFriendsRequestType.OnlyOnline, DataCollectionReason.FindUndiscoveredAccounts);
-        var offlineFriends = await _api.ListFriends(ListFriendsRequestType.OnlyOffline, DataCollectionReason.FindUndiscoveredAccounts);
-        var userNotes = await _api.ListUserNotes(DataCollectionReason.FindUndiscoveredAccounts);
+        var onlineFriends = await _api.ListFriends(ListFriendsRequestType.OnlyOnline, DataCollectionReason.FindUndiscoveredAccounts).ToListAsync();
+        var offlineFriends = await _api.ListFriends(ListFriendsRequestType.OnlyOffline, DataCollectionReason.FindUndiscoveredAccounts).ToListAsync();
+        var userNotes = await _api.ListUserNotes(DataCollectionReason.FindUndiscoveredAccounts).ToListAsync();
 
         var friendsAsAccounts = onlineFriends.Concat(offlineFriends)
             .Where(friend => !vrchatAccountIdentifiers.Contains(friend.id))
@@ -105,16 +105,17 @@ public class VRChatCommunicator
         return friendsAsAccounts.Concat(notesAsAccounts).ToList();
     }
     
-    public async Task<List<IncompleteAccount>> FindIncompleteAccounts()
+    public async IAsyncEnumerable<IncompleteAccount> FindIncompleteAccounts()
     {
         _api ??= await InitializeAPI();
 
-        var onlineFriends = await _api.ListFriends(ListFriendsRequestType.OnlyOnline, DataCollectionReason.FindUndiscoveredAccounts);
-        var offlineFriends = await _api.ListFriends(ListFriendsRequestType.OnlyOffline, DataCollectionReason.FindUndiscoveredAccounts);
-        var userNotes = await _api.ListUserNotes(DataCollectionReason.FindUndiscoveredAccounts);
-
-        var friendsAsAccounts = onlineFriends.Concat(offlineFriends)
-            .Select(friend => new IncompleteAccount
+        var accountsCollectedSoFar = new HashSet<string>();
+        
+        var contactsAsyncEnum = _api.ListFriends(ListFriendsRequestType.OnlyOnline, DataCollectionReason.FindUndiscoveredAccounts)
+            .Concat(_api.ListFriends(ListFriendsRequestType.OnlyOffline, DataCollectionReason.FindUndiscoveredAccounts));
+        await foreach (var friend in contactsAsyncEnum)
+        {
+            var acc = new IncompleteAccount
             {
                 namedApp = NamedApp.VRChat,
                 qualifiedAppName = VRChatQualifiedAppName,
@@ -129,19 +130,19 @@ public class VRChatCommunicator
                         isContact = true
                     }
                 ]
-            })
-            .ToList();
+            };
+            accountsCollectedSoFar.Add(acc.inAppIdentifier);
+            yield return acc;
+        }
         
-        var accountsCollectedSoFar = new HashSet<string>(friendsAsAccounts.Select(account => account.inAppIdentifier));
-
-        var notesAsAccounts = userNotes
-            .Where(note => !accountsCollectedSoFar.Contains(note.targetUserId))
-            .Select(full => new IncompleteAccount
+        await foreach (var note in _api.ListUserNotes(DataCollectionReason.FindUndiscoveredAccounts))
+        {
+            var acc = new IncompleteAccount
             {
                 namedApp = NamedApp.VRChat,
                 qualifiedAppName = VRChatQualifiedAppName,
-                inAppIdentifier = full.targetUserId,
-                inAppDisplayName = full.targetUser.displayName,
+                inAppIdentifier = note.targetUserId,
+                inAppDisplayName = note.targetUser.displayName,
                 callers =
                 [
                     new IncompleteCallerAccount
@@ -151,10 +152,13 @@ public class VRChatCommunicator
                         isContact = null // We don't know if it's a contact.
                     }
                 ]
-            })
-            .ToList();
+            };
 
-        return friendsAsAccounts.Concat(notesAsAccounts).ToList();
+            if (!accountsCollectedSoFar.Contains(acc.inAppIdentifier))
+            {
+                yield return acc;
+            }
+        }
     }
 
     /// Given a list of user IDs that may or may not exist, return a list of accounts.<br/>
@@ -236,7 +240,7 @@ public class VRChatCommunicator
     {
         _api ??= await InitializeAPI();
 
-        var resultN = await _api.ListUserNotes(DataCollectionReason.ManualRequest);
+        var resultN = await _api.ListUserNotes(DataCollectionReason.ManualRequest).ToListAsync();
         return resultN;
     }
 

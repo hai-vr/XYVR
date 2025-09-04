@@ -239,16 +239,20 @@ public class VRChatAPI
         }
     }
 
-    public async Task<List<VRChatFriend>> ListFriends(ListFriendsRequestType listFriendsRequestType, DataCollectionReason dataCollectionReason)
+    public async IAsyncEnumerable<VRChatFriend> ListFriends(ListFriendsRequestType listFriendsRequestType, DataCollectionReason dataCollectionReason)
     {
         ThrowIfNotLoggedIn();
         
         var requestGuid = Guid.NewGuid().ToString();
 
         var offline = listFriendsRequestType == ListFriendsRequestType.OnlyOffline ? "true" : "false";
-        return await GetPaginatedResults<VRChatFriend>(dataCollectionReason, requestGuid, (offset, pageSize) =>
-            Task.FromResult($"{RootUrl}/auth/user/friends?offset={offset}&n={pageSize}&offline={offline}"));
+        await foreach (var friend in GetPaginatedResults<VRChatFriend>(dataCollectionReason, requestGuid, (offset, pageSize) =>
+                           Task.FromResult($"{RootUrl}/auth/user/friends?offset={offset}&n={pageSize}&offline={offline}")))
+        {
+            yield return friend;
+        }
     }
+
 
     public async Task<VRChatUser?> GetUserLenient(string userId, DataCollectionReason dataCollectionReason)
     {
@@ -281,26 +285,30 @@ public class VRChatAPI
         }
     }
 
-    public async Task<List<VRChatNoteFull>> ListUserNotes(DataCollectionReason dataCollectionReason)
+    public async IAsyncEnumerable<VRChatNoteFull> ListUserNotes(DataCollectionReason dataCollectionReason)
     {
         ThrowIfNotLoggedIn();
         
         var requestGuid = Guid.NewGuid().ToString();
         
-        return await GetPaginatedResults<VRChatNoteFull>(dataCollectionReason, requestGuid, (offset, pageSize) =>
-            Task.FromResult($"{RootUrl}/userNotes?offset={offset}&n={pageSize}"));
+        await foreach (var note in GetPaginatedResults<VRChatNoteFull>(dataCollectionReason, requestGuid, (offset, pageSize) =>
+            Task.FromResult($"{RootUrl}/userNotes?offset={offset}&n={pageSize}")))
+        {
+            yield return note;
+        }
     }
     
-    private async Task<List<T>> GetPaginatedResults<T>(DataCollectionReason dataCollectionReason, string requestGuid, Func<int, int, Task<string>> urlBuilder, int pageSize = 100)
+    private async IAsyncEnumerable<T> GetPaginatedResults<T>(DataCollectionReason dataCollectionReason, string requestGuid, Func<int, int, Task<string>> urlBuilder, int pageSize = 100)
     {
-        string? url = null;
-        try
-        {
-            var allResults = new List<T>();
-            var hasMoreData = true;
-            var offset = 0;
+        var hasMoreData = true;
+        var offset = 0;
 
-            while (hasMoreData)
+        while (hasMoreData)
+        {
+            List<T>? results = null;
+            string? url = null;
+            
+            try
             {
                 url = await urlBuilder(offset, pageSize);
                 var response = await _client.GetAsync(url);
@@ -311,33 +319,36 @@ public class VRChatAPI
 
                 var responseStr = await response.Content.ReadAsStringAsync();
                 DataCollectSuccess(url, requestGuid, responseStr, dataCollectionReason);
-                var results = JsonConvert.DeserializeObject<List<T>>(responseStr);
-                if (results == null || results.Count == 0)
+                results = JsonConvert.DeserializeObject<List<T>>(responseStr);
+            }
+            catch (Exception _)
+            {
+                if (url != null) DataCollectFailure(url, requestGuid, dataCollectionReason);
+                throw;
+            }
+            
+            if (results == null || results.Count == 0)
+            {
+                hasMoreData = false;
+            }
+            else
+            {
+                foreach (var result in results)
+                {
+                    yield return result;
+                }
+
+                if (results.Count < pageSize)
                 {
                     hasMoreData = false;
                 }
                 else
                 {
-                    allResults.AddRange(results);
-
-                    if (results.Count < pageSize)
-                    {
-                        hasMoreData = false;
-                    }
-                    else
-                    {
-                        offset += pageSize;
-                    }
+                    offset += pageSize;
                 }
             }
+        }
 
-            return allResults;
-        }
-        catch (Exception _)
-        {
-            if (url != null) DataCollectFailure(url, requestGuid, dataCollectionReason);
-            throw;
-        }
     }
 
     private async Task EnsureRateLimiting(string urlForLogging)

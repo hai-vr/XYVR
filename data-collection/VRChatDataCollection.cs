@@ -48,7 +48,7 @@ public class VRChatDataCollection(IndividualRepository repository, ResponseColle
     {
         var vrcCaller = await _vrChatCommunicator.CallerAccount();
         
-        var incompleteAccounts = await _vrChatCommunicator.FindIncompleteAccounts();
+        var incompleteAccounts = await _vrChatCommunicator.FindIncompleteAccounts().ToListAsync();
         var undiscoveredUserIds = incompleteAccounts
             .Select(account => account.inAppIdentifier)
             .Distinct()
@@ -106,14 +106,16 @@ public class VRChatDataCollection(IndividualRepository repository, ResponseColle
         repository.MergeAccounts([vrcCaller]);
         await incrementFn([vrcCaller.AsIdentification()]);
         
-        var incompleteAccounts = await _vrChatCommunicator.FindIncompleteAccounts();
-        repository.MergeIncompleteAccounts(incompleteAccounts);
-        await incrementFn(incompleteAccounts.Select(account => account.AsIdentification()).ToList());
-        
-        var undiscoveredUserIds = incompleteAccounts
-            .Select(account => account.inAppIdentifier)
-            .Distinct()
-            .ToList();
+        var undiscoveredUserIds = new HashSet<string>();
+        var incompleteAccounts = new HashSet<AccountIdentification>();
+        await foreach (var incompleteAccount in _vrChatCommunicator.FindIncompleteAccounts())
+        {
+            undiscoveredUserIds.Add(incompleteAccount.inAppIdentifier);
+            incompleteAccounts.Add(incompleteAccount.AsIdentification());
+            
+            repository.MergeIncompleteAccounts([incompleteAccount]);
+            await incrementFn([incompleteAccount.AsIdentification()]);
+        }
         
         foreach (var undiscoveredUserId in undiscoveredUserIds)
         {
@@ -123,7 +125,7 @@ public class VRChatDataCollection(IndividualRepository repository, ResponseColle
         }
 
         return new List<AccountIdentification> { vrcCaller.AsIdentification() }
-            .Concat(incompleteAccounts.Select(account => account.AsIdentification()))
+            .Concat(incompleteAccounts)
             .Distinct()
             .ToList();
     }
