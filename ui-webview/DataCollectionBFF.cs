@@ -1,5 +1,4 @@
 ﻿using System.Runtime.InteropServices;
-using System.Windows;
 using Newtonsoft.Json;
 using XYVR.Core;
 using XYVR.Data.Collection;
@@ -10,13 +9,13 @@ namespace XYVR.UI.WebviewUI;
 [ComVisible(true)]
 public interface IDataCollectionBFF
 {
-    void DataCollectionTriggerTest();
     Task<string> GetConnectors();
     Task<string> CreateConnector(string connectorType);
     Task DeleteConnector(string guid);
     Task<string> TryLogin(string guid, string login__sensitive, string password__sensitive, bool stayLoggedIn);
     Task<string> TryTwoFactor(string guid, string twoFactorCode__sensitive, bool stayLoggedIn);
     Task<string> TryLogout(string guid);
+    Task StartDataCollection();
 }
 
 [ComVisible(true)]
@@ -25,6 +24,9 @@ public class DataCollectionBFF : IDataCollectionBFF
 {
     private readonly MainWindow _mainWindow;
     private readonly JsonSerializerSettings _serializer;
+    private static readonly SemaphoreSlim Lock = new(1, 1);
+    
+    private bool _isRunningDataCollection;
 
     public DataCollectionBFF(MainWindow mainWindow)
     {
@@ -32,6 +34,38 @@ public class DataCollectionBFF : IDataCollectionBFF
         _serializer = BFFUtils.NewSerializer();
     }
 
+    public async Task StartDataCollection()
+    {
+        if (_isRunningDataCollection) return;
+        
+        await Lock.WaitAsync(TimeSpan.FromSeconds(1));
+        try
+        {
+            _isRunningDataCollection = true;
+
+            var repository = _mainWindow.IndividualRepository;
+            var connectors = _mainWindow.ConnectorsMgt;
+            var credentials = _mainWindow.CredentialsMgt;
+            var storage = new ResponseCollectionStorage();
+
+            var dataCollection = new CompoundDataCollection(repository, (await Task.WhenAll(connectors.Connectors
+                    .Where(connector => connector.refreshMode != RefreshMode.ManualUpdatesOnly)
+                    .Select(async connector => await credentials.GetConnectedDataCollectionOrNull(connector, repository, storage))
+                    .ToList()))
+                .Where(collection => collection != null)
+                .Cast<IDataCollection>()
+                .ToList()) as IDataCollection;
+
+            await dataCollection.IncrementalUpdateRepository(new UIProgressJobHandler(repository, individual => _mainWindow.SendEventToReact("individualUpdated", individual)));
+            await Scaffolding.SaveRepository(repository);
+        }
+        finally
+        {
+            _isRunningDataCollection = false;
+            Lock.Release();
+        }
+    }
+    
     public async Task<string> GetConnectors()
     {
         var connectors = _mainWindow.ConnectorsMgt.Connectors;
@@ -110,11 +144,6 @@ public class DataCollectionBFF : IDataCollectionBFF
             
             await Scaffolding.SaveConnectors(_mainWindow.ConnectorsMgt);
         }
-    }
-
-    public void DataCollectionTriggerTest()
-    {
-        MessageBox.Show("data collection trigger", "From WebView", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
     private string ToJSON(object result)

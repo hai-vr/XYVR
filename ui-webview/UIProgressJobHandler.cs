@@ -1,0 +1,57 @@
+﻿using XYVR.Core;
+using XYVR.Data.Collection;
+using XYVR.Scaffold;
+
+namespace XYVR.UI.WebviewUI;
+
+public class UIProgressJobHandler(IndividualRepository repository, Action<Individual> individualUpdatedEventFn) : IIncrementalDataCollectionJobHandler
+{
+    private int _prevEnumTotalCount;
+
+    public Task NotifyAccountUpdated(List<AccountIdentification> increment)
+    {
+        Console.WriteLine($"Updated the following {increment.Count} accounts: {string.Join(", ", increment)}");
+        foreach (var accountIdentification in increment)
+        {
+            Console.WriteLine($"Getting account to send to front...: {accountIdentification}");
+            var individual = repository.GetIndividualByAccount(accountIdentification);
+            individualUpdatedEventFn(individual);
+        }
+        
+        return Task.CompletedTask;
+    }
+
+    public async Task<IncrementalEnumerationTracker> NewEnumerationTracker()
+    {
+        Console.WriteLine("Saving repository...");
+        await Scaffolding.SaveRepository(repository);
+        
+        return new IncrementalEnumerationTracker();
+    }
+
+    public async Task NotifyEnumeration(IncrementalEnumerationTracker tracker, int enumerationAccomplished, int enumerationTotalCount_canBeZero)
+    {
+        if (_prevEnumTotalCount != enumerationTotalCount_canBeZero)
+        {
+            _prevEnumTotalCount = enumerationTotalCount_canBeZero;
+            if (enumerationTotalCount_canBeZero != 0 && enumerationTotalCount_canBeZero % 100 == 0)
+            {
+                Console.WriteLine("Saving repository...");
+                await Scaffolding.SaveRepository(repository);
+            }
+        }
+        
+        if (enumerationAccomplished != 0 && enumerationAccomplished % 100 == 0)
+        {
+            Console.WriteLine("Saving repository...");
+            await Scaffolding.SaveRepository(repository);
+        }
+        
+        Console.WriteLine($"Progress: {enumerationAccomplished} / {enumerationTotalCount_canBeZero}");
+    }
+
+    public Task NotifyProspective(IncrementalEnumerationTracker tracker)
+    {
+        return Task.CompletedTask;
+    }
+}

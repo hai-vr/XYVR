@@ -101,6 +101,10 @@ function DataCollectionPage({ isDark, setIsDark }) {
         }
     }
 
+    const startDataCollection = async () => {
+        await window.chrome.webview.hostObjects.dataCollectionApi.StartDataCollection();
+    }
+
     return (
         <div className="data-collection-container">
             <div className="header-group">
@@ -165,6 +169,13 @@ function DataCollectionPage({ isDark, setIsDark }) {
                     </div>
                 </>
             )}
+
+            <button
+                onClick={() => startDataCollection()}
+                title="Start data collection"
+            >
+                Start data collection
+            </button>
         </div>
     )
 }

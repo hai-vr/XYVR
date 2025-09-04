@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Windows;
 using Microsoft.Web.WebView2.Core;
+using Newtonsoft.Json;
 using XYVR.Core;
 using XYVR.Data.Collection;
 using XYVR.Scaffold;
@@ -14,6 +15,7 @@ public partial class MainWindow : Window
     private readonly AppBFF _appBff;
     private readonly DataCollectionBFF _dataCollectionBff;
     private readonly PreferencesBFF _preferencesBff;
+    private readonly JsonSerializerSettings _serializer;
 
     public IndividualRepository IndividualRepository { get; private set; }
     public ConnectorManagement ConnectorsMgt { get; private set; }
@@ -25,6 +27,7 @@ public partial class MainWindow : Window
         _appBff = new AppBFF(this);
         _dataCollectionBff = new DataCollectionBFF(this);
         _preferencesBff = new PreferencesBFF(this);
+        _serializer = BFFUtils.NewSerializer();
 
         Title = "XYVR";
         
@@ -70,5 +73,19 @@ public partial class MainWindow : Window
                 Scaffolding.DANGER_OpenUrl(uriString);
             }
         }
+    }
+    
+    internal async Task SendEventToReact(string eventType__vulnerableToInjections, object obj)
+    {
+        var eventJson = JsonConvert.SerializeObject(obj, _serializer);
+        var script = $"window.dispatchEvent(new CustomEvent('{eventType__vulnerableToInjections}', {{ detail: {eventJson} }}));";
+        
+        await Dispatcher.InvokeAsync(() =>
+        {
+            if (WebView?.CoreWebView2 != null)
+            {
+                WebView.CoreWebView2.ExecuteScriptAsync(script);
+            }
+        });
     }
 }

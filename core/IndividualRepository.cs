@@ -4,14 +4,13 @@ public class IndividualRepository
 {
     public List<Individual> Individuals { get; }
     
-    private Dictionary<NamedApp, Dictionary<string, Individual>> _namedAppToInAppIdToIndividual;
+    private readonly Dictionary<NamedApp, Dictionary<string, Individual>> _namedAppToInAppIdToIndividual = new();
 
     public IndividualRepository(Individual[] individuals)
     {
         Individuals = individuals.ToList();
         EvaluateDataMigrations(Individuals);
 
-        _namedAppToInAppIdToIndividual = new Dictionary<NamedApp, Dictionary<string, Individual>>();
         RebuildAccountDictionary();
     }
 
@@ -415,5 +414,10 @@ public class IndividualRepository
         }
         
         Individuals.RemoveAt(indexToDestroy);
+    }
+
+    public Individual GetIndividualByAccount(AccountIdentification accountIdentification)
+    {
+        return _namedAppToInAppIdToIndividual[accountIdentification.namedApp][accountIdentification.inAppIdentifier];
     }
 }

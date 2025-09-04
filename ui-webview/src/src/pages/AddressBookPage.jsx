@@ -1,5 +1,5 @@
 ﻿import { useEffect, useState, useMemo, useCallback, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import {useNavigate} from 'react-router-dom'
 import './AddressBookPage.css'
 import '../Header.css'
 import Individual from "../components/Individual.jsx"
@@ -67,6 +67,30 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
     useEffect(() => {
         setDisplayedCount(50);
     }, [debouncedSearchTerm, showOnlyContacts]);
+
+    useEffect(() => {
+        const individualUpdated = (event) => {
+            console.log('Individual updated:', event.detail);
+            const updatedIndividual = event.detail;
+
+            setIndividuals(prevIndividuals => {
+                const existingIndex = prevIndividuals.findIndex(ind => ind.guid === updatedIndividual.guid);
+
+                if (existingIndex !== -1) {
+                    const newIndividuals = [...prevIndividuals];
+                    newIndividuals[existingIndex] = updatedIndividual;
+                    return newIndividuals;
+                } else {
+                    return [...prevIndividuals, updatedIndividual];
+                }
+            });
+        };
+
+        window.addEventListener('individualUpdated', individualUpdated);
+        return () => {
+            window.removeEventListener('individualUpdated', individualUpdated);
+        };
+    }, []);
 
     // Create sorted and filtered individuals array (now using debouncedSearchTerm)
     const sortedAndFilteredIndividuals = useMemo(() => {
