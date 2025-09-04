@@ -45,7 +45,7 @@ public class AppBFF : IAppBFF
         return JsonConvert.SerializeObject(responseObj, Formatting.None, _serializer);
     }
 
-    private FrontIndividual ToFront(Individual individual)
+    internal static FrontIndividual ToFront(Individual individual)
     {
         return new FrontIndividual
         {
