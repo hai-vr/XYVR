@@ -13,8 +13,6 @@ public class ResponseCollectionStorage : IResponseCollector
     
     public void Ingest(ResponseCollectionTrail trail)
     {
-        Console.WriteLine($"{trail.timestamp} {trail.reason} {trail.apiSource} {trail.route} {trail.status} {trail.responseObject}");
-        
         _ = Task.Run(async () => await WriteToJsonlFileAsync(trail));
     }
 
