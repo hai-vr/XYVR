@@ -53,11 +53,30 @@ public partial class MainWindow : Window
 
         // Intercept clicks on links
         WebView.CoreWebView2.NavigationStarting += CoreWebView2_NavigationStarting;
+        WebView.CoreWebView2.NewWindowRequested += CoreWebView2_NewWindowRequested;
 
         var distPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "src/dist");
         WebView.CoreWebView2.SetVirtualHostNameToFolderMapping(VirtualHost, distPath, CoreWebView2HostResourceAccessKind.Allow);
         
         WebView.Source = new Uri($"https://{VirtualHost}/index.html");
+    }
+
+    private void CoreWebView2_NewWindowRequested(object? sender, CoreWebView2NewWindowRequestedEventArgs evt)
+    {
+        // Cancel the new window request to prevent popups from middle-clicks
+        evt.Handled = true;
+        
+        var uriString = evt.Uri;
+        var uri = new Uri(uriString);
+        
+        // If the middle click was on an external link, then open it in the default browser instead of a popup.
+        if (uri.Host != VirtualHost)
+        {
+            if (uriString.ToLowerInvariant().StartsWith("https://") || uriString.ToLowerInvariant().StartsWith("http://"))
+            {
+                Scaffolding.DANGER_OpenUrl(uriString);
+            }
+        }
     }
 
     private void CoreWebView2_NavigationStarting(object? sender, CoreWebView2NavigationStartingEventArgs evt)
