@@ -120,6 +120,28 @@ public class IndividualRepository
         return results;
     }
 
+    public void MergeIncompleteAccounts(List<IncompleteAccount> incompleteAccounts)
+    {
+        foreach (var inputAccount in incompleteAccounts)
+        {
+            if (_namedAppToInAppIdToIndividual[inputAccount.namedApp].TryGetValue(inputAccount.inAppIdentifier, out var existingIndividual))
+            {
+                foreach (var existingAccount in existingIndividual.accounts)
+                {
+                    if (SynchronizeIncompleteAccount(existingAccount, inputAccount)) break;
+                }
+
+                UpdateIndividualBasedOnAccounts(existingIndividual);
+            }
+            else
+            {
+                Console.WriteLine($"Creating new individual from incomplete account: {inputAccount.namedApp} {inputAccount.inAppIdentifier} {inputAccount.inAppDisplayName}");
+                var newIndividual = CreateNewIndividualFromIncompleteAccount(inputAccount);
+                _namedAppToInAppIdToIndividual[inputAccount.namedApp].Add(inputAccount.inAppIdentifier, newIndividual);
+            }
+        }
+    }
+
     public void MergeAccounts(List<Account> accounts)
     {
         foreach (var inputAccount in accounts)
@@ -180,11 +202,70 @@ public class IndividualRepository
                 workingDisplayNames.Add(inputAccount.inAppDisplayName);
             }
             existingAccount.allDisplayNames = workingDisplayNames.Distinct().ToList();
+
+            existingAccount.isPendingUpdate = false; // Merging a complete inputAccount means it's no longer pending update.
             
             return true;
         }
 
         return false;
+    }
+
+    private static bool SynchronizeIncompleteAccount(Account existingAccount, IncompleteAccount inputAccount)
+    {
+        var isSameAppAndIdentifier = IsSameApp(existingAccount, inputAccount) && existingAccount.inAppIdentifier == inputAccount.inAppIdentifier;
+        if (isSameAppAndIdentifier)
+        {
+            existingAccount.inAppDisplayName = inputAccount.inAppDisplayName;
+            
+            foreach (var inputCaller in inputAccount.callers)
+            {
+                var callerExists = false;
+                foreach (var existingCaller in existingAccount.callers)
+                {
+                    if (inputCaller.isAnonymous && existingCaller.isAnonymous
+                        || !inputCaller.isAnonymous && !existingCaller.isAnonymous && existingCaller.inAppIdentifier == inputCaller.inAppIdentifier)
+                    {
+                        callerExists = true;
+                        if (inputCaller.isContact != null) { existingCaller.isContact = (bool)inputCaller.isContact; }
+                        
+                        break;
+                    }
+                }
+                if (!callerExists)
+                {
+                    existingAccount.callers.Add(CallerFromIncompleteCaller(inputCaller));
+                }
+            }
+
+            var workingDisplayNames = existingAccount.allDisplayNames.ToList();
+            if (!workingDisplayNames.Contains(inputAccount.inAppDisplayName))
+            {
+                workingDisplayNames.Add(inputAccount.inAppDisplayName);
+            }
+            existingAccount.allDisplayNames = workingDisplayNames.Distinct().ToList();
+            
+            // Notice how we don't set account.isPendingUpdate to true here, it just stays default previous value.
+            
+            return true;
+        }
+
+        return false;
+    }
+
+    private static CallerAccount CallerFromIncompleteCaller(IncompleteCallerAccount inputCaller)
+    {
+        return new CallerAccount
+        {
+            inAppIdentifier = inputCaller.inAppIdentifier,
+            isAnonymous = inputCaller.isAnonymous,
+            isContact = inputCaller.isContact ?? false,
+            note = new Note
+            {
+                status = NoteState.NeverHad,
+                text = null
+            }
+        };
     }
 
     private static void UpdateExistingNote(Note existingNote, Note inputNote)
@@ -244,6 +325,20 @@ public class IndividualRepository
         return true;
     }
 
+    private static bool IsSameApp(Account existingAccount, IncompleteAccount inputAccount)
+    {
+        var sameNamedApp = existingAccount.namedApp == inputAccount.namedApp;
+        if (!sameNamedApp)
+        {
+            return false;
+        }
+        if (existingAccount.namedApp == NamedApp.NotNamed)
+        {
+            return existingAccount.qualifiedAppName == inputAccount.qualifiedAppName;
+        }
+        return true;
+    }
+
     // It is the responsibility of the caller to never call this when that account is already owned by an Individual.
     private Individual CreateNewIndividualFromAccount(Account account)
     {
@@ -255,6 +350,33 @@ public class IndividualRepository
             displayName = account.inAppDisplayName,
             isAnyContact = isAnyContact,
             isExposed = isAnyContact || account.HasAnyCallerNote()
+        };
+        Individuals.Add(individual);
+        return individual;
+    }
+
+    private Individual CreateNewIndividualFromIncompleteAccount(IncompleteAccount incompleteAccount)
+    {
+        var isAnyContact = incompleteAccount.IsAnyCallerContact();
+        var individual = new Individual
+        {
+            guid = Guid.NewGuid().ToString(),
+            accounts = [new Account
+            {
+                guid = Guid.NewGuid().ToString(),
+                namedApp = incompleteAccount.namedApp,
+                qualifiedAppName = incompleteAccount.qualifiedAppName,
+                inAppIdentifier = incompleteAccount.inAppIdentifier,
+                inAppDisplayName = incompleteAccount.inAppDisplayName,
+                callers = incompleteAccount.callers.Select(CallerFromIncompleteCaller).ToList(),
+                allDisplayNames = [incompleteAccount.inAppDisplayName],
+                isTechnical = false,
+                
+                isPendingUpdate = true // true because this individual was just created from an incomplete account
+            }],
+            displayName = incompleteAccount.inAppDisplayName,
+            isAnyContact = isAnyContact,
+            isExposed = isAnyContact,
         };
         Individuals.Add(individual);
         return individual;

@@ -62,7 +62,7 @@ function Individual({ individual, isVisible = true, showBio = false, showAlias =
                 {individual.accounts && individual.accounts.length > 0 ? (
                     <div className="accounts-grid">
                         {individual.accounts.map((account, accountIndex) => (
-                            <Account key={accountIndex} account={account} showAlias={showAlias} />
+                            <Account key={account.guid} account={account} showAlias={showAlias} />
                         ))}
                     </div>
                 ) : (

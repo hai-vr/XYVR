@@ -113,6 +113,13 @@ const Account = ({ account, imposter, showAlias }) => {
                 </div>)}
             </div>
 
+            {account.isPendingUpdate && (
+                <p className="warning-message">
+                    <span className="warning-icon">⚠️</span>
+                    We have not yet collected all information for this account. Notes, bio, and links may be missing.
+                </p>
+            )}
+
             {account.callers && account.callers.filter(caller => caller.note.status === "Exists").map((caller, index) => (
                 <div key={index} className="note-container">
                     <div className="note-header">

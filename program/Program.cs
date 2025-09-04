@@ -14,11 +14,12 @@ public enum Mode
     UpdateOnlyThoseReturned,
     SetupConnectors,
     MigrateAndSave,
+    Incremental,
 }
 
 internal partial class Program
 {
-    private static Mode mode = Mode.MigrateAndSave;
+    private static Mode mode = Mode.Incremental;
 
     public static async Task Main(string[] args)
     {
@@ -30,7 +31,7 @@ internal partial class Program
         var connectors = new ConnectorManagement(await Scaffolding.OpenConnectors());
         var credentials = new CredentialsManagement(await Scaffolding.OpenCredentials(), Scaffolding.ResoniteUIDLateInitializerFn());
 
-        var dataCollection = new CompoundDataCollection((await Task.WhenAll(connectors.Connectors
+        var dataCollection = new CompoundDataCollection(repository, (await Task.WhenAll(connectors.Connectors
                 .Select(async connector => await credentials.GetConnectedDataCollectionOrNull(connector, repository, storage))
                 .ToList()))
             .Where(collection => collection != null)
@@ -42,6 +43,15 @@ internal partial class Program
             case Mode.MigrateAndSave:
             {
                 await Scaffolding.SaveRepository(repository);
+                
+                break;
+            }
+            case Mode.Incremental:
+            {
+                await dataCollection.IncrementalUpdateRepository(async updatedThisIncrement => {
+                    Console.WriteLine($"Updated the following {updatedThisIncrement.Count} accounts: {string.Join(", ", updatedThisIncrement)}");
+                    await Scaffolding.SaveRepository(repository);
+                });
                 
                 break;
             }

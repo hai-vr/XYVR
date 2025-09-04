@@ -87,7 +87,7 @@ public class ResoniteCommunicator
             .ToList();
     }
     
-    public async Task<List<Account>> FindIncompleteAccounts()
+    public async Task<List<Account>> FindAccounts()
     {
         _api ??= await InitializeApi();
 

@@ -71,7 +71,8 @@ public class VRChatCommunicator
                     new IncompleteCallerAccount
                     {
                         isAnonymous = false,
-                        inAppIdentifier = _callerUserId
+                        inAppIdentifier = _callerUserId,
+                        isContact = true
                     }
                 ]
             })
@@ -81,6 +82,7 @@ public class VRChatCommunicator
         accountsCollectedSoFar.UnionWith(friendsAsAccounts.Select(account => account.inAppIdentifier));
 
         var notesAsAccounts = userNotes
+            // TODO: We could add .note to IncompleteAccount and set it next, even if a friend was already collected above without a note
             .Where(note => !accountsCollectedSoFar.Contains(note.targetUserId))
             .Select(full => new IncompleteAccount
             {
@@ -93,7 +95,8 @@ public class VRChatCommunicator
                     new IncompleteCallerAccount
                     {
                         isAnonymous = false,
-                        inAppIdentifier = _callerUserId
+                        inAppIdentifier = _callerUserId,
+                        isContact = null // We don't know if it's a contact.
                     }
                 ]
             })
@@ -122,7 +125,8 @@ public class VRChatCommunicator
                     new IncompleteCallerAccount
                     {
                         isAnonymous = false,
-                        inAppIdentifier = _callerUserId
+                        inAppIdentifier = _callerUserId,
+                        isContact = true
                     }
                 ]
             })
@@ -143,7 +147,8 @@ public class VRChatCommunicator
                     new IncompleteCallerAccount
                     {
                         isAnonymous = false,
-                        inAppIdentifier = _callerUserId
+                        inAppIdentifier = _callerUserId,
+                        isContact = null // We don't know if it's a contact.
                     }
                 ]
             })

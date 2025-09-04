@@ -49,12 +49,25 @@ public class Account
     public List<CallerAccount> callers = new();
     
     public List<string> allDisplayNames = new();
+    
+    // Maintenance fields
+    public bool isPendingUpdate;
 
     // This field is up to the app users' judgement
     public bool isTechnical;
 
     public bool IsAnyCallerContact() => callers.Any(caller => caller.isContact);
     public bool HasAnyCallerNote() => callers.Any(caller => caller.note.status == NoteState.Exists);
+
+    public AccountIdentification AsIdentification()
+    {
+        return new AccountIdentification
+        {
+            inAppIdentifier = inAppIdentifier,
+            namedApp = namedApp,
+            qualifiedAppName = qualifiedAppName,
+        };
+    }
 }
 
 public class IncompleteAccount
@@ -66,12 +79,63 @@ public class IncompleteAccount
     public string inAppDisplayName;
     
     public List<IncompleteCallerAccount> callers = new();
+    
+    public bool IsAnyCallerContact() => callers.Any(caller => caller.isContact ?? false);
+
+    public AccountIdentification AsIdentification()
+    {
+        return new AccountIdentification
+        {
+            inAppIdentifier = inAppIdentifier,
+            namedApp = namedApp,
+            qualifiedAppName = qualifiedAppName,
+        };
+    }
+}
+
+public class AccountIdentification
+{
+    public NamedApp namedApp;
+    public string qualifiedAppName;
+
+    public string inAppIdentifier;
+    
+    public override string ToString()
+    {
+        return $"{namedApp}:{qualifiedAppName}:{inAppIdentifier}";
+    }
+
+    protected bool Equals(AccountIdentification other)
+    {
+        return namedApp == other.namedApp && qualifiedAppName == other.qualifiedAppName && inAppIdentifier == other.inAppIdentifier;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is null) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj.GetType() != GetType()) return false;
+        return Equals((AccountIdentification)obj);
+    }
+
+    public override int GetHashCode()
+    {
+        unchecked
+        {
+            var hashCode = (int)namedApp;
+            hashCode = (hashCode * 397) ^ qualifiedAppName.GetHashCode();
+            hashCode = (hashCode * 397) ^ inAppIdentifier.GetHashCode();
+            return hashCode;
+        }
+    }
 }
 
 public class IncompleteCallerAccount
 {
     public bool isAnonymous;
     public string? inAppIdentifier;
+    
+    public bool? isContact;
 }
 
 public class CallerAccount

@@ -63,7 +63,8 @@ public class AppBFF : IAppBFF
                     isTechnical = account.isTechnical,
                     isAnyCallerContact = account.callers.Any(caller => caller.isContact),
                     isAnyCallerNote = account.callers.Any(caller => caller.note.status == NoteState.Exists),
-                    allDisplayNames = account.allDisplayNames
+                    allDisplayNames = account.allDisplayNames,
+                    isPendingUpdate = account.isPendingUpdate
                 }).ToList(),
             displayName = individual.displayName,
             note = individual.note,

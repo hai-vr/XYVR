@@ -99,4 +99,46 @@ public class VRChatDataCollection(IndividualRepository repository, DataCollectio
 
         return vrchatAccounts;
     }
+
+    public async Task<List<AccountIdentification>> IncrementalUpdateRepository(Func<List<AccountIdentification>, Task> incrementFn)
+    {
+        var vrcCaller = await _vrChatCommunicator.CallerAccount();
+        repository.MergeAccounts([vrcCaller]);
+        await incrementFn([vrcCaller.AsIdentification()]);
+        
+        var incompleteAccounts = await _vrChatCommunicator.FindIncompleteAccounts();
+        repository.MergeIncompleteAccounts(incompleteAccounts);
+        await incrementFn(incompleteAccounts.Select(account => account.AsIdentification()).ToList());
+        
+        var undiscoveredUserIds = incompleteAccounts
+            .Select(account => account.inAppIdentifier)
+            .Distinct()
+            .ToList();
+        
+        foreach (var undiscoveredUserId in undiscoveredUserIds)
+        {
+            var collectUndiscoveredLenient = await _vrChatCommunicator.CollectAllLenient([undiscoveredUserId]);
+            repository.MergeAccounts(collectUndiscoveredLenient);
+            await incrementFn(collectUndiscoveredLenient.Select(account => account.AsIdentification()).ToList());
+        }
+
+        return new List<AccountIdentification> { vrcCaller.AsIdentification() }
+            .Concat(incompleteAccounts.Select(account => account.AsIdentification()))
+            .Distinct()
+            .ToList();
+    }
+
+    public bool CanAttemptIncrementalUpdateOn(AccountIdentification identification)
+    {
+        return identification.namedApp == NamedApp.VRChat;
+    }
+
+    public async Task<Account?> TryGetForIncrementalUpdate__Flawed__NonContactOnly(AccountIdentification toTryUpdate)
+    {
+        if (toTryUpdate.namedApp != NamedApp.VRChat) throw new ArgumentException("Cannot attempt incremental update on non-VRChat account, it is the responsibility of the caller to invoke CanAttemptIncrementalUpdateOn beforehand");
+        
+        var collected = await _vrChatCommunicator.CollectAllLenient([toTryUpdate.inAppIdentifier]);
+        
+        return collected.Count == 0 ? null : collected.First();
+    }
 }

@@ -41,7 +41,7 @@ public class ResoniteDataCollection(IndividualRepository repository, DataCollect
     {
         var resoniteCaller = await _resoniteCommunicator.CallerAccount();
 
-        var incompleteAccounts = await _resoniteCommunicator.FindIncompleteAccounts();
+        var incompleteAccounts = await _resoniteCommunicator.FindAccounts();
 
         return incompleteAccounts
             .Concat([resoniteCaller])
@@ -100,5 +100,34 @@ public class ResoniteDataCollection(IndividualRepository repository, DataCollect
             .ToList();
 
         return resoniteAccounts;
+    }
+
+    public async Task<List<AccountIdentification>> IncrementalUpdateRepository(Func<List<AccountIdentification>, Task> incrementFn)
+    {
+        var resoniteCaller = await _resoniteCommunicator.CallerAccount();
+        repository.MergeAccounts([resoniteCaller]);
+        await incrementFn([resoniteCaller.AsIdentification()]);
+
+        var incompleteAccounts = await _resoniteCommunicator.FindAccounts();
+        repository.MergeAccounts(incompleteAccounts);
+        await incrementFn(incompleteAccounts.Select(account => account.AsIdentification()).ToList());
+
+        return new List<AccountIdentification> { resoniteCaller.AsIdentification() }
+            .Concat(incompleteAccounts.Select(account => account.AsIdentification()))
+            .Distinct()
+            .ToList();
+    }
+
+    public bool CanAttemptIncrementalUpdateOn(AccountIdentification identification)
+    {
+        return identification.namedApp == NamedApp.Resonite;
+    }
+
+    public async Task<Account?> TryGetForIncrementalUpdate__Flawed__NonContactOnly(AccountIdentification toTryUpdate)
+    {
+        // FIXME: By default, this will always consider the returned user to be a non-Contact, so it's quite flawed. The name of this data collection method was changed BECAUSE OF this flaw in this specific collector.
+        var result = await _resoniteCommunicator.CollectAllLenient([toTryUpdate.inAppIdentifier], []);
+        
+        return result.Count == 0 ? null : result.First();
     }
 }

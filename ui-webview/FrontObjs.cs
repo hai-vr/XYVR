@@ -26,6 +26,7 @@ internal class FrontAccount
     public bool isAnyCallerNote;
     public object? specifics;
     public List<string> allDisplayNames;
+    public bool isPendingUpdate;
 }
 
 public class FrontConnector(Connector connector, bool isLoggedIn)

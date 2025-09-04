@@ -12,7 +12,7 @@ public interface IDataCollection
     Task<List<Account>> CollectAllUndiscoveredAccounts();
     
     /// Collects all accounts from upstream and returns only those accounts.<br/>
-    /// Internally, this lists all current friends and notes but and retrieves all of those.<br/>
+    /// Internally, this lists all current friends and notes and retrieves all of those.<br/>
     /// <br/>
     /// This does not modify the repository.
     Task<List<Account>> CollectReturnedAccounts();
@@ -26,4 +26,14 @@ public interface IDataCollection
 
     /// Using a data collection storage, try to rebuild account data.
     Task<List<Account>> RebuildFromDataCollectionStorage(List<DataCollectionTrail> trails);
+    
+    Task<List<AccountIdentification>> IncrementalUpdateRepository(Func<List<AccountIdentification>, Task> incrementFn);
+    
+    /// Return true if this data collector can attempt an incremental update of the given identification.
+    bool CanAttemptIncrementalUpdateOn(AccountIdentification identification);
+
+    /// Attempt an incremental update of the given identification, which MUST have been passed to CanAttemptIncrementalUpdateOn beforehand.<br/>
+    /// Attempt can fail on accounts removed by the upstream service, which is the reason this function returns nullable.<br/>
+    /// Return whether it was successful.
+    Task<Account?> TryGetForIncrementalUpdate__Flawed__NonContactOnly(AccountIdentification toTryUpdate);
 }

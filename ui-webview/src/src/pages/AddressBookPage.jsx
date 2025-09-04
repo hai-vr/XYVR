@@ -272,7 +272,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                 <div className="individuals-grid">
                     {displayedIndividuals.map((individual, index) => (
                         <Individual
-                            key={individual.id || index}
+                            key={individual.guid || index}
                             individual={individual}
                             isVisible={true}
                             showBio={showBio}
