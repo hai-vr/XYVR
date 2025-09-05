@@ -8,7 +8,7 @@ namespace XYVR.Data.Collection;
 public class ResoniteDataCollection(IndividualRepository repository, ResponseCollectionStorage responseCollectionStorage, string resoniteUid, ICredentialsStorage credentialsStorage) : IDataCollection
 {
     private readonly ResoniteCommunicator _resoniteCommunicator = new(responseCollectionStorage,
-        null, null, resoniteUid,
+        null, null, false, resoniteUid,
         credentialsStorage
     );
     

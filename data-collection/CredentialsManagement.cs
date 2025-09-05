@@ -100,7 +100,7 @@ public class CredentialsManagement
     {
         var communicator = new ResoniteCommunicator(
             new DoNotStoreAnythingStorage(),
-            null, null, await _resoniteUidProviderFn(),
+            null, null, false, await _resoniteUidProviderFn(),
             new InMemoryCredentialsStorage(cookieOrToken)
         );
         
@@ -200,6 +200,7 @@ public class CredentialsManagement
             new DoNotStoreAnythingStorage(),
             connectionAttempt.login__sensitive,
             connectionAttempt.password__sensitive,
+            connectionAttempt.stayLoggedIn,
             await _resoniteUidProviderFn(),
             credentialsStorage
         );
@@ -281,7 +282,13 @@ public class CredentialsManagement
     {
         _connectorGuidToCredentialsStorageState.Remove(connector.guid, out _);
         // TODO: implement resonite
-        throw new NotImplementedException();
+        // throw new NotImplementedException();
+        return new ConnectionAttemptResult
+        {
+            guid = connector.guid,
+            account = connector.account,
+            type = ConnectionAttemptResultType.LoggedOut
+        };
     }
 
     private static ConnectorAccount AsConnectorAccount(Account callerAccount)

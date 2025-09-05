@@ -41,7 +41,7 @@ public class ResoniteAPI
         _client.DefaultRequestHeaders.UserAgent.ParseAdd($"Hai.XYVR/{VERSION.version} (docs.hai-vr.dev/docs/products/xyvr#user-agent)");
     }
 
-    public async Task<LoginResponseJsonObject> Login(string username__sensitive, string password__sensitive, string? twoferTotp = null)
+    public async Task<LoginResponseJsonObject> Login(string username__sensitive, string password__sensitive, bool stayLoggedIn, string? twoferTotp = null)
     {
         var obj__sensitive = new LoginJsonObject
         {
@@ -51,7 +51,8 @@ public class ResoniteAPI
                 type = "password",
                 password = password__sensitive
             },
-            secretMachineId = _secretMachineId
+            secretMachineId = _secretMachineId,
+            rememberMe = stayLoggedIn
         };
         var request__sensitive = new HttpRequestMessage(HttpMethod.Post, $"{PrefixWithSlash}userSessions");
         request__sensitive.Content = ToCarefulJsonContent__Sensitive(obj__sensitive);

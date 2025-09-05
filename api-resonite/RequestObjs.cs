@@ -7,6 +7,7 @@ internal struct LoginJsonObject
     public string username;
     public AuthenticationJsonObject authentication;
     public string secretMachineId;
+    public bool rememberMe;
 }
 
 internal struct AuthenticationJsonObject
