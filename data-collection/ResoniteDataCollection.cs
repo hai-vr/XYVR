@@ -111,15 +111,23 @@ public class ResoniteDataCollection(IndividualRepository repository, ResponseCol
         await jobHandler.NotifyAccountUpdated([resoniteCaller.AsIdentification()]);
         await jobHandler.NotifyProspective(eTracker);
 
-        var incompleteAccounts = new List<AccountIdentification>();
-        await foreach (var incompleteAccount in _resoniteCommunicator.FindAccounts()) // TODO: FindAccounts can further be divided (get contacts then get user)
-        {
-            incompleteAccounts.Add(incompleteAccount.AsIdentification());
-            repository.MergeAccounts([incompleteAccount]);
-            await jobHandler.NotifyAccountUpdated([incompleteAccount.AsIdentification()]);
-            await jobHandler.NotifyEnumeration(eTracker, incompleteAccounts.Count, incompleteAccounts.Count);
-        }
+        var incAccs = await _resoniteCommunicator.FindIncompleteAccounts().ToListAsync();
+        repository.MergeIncompleteAccounts(incAccs);
+        await jobHandler.NotifyAccountUpdated(incAccs.Select(account => account.AsIdentification()).ToList());
 
+        var incompleteAccounts = new List<AccountIdentification>();
+        foreach (var acc in incAccs)
+        {
+            var account = await _resoniteCommunicator.GetUser(acc.inAppIdentifier, true);
+            if (account != null)
+            {
+                incompleteAccounts.Add(account.AsIdentification());
+                repository.MergeAccounts([account]);
+                await jobHandler.NotifyAccountUpdated([account.AsIdentification()]);
+                await jobHandler.NotifyEnumeration(eTracker, incompleteAccounts.Count, incAccs.Count);
+            }
+        }
+        
         return new List<AccountIdentification> { resoniteCaller.AsIdentification() }
             .Concat(incompleteAccounts)
             .Distinct()

@@ -87,6 +87,30 @@ public class ResoniteCommunicator
             .ToList();
     }
     
+
+    public async IAsyncEnumerable<IncompleteAccount> FindIncompleteAccounts()
+    {
+        _api ??= await InitializeApi();
+
+        var contacts = await _api.GetUserContacts(DataCollectionReason.FindUndiscoveredAccounts);
+        foreach (var contact in contacts)
+        {
+            yield return new IncompleteAccount
+            {
+                namedApp = NamedApp.Resonite,
+                qualifiedAppName = ResoniteQualifiedAppName,
+                inAppIdentifier = contact.id,
+                inAppDisplayName = contact.contactUsername,
+                callers = [new IncompleteCallerAccount
+                {
+                    isAnonymous = false,
+                    inAppIdentifier = _callerUserId,
+                    isContact = true
+                }]
+            };
+        }
+    }
+    
     public async IAsyncEnumerable<Account> FindAccounts()
     {
         _api ??= await InitializeApi();
@@ -106,6 +130,38 @@ public class ResoniteCommunicator
                 yield return AsAccount(combinedContactAndUser, _callerUserId, true);
             }
         }
+    }
+    
+    public async Task<Account?> GetUser(string id, bool isContact)
+    {
+        _api ??= await InitializeApi();
+
+        var userN = await _api.GetUser(id, DataCollectionReason.CollectUndiscoveredAccount);
+        if (userN == null) return null;
+        
+        var user = (UserResponseJsonObject)userN;
+        return new Account
+        {
+            guid = Guid.NewGuid().ToString(),
+            namedApp = NamedApp.Resonite,
+            qualifiedAppName = ResoniteQualifiedAppName,
+            inAppIdentifier = user.id,
+            inAppDisplayName = user.username,
+            callers =
+            [
+                new CallerAccount
+                {
+                    isAnonymous = false,
+                    inAppIdentifier = _callerUserId,
+                    isContact = isContact,
+                    note = new Note
+                    {
+                        status = NoteState.NeverHad,
+                        text = null
+                    }
+                }
+            ]
+        };
     }
 
     /// Get the list of user contact IDs for the purposes of combining it with the users data.<br/>
