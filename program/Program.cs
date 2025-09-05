@@ -35,6 +35,7 @@ internal class Program
         var repository = new IndividualRepository(await Scaffolding.OpenRepository());
         var connectors = new ConnectorManagement(await Scaffolding.OpenConnectors());
         var credentials = new CredentialsManagement(await Scaffolding.OpenCredentials(), Scaffolding.ResoniteUIDLateInitializerFn());
+        var liveStatusMonitoring = new LiveStatusMonitoring();
 
         var dataCollection = new CompoundDataCollection(repository, (await Task.WhenAll(connectors.Connectors
                 .Where(connector => connector.refreshMode != RefreshMode.ManualUpdatesOnly)
@@ -58,10 +59,17 @@ internal class Program
                 resoniteLiveUpdates.OnLiveUpdateReceived += update =>
                 {
                     Console.WriteLine($"OnLiveUpdateReceived: {JsonConvert.SerializeObject(update, serializer)}");
+                    liveStatusMonitoring.Merge(update);
+                    
                     return Task.CompletedTask;
                 };
                 await resoniteLiveUpdates.Connect();
-                await Task.Delay(TimeSpan.FromMinutes(100));
+                int i = 0;
+                while (i < int.MaxValue) // this is just a placeholder so the ide doesn't complain
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(1));
+                    i++;
+                }
                 await resoniteLiveUpdates.Disconnect();
 
                 break;

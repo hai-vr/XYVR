@@ -32,7 +32,7 @@ If you are a developer, feel free to read below.
 - We store your address book in the `%APPDATA%/XYVR/` folder.
 - We only perform requests to the following URLs:
   - for VRChat accounts: `https://api.vrchat.cloud/api/1`
-  - for Resonite accounts: `https://api.resonite.com/`
+  - for Resonite accounts: `https://api.resonite.com/` (live updates: https://api.resonite.com/hub)
 - There are no requests to any other server.
 - There is no telemetry, no analytics, and no cloud storage.
 
