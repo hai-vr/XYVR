@@ -107,8 +107,20 @@ public static class Scaffolding
         await SaveTo(serialized, CredentialsJsonFilePath, _encryptionKeyForSessionData);
     }
 
-    public static async Task<string> OpenResoniteUID() => await OpenIfExists<string>(ResoniteUidFilePath, RandomUID__NotCryptographicallySecure);
-    public static async Task SaveResoniteUID(string serialized) => await SaveTo(serialized, ResoniteUidFilePath);
+
+    private static async Task<string> GetOrCreateResoniteUID()
+    {
+        Func<string> defaultGen = RandomUID__NotCryptographicallySecure;
+        if (File.Exists(ResoniteUidFilePath))
+        {
+            var text = await File.ReadAllTextAsync(ResoniteUidFilePath, Encoding);
+            return JsonConvert.DeserializeObject<string>(text, Serializer)!;
+        }
+
+        var ret = defaultGen();
+        await SaveTo(ret, ResoniteUidFilePath);
+        return ret;
+    }
     
     public static async Task<ReactAppPreferences> OpenReactAppPreferences() => await OpenIfExists<ReactAppPreferences>(ReactAppJsonFilePath, () => new ReactAppPreferences());
     public static async Task SaveReactAppPreferences(ReactAppPreferences serialized) => await SaveTo(serialized, ReactAppJsonFilePath);
@@ -192,12 +204,7 @@ public static class Scaffolding
 
     public static Func<Task<string>> ResoniteUIDLateInitializerFn()
     {
-        return async () =>
-        {
-            var uid = await Scaffolding.OpenResoniteUID();
-            await Scaffolding.SaveResoniteUID(uid);
-            return uid;
-        };
+        return async () => await GetOrCreateResoniteUID();
     }
 
     public static async Task WriteToResponseCollectionFile(ResponseCollectionTrail trail)
