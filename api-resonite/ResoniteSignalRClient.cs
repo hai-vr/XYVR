@@ -12,6 +12,8 @@ public class ResoniteSignalRClient
     public event StatusUpdate? OnStatusUpdate;
     public delegate Task StatusUpdate(UserStatusUpdate statusUpdate);
 
+    public event Func<Task>? OnReconnected;
+
     public async Task StartAsync(ResAuthenticationStorage authStorage__sensitive)
     {
         _connection = new HubConnectionBuilder()
@@ -24,9 +26,9 @@ public class ResoniteSignalRClient
         // _connection.On<object>("ReceiveSessionUpdate", OnReceiveSessionUpdate);
         _connection.On<object>("ReceiveStatusUpdate", OnReceiveStatusUpdate);
 
-        _connection.Closed += OnConnectionClosed;
-        _connection.Reconnecting += OnReconnecting;
-        _connection.Reconnected += OnReconnected;
+        _connection.Closed += WhenConnectionClosed;
+        _connection.Reconnecting += WhenReconnecting;
+        _connection.Reconnected += WhenReconnected;
 
         await _connection.StartAsync();
     }
@@ -55,27 +57,26 @@ public class ResoniteSignalRClient
     {
         var rawText = ((JsonElement)statusUpdate).GetRawText();
         var obj = JsonConvert.DeserializeObject<UserStatusUpdate>(rawText);
-        Console.WriteLine($"Received status update: userId: {obj.userId} is now {obj.onlineStatus} in session {obj.userSessionId}");
         
         if (OnStatusUpdate != null) await OnStatusUpdate?.Invoke(obj);
     }
 
-    private Task OnConnectionClosed(Exception? exception)
+    private Task WhenConnectionClosed(Exception? exception)
     {
         Console.WriteLine($"Connection closed. Exception?: {exception?.Message}");
         return Task.CompletedTask;
     }
 
-    private Task OnReconnecting(Exception? exception)
+    private Task WhenReconnecting(Exception? exception)
     {
         Console.WriteLine($"Reconnecting... Exception?: {exception?.Message}");
         return Task.CompletedTask;
     }
 
-    private Task OnReconnected(string? connectionId)
+    private async Task WhenReconnected(string? connectionId)
     {
         Console.WriteLine($"Reconnected with connection ID: {connectionId}");
-        return Task.CompletedTask;
+        if (OnReconnected != null) await OnReconnected?.Invoke();
     }
     
     public bool IsConnected => _connection?.State == HubConnectionState.Connected;

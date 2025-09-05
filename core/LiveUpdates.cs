@@ -7,11 +7,12 @@ public class LiveUpdate
     public string inAppIdentifier;
 
     public OnlineStatus? onlineStatus;
-    public LiveKnownSession? mainSession;
+    public LiveSessionState? mainSession;
 }
 
 public enum OnlineStatus
 {
+    Indeterminate,
     Offline,
     Online,
     // Resonite
@@ -46,9 +47,7 @@ public class LiveKnownSession
 {
     public string inAppSessionIdentifier;
     public string? inAppSessionName;
-    
-    public string inAppVirtualSpaceName;
-    
+    public string? inAppVirtualSpaceName;
     public LiveSessionHost? inAppHost;
 }
 

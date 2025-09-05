@@ -6,7 +6,7 @@ namespace XYVR.AccountAuthority.Resonite;
 
 public class ResoniteCommunicator
 {
-    private const string ResoniteQualifiedAppName = "resonite";
+    public const string ResoniteQualifiedAppName = "resonite";
     
     private readonly IResponseCollector _responseCollector;
     private readonly ICredentialsStorage _credentialsStorage;

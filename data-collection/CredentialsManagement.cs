@@ -28,7 +28,7 @@ public class CredentialsManagement
         }
     }
 
-    public ICredentialsStorage ExtractCredentials__sensitive(string connectorGuid)
+    public ICredentialsStorage Temp__ExtractCredentials__sensitive(string connectorGuid)
     {
         return _connectorGuidToCredentialsStorageState[connectorGuid];
     }

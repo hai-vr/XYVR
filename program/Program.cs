@@ -1,4 +1,6 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using XYVR.AccountAuthority.Resonite;
 using XYVR.API.Resonite;
 using XYVR.Core;
 using XYVR.Data.Collection;
@@ -17,11 +19,16 @@ public enum Mode
 
 internal class Program
 {
-    private static Mode mode = Mode.SignalRTesting;
+    private static Mode mode = Mode.Test;
 
     public static async Task Main(string[] args)
     {
         Scaffolding.DefineSavePathFromArgsOrUseDefault(args);
+
+        var serializer = new JsonSerializerSettings()
+        {
+            Converters = { new StringEnumConverter() }
+        };
         
         var storage = new ResponseCollectionStorage();
 
@@ -41,12 +48,21 @@ internal class Program
         {
             case Mode.Test:
             {
-                var connector = connectors.Connectors.First(connector => connector.type == ConnectorType.ResoniteAPI);
-                var dc = await credentials.GetConnectedDataCollectionOrNull(connector, repository, storage) as ResoniteDataCollection;
-                var comm = dc.Temp__GetCommunicator();
+                var firstResoniteConnector = connectors.Connectors.First(connector => connector.type == ConnectorType.ResoniteAPI);
+                // var dc = await credentials.GetConnectedDataCollectionOrNull(connector, repository, storage) as ResoniteDataCollection;
+                // var comm = dc.Temp__GetCommunicator();
                 
-                var usr = await comm.GetUser(connector.account.inAppIdentifier, false);
-                Console.WriteLine(JsonConvert.SerializeObject(usr));
+                // var usr = await comm.GetUser(connector.account.inAppIdentifier, false);
+                // Console.WriteLine(JsonConvert.SerializeObject(usr));
+                var resoniteLiveUpdates = new ResoniteLiveUpdates(credentials.Temp__ExtractCredentials__sensitive(firstResoniteConnector.guid));
+                resoniteLiveUpdates.OnLiveUpdateReceived += update =>
+                {
+                    Console.WriteLine($"OnLiveUpdateReceived: {JsonConvert.SerializeObject(update, serializer)}");
+                    return Task.CompletedTask;
+                };
+                await resoniteLiveUpdates.Connect();
+                await Task.Delay(TimeSpan.FromMinutes(100));
+                await resoniteLiveUpdates.Disconnect();
 
                 break;
             }
@@ -72,7 +88,7 @@ internal class Program
                     }
                 };
                 
-                var extractCredentials__sensitive = credentials.ExtractCredentials__sensitive(firstResoniteConnector.guid);
+                var extractCredentials__sensitive = credentials.Temp__ExtractCredentials__sensitive(firstResoniteConnector.guid);
                 var resAuth__sensitive = JsonConvert.DeserializeObject<ResAuthenticationStorage>(await extractCredentials__sensitive.RequireCookieOrToken())!;
                 await srClient.StartAsync(resAuth__sensitive);
                 
