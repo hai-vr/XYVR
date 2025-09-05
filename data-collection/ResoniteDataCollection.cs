@@ -11,53 +11,6 @@ public class ResoniteDataCollection(IndividualRepository repository, ResponseCol
         null, null, resoniteUid,
         credentialsStorage
     );
-
-    public async Task<List<Account>> CollectAllUndiscoveredAccounts()
-    {
-        var resoniteCaller = await _resoniteCommunicator.CallerAccount();
-        
-        using var cts = new CancellationTokenSource();
-        var resoniteTask = _resoniteCommunicator.FindUndiscoveredAccounts(repository);
-        try
-        {
-            await resoniteTask;
-        }
-        catch (Exception _)
-        {
-            await cts.CancelAsync();
-            throw;
-        }
-
-        var undiscoveredResoniteAccounts = resoniteTask.Result;
-
-        var undiscoveredAccounts = new List<Account>();
-        if (!repository.CollectAllInAppIdentifiers(NamedApp.Resonite).Contains(resoniteCaller.inAppIdentifier)) undiscoveredAccounts.Add(resoniteCaller);
-        undiscoveredAccounts.AddRange(undiscoveredResoniteAccounts);
-
-        return undiscoveredAccounts;
-    }
-
-    public async Task<List<Account>> CollectReturnedAccounts()
-    {
-        var resoniteCaller = await _resoniteCommunicator.CallerAccount();
-
-        var incompleteAccounts = await _resoniteCommunicator.FindAccounts().ToListAsync();
-
-        return incompleteAccounts
-            .Concat([resoniteCaller])
-            .ToList();
-    }
-    
-    public async Task<List<Account>> CollectExistingAccounts()
-    {
-        var resoniteContactIds = await _resoniteCommunicator.CollectContactUserIdsToCombineWithUsers();
-        var resoniteAccounts = await _resoniteCommunicator.CollectAllLenient(repository.CollectAllInAppIdentifiers(NamedApp.Resonite).ToList(), resoniteContactIds);
-
-        var undiscoveredAccounts = new List<Account>();
-        undiscoveredAccounts.AddRange(resoniteAccounts);
-
-        return undiscoveredAccounts;
-    }
     
     public async Task<List<Account>> RebuildFromDataCollectionStorage(List<ResponseCollectionTrail> trails)
     {

@@ -4,46 +4,7 @@ namespace XYVR.Data.Collection;
 
 public class CompoundDataCollection(IndividualRepository repository, List<IDataCollection> collectors) : IDataCollection
 {
-    private readonly IndividualRepository _repository = repository;
     private readonly List<IDataCollection> _collectors = collectors.ToList();
-
-    public async Task<List<Account>> CollectAllUndiscoveredAccounts()
-    {
-        var results = new List<Account>();
-        
-        foreach (var dataCollection in _collectors)
-        {
-            results.AddRange(await dataCollection.CollectAllUndiscoveredAccounts());
-        }
-
-        return results;
-    }
-
-    public async Task<List<Account>> CollectReturnedAccounts()
-    {
-        var results = new List<Account>();
-        
-        foreach (var dataCollection in _collectors)
-        {
-            results.AddRange(await dataCollection.CollectReturnedAccounts());
-        }
-
-        return results;
-    }
-
-    public async Task<List<Account>> CollectExistingAccounts()
-    {
-        // TODO: We need special handling when two collectors are of the same type so that we don't iterate on both.
-        
-        var results = new List<Account>();
-        
-        foreach (var dataCollection in _collectors)
-        {
-            results.AddRange(await dataCollection.CollectExistingAccounts());
-        }
-
-        return results;
-    }
 
     public async Task<List<Account>> RebuildFromDataCollectionStorage(List<ResponseCollectionTrail> trails)
     {
@@ -66,7 +27,7 @@ public class CompoundDataCollection(IndividualRepository repository, List<IDataC
             updatedSoFar.AddRange(await dataCollection.IncrementalUpdateRepository(jobHandler));
         }
 
-        var notUpdated = _repository.Individuals
+        var notUpdated = repository.Individuals
             .SelectMany(individual => individual.accounts.Select(account => account.AsIdentification()))
             .ToHashSet();
         notUpdated.ExceptWith(updatedSoFar);
@@ -80,7 +41,7 @@ public class CompoundDataCollection(IndividualRepository repository, List<IDataC
                     var result = await collector.TryGetForIncrementalUpdate__Flawed__NonContactOnly(toTryUpdate);
                     if (result != null)
                     {
-                        _repository.MergeAccounts([result]);
+                        repository.MergeAccounts([result]);
                         await jobHandler.NotifyAccountUpdated([toTryUpdate]);
                         
                         updatedSoFar.Add(toTryUpdate);

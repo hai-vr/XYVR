@@ -11,63 +11,6 @@ public class VRChatDataCollection(IndividualRepository repository, ResponseColle
         responseCollectionStorage,
         credentialsStorage
     );
-
-    public async Task<List<Account>> CollectAllUndiscoveredAccounts()
-    {
-        var vrcCaller = await _vrChatCommunicator.CallerAccount();
-        
-        using var cts = new CancellationTokenSource();
-        var vrcTask = _vrChatCommunicator.FindUndiscoveredIncompleteAccounts(repository);
-        try
-        {
-            await vrcTask;
-        }
-        catch (Exception _)
-        {
-            await cts.CancelAsync();
-            throw;
-        }
-
-        var undiscoveredIncompleteAccounts = vrcTask.Result;
-        var undiscoveredUserIds = undiscoveredIncompleteAccounts
-            .Select(account => account.inAppIdentifier)
-            .Distinct()
-            .ToList();
-
-        var undiscoveredVrcAccounts = await _vrChatCommunicator.CollectUndiscoveredLenient(repository, undiscoveredUserIds);
-
-        var undiscoveredAccounts = new List<Account>();
-        if (!repository.CollectAllInAppIdentifiers(NamedApp.VRChat).Contains(vrcCaller.inAppIdentifier)) undiscoveredAccounts.Add(vrcCaller);
-        undiscoveredAccounts.AddRange(undiscoveredVrcAccounts);
-
-        return undiscoveredAccounts;
-    }
-
-    public async Task<List<Account>> CollectReturnedAccounts()
-    {
-        var vrcCaller = await _vrChatCommunicator.CallerAccount();
-        
-        var incompleteAccounts = await _vrChatCommunicator.FindIncompleteAccounts().ToListAsync();
-        var undiscoveredUserIds = incompleteAccounts
-            .Select(account => account.inAppIdentifier)
-            .Distinct()
-            .ToList();
-
-        var collectUndiscoveredLenient = await _vrChatCommunicator.CollectAllLenient(undiscoveredUserIds);
-        return collectUndiscoveredLenient
-            .Concat([vrcCaller])
-            .ToList();
-    }
-    
-    public async Task<List<Account>> CollectExistingAccounts()
-    {
-        var vrcAccounts = await _vrChatCommunicator.CollectAllLenient(repository.CollectAllInAppIdentifiers(NamedApp.VRChat).ToList());
-
-        var undiscoveredAccounts = new List<Account>();
-        undiscoveredAccounts.AddRange(vrcAccounts);
-
-        return undiscoveredAccounts;
-    }
     
     public async Task<List<Account>> RebuildFromDataCollectionStorage(List<ResponseCollectionTrail> trails)
     {

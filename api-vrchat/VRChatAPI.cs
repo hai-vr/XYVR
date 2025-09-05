@@ -31,7 +31,7 @@ public class VRChatAPI
     
     private CookieContainer _cookies;
     private HttpClient _client;
-    private string? _userAgent;
+    private readonly string _userAgent;
 
     public bool IsLoggedIn { get; private set; }
 
@@ -305,7 +305,7 @@ public class VRChatAPI
 
         while (hasMoreData)
         {
-            List<T>? results = null;
+            List<T>? results;
             string? url = null;
             
             try

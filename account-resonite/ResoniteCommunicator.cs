@@ -57,36 +57,6 @@ public class ResoniteCommunicator
             inAppDisplayName = _callerDisplayName
         };
     }
-    
-    /// Calls the User Contacts API to collect possible accounts haven't been collected yet.<br/>
-    /// Only returns user IDs that aren't in the repository yet.
-    public async Task<List<Account>> FindUndiscoveredAccounts(IndividualRepository individualRepository)
-    {
-        var resoniteAccountIdentifiers = individualRepository.CollectAllInAppIdentifiers(NamedApp.Resonite);
-
-        _api ??= await InitializeApi();
-
-        var contacts = await _api.GetUserContacts(DataCollectionReason.FindUndiscoveredAccounts);
-        
-        var undiscoveredContacts = contacts.Where(contact => !resoniteAccountIdentifiers.Contains(contact.id)).ToList();
-        if (undiscoveredContacts.Count == 0) return [];
-        
-        var undiscoveredContactIdToUser = new Dictionary<string, CombinedContactAndUser>();
-        foreach (var undiscoveredContact in undiscoveredContacts)
-        {
-            // Don't parallelize this. We don't want to abuse the Resonite API.
-            var userN = await _api.GetUser(undiscoveredContact.id, DataCollectionReason.CollectUndiscoveredAccount);
-            if (userN is { } user)
-            {
-                undiscoveredContactIdToUser.Add(undiscoveredContact.id, new CombinedContactAndUser(undiscoveredContact.id, undiscoveredContact, user));
-            }
-        }
-
-        return undiscoveredContactIdToUser.Values
-            .Select(user => AsAccount(user, _callerUserId, true))
-            .ToList();
-    }
-    
 
     public async IAsyncEnumerable<IncompleteAccount> FindIncompleteAccounts()
     {
@@ -108,27 +78,6 @@ public class ResoniteCommunicator
                     isContact = true
                 }]
             };
-        }
-    }
-    
-    public async IAsyncEnumerable<Account> FindAccounts()
-    {
-        _api ??= await InitializeApi();
-
-        var contacts = await _api.GetUserContacts(DataCollectionReason.FindUndiscoveredAccounts);
-    
-        var undiscoveredContacts = contacts.ToList();
-        if (undiscoveredContacts.Count == 0) yield break;
-    
-        foreach (var undiscoveredContact in undiscoveredContacts)
-        {
-            // Don't parallelize this. We don't want to abuse the Resonite API.
-            var userN = await _api.GetUser(undiscoveredContact.id, DataCollectionReason.CollectUndiscoveredAccount);
-            if (userN is { } user)
-            {
-                var combinedContactAndUser = new CombinedContactAndUser(undiscoveredContact.id, undiscoveredContact, user);
-                yield return AsAccount(combinedContactAndUser, _callerUserId, true);
-            }
         }
     }
     
@@ -162,20 +111,6 @@ public class ResoniteCommunicator
                 }
             ]
         };
-    }
-
-    /// Get the list of user contact IDs for the purposes of combining it with the users data.<br/>
-    /// The intended purpose of this endpoint is to provide missing information about the user,
-    /// as contact information is not available in the users endpoint.
-    public async Task<HashSet<string>> CollectContactUserIdsToCombineWithUsers()
-    {
-        _api ??= await InitializeApi();
-
-        var contacts = await _api.GetUserContacts(DataCollectionReason.CollectExistingAccount);
-
-        return contacts
-            .Select(contact => contact.id)
-            .ToHashSet();
     }
 
     public async Task<List<Account>> CollectAllLenient(List<string> notNecessarilyValidUserIds, HashSet<string> resoniteContactIds)
@@ -258,31 +193,5 @@ public class ResoniteCommunicator
         _callerDisplayName = ((UserResponseJsonObject)callerUserN).username;
         
         return api;
-    }
-
-    private static Account AsAccount(CombinedContactAndUser combined, string callerUserId, bool isContact)
-    {
-        return new Account
-        {
-            guid = Guid.NewGuid().ToString(),
-            namedApp = NamedApp.Resonite,
-            qualifiedAppName = ResoniteQualifiedAppName,
-            inAppIdentifier = combined.User.id,
-            inAppDisplayName = combined.User.username,
-            callers =
-            [
-                new CallerAccount
-                {
-                    isAnonymous = false,
-                    inAppIdentifier = callerUserId,
-                    isContact = isContact,
-                    note = new Note
-                    {
-                        status = NoteState.NeverHad,
-                        text = null
-                    }
-                }
-            ]
-        };
     }
 }
