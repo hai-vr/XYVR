@@ -28,6 +28,11 @@ public class CredentialsManagement
         }
     }
 
+    public ICredentialsStorage ExtractCredentials__sensitive(string connectorGuid)
+    {
+        return _connectorGuidToCredentialsStorageState[connectorGuid];
+    }
+
     public async Task<SerializedCredentials> SerializeCredentials()
     {
         var toSerialize = new Dictionary<string, string>();

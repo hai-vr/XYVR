@@ -56,8 +56,9 @@ The following work remains to be done:
 - Reported issues:
     - The user does not have proper feedback on login failure.
     - The user cannot back off of the 2FA login screen.
-    - The system does not handle authenticator 2FA, only email.
+    - ~~The system does not handle authenticator 2FA, only email.~~
     - There is no feedback on the progress of data collection.
+    - The Resonite login does not support TOTP.
 - Provide a graphical UI to group accounts belonging to a single individual.
 - Write the necessary API connectors to fetch live session data and display the current social VR application that a user is playing.
 - Provide a graphical UI to import an existing set of pre-made requests so that it does not require a direct connection.

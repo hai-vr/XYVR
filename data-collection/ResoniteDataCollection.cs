@@ -12,6 +12,8 @@ public class ResoniteDataCollection(IndividualRepository repository, ResponseCol
         credentialsStorage
     );
     
+    public ResoniteCommunicator Temp__GetCommunicator() => _resoniteCommunicator;
+    
     public async Task<List<Account>> RebuildFromDataCollectionStorage(List<ResponseCollectionTrail> trails)
     {
         await Task.CompletedTask;
