@@ -36,41 +36,50 @@ public class AppBFF : IAppBFF
 
     public string GetAllExposedIndividualsOrderedByContact()
     {
+        var live = _mainWindow.LiveStatusMonitoring;
+        
         var responseObj = _mainWindow.IndividualRepository.Individuals
             .Where(individual => individual.isExposed)
             .OrderByDescending(individual => individual.isAnyContact)
-            .Select(ToFront)
+            .Select(individual => ToFront(individual, live))
             .ToList();
         
         return JsonConvert.SerializeObject(responseObj, Formatting.None, _serializer);
     }
 
-    internal static FrontIndividual ToFront(Individual individual)
+    internal static FrontIndividual ToFront(Individual individual, LiveStatusMonitoring live)
     {
+        var accounts = individual.accounts
+            .Select(account => new FrontAccount
+            {
+                guid = account.guid,
+                namedApp = account.namedApp,
+                qualifiedAppName = account.qualifiedAppName,
+                inAppIdentifier = account.inAppIdentifier,
+                inAppDisplayName = account.inAppDisplayName,
+                specifics = account.specifics,
+                callers = account.callers,
+                isTechnical = account.isTechnical,
+                isAnyCallerContact = account.callers.Any(caller => caller.isContact),
+                isAnyCallerNote = account.callers.Any(caller => caller.note.status == NoteState.Exists),
+                allDisplayNames = account.allDisplayNames,
+                isPendingUpdate = account.isPendingUpdate,
+                
+                onlineStatus = live.GetLiveSessionStateOrNull(account.namedApp, account.inAppIdentifier)?.onlineStatus,
+            }).ToList();
+
+        var nonNullStatus = accounts.Select(account => account.onlineStatus).Where(status => status != null).ToList();
         return new FrontIndividual
         {
             guid = individual.guid,
-            accounts = individual.accounts
-                .Select(account => new FrontAccount
-                {
-                    guid = account.guid,
-                    namedApp = account.namedApp,
-                    qualifiedAppName = account.qualifiedAppName,
-                    inAppIdentifier = account.inAppIdentifier,
-                    inAppDisplayName = account.inAppDisplayName,
-                    specifics = account.specifics,
-                    callers = account.callers,
-                    isTechnical = account.isTechnical,
-                    isAnyCallerContact = account.callers.Any(caller => caller.isContact),
-                    isAnyCallerNote = account.callers.Any(caller => caller.note.status == NoteState.Exists),
-                    allDisplayNames = account.allDisplayNames,
-                    isPendingUpdate = account.isPendingUpdate
-                }).ToList(),
+            accounts = accounts,
             displayName = individual.displayName,
             note = individual.note,
             isAnyContact = individual.isAnyContact,
             isExposed = individual.isExposed,
-            customName = individual.customName
+            customName = individual.customName,
+            
+            onlineStatus = nonNullStatus.Count > 0 ? nonNullStatus.FirstOrDefault(it => it != OnlineStatus.Offline, OnlineStatus.Offline) : null,
         };
     }
 

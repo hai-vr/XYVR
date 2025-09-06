@@ -52,6 +52,47 @@ const Account = ({ account, imposter, showAlias }) => {
                 return account.qualifiedAppName;
         }
     };
+    
+    const getOnlineStatusEmoji = (onlineStatus) => {
+        switch (onlineStatus) {
+            case 'Online':
+                return '🟢';
+            case 'ResoniteBusy':
+            case 'VRChatDND':
+                return '⛔';
+            case 'ResoniteAway':
+            case 'VRChatAskMe':
+                return '🔶';
+            case 'ResoniteSociable':
+            case 'VRChatJoinMe':
+                return '🟦';
+            case 'Offline':
+            default:
+                return '';
+        }
+    };
+    
+    const getOnlineStatusText = (onlineStatus) => {
+        switch (onlineStatus) {
+            case 'Online':
+                return 'Online';
+            case 'ResoniteBusy':
+                return 'Busy';
+            case 'VRChatDND':
+                return 'Do Not Disturb';
+            case 'ResoniteAway':
+                return 'Away';
+            case 'VRChatAskMe':
+                return 'Ask Me';
+            case 'ResoniteSociable':
+                return 'Sociable';
+            case 'VRChatJoinMe':
+                return 'Join Me';
+            case '':
+            default:
+                return '';
+        }
+    };
 
     return (
         <div className="account-container">
@@ -62,7 +103,7 @@ const Account = ({ account, imposter, showAlias }) => {
                     </div>
                     <div>
                         <div className="account-display-name" title={!imposter && account.allDisplayNames?.join('\n') || ``}>
-                            {account.inAppDisplayName}
+                            {account.inAppDisplayName} {getOnlineStatusEmoji(account.onlineStatus)} {getOnlineStatusText(account.onlineStatus)}
                         </div>
                         {!imposter && showAlias && account.allDisplayNames && account.allDisplayNames
                             .toReversed()

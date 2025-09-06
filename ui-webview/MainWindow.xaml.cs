@@ -51,6 +51,8 @@ public partial class MainWindow : Window
         ConnectorsMgt = new ConnectorManagement(await Scaffolding.OpenConnectors());
         CredentialsMgt = new CredentialsManagement(await Scaffolding.OpenCredentials(), Scaffolding.ResoniteUIDLateInitializerFn());
         LiveStatusMonitoring = new LiveStatusMonitoring();
+
+        await _liveBff.StartMonitoring();
         
         await WebView.EnsureCoreWebView2Async();
         WebView.CoreWebView2.AddHostObjectToScript("appApi", _appBff);

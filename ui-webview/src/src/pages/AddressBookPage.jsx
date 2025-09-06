@@ -70,7 +70,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
 
     useEffect(() => {
         const individualUpdated = (event) => {
-            console.log('Individual updated:', event.detail);
+            console.log('Individual updated event:', event.detail);
             const updatedIndividual = event.detail;
 
             setIndividuals(prevIndividuals => {
@@ -85,33 +85,78 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                 }
             });
         };
+        const liveUpdateMerged = (event) => {
+            // TODO: we should just use individualUpdated event and drive-by update the status from there
+            console.log('Live update merge event:', event.detail);
+            const liveUpdate = event.detail;
+
+            setIndividuals(prevIndividuals => {
+                // FIXME: This should be attached to the account itself
+                const index = prevIndividuals.findIndex(ind => ind.accounts?.some(acc => acc.qualifiedAppName === liveUpdate.qualifiedAppName && acc.inAppIdentifier === liveUpdate.inAppIdentifier));
+                if (index !== -1) {
+                    console.log('Found individual to update at index: ' + index);
+                    const newIndividuals = [...prevIndividuals];
+                    newIndividuals[index] = {
+                        ...prevIndividuals[index],
+                        accounts: prevIndividuals[index].accounts?.map(acc =>
+                            acc.qualifiedAppName === liveUpdate.qualifiedAppName && acc.inAppIdentifier === liveUpdate.inAppIdentifier
+                                ? { ...acc, onlineStatus: liveUpdate.onlineStatus }
+                                : acc
+                        )
+                    };
+                    return newIndividuals;
+                } else {
+                    console.log('Individual not found for update');
+                    return prevIndividuals;
+                }
+            });
+        };
 
         window.addEventListener('individualUpdated', individualUpdated);
+        window.addEventListener('liveUpdateMerged', liveUpdateMerged);
         return () => {
             window.removeEventListener('individualUpdated', individualUpdated);
+            window.removeEventListener('liveUpdateMerged', liveUpdateMerged);
         };
     }, []);
 
-    // Create sorted and filtered individuals array (now using debouncedSearchTerm)
+// Create sorted and filtered individuals array (now using debouncedSearchTerm)
     const sortedAndFilteredIndividuals = useMemo(() => {
         const visibleIndividuals = individuals.filter(ind => isIndividualVisible(ind, debouncedSearchTerm, showOnlyContacts));
 
         if (!debouncedSearchTerm) {
-            return visibleIndividuals;
+            // Sort by online status first, even when there's no search term
+            return visibleIndividuals.sort((a, b) => {
+                const aIsOnline = a.onlineStatus !== undefined && a.onlineStatus !== null && a.onlineStatus !== "Offline";
+                const bIsOnline = b.onlineStatus !== undefined && b.onlineStatus !== null && b.onlineStatus !== "Offline";
+
+                // First priority: online status
+                if (aIsOnline && !bIsOnline) return -1;
+                if (!aIsOnline && bIsOnline) return 1;
+
+                // If both have same online status, maintain original order
+                return 0;
+            });
         }
 
-        // Sort by priority: display name matches first, then identifier matches, then original order
+        // Sort by priority: online status first, then display name matches, then identifier matches, then original order
         return visibleIndividuals.sort((a, b) => {
+            const aIsOnline = a.onlineStatus !== undefined && a.onlineStatus !== null && a.onlineStatus !== "Offline";
+            const bIsOnline = b.onlineStatus !== undefined && b.onlineStatus !== null && b.onlineStatus !== "Offline";
             const aHasDisplayNameMatch = hasDisplayNameMatch(a, debouncedSearchTerm);
             const bHasDisplayNameMatch = hasDisplayNameMatch(b, debouncedSearchTerm);
             const aHasIdentifierMatch = hasIdentifierMatch(a, debouncedSearchTerm);
             const bHasIdentifierMatch = hasIdentifierMatch(b, debouncedSearchTerm);
 
-            // First priority: display name matches
+            // First priority: online status
+            if (aIsOnline && !bIsOnline) return -1;
+            if (!aIsOnline && bIsOnline) return 1;
+
+            // Second priority: display name matches (only if both have same online status)
             if (aHasDisplayNameMatch && !bHasDisplayNameMatch) return -1;
             if (!aHasDisplayNameMatch && bHasDisplayNameMatch) return 1;
 
-            // Second priority: identifier matches (only if both don't have display name matches)
+            // Third priority: identifier matches (only if both don't have display name matches and same online status)
             if (!aHasDisplayNameMatch && !bHasDisplayNameMatch) {
                 if (aHasIdentifierMatch && !bHasIdentifierMatch) return -1;
                 if (!aHasIdentifierMatch && bHasIdentifierMatch) return 1;

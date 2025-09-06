@@ -55,4 +55,9 @@ public class LiveStatusMonitoring
     {
         OnLiveUpdateMerged -= listener;
     }
+
+    public LiveUpdate? GetLiveSessionStateOrNull(NamedApp accountNamedApp, string accountInAppIdentifier)
+    {
+        return _liveUpdates[accountNamedApp].GetValueOrDefault(accountInAppIdentifier);
+    }
 }

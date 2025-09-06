@@ -76,6 +76,6 @@ public class LiveBFF : ILiveBFF
 
     private async Task WhenLiveUpdateMerged(LiveUpdate update)
     {
-        await _mainWindow.SendEventToReact("LiveUpdate", update);
+        await _mainWindow.SendEventToReact("liveUpdateMerged", update);
     }
 }

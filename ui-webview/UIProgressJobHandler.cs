@@ -4,21 +4,19 @@ using XYVR.Scaffold;
 
 namespace XYVR.UI.WebviewUI;
 
-public class UIProgressJobHandler(IndividualRepository repository, Action<Individual> individualUpdatedEventFn) : IIncrementalDataCollectionJobHandler
+public class UIProgressJobHandler(IndividualRepository repository, Func<Individual, Task> individualUpdatedEventFn) : IIncrementalDataCollectionJobHandler
 {
     private int _prevEnumTotalCount;
 
-    public Task NotifyAccountUpdated(List<AccountIdentification> increment)
+    public async Task NotifyAccountUpdated(List<AccountIdentification> increment)
     {
         Console.WriteLine($"Updated the following {increment.Count} accounts: {string.Join(", ", increment)}");
         foreach (var accountIdentification in increment)
         {
             Console.WriteLine($"Getting account to send to front...: {accountIdentification}");
             var individual = repository.GetIndividualByAccount(accountIdentification);
-            individualUpdatedEventFn(individual);
+            await individualUpdatedEventFn.Invoke(individual);
         }
-        
-        return Task.CompletedTask;
     }
 
     public async Task<IncrementalEnumerationTracker> NewEnumerationTracker()

@@ -11,6 +11,8 @@ internal class FrontIndividual
     public bool isAnyContact;
     public bool isExposed;
     public string? customName;
+
+    public OnlineStatus? onlineStatus;
 }
 
 internal class FrontAccount
@@ -27,6 +29,8 @@ internal class FrontAccount
     public object? specifics;
     public List<string> allDisplayNames;
     public bool isPendingUpdate;
+    
+    public OnlineStatus? onlineStatus;
 }
 
 public class FrontConnector(Connector connector, bool isLoggedIn)
