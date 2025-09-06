@@ -132,9 +132,6 @@
     font-size: 13px;
     line-height: 1.4;
     margin-bottom: 0.5rem;
-    display: flex;
-    align-items: center;
-    gap: 6px;
 }
 
 .info-message .info-icon {
