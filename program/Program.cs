@@ -50,27 +50,17 @@ internal class Program
             case Mode.Test:
             {
                 var firstResoniteConnector = connectors.Connectors.First(connector => connector.type == ConnectorType.ResoniteAPI);
-                // var dc = await credentials.GetConnectedDataCollectionOrNull(connector, repository, storage) as ResoniteDataCollection;
-                // var comm = dc.Temp__GetCommunicator();
+                var live = await credentials.GetConnectedLiveMonitoringOrNull(firstResoniteConnector, liveStatusMonitoring);
+                if (live == null) throw new InvalidOperationException("No live monitoring available");
                 
-                // var usr = await comm.GetUser(connector.account.inAppIdentifier, false);
-                // Console.WriteLine(JsonConvert.SerializeObject(usr));
-                var resoniteLiveUpdates = new ResoniteLiveUpdates(credentials.Temp__ExtractCredentials__sensitive(firstResoniteConnector.guid));
-                resoniteLiveUpdates.OnLiveUpdateReceived += update =>
-                {
-                    Console.WriteLine($"OnLiveUpdateReceived: {JsonConvert.SerializeObject(update, serializer)}");
-                    liveStatusMonitoring.Merge(update);
-                    
-                    return Task.CompletedTask;
-                };
-                await resoniteLiveUpdates.Connect();
-                int i = 0;
+                await live.StartMonitoring();
+                var i = 0;
                 while (i < int.MaxValue) // this is just a placeholder so the ide doesn't complain
                 {
-                    await Task.Delay(TimeSpan.FromSeconds(1));
+                    await Task.Delay(TimeSpan.FromSeconds(10));
                     i++;
                 }
-                await resoniteLiveUpdates.Disconnect();
+                await live.StopMonitoring();
 
                 break;
             }

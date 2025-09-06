@@ -46,11 +46,23 @@ public class ResoniteSignalRClient
     {
     }
 
-    public async Task SubmitRequestStatus()
+    public async Task SubmitRequestStatus(string? userId = null, bool weAreInvisible = false)
+    {
+        EnsureConnected();
+
+        await _connection!.SendAsync("RequestStatus", userId, weAreInvisible);
+    }
+
+    public async Task ListenOnContact(string userId)
+    {
+        EnsureConnected();
+
+        await _connection!.SendAsync("ListenOnContact", userId);
+    }
+
+    private void EnsureConnected()
     {
         if (_connection == null) throw new InvalidOperationException("Not connected");
-        
-        await _connection.SendAsync("RequestStatus", null, false);
     }
 
     private async Task OnReceiveStatusUpdate(object statusUpdate)

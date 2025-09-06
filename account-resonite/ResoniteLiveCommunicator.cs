@@ -4,23 +4,28 @@ using XYVR.Core;
 
 namespace XYVR.AccountAuthority.Resonite;
 
-public class ResoniteLiveUpdates
+public class ResoniteLiveCommunicator
 {
     private readonly ICredentialsStorage _credentialsStorage;
+    private readonly string _callerInAppIdentifier;
     private readonly ResoniteSignalRClient _srClient;
     
     public event LiveUpdateReceived? OnLiveUpdateReceived;
     public delegate Task LiveUpdateReceived(LiveUpdate liveUpdate);
+    
+    public event Action OnReconnected;
 
-    public ResoniteLiveUpdates(ICredentialsStorage credentialsStorage)
+    public ResoniteLiveCommunicator(ICredentialsStorage credentialsStorage, string callerInAppIdentifier)
     {
         _credentialsStorage = credentialsStorage;
-        
+        _callerInAppIdentifier = callerInAppIdentifier;
+
         _srClient = new ResoniteSignalRClient();
         _srClient.OnStatusUpdate += WhenStatusUpdate;
         _srClient.OnReconnected += async () =>
         {
             await _srClient.SubmitRequestStatus();
+            OnReconnected?.Invoke();
         };
     }
 
@@ -48,7 +53,8 @@ public class ResoniteLiveUpdates
                 qualifiedAppName = ResoniteCommunicator.ResoniteQualifiedAppName,
                 inAppIdentifier = statusUpdate.userId,
                 onlineStatus = status,
-                mainSession = liveSessionState
+                mainSession = liveSessionState,
+                callerInAppIdentifier = _callerInAppIdentifier
             });
         }
     }
@@ -80,9 +86,9 @@ public class ResoniteLiveUpdates
         {
             "Offline" => OnlineStatus.Offline,
             "Online" => OnlineStatus.Online,
-            "Away" => OnlineStatus.Away,
-            "Busy" => OnlineStatus.Busy,
-            "Sociable" => OnlineStatus.Sociable,
+            "Away" => OnlineStatus.ResoniteAway,
+            "Busy" => OnlineStatus.ResoniteBusy,
+            "Sociable" => OnlineStatus.ResoniteSociable,
             _ => OnlineStatus.Indeterminate
         };
     }
@@ -90,5 +96,23 @@ public class ResoniteLiveUpdates
     private async Task<ResAuthenticationStorage?> GetToken__sensitive()
     {
         return JsonConvert.DeserializeObject<ResAuthenticationStorage>(await _credentialsStorage.RequireCookieOrToken());
+    }
+
+    public async Task RequestFullUpdate()
+    {
+        await _srClient.SubmitRequestStatus();
+    }
+
+    public async Task RequestPartialUpdate(List<string> userIds)
+    {
+        foreach (var userId in userIds)
+        {
+            await _srClient.SubmitRequestStatus(userId);
+        }
+    }
+
+    public async Task ListenOnContact(string userId)
+    {
+        await _srClient.ListenOnContact(userId);
     }
 }

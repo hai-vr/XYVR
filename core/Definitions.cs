@@ -35,17 +35,20 @@ public class Individual
 
 public class Account
 {
+    // These fields are not supposed to change.
     public string guid;
-    
     public NamedApp namedApp;
     public string qualifiedAppName;
-    
     public string inAppIdentifier;
+    
     public string inAppDisplayName;
 
     [JsonConverter(typeof(SpecificsConverter))]
     public object? specifics;
     
+    // As the account can be retrieved by different connections, we need to keep track of which connection caused this account
+    // to be retrieved: That's the caller account.
+    // In addition, there is information specific to that caller account, such as notes, or whether it's a contact.
     public List<CallerAccount> callers = new();
     
     public List<string> allDisplayNames = new();

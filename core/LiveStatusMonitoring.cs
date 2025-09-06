@@ -2,7 +2,12 @@
 
 public class LiveStatusMonitoring
 {
-    private readonly Dictionary<NamedApp, Dictionary<string, LiveUpdate>> _liveUpdates = new();
+    private readonly Dictionary<NamedApp,
+        Dictionary<string, LiveUpdate>
+    > _liveUpdates = new();
+    
+    private event LiveUpdateMerged? OnLiveUpdateMerged;
+    public delegate Task LiveUpdateMerged(LiveUpdate liveUpdate);
 
     public LiveStatusMonitoring()
     {
@@ -22,8 +27,32 @@ public class LiveStatusMonitoring
         return _liveUpdates.Values.SelectMany(it => it.Values).ToList();
     }
     
-    public void Merge(LiveUpdate liveUpdate)
+    public async Task Merge(LiveUpdate liveUpdate)
     {
+        // TODO:
+        // It is possible to have the same inAppIdentifier being updated with a different status,
+        // if the caller has multiple connections on the same app.
+        // For example, if someone's status is set to invisible, it may be possible that the status
+        // of that account is shown as Offline on one connection, and Online/InSameInstance for another connection.
+        // In that case, we may need to avoid deduplicating status by inAppIdentifier alone,
+        // and also use the callerInAppIdentifier, to know where we got the status from.
+        // The UI side or BFF would have to decide what status to associate with that account.
         _liveUpdates[liveUpdate.namedApp][liveUpdate.inAppIdentifier] = liveUpdate;
+
+        if (OnLiveUpdateMerged != null)
+        {
+            await OnLiveUpdateMerged.Invoke(liveUpdate);
+        }
+    }
+
+    public void AddMergeListener(LiveUpdateMerged listener)
+    {
+        OnLiveUpdateMerged -= listener;
+        OnLiveUpdateMerged += listener;
+    }
+
+    public void RemoveListener(LiveUpdateMerged listener)
+    {
+        OnLiveUpdateMerged -= listener;
     }
 }

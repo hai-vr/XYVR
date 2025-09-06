@@ -8,6 +8,8 @@ public class LiveUpdate
 
     public OnlineStatus? onlineStatus;
     public LiveSessionState? mainSession;
+
+    public string callerInAppIdentifier;
 }
 
 public enum OnlineStatus
@@ -16,13 +18,14 @@ public enum OnlineStatus
     Offline,
     Online,
     // Resonite
-    Busy,
-    Away,
-    Sociable,
+    ResoniteSociable,
+    ResoniteBusy,
+    ResoniteAway,
+    ResoniteInvisible,
     // VRChat
-    AskMe,
-    DoNotDisturb,
-    JoinMe
+    VRChatJoinMe,
+    VRChatAskMe,
+    VRChatDND,
 }
 
 public class LiveSessionState

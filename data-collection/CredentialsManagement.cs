@@ -3,6 +3,7 @@ using XYVR.AccountAuthority.Resonite;
 using XYVR.AccountAuthority.VRChat;
 using XYVR.API.VRChat;
 using XYVR.Core;
+using XYVR.Data.Collection.monitoring;
 using XYVR.Scaffold;
 
 namespace XYVR.Data.Collection;
@@ -300,5 +301,34 @@ public class CredentialsManagement
             inAppIdentifier = callerAccount.inAppIdentifier,
             inAppDisplayName = callerAccount.inAppDisplayName,
         };
+    }
+
+    public async Task<ILiveMonitoring?> GetConnectedLiveMonitoringOrNull(Connector connector, LiveStatusMonitoring monitoring)
+    {
+        if (!_connectorGuidToCredentialsStorageState.TryGetValue(connector.guid, out var credentialsStorage)) return null;
+        
+        switch (connector.type)
+        {
+            case ConnectorType.Offline:
+                return null;
+            case ConnectorType.ResoniteAPI:
+                ILiveMonitoring liveMonitoring = new ResoniteLiveMonitoring(credentialsStorage, monitoring);
+            {
+                var res = new ResoniteCommunicator(
+                    new DoNotStoreAnythingStorage(),
+                    null, null, false, await _resoniteUidProviderFn(),
+                    credentialsStorage
+                );
+                var caller = await res.CallerAccount();
+
+                await liveMonitoring.DefineCaller(caller.inAppIdentifier);
+                
+                return liveMonitoring;
+            }
+            case ConnectorType.VRChatAPI:
+                return null;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
     }
 }

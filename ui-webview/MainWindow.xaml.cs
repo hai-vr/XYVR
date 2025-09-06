@@ -15,11 +15,13 @@ public partial class MainWindow : Window
     private readonly AppBFF _appBff;
     private readonly DataCollectionBFF _dataCollectionBff;
     private readonly PreferencesBFF _preferencesBff;
+    private readonly LiveBFF _liveBff;
     private readonly JsonSerializerSettings _serializer;
 
     public IndividualRepository IndividualRepository { get; private set; }
     public ConnectorManagement ConnectorsMgt { get; private set; }
     public CredentialsManagement CredentialsMgt { get; private set; }
+    public LiveStatusMonitoring LiveStatusMonitoring { get; private set; }
 
     public MainWindow()
     {
@@ -27,6 +29,7 @@ public partial class MainWindow : Window
         _appBff = new AppBFF(this);
         _dataCollectionBff = new DataCollectionBFF(this);
         _preferencesBff = new PreferencesBFF(this);
+        _liveBff = new LiveBFF(this);
         _serializer = BFFUtils.NewSerializer();
 
         Title = "XYVR";
@@ -42,14 +45,18 @@ public partial class MainWindow : Window
 
     private async void MainWindow_Loaded(object sender, RoutedEventArgs evt)
     {
+        Console.WriteLine("WebView: Main window loaded.");
+        
         IndividualRepository = new IndividualRepository(await Scaffolding.OpenRepository());
         ConnectorsMgt = new ConnectorManagement(await Scaffolding.OpenConnectors());
         CredentialsMgt = new CredentialsManagement(await Scaffolding.OpenCredentials(), Scaffolding.ResoniteUIDLateInitializerFn());
+        LiveStatusMonitoring = new LiveStatusMonitoring();
         
         await WebView.EnsureCoreWebView2Async();
         WebView.CoreWebView2.AddHostObjectToScript("appApi", _appBff);
         WebView.CoreWebView2.AddHostObjectToScript("dataCollectionApi", _dataCollectionBff);
         WebView.CoreWebView2.AddHostObjectToScript("preferencesApi", _preferencesBff);
+        WebView.CoreWebView2.AddHostObjectToScript("liveApi", _liveBff);
 
         // Intercept clicks on links
         WebView.CoreWebView2.NavigationStarting += CoreWebView2_NavigationStarting;
@@ -96,6 +103,8 @@ public partial class MainWindow : Window
     
     internal async Task SendEventToReact(string eventType__vulnerableToInjections, object obj)
     {
+        if (eventType__vulnerableToInjections.Contains('\'')) throw new ArgumentException("Event type cannot contain single quotes.");
+        
         var eventJson = JsonConvert.SerializeObject(obj, _serializer);
         var script = $"window.dispatchEvent(new CustomEvent('{eventType__vulnerableToInjections}', {{ detail: {eventJson} }}));";
         
