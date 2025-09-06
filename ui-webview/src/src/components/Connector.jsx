@@ -128,8 +128,12 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated }
                                 </p>
                             }
                             <button title={`Login to ${virtualApp}`} onClick={() => tryLogin()} disabled={!login || !password || isRequestInProgress}>Login to {virtualApp}</button>
-                            {stayLoggedIn && <>{connector.type === 'ResoniteAPI' && <p className="info-message">We do not store your username and password, only a connection token that expires in 30 days.</p>
-                                || <p className="info-message">We do not store your username and password, only a cookie.</p>}</>}
+                            <p className="info-message">
+                                {stayLoggedIn && connector.type === 'ResoniteAPI' && 'We do not store your username and password, only a connection token that expires in 30 days. '
+                                    || stayLoggedIn && connector.type === 'VRChatAPI' && 'We do not store your username and password, only a cookie. '}
+                                {connector.type === 'ResoniteAPI' && <>All data is stored locally. Requests are sent directly to the Resonite API. <a title="Open privacy and data considerations docs in your browser" href="https://docs.hai-vr.dev/docs/products/xyvr/privacy">Learn more</a>.</>
+                                || <>All data is stored locally. Requests are sent directly to the VRChat API. <a title="Open privacy and data considerations docs in your browser" href="https://docs.hai-vr.dev/docs/products/xyvr/privacy">Learn more</a>.</>}
+                            </p>
 
                         </>
                     )}
