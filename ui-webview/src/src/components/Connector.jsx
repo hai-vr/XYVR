@@ -2,6 +2,7 @@
 import Account from './Account.jsx';
 import './Connector.css';
 import '../InputFields.css';
+import {TriangleAlert, X} from "lucide-react";
 
 const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated }) => {
     const [login, setLogin] = useState('');
@@ -160,7 +161,7 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated }
                     onClick={() => onDeleteClick(connector.guid)}
                     title={deleteState?.confirming ? 'Click again to confirm remove' : 'Remove connector'}
                 >
-                    {deleteState?.confirming ? '⚠️ Really remove?' : '❌ Remove'}
+                    {deleteState?.confirming ? <><TriangleAlert /> Really remove?</> : <><X /><span>Remove</span></>}
                 </button>
             </div>
         </div>

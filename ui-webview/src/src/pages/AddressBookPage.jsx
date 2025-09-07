@@ -1,25 +1,19 @@
-﻿import { useEffect, useState, useMemo, useCallback, useRef } from 'react'
+﻿import {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import {useNavigate} from 'react-router-dom'
 import './AddressBookPage.css'
 import '../Header.css'
 import Individual from "../components/Individual.jsx"
 import {
-    isIndividualVisible,
     hasDisplayNameMatch,
     hasIdentifierMatch,
-    shouldShowBio, shouldShowHelp, shouldShowAlias,
+    isIndividualVisible,
+    shouldShowAlias,
+    shouldShowBio,
+    shouldShowHelp,
+    getOnlineStatusPriority
 } from './searchUtils.js'
-
-const getOnlineStatusPriority = (onlineStatus) => {
-    if (!onlineStatus || onlineStatus === "Offline") return 5;
-    if (onlineStatus === "Indeterminate") return 6;
-    if (onlineStatus === "ResoniteBusy" || onlineStatus === "VRChatDND") return 4;
-    if (onlineStatus === "ResoniteAway" || onlineStatus === "VRChatAskMe") return 3;
-    if (onlineStatus === "Online") return 2;
-    if (onlineStatus === "ResoniteSociable" || onlineStatus === "VRChatJoinMe") return 1;
-    return 5; // Default to same as offline for unknown statuses
-};
-
+import {NotebookPen, Moon, Sun, Glasses, Search, X, Settings} from 'lucide-react'
+import DarkModeToggleButton from "../components/DarkModeToggleButton.jsx";
 
 const sortIndividuals = (individuals, searchTerm) => {
     if (!searchTerm) {
@@ -64,14 +58,6 @@ const sortIndividuals = (individuals, searchTerm) => {
 };
 
 // Custom hook for filtering individuals
-const useFilteredIndividuals = (individuals, searchTerm, showOnlyContacts, mergeAccountGuidOrUnd, setSortedIndividuals) => {
-    return useEffect(() => {
-        console.log(`useFilteredIndividuals useEffect running ${individuals.length} individuals, searchTerm: ${searchTerm || 'none'}`);
-        // it's faster to filter first then sort on a subset of the data
-        setSortedIndividuals(sortIndividuals(individuals.filter(ind => isIndividualVisible(ind, searchTerm, showOnlyContacts, mergeAccountGuidOrUnd)), searchTerm));
-    }, [individuals, searchTerm, showOnlyContacts, mergeAccountGuidOrUnd]);
-};
-
 function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyContacts, compactMode, setCompactMode }) {
     const navigate = useNavigate()
     const searchInputRef = useRef(null)
@@ -164,7 +150,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                             }
                             : acc
                     );
-                    let onlineStatusVals = accounts?.filter(acc => acc.onlineStatus !== undefined && acc.onlineStatus !== null);
+                    let onlineStatusVals = accounts?.filter(acc => acc.onlineStatus);
 
                     // Determine the best online status using priority system
                     let bestOnlineStatus = undefined;
@@ -201,7 +187,11 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
     }, []);
 
     // Use the custom hooks for sorting and filtering
-    useFilteredIndividuals(individuals, debouncedSearchTerm, showOnlyContacts, mergeAccountGuidOrUnd, setSortedIndividuals);
+    useEffect(() => {
+        console.log(`useFilteredIndividuals useEffect running ${individuals.length} individuals, searchTerm: ${debouncedSearchTerm || 'none'}`);
+        // it's faster to filter first then sort on a subset of the data
+        setSortedIndividuals(sortIndividuals(individuals.filter(ind => isIndividualVisible(ind, debouncedSearchTerm, showOnlyContacts, mergeAccountGuidOrUnd)), debouncedSearchTerm));
+    }, [individuals, debouncedSearchTerm, showOnlyContacts, mergeAccountGuidOrUnd]);
 
     // Get the currently displayed individuals (for infinite scrolling)
     const displayedIndividuals = useMemo(() => {
@@ -313,7 +303,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                                     aria-pressed={compactMode}
                                     title={`${compactMode ? 'Switch to full mode' : 'Switch to compact mode'}`}
                                 >
-                                    👓
+                                    <Glasses />
                                 </button>
                                 <button
                                     className="theme-toggle-btn"
@@ -321,22 +311,16 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                                     aria-pressed={showOnlyContacts}
                                     title={`${showOnlyContacts ? 'Switch to show contacts and users with notes' : 'Switch to show only contacts'}`}
                                 >
-                                    📝
+                                    <NotebookPen />
                                 </button>
 
-                                <button
-                                    className="theme-toggle-btn"
-                                    onClick={() => setIsDark(!isDark)}
-                                    title={`Switch to ${isDark ? 'Light' : 'Dark'} Mode`}
-                                >
-                                    {isDark ? '🌙' : '☀️'}
-                                </button>
+                                <DarkModeToggleButton isDark={isDark} setIsDark={setIsDark} />
                             </div>
                         </div>
                     </div>
                     <div className="header-thin-right">
                         <h2 className="header-title">
-                            <button className="header-nav" title="Configure connections" onClick={() => navigate('/data-collection')}>⚙️</button>
+                            <button className="header-nav" title="Configure connections" onClick={() => navigate('/data-collection')}><Settings /></button>
                         </h2>
                     </div>
                 </div>
@@ -351,21 +335,21 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                         className="search-input"
                     />
                     <span className="search-icon">
-                        🔍
+                        <Search />
                     </span>
                     {searchTerm && (
                         <button
                             onClick={() => setSearchTerm('')}
                             className="icon-button search-clear-button"
                         >
-                            ✕
+                            <X size={16} />
                         </button>
                     )}
                 </div>
 
                 {debouncedSearchTerm && (totalFilteredCount === 0 || showHelp) && (
                     <div className="no-results-message">
-                        <div className="no-results-icon">🔍</div>
+                        <div className="no-results-icon"><Search size={48}/></div>
                         {!showHelp && <>
                             <div className="no-results-text">No individuals found matching
                                 "<strong>{debouncedSearchTerm}</strong>"

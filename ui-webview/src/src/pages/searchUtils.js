@@ -354,3 +354,13 @@ export const shouldShowAlias = (searchTerm) => {
     const { specialTerms } = parseSearchTerms(searchTerm);
     return specialTerms.some(term => term.startsWith('alias:'));
 };
+
+export const getOnlineStatusPriority = (onlineStatus) => {
+    if (!onlineStatus || onlineStatus === "Offline") return 5;
+    if (onlineStatus === "Indeterminate") return 6;
+    if (onlineStatus === "ResoniteBusy" || onlineStatus === "VRChatDND") return 4;
+    if (onlineStatus === "ResoniteAway" || onlineStatus === "VRChatAskMe") return 3;
+    if (onlineStatus === "Online") return 2;
+    if (onlineStatus === "ResoniteSociable" || onlineStatus === "VRChatJoinMe") return 1;
+    return 5; // Default to same as offline for unknown statuses
+};

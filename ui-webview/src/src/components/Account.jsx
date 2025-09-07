@@ -1,5 +1,6 @@
 ﻿import React from 'react';
 import './Account.css';
+import {Clipboard, Globe} from "lucide-react";
 
 const Account = ({ account, imposter, showAlias }) => {
     const hasNote = account.isAnyCallerNote;
@@ -145,7 +146,7 @@ const Account = ({ account, imposter, showAlias }) => {
                             className="icon-button"
                             title={`Open ${account.namedApp} Profile`}
                         >
-                            🌍
+                            <Globe size={16} />
                         </a>
                     )}
                     <button
@@ -153,7 +154,7 @@ const Account = ({ account, imposter, showAlias }) => {
                         className="icon-button"
                         title={`Copy ID: ${account.inAppIdentifier}`}
                     >
-                        📋
+                        <Clipboard size={16} />
                     </button>
                 </div>)}
             </div>

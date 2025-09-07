@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import './DataCollectionPage.css'
 import '../Header.css'
 import Connector from "../components/Connector.jsx";
+import DarkModeToggleButton from "../components/DarkModeToggleButton.jsx";
 
 function DataCollectionPage({ isDark, setIsDark }) {
     const navigate = useNavigate()
@@ -93,15 +94,7 @@ function DataCollectionPage({ isDark, setIsDark }) {
                             Connections
                         </h2>
 
-                        <div className="header-buttons">
-                            <button
-                                className="theme-toggle-btn"
-                                onClick={() => setIsDark(!isDark)}
-                                title={`Switch to ${isDark ? 'Light' : 'Dark'} Mode`}
-                            >
-                                {isDark ? '🌙' : '☀️'}
-                            </button>
-                        </div>
+                        <DarkModeToggleButton isDark={isDark} setIsDark={setIsDark} />
                     </div>
                 </div>
                 <div className="header-thin-right">

@@ -1,6 +1,7 @@
 ﻿import Account from "./Account.jsx";
 import "./Individual.css";
 import { useState, useRef, useEffect } from "react";
+import {Clipboard, Phone} from "lucide-react";
 
 function Individual({
                         individual,
@@ -93,7 +94,7 @@ function Individual({
         // If all characters are punctuation or whitespace, return the first character or '?'
         return str.charAt(0).toUpperCase() || '?';
     };
-    
+
     return (
         <div className={`${!compactMode ? 'individual-container' : ''} ${!isVisible ? 'hidden' : ''} ${isBeingMerged ? 'being-merged' : ''}`}>
             {!compactMode && (<>
@@ -106,8 +107,9 @@ function Individual({
                     </h3>
                     {individual.isAnyContact && (
                         <span className="contact-badge">
-                        📞 Contact
-                    </span>
+                            <Phone size={16} />
+                            <span>Contact</span>
+                        </span>
                     )}
                     <div className="individual-menu" ref={dropdownRef}>
                         <button
@@ -182,7 +184,7 @@ function Individual({
                                 className="icon-button"
                                 title="Copy link to clipboard"
                             >
-                                📋
+                                <Clipboard size={16} />
                             </button>
                         </div>
                     ))}

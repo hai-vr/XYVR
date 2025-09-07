@@ -25,6 +25,15 @@
     flex-shrink: 0;
 }
 
+.theme-toggle-btn svg {
+    min-width: 24px;
+    min-height: 24px;
+    width: 24px;
+    height: 24px;
+    display: block;
+    color: var(--header-text);
+}
+
 .theme-toggle-btn:hover {
     background: var(--theme-toggle-hover-bg);
     border-color: var(--theme-toggle-hover-border);
