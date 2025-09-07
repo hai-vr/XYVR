@@ -10,6 +10,20 @@
     outline-offset: -4px;
     transition: outline 0.3s ease;
 }
+
+.individual-container-compact {
+    display: block;
+    background: var(--bg-secondary);
+    border: 1px solid var(--brd-primary);
+    border-radius: 12px;
+    padding: 6px;
+    box-shadow: 0 2px 8px var(--shadow-medium);
+    cursor: pointer;
+    outline: 0px solid transparent;
+    outline-offset: -4px;
+    transition: outline 0.3s ease;
+}
+
 .individual-container.hidden {
     display: none;
 }
@@ -121,8 +135,12 @@
     border-bottom: 1px solid var(--brd-secondary);
 }
 
-.accounts-container {
+.individual-container .accounts-container {
     margin-bottom: 20px;
+}
+
+.individual-container-compact .accounts-container {
+    margin-bottom: 0;
 }
 
 .accounts-grid {

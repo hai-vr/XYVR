@@ -103,13 +103,13 @@ export const parseSearchTerms = (searchTerm) => {
 };
 
 // Special search term matching
-export const matchesSpecialTerms = (individual, specialTerms) => {
+export const anyAccountMatchesSpecialTerms = (accounts, specialTerms) => {
     return specialTerms.every(term => {
         if (term.startsWith('links:')) {
             const searchString = term.substring(6); // Remove 'links:' prefix
             if (!searchString) return true; // Empty search string matches all
 
-            return individual.accounts?.some(account =>
+            return accounts?.some(account =>
                 account.specifics?.urls?.some(url =>
                     url.toLowerCase().includes(searchString)
                 )
@@ -120,7 +120,7 @@ export const matchesSpecialTerms = (individual, specialTerms) => {
             const searchString = term.substring(4); // Remove 'bio:' prefix
             if (!searchString) return true; // Empty search string matches all
 
-            return individual.accounts?.some(account =>
+            return accounts?.some(account =>
                 account.specifics?.bio?.toLowerCase().includes(searchString)
             ) || false;
         }
@@ -131,7 +131,7 @@ export const matchesSpecialTerms = (individual, specialTerms) => {
 
             const kanaVariants = generateKanaVariants(searchString);
 
-            return individual.accounts?.some(account => {
+            return accounts?.some(account => {
                 if (!account.allDisplayNames || !Array.isArray(account.allDisplayNames)) {
                     return false;
                 }
@@ -147,41 +147,41 @@ export const matchesSpecialTerms = (individual, specialTerms) => {
 
         switch (term) {
             case 'app:resonite':
-                return individual.accounts?.some(account => account.namedApp === "Resonite") || false;
+                return accounts?.some(account => account.namedApp === "Resonite") || false;
 
             case 'app:vrchat':
-                return individual.accounts?.some(account => account.namedApp === "VRChat") || false;
+                return accounts?.some(account => account.namedApp === "VRChat") || false;
 
             case 'app:cluster':
-                return individual.accounts?.some(account => account.namedApp === "Cluster") || false;
+                return accounts?.some(account => account.namedApp === "Cluster") || false;
 
             case 'app:chilloutvr':
-                return individual.accounts?.some(account => account.namedApp === "ChilloutVR") || false;
+                return accounts?.some(account => account.namedApp === "ChilloutVR") || false;
 
             case 'on:':
-                return individual.accounts?.some(account => account.onlineStatus && account.onlineStatus !== 'Offline') || false;
+                return accounts?.some(account => account.onlineStatus && account.onlineStatus !== 'Offline') || false;
 
             case 'on:resonite':
-                return individual.accounts?.some(account => account.namedApp === "Resonite" && account.onlineStatus && account.onlineStatus !== 'Offline') || false;
+                return accounts?.some(account => account.namedApp === "Resonite" && account.onlineStatus && account.onlineStatus !== 'Offline') || false;
 
             case 'on:vrchat':
-                return individual.accounts?.some(account => account.namedApp === "VRChat" && account.onlineStatus && account.onlineStatus !== 'Offline') || false;
+                return accounts?.some(account => account.namedApp === "VRChat" && account.onlineStatus && account.onlineStatus !== 'Offline') || false;
 
             case 'on:cluster':
-                return individual.accounts?.some(account => account.namedApp === "Cluster" && account.onlineStatus && account.onlineStatus !== 'Offline') || false;
+                return accounts?.some(account => account.namedApp === "Cluster" && account.onlineStatus && account.onlineStatus !== 'Offline') || false;
 
             case 'on:chilloutvr':
-                return individual.accounts?.some(account => account.namedApp === "ChilloutVR" && account.onlineStatus && account.onlineStatus !== 'Offline') || false;
+                return accounts?.some(account => account.namedApp === "ChilloutVR" && account.onlineStatus && account.onlineStatus !== 'Offline') || false;
 
             case 'has:bot':
-                return individual.accounts?.some(account => account.isTechnical) || false;
+                return accounts?.some(account => account.isTechnical) || false;
 
             case 'has:alt': {
-                if (!individual.accounts) return false;
+                if (!accounts) return false;
 
                 // Group accounts by namedApp, excluding technical accounts
                 const accountGroups = {};
-                individual.accounts.forEach(account => {
+                accounts.forEach(account => {
                     if (account.isTechnical === false || account.isTechnical === undefined) {
                         if (!accountGroups[account.namedApp]) {
                             accountGroups[account.namedApp] = 0;
@@ -199,12 +199,53 @@ export const matchesSpecialTerms = (individual, specialTerms) => {
                     const minCount = parseInt(term.substring(10));
                     if (isNaN(minCount)) return false;
 
-                    const accountCount = individual.accounts?.length || 0;
+                    const accountCount = accounts?.length || 0;
                     return accountCount > minCount;
                 }
                 return false;
         }
     });
+};
+
+export const accountMatchesFromRegularTerms = (account, regularTerms) => {
+    const accountNote = account.note?.text || '';
+    const accountDisplayName = account.inAppDisplayName || '';
+    const accountIdentifier = account.inAppIdentifier || '';
+
+    // Check account-level matches
+    const accountMatch = regularTerms.every(term => {
+        const kanaVariants = generateKanaVariants(term);
+
+        return kanaVariants.some(variant => {
+            const variantNormalized = removeDiacritics(variant);
+            const noteMatch = removeDiacritics(accountNote.toLowerCase()).includes(variantNormalized);
+            const displayNameMatch = removeDiacritics(accountDisplayName.toLowerCase()).includes(variantNormalized);
+
+            // Only search in inAppIdentifier if namedApp equals 3 (Cluster)
+            const identifierMatch = account.namedApp === "Cluster" &&
+                removeDiacritics(accountIdentifier.toLowerCase()).includes(variantNormalized);
+
+            return noteMatch || displayNameMatch || identifierMatch;
+        });
+    });
+
+    if (accountMatch) return true;
+
+    // Check caller notes
+    const callerNotesMatch = account.callers?.some(caller => {
+        const callerNote = caller.note?.text || '';
+
+        return regularTerms.every(term => {
+            const kanaVariants = generateKanaVariants(term);
+
+            return kanaVariants.some(variant => {
+                const variantNormalized = removeDiacritics(variant);
+                return removeDiacritics(callerNote.toLowerCase()).includes(variantNormalized);
+            });
+        });
+    }) || false;
+
+    return callerNotesMatch;
 };
 
 // Main filtering function
@@ -221,7 +262,7 @@ export const isIndividualVisible = (individual, searchTerm, showOnlyContacts = f
     const { specialTerms, regularTerms } = parseSearchTerms(searchTerm);
 
     // Check special terms first
-    if (specialTerms.length > 0 && !matchesSpecialTerms(individual, specialTerms)) {
+    if (specialTerms.length > 0 && !anyAccountMatchesSpecialTerms(individual.accounts, specialTerms)) {
         return false;
     }
 
@@ -251,44 +292,7 @@ export const isIndividualVisible = (individual, searchTerm, showOnlyContacts = f
     if (individualMatch) return true;
 
     const accountNotesMatch = individual.accounts?.some(account => {
-        const accountNote = account.note?.text || '';
-        const accountDisplayName = account.inAppDisplayName || '';
-        const accountIdentifier = account.inAppIdentifier || '';
-
-        // Check account-level matches
-        const accountMatch = regularTerms.every(term => {
-            const kanaVariants = generateKanaVariants(term);
-
-            return kanaVariants.some(variant => {
-                const variantNormalized = removeDiacritics(variant);
-                const noteMatch = removeDiacritics(accountNote.toLowerCase()).includes(variantNormalized);
-                const displayNameMatch = removeDiacritics(accountDisplayName.toLowerCase()).includes(variantNormalized);
-
-                // Only search in inAppIdentifier if namedApp equals 3 (Cluster)
-                const identifierMatch = account.namedApp === "Cluster" &&
-                    removeDiacritics(accountIdentifier.toLowerCase()).includes(variantNormalized);
-
-                return noteMatch || displayNameMatch || identifierMatch;
-            });
-        });
-
-        if (accountMatch) return true;
-
-        // Check caller notes
-        const callerNotesMatch = account.callers?.some(caller => {
-            const callerNote = caller.note?.text || '';
-
-            return regularTerms.every(term => {
-                const kanaVariants = generateKanaVariants(term);
-
-                return kanaVariants.some(variant => {
-                    const variantNormalized = removeDiacritics(variant);
-                    return removeDiacritics(callerNote.toLowerCase()).includes(variantNormalized);
-                });
-            });
-        }) || false;
-
-        return callerNotesMatch;
+        return accountMatchesFromRegularTerms(account, regularTerms);
     }) || false;
 
     return accountNotesMatch;

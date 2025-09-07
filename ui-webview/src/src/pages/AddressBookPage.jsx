@@ -400,7 +400,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                             displayNameOfOtherBeingMergedOrUnd={displayNameOfOtherBeingMergedOrUnd}
                             fusionAccounts={fusionAccounts}
                             compactMode={compactMode}
-                            setCompactMode={setCompactMode}
+                            searchTerm={debouncedSearchTerm}
                         />
                     ))}
                 </div>

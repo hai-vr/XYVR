@@ -112,7 +112,7 @@
 }
 
 .individuals-grid.compact-mode {
-    row-gap: 0;
+    row-gap: 10px;
 }
 
 @media (min-width: 768px) {

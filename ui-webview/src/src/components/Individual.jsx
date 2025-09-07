@@ -2,6 +2,7 @@
 import "./Individual.css";
 import { useState, useRef, useEffect } from "react";
 import {Clipboard, Phone} from "lucide-react";
+import {accountMatchesFromRegularTerms, anyAccountMatchesSpecialTerms, parseSearchTerms} from "../pages/searchUtils.js";
 
 function Individual({
                         individual,
@@ -13,9 +14,10 @@ function Individual({
                         displayNameOfOtherBeingMergedOrUnd = undefined,
                         fusionAccounts,
                         compactMode,
-                        setCompactMode
+                        searchTerm
                     }) {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [filteredAccounts, setFilteredAccounts] = useState([]);
     const dropdownRef = useRef(null);
 
     // Get all VRChat account links and filter to only show http/https URLs
@@ -74,6 +76,29 @@ function Individual({
         }
     };
 
+    useEffect(() => {
+        if (!compactMode || !searchTerm) {
+            setFilteredAccounts(individual.accounts);
+            return;
+        }
+
+        if (individual.accounts) {
+            const { specialTerms, regularTerms } = parseSearchTerms(searchTerm);
+
+            const filtered = individual.accounts.filter(account => {
+                if (specialTerms.length > 0 && !anyAccountMatchesSpecialTerms([account], specialTerms)) return false;
+                if (regularTerms.length === 0) {
+                    return true;
+                }
+                if (accountMatchesFromRegularTerms(account, regularTerms)) return true;
+
+                return false;
+            });
+
+            setFilteredAccounts(filtered);
+        }
+    }, [individual, searchTerm, compactMode])
+
     // Helper function to get the first non-punctuation character
     const getFirstNonPunctuationChar = (str) => {
         if (!str) return '?';
@@ -96,7 +121,7 @@ function Individual({
     };
 
     return (
-        <div className={`${!compactMode ? 'individual-container' : ''} ${!isVisible ? 'hidden' : ''} ${isBeingMerged ? 'being-merged' : ''}`}>
+        <div className={`${!compactMode ? 'individual-container' : 'individual-container-compact'} ${!isVisible ? 'hidden' : ''} ${isBeingMerged ? 'being-merged' : ''}`}>
             {!compactMode && (<>
                 <div className="individual-header">
                     <div className="individual-avatar">
@@ -155,9 +180,9 @@ function Individual({
             </>)}
 
             <div className="accounts-container">
-                {individual.accounts && individual.accounts.length > 0 ? (
+                {filteredAccounts && filteredAccounts.length > 0 ? (
                     <div className="accounts-grid">
-                        {individual.accounts.map((account, accountIndex) => (
+                        {filteredAccounts.map((account, accountIndex) => (
                             <Account key={account.guid} account={account} showAlias={showAlias} />
                         ))}
                     </div>
