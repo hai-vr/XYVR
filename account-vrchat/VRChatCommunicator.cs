@@ -6,7 +6,7 @@ namespace XYVR.AccountAuthority.VRChat;
 
 public class VRChatCommunicator
 {
-    private const string VRChatQualifiedAppName = "vrchat";
+    public const string VRChatQualifiedAppName = "vrchat";
     
     private readonly IResponseCollector _responseCollector;
 

@@ -69,7 +69,6 @@ public class ResoniteLiveMonitoring : ILiveMonitoring, IDisposable
         {
             _operationLock.Release();
         }
-
     }
 
     public async Task StopMonitoring()

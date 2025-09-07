@@ -1,5 +1,11 @@
 ﻿namespace XYVR.API.VRChat;
 
+public class VRChatWebsocketContentContainingUser
+{
+    public string userId;
+    public VRChatUser user;
+}
+
 public class VRChatFriend
 {
     public string bio;

@@ -52,7 +52,7 @@ public partial class MainWindow : Window
         CredentialsMgt = new CredentialsManagement(await Scaffolding.OpenCredentials(), Scaffolding.ResoniteUIDLateInitializerFn());
         LiveStatusMonitoring = new LiveStatusMonitoring();
 
-        await _liveBff.StartMonitoring();
+        _ = Task.Run(() => _liveBff.StartMonitoring()); // don't wait this;
         
         await WebView.EnsureCoreWebView2Async();
         WebView.CoreWebView2.AddHostObjectToScript("appApi", _appBff);

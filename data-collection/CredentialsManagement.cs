@@ -312,8 +312,8 @@ public class CredentialsManagement
             case ConnectorType.Offline:
                 return null;
             case ConnectorType.ResoniteAPI:
-                ILiveMonitoring liveMonitoring = new ResoniteLiveMonitoring(credentialsStorage, monitoring);
             {
+                ILiveMonitoring liveMonitoring = new ResoniteLiveMonitoring(credentialsStorage, monitoring);
                 var res = new ResoniteCommunicator(
                     new DoNotStoreAnythingStorage(),
                     null, null, false, await _resoniteUidProviderFn(),
@@ -326,7 +326,15 @@ public class CredentialsManagement
                 return liveMonitoring;
             }
             case ConnectorType.VRChatAPI:
-                return null;
+            {
+                ILiveMonitoring liveMonitoring = new VRChatLiveMonitoring(credentialsStorage, monitoring);
+                var res = new VRChatCommunicator(new DoNotStoreAnythingStorage(), credentialsStorage);
+                var caller = await res.CallerAccount();
+
+                await liveMonitoring.DefineCaller(caller.inAppIdentifier);
+                
+                return liveMonitoring;
+            }
             default:
                 throw new ArgumentOutOfRangeException();
         }
