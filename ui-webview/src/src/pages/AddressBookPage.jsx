@@ -56,12 +56,12 @@ const sortIndividuals = (individuals, searchTerm) => {
 };
 
 // Custom hook for filtering individuals
-const useFilteredIndividuals = (individuals, searchTerm, showOnlyContacts) => {
-    return useMemo(() => {
-        console.log(`useFilteredIndividuals memo running ${individuals.length} individuals, searchTerm: ${searchTerm || 'none'}`);
+const useFilteredIndividuals = (individuals, searchTerm, showOnlyContacts, mergeAccountGuidOrUnd, setSortedIndividuals) => {
+    return useEffect(() => {
+        console.log(`useFilteredIndividuals useEffect running ${individuals.length} individuals, searchTerm: ${searchTerm || 'none'}`);
         // it's faster to filter first then sort on a subset of the data
-        return sortIndividuals(individuals.filter(ind => isIndividualVisible(ind, searchTerm, showOnlyContacts)), searchTerm);
-    }, [individuals, searchTerm, showOnlyContacts]);
+        setSortedIndividuals(sortIndividuals(individuals.filter(ind => isIndividualVisible(ind, searchTerm, showOnlyContacts, mergeAccountGuidOrUnd)), searchTerm));
+    }, [individuals, searchTerm, showOnlyContacts, mergeAccountGuidOrUnd]);
 };
 
 function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyContacts }) {
@@ -69,6 +69,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
     const searchInputRef = useRef(null)
     const [initialized, setInitialized] = useState(false);
     const [individuals, setIndividuals] = useState([]);
+    const [sortedIndividuals, setSortedIndividuals] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
 
@@ -148,15 +149,28 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                     const newIndividuals = [...prevIndividuals];
                     let accounts = prevIndividuals[index].accounts?.map(acc =>
                         acc.qualifiedAppName === liveUpdate.qualifiedAppName && acc.inAppIdentifier === liveUpdate.inAppIdentifier
-                            ? { ...acc, onlineStatus: liveUpdate.onlineStatus }
+                            ? {
+                                ...acc,
+                                onlineStatus: liveUpdate.onlineStatus || acc.onlineStatus,
+                                customStatus: liveUpdate.customStatus || acc.customStatus,
+                            }
                             : acc
                     );
                     let onlineStatusVals = accounts?.filter(acc => acc.onlineStatus !== undefined && acc.onlineStatus !== null);
+
+                    // Determine the best online status: prefer any non-offline status, otherwise use 'Offline'
+                    let bestOnlineStatus = undefined;
+                    if (onlineStatusVals.length > 0) {
+                        const nonOfflineStatuses = onlineStatusVals.filter(acc => acc.onlineStatus !== 'Offline');
+                        bestOnlineStatus = nonOfflineStatuses.length > 0 ? nonOfflineStatuses[0].onlineStatus : 'Offline';
+                    }
+
                     newIndividuals[index] = {
                         ...prevIndividuals[index],
                         accounts: [...accounts],
-                        onlineStatus: onlineStatusVals.length > 0 ? onlineStatusVals.filter(it => it !== 'Offline').at(0) || 'Offline' : undefined,
+                        onlineStatus: bestOnlineStatus
                     };
+
 
                     return newIndividuals;
 
@@ -176,12 +190,12 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
     }, []);
 
     // Use the custom hooks for sorting and filtering
-    const filteredIndividuals = useFilteredIndividuals(individuals, debouncedSearchTerm, showOnlyContacts);
+    useFilteredIndividuals(individuals, debouncedSearchTerm, showOnlyContacts, mergeAccountGuidOrUnd, setSortedIndividuals);
 
     // Get the currently displayed individuals (for infinite scrolling)
     const displayedIndividuals = useMemo(() => {
-        return filteredIndividuals.slice(0, displayedCount);
-    }, [filteredIndividuals, displayedCount]);
+        return sortedIndividuals.slice(0, displayedCount);
+    }, [sortedIndividuals, displayedCount]);
 
     // Infinite scroll handler
     const loadMoreItems = useCallback(() => {
@@ -192,16 +206,16 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
         // Simulate a small delay for better UX
         setTimeout(() => {
             setDisplayedCount(prev => {
-                let nextCount = Math.min(prev + ITEMS_PER_LOAD, filteredIndividuals.length);
+                let nextCount = Math.min(prev + ITEMS_PER_LOAD, sortedIndividuals.length);
                 if (nextCount > 199) {
                     // If the user scrolls too much, just show everything immediately
-                    return filteredIndividuals.length;
+                    return sortedIndividuals.length;
                 }
                 return nextCount;
             });
             setIsLoading(false);
         }, 100);
-    }, [isLoading, filteredIndividuals.length]);
+    }, [isLoading, sortedIndividuals.length]);
 
     // Scroll event handler
     useEffect(() => {
@@ -214,7 +228,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
 
             // Load more when user is 200px from the bottom
             if (scrollTop + windowHeight >= documentHeight - 200) {
-                if (displayedCount < filteredIndividuals.length) {
+                if (displayedCount < sortedIndividuals.length) {
                     loadMoreItems();
                 }
             }
@@ -222,10 +236,10 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
 
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
-    }, [loadMoreItems, displayedCount, filteredIndividuals.length, isLoading]);
+    }, [loadMoreItems, displayedCount, sortedIndividuals.length, isLoading]);
 
     // Calculate visible individuals count using the filtered array
-    const totalFilteredCount = filteredIndividuals.length;
+    const totalFilteredCount = sortedIndividuals.length;
 
     // Check if bio should be shown based on search terms
     const showBio = useMemo(() => {

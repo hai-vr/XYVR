@@ -60,22 +60,27 @@ public class AppBFF : IAppBFF
     internal static FrontIndividual ToFront(Individual individual, LiveStatusMonitoring live)
     {
         var accounts = individual.accounts
-            .Select(account => new FrontAccount
+            .Select(account =>
             {
-                guid = account.guid,
-                namedApp = account.namedApp,
-                qualifiedAppName = account.qualifiedAppName,
-                inAppIdentifier = account.inAppIdentifier,
-                inAppDisplayName = account.inAppDisplayName,
-                specifics = account.specifics,
-                callers = account.callers,
-                isTechnical = account.isTechnical,
-                isAnyCallerContact = account.callers.Any(caller => caller.isContact),
-                isAnyCallerNote = account.callers.Any(caller => caller.note.status == NoteState.Exists),
-                allDisplayNames = account.allDisplayNames,
-                isPendingUpdate = account.isPendingUpdate,
-                
-                onlineStatus = live.GetLiveSessionStateOrNull(account.namedApp, account.inAppIdentifier)?.onlineStatus,
+                var sessionState = live.GetLiveSessionStateOrNull(account.namedApp, account.inAppIdentifier);
+                return new FrontAccount
+                {
+                    guid = account.guid,
+                    namedApp = account.namedApp,
+                    qualifiedAppName = account.qualifiedAppName,
+                    inAppIdentifier = account.inAppIdentifier,
+                    inAppDisplayName = account.inAppDisplayName,
+                    specifics = account.specifics,
+                    callers = account.callers,
+                    isTechnical = account.isTechnical,
+                    isAnyCallerContact = account.callers.Any(caller => caller.isContact),
+                    isAnyCallerNote = account.callers.Any(caller => caller.note.status == NoteState.Exists),
+                    allDisplayNames = account.allDisplayNames,
+                    isPendingUpdate = account.isPendingUpdate,
+
+                    onlineStatus = sessionState?.onlineStatus,
+                    customStatus = sessionState?.customStatus
+                };
             }).ToList();
 
         var nonNullStatus = accounts.Select(account => account.onlineStatus).Where(status => status != null).ToList();

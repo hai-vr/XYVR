@@ -2,6 +2,7 @@
 using Newtonsoft.Json.Linq;
 using XYVR.API.VRChat;
 using XYVR.Core;
+using XYVR.Data.Collection;
 
 namespace XYVR.AccountAuthority.VRChat;
 
@@ -10,14 +11,18 @@ public class VRChatLiveCommunicator
     private readonly ICredentialsStorage _credentialsStorage;
     private readonly string _callerInAppIdentifier;
     private readonly VRChatWebsocketClient _wsClient;
+    private readonly IResponseCollector _responseCollector;
     
+    private VRChatAPI? _api;
+
     public event LiveUpdateReceived? OnLiveUpdateReceived;
     public delegate Task LiveUpdateReceived(LiveUpdate liveUpdate);
 
-    public VRChatLiveCommunicator(ICredentialsStorage credentialsStorage, string callerInAppIdentifier)
+    public VRChatLiveCommunicator(ICredentialsStorage credentialsStorage, string callerInAppIdentifier, IResponseCollector responseCollector)
     {
         _credentialsStorage = credentialsStorage;
         _callerInAppIdentifier = callerInAppIdentifier;
+        _responseCollector = responseCollector;
 
         _wsClient = new VRChatWebsocketClient();
         _wsClient.Connected += WhenConnected;
@@ -27,6 +32,26 @@ public class VRChatLiveCommunicator
 
     public async Task Connect()
     {
+        _api ??= await InitializeAPI();
+        
+        var contactsAsyncEnum = _api.ListFriends(ListFriendsRequestType.OnlyOnline, DataCollectionReason.FindUndiscoveredAccounts)
+            .Concat(_api.ListFriends(ListFriendsRequestType.OnlyOffline, DataCollectionReason.FindUndiscoveredAccounts));
+        await foreach (var friend in contactsAsyncEnum)
+        {
+            if (OnLiveUpdateReceived != null)
+            {
+                await OnLiveUpdateReceived(new LiveUpdate
+                {
+                    namedApp = NamedApp.VRChat,
+                    qualifiedAppName = VRChatCommunicator.VRChatQualifiedAppName,
+                    inAppIdentifier = friend.id,
+                    onlineStatus = ParseStatus("xxx", friend.platform, friend.status),
+                    callerInAppIdentifier = _callerInAppIdentifier,
+                    customStatus = friend.statusDescription
+                });
+            }
+        }
+        
         await _wsClient.Connect(await GetToken__sensitive());
     }
 
@@ -41,19 +66,28 @@ public class VRChatLiveCommunicator
         {
             var rootObj = JObject.Parse(msg);
             var type = rootObj["type"].Value<string>();
-            Console.WriteLine($"Received message of type {type} from vrc ws api");
         
             if (type is "friend-online" or "friend-update" or "friend-offline" or "friend-location" or "friend-active")
             {
+                Console.Write($"{type} ");
                 var content = JsonConvert.DeserializeObject<VRChatWebsocketContentContainingUser>(rootObj["content"].Value<string>())!;
-                OnLiveUpdateReceived?.Invoke(new LiveUpdate
+                if (OnLiveUpdateReceived != null)
                 {
-                    namedApp = NamedApp.VRChat,
-                    qualifiedAppName = VRChatCommunicator.VRChatQualifiedAppName,
-                    inAppIdentifier = content.userId,
-                    onlineStatus = ParseStatus(type, content.user),
-                    callerInAppIdentifier = _callerInAppIdentifier,
-                });
+                    // FIXME: This is a task???
+                    OnLiveUpdateReceived(new LiveUpdate
+                    {
+                        namedApp = NamedApp.VRChat,
+                        qualifiedAppName = VRChatCommunicator.VRChatQualifiedAppName,
+                        inAppIdentifier = content.userId,
+                        onlineStatus = ParseStatus(type, content.user.platform, content.user.status),
+                        callerInAppIdentifier = _callerInAppIdentifier,
+                        customStatus = content.user.statusDescription
+                    });
+                }
+            }
+            else
+            {
+                Console.WriteLine($"Received UNHANDLED message of type {type} from vrc ws api");
             }
         }
         catch (Exception e)
@@ -63,11 +97,12 @@ public class VRChatLiveCommunicator
         }
     }
 
-    private OnlineStatus ParseStatus(string type, VRChatUser vrcUser)
+    private OnlineStatus ParseStatus(string type, string platform, string userStatus)
     {
+        if (platform == "web") return OnlineStatus.Offline;
         if (type == "friend-offline") return OnlineStatus.Offline;
         
-        return vrcUser.status switch
+        return userStatus switch
         {
             "offline" => OnlineStatus.Offline,
             "active" => OnlineStatus.Online,
@@ -90,5 +125,22 @@ public class VRChatLiveCommunicator
     {
         return JsonConvert.DeserializeObject<VRChatAPI.VrcAuthenticationCookies>(await _credentialsStorage.RequireCookieOrToken())
             .auth.Value;
+    }
+    
+    private async Task<VRChatAPI> InitializeAPI()
+    {
+        var api = new VRChatAPI(_responseCollector);
+        var userinput_cookies__sensitive = await _credentialsStorage.RequireCookieOrToken();
+        if (userinput_cookies__sensitive != null)
+        {
+            api.ProvideCookies(userinput_cookies__sensitive);
+        }
+
+        if (!api.IsLoggedIn)
+        {
+            throw new ArgumentException("User must be already logged in before establishing communication");
+        }
+
+        return api;
     }
 }

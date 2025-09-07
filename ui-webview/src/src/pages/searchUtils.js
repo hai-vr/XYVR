@@ -185,7 +185,9 @@ export const matchesSpecialTerms = (individual, specialTerms) => {
 };
 
 // Main filtering function
-export const isIndividualVisible = (individual, searchTerm, showOnlyContacts = false) => {
+export const isIndividualVisible = (individual, searchTerm, showOnlyContacts = false, mergeAccountGuidOrUnd = undefined) => {
+    if (mergeAccountGuidOrUnd !== undefined && individual.guid === mergeAccountGuidOrUnd) return true;
+
     // First apply the contact filter
     if (showOnlyContacts && !individual.isAnyContact) {
         return false;

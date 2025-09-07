@@ -8,6 +8,7 @@ public class LiveUpdate
 
     public OnlineStatus? onlineStatus;
     public LiveSessionState? mainSession;
+    public string? customStatus;
 
     public string callerInAppIdentifier;
 }

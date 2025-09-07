@@ -13,6 +13,7 @@ internal class FrontIndividual
     public string? customName;
 
     public OnlineStatus? onlineStatus;
+    public string? customStatus;
 }
 
 internal class FrontAccount
@@ -31,6 +32,7 @@ internal class FrontAccount
     public bool isPendingUpdate;
     
     public OnlineStatus? onlineStatus;
+    public string? customStatus;
 }
 
 public class FrontConnector(Connector connector, bool isLoggedIn)

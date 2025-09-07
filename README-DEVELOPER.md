@@ -51,6 +51,7 @@ The following work has been done:
 - Provide a graphical UI to update the data.
 - Make the connection code easily auditable.
 - Set up workflow automation to build the React app and the .NET app.
+- Write the necessary API connectors to fetch live session data and display the current social VR application that a user is playing.
 
 The following work remains to be done:
 - Reported issues:
@@ -60,13 +61,12 @@ The following work remains to be done:
     - There is no feedback on the progress of data collection.
     - The Resonite login does not support TOTP.
 - Provide a graphical UI to group accounts belonging to a single individual.
-- Write the necessary API connectors to fetch live session data and display the current social VR application that a user is playing.
 - Provide a graphical UI to import an existing set of pre-made requests so that it does not require a direct connection.
 
 ## Technology in use
 
 The app is written in .NET 9 and uses a WebView pointing to a React app set up with Vite. Offline data is stored in plain JSON.
-- As I am originally a backend developer, the WebView and React frontend are built using heavy assistance from Claude 4 integrated
+- As I am originally a backend developer, the WebView and React frontend are [built using heavy assistance](ui-webview/src/README.md) from Claude 4 integrated
   with Jetbrains Rider.
 - The backend is designed without much assistance.
 
@@ -115,3 +115,4 @@ External system projects:
 - **account-vrchat** communicates with **api-vrchat** and returns core objects.
 - **api-resonite** makes HTTP requests (*and in the future, will receive SignalR*) with the [Resonite API](https://wiki.resonite.com/API).
 - **api-vrchat** makes HTTP requests to the [VRChat API](https://vrchat.community).
+- **audit-urls** contains all the URLs that are used to perform requests to external systems (currently: the Resonite API and the VRChat API).

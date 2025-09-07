@@ -34,7 +34,7 @@ public class VRChatLiveMonitoring : ILiveMonitoring
                 Converters = { new StringEnumConverter() }
             };
             
-            _liveComms = new VRChatLiveCommunicator(_credentialsStorage, _callerInAppIdentifier);
+            _liveComms = new VRChatLiveCommunicator(_credentialsStorage, _callerInAppIdentifier, new DoNotStoreAnythingStorage());
             _liveComms.OnLiveUpdateReceived += async update =>
             {
                 Console.WriteLine($"OnLiveUpdateReceived: {JsonConvert.SerializeObject(update, serializer)}");

@@ -61,7 +61,7 @@ const Account = ({ account, imposter, showAlias }) => {
             case 'VRChatDND':
                 return '⛔';
             case 'ResoniteAway':
-                return '🌗';
+                return '💤';
             case 'VRChatAskMe':
                 return '🔶';
             case 'ResoniteSociable':
@@ -118,7 +118,7 @@ const Account = ({ account, imposter, showAlias }) => {
                             </div>
                         ))}
                         <div className="account-app-name">
-                            {getAppDisplayName(account)}
+                            {!account.customStatus && getAppDisplayName(account)} {account.customStatus}
                         </div>
                     </div>
                 </div>
