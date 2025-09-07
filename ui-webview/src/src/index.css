@@ -369,3 +369,23 @@ button:disabled:hover {
 .status-joinme {
     color: #00e1ff;
 }
+:root[data-theme="light"] .status-online {
+    color: #22c55e;
+}
+
+:root[data-theme="light"] .status-away {
+    color: #f59e0b;
+}
+
+:root[data-theme="light"] .status-askme {
+    color: #ea580c;
+}
+
+:root[data-theme="light"] .status-busy {
+    color: #dc2626;
+}
+
+:root[data-theme="light"] .status-joinme {
+    color: #0ea5e9;
+}
+
