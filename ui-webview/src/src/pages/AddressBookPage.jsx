@@ -26,6 +26,7 @@ import {
     NotebookText, Notebook
 } from 'lucide-react'
 import DarkModeToggleButton from "../components/DarkModeToggleButton.jsx";
+import {_D2} from "../haiUtils.js";
 
 const sortIndividuals = (individuals, searchTerm) => {
     if (!searchTerm) {
@@ -70,7 +71,7 @@ const sortIndividuals = (individuals, searchTerm) => {
 };
 
 // Custom hook for filtering individuals
-function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyContacts, compactMode, setCompactMode, showNotes, setShowNotes }) {
+function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyContacts, compactMode, setCompactMode, showNotes, setShowNotes, demoMode }) {
     const navigate = useNavigate()
     const searchInputRef = useRef(null)
     const [initialized, setInitialized] = useState(false);
@@ -347,7 +348,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                 <div className="search-container">
                     <input
                         ref={searchInputRef}
-                        type="text"
+                        type={demoMode ? 'password' : 'text'}
                         placeholder="Search by name or note..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
@@ -371,7 +372,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                         <div className="no-results-icon"><Search size={48}/></div>
                         {!showHelp && <>
                             <div className="no-results-text">No individuals found matching
-                                "<strong>{debouncedSearchTerm}</strong>"
+                                "<strong>{_D2(debouncedSearchTerm, demoMode)}</strong>"
                             </div>
                         </>}
                         <div className="no-results-hint">
@@ -421,6 +422,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                             compactMode={compactMode}
                             searchTerm={debouncedSearchTerm}
                             showNotes={showNotes}
+                            demoMode={demoMode}
                         />
                     ))}
                 </div>

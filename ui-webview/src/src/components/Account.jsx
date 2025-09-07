@@ -1,8 +1,9 @@
 ﻿import React from 'react';
 import './Account.css';
 import {CircleDot, CircleOff, Clipboard, DiamondMinus, Globe, TriangleAlert} from "lucide-react";
+import {_D, _D2} from "../haiUtils.js";
 
-const Account = ({ account, imposter, showAlias, showNotes }) => {
+const Account = ({ account, imposter, showAlias, showNotes, demoMode }) => {
     const hasNote = account.isAnyCallerNote;
 
     const copyInAppIdentifier = async () => {
@@ -107,19 +108,19 @@ const Account = ({ account, imposter, showAlias, showNotes }) => {
                         {getAppIcon(account.namedApp)}
                     </div>
                     <div>
-                        <div className="account-display-name" title={!imposter && account.allDisplayNames?.join('\n') || ``}>
-                            {account.inAppDisplayName} {getOnlineStatusEmoji(account.onlineStatus)} {getOnlineStatusText(account.onlineStatus)}
+                        <div className="account-display-name" title={!imposter && account.allDisplayNames?.map(it => _D(it, demoMode)).join('\n') || ``}>
+                            {_D(account.inAppDisplayName, demoMode)} {getOnlineStatusEmoji(account.onlineStatus)} {getOnlineStatusText(account.onlineStatus)}
                         </div>
                         {!imposter && showAlias && account.allDisplayNames && account.allDisplayNames
                             .toReversed()
                             .filter((displayName) => displayName !== account.inAppDisplayName)
                             .map((displayName, index) => (
                             <div key={index} className="account-display-name">
-                                {displayName}
+                                {_D(displayName, demoMode)}
                             </div>
                         ))}
                         <div className="account-app-name">
-                            {!account.customStatus && getAppDisplayName(account)} {account.customStatus}
+                            {!account.customStatus && getAppDisplayName(account)} {_D2(account.customStatus, demoMode)}
                         </div>
                     </div>
                 </div>
@@ -152,7 +153,7 @@ const Account = ({ account, imposter, showAlias, showNotes }) => {
                     <button
                         onClick={copyInAppIdentifier}
                         className="icon-button"
-                        title={`Copy ID: ${account.inAppIdentifier}`}
+                        title={`Copy ID: ${_D(account.inAppIdentifier, demoMode)}`}
                     >
                         <Clipboard size={16} />
                     </button>
@@ -169,7 +170,7 @@ const Account = ({ account, imposter, showAlias, showNotes }) => {
             {showNotes && account.callers && account.callers.filter(caller => caller.note.status === "Exists").map((caller, index) => (
                 <div key={index} className="note-container">
                     <div className="note-text">
-                        {caller.note.text.startsWith('mt ') ? ('Met through ' + caller.note.text.substring(3)) : caller.note.text}
+                        {caller.note.text.startsWith('mt ') ? (_D2('Met through ' + caller.note.text.substring(3), demoMode)) : _D2(caller.note.text, demoMode)}
                     </div>
                 </div>
             ))}

@@ -6,7 +6,7 @@ import '../Header.css'
 import Connector from "../components/Connector.jsx";
 import DarkModeToggleButton from "../components/DarkModeToggleButton.jsx";
 
-function DataCollectionPage({ isDark, setIsDark }) {
+function DataCollectionPage({ isDark, setIsDark, demoMode }) {
     const navigate = useNavigate()
     const [initialized, setInitialized] = useState(false);
     const [connectors, setConnectors] = useState([]);
@@ -115,6 +115,7 @@ function DataCollectionPage({ isDark, setIsDark }) {
                                     onDeleteClick={handleDeleteClick}
                                     deleteState={deleteStates[connector.guid]}
                                     onConnectorUpdated={refreshConnectors}
+                                    demoMode={demoMode}
                                 />
                             ))}
                         </div>

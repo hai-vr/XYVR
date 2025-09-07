@@ -4,7 +4,7 @@ import './Connector.css';
 import '../InputFields.css';
 import {TriangleAlert, X} from "lucide-react";
 
-const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated }) => {
+const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated, demoMode }) => {
     const [login, setLogin] = useState('');
     const [password, setPassword] = useState('');
     const [twoFactorCode, setTwoFactorCode] = useState('');
@@ -75,7 +75,7 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated }
     return (
         <div className="connector-card">
             {connector.account && (
-                <Account account={connector.account} />
+                <Account account={connector.account} demoMode={demoMode} />
             )}
             {!connector.account && (
                 <Account account={tempAccount} imposter={true} />
@@ -87,7 +87,7 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated }
                         <>
                             <h3 className="input-title">Connect to your {virtualApp} account</h3>
                             <input
-                                type="text"
+                                type={demoMode && 'password' || 'text'}
                                 placeholder={connector.type === 'VRChatAPI' && "Username/Email" || "Username"}
                                 value={login}
                                 onChange={(e) => setLogin(e.target.value)}
@@ -138,7 +138,7 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated }
                         <>
                             <h3 className="input-title">Enter your {virtualApp} 2FA code ({isTwoFactorEmail && `Email` || `Authenticator`})</h3>
                             <input
-                                type="text"
+                                type={demoMode && 'password' || 'text'}
                                 placeholder={`2FA Code (${isTwoFactorEmail ? 'Email' : 'Authenticator'})`}
                                 value={twoFactorCode}
                                 onChange={(e) => setTwoFactorCode(e.target.value)}

@@ -3,6 +3,7 @@ import "./Individual.css";
 import { useState, useRef, useEffect } from "react";
 import {Clipboard, Phone} from "lucide-react";
 import {accountMatchesFromRegularTerms, anyAccountMatchesSpecialTerms, parseSearchTerms} from "../pages/searchUtils.js";
+import {_D, _D2} from "../haiUtils.js";
 
 function Individual({
                         individual,
@@ -15,7 +16,8 @@ function Individual({
                         fusionAccounts,
                         compactMode,
                         searchTerm,
-                        showNotes
+                        showNotes,
+                        demoMode
                     }) {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [filteredAccounts, setFilteredAccounts] = useState([]);
@@ -126,10 +128,10 @@ function Individual({
             {!compactMode && (<>
                 <div className="individual-header">
                     <div className="individual-avatar">
-                        {getFirstNonPunctuationChar(individual.displayName)}
+                        {demoMode ? '?' : getFirstNonPunctuationChar(individual.displayName)}
                     </div>
                     <h3 className="individual-name">
-                        {individual.displayName}
+                        {_D(individual.displayName, demoMode)}
                     </h3>
                     {individual.isAnyContact && (
                         <span className="contact-badge">
@@ -184,7 +186,7 @@ function Individual({
                 {filteredAccounts && filteredAccounts.length > 0 ? (
                     <div className="accounts-grid">
                         {filteredAccounts.map((account, accountIndex) => (
-                            <Account key={account.guid} account={account} showAlias={showAlias} showNotes={showNotes} />
+                            <Account key={account.guid} account={account} showAlias={showAlias} showNotes={showNotes} demoMode={demoMode} />
                         ))}
                     </div>
                 ) : (
@@ -199,11 +201,11 @@ function Individual({
                     {vrChatLinks.map((url, linkIndex) => (
                         <div key={linkIndex} className="vrchat-link-item">
                             <a
-                                href={url}
+                                href={demoMode ? 'https://example.com' : url}
                                 rel="noopener noreferrer"
                                 className="vrchat-link"
                             >
-                                {url}
+                                {_D2(url, demoMode, '/')}
                             </a>
                             <button
                                 onClick={(e) => copyToClipboard(url, e)}
@@ -224,7 +226,7 @@ function Individual({
                             <div key={bioIndex} className="vrchat-bio-item">
                                 {bio.split('\n').map((line, lineIndex) => (
                                     <span key={lineIndex}>
-                                        {line}
+                                        {_D(line, demoMode)}
                                         {lineIndex < bio.split('\n').length - 1 && <br/>}
                                     </span>
                                 ))}

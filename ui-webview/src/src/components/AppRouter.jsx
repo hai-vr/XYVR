@@ -11,6 +11,7 @@ function AppRouter() {
     const [showNotes, setShowNotes] = useState(true)
     const [preferences, setPreferences] = useState({})
     const [isPreferencesObtained, setIsPreferencesObtained] = useState(false)
+    const [debugMode, setDebugMode] = useState(false)
 
     // Apply theme and persist
     useEffect(() => {
@@ -58,6 +59,22 @@ function AppRouter() {
         initializeApi();
     }, [])
 
+    // Keyboard shortcut handler for CTRL-SHIFT-D
+    useEffect(() => {
+        const handleKeyDown = (event) => {
+            if (event.ctrlKey && event.shiftKey && event.key === 'D') {
+                event.preventDefault()
+                setDebugMode(prevMode => !prevMode)
+            }
+        }
+
+        document.addEventListener('keydown', handleKeyDown)
+
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown)
+        }
+    }, [])
+
     return (
         <Router>
             <div className="app-container">
@@ -71,8 +88,10 @@ function AppRouter() {
                                                                               compactMode={compactMode}
                                                                               setCompactMode={setCompactMode}
                                                                               showNotes={showNotes}
-                                                                              setShowNotes={setShowNotes}/>}/>
-                        <Route path="/data-collection" element={<DataCollectionPage isDark={isDark} setIsDark={setIsDark} />} />
+                                                                              setShowNotes={setShowNotes}
+                                                                              demoMode={debugMode}
+                        />}/>
+                        <Route path="/data-collection" element={<DataCollectionPage isDark={isDark} setIsDark={setIsDark} demoMode={debugMode} />} />
                     </Routes>
                 </main>
             </div>
