@@ -70,21 +70,21 @@ public class ResoniteDataCollection(IndividualRepository repository, ResponseCol
         repository.MergeIncompleteAccounts(incAccs);
         await jobHandler.NotifyAccountUpdated(incAccs.Select(account => account.AsIdentification()).ToList());
 
-        var incompleteAccounts = new List<AccountIdentification>();
-        foreach (var acc in incAccs)
+        var incompleteAccountsIds = new List<AccountIdentification>();
+        foreach (var incompleteAccount in incAccs)
         {
-            var account = await _resoniteCommunicator.GetUser(acc.inAppIdentifier, true);
+            var account = await _resoniteCommunicator.GetUser(incompleteAccount.inAppIdentifier, incompleteAccount.callers[0].isContact ?? false);
             if (account != null)
             {
-                incompleteAccounts.Add(account.AsIdentification());
+                incompleteAccountsIds.Add(account.AsIdentification());
                 repository.MergeAccounts([account]);
                 await jobHandler.NotifyAccountUpdated([account.AsIdentification()]);
-                await jobHandler.NotifyEnumeration(eTracker, incompleteAccounts.Count, incAccs.Count);
+                await jobHandler.NotifyEnumeration(eTracker, incompleteAccountsIds.Count, incAccs.Count);
             }
         }
         
         return new List<AccountIdentification> { resoniteCaller.AsIdentification() }
-            .Concat(incompleteAccounts)
+            .Concat(incompleteAccountsIds)
             .Distinct()
             .ToList();
     }
