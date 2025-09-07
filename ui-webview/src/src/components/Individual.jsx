@@ -1,7 +1,11 @@
 ﻿import Account from "./Account.jsx";
 import "./Individual.css";
+import { useState, useRef, useEffect } from "react";
 
 function Individual({ individual, isVisible = true, showBio = false, showAlias = false }) {
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const dropdownRef = useRef(null);
+
     // Get all VRChat account links and filter to only show http/https URLs
     const vrChatLinks = individual.accounts
         ?.filter(account => account.namedApp === "VRChat" && account.specifics?.urls?.length > 0)
@@ -16,9 +20,41 @@ function Individual({ individual, isVisible = true, showBio = false, showAlias =
         ?.map(account => account.specifics.bio)
         ?.filter(bio => bio.trim() !== '') || [];
 
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsDropdownOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
     const copyToClipboard = async (url, event) => {
         event.stopPropagation(); // Prevent the container click event
         await navigator.clipboard.writeText(url);
+    };
+
+    const handleMenuAction = (action, event) => {
+        event.stopPropagation();
+        setIsDropdownOpen(false);
+
+        switch (action) {
+            case 'merge':
+                // TODO: Implement merge account functionality
+                console.log('Merge account clicked for:', individual.displayName);
+                break;
+            case 'details':
+                // TODO: Implement show details functionality
+                console.log('Show details clicked for:', individual.displayName);
+                break;
+            default:
+                break;
+        }
     };
 
     // Helper function to get the first non-punctuation character
@@ -56,6 +92,34 @@ function Individual({ individual, isVisible = true, showBio = false, showAlias =
                         📞 Contact
                     </span>
                 )}
+                <div className="individual-menu" ref={dropdownRef}>
+                    <button
+                        className="menu-button"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setIsDropdownOpen(!isDropdownOpen);
+                        }}
+                        title="More actions"
+                    >
+                        ⋯
+                    </button>
+                    {isDropdownOpen && (
+                        <div className="dropdown-menu">
+                            <button
+                                className="dropdown-item"
+                                onClick={(e) => handleMenuAction('merge', e)}
+                            >
+                                Merge account...
+                            </button>
+                            <button
+                                className="dropdown-item"
+                                onClick={(e) => handleMenuAction('details', e)}
+                            >
+                                Show details
+                            </button>
+                        </div>
+                    )}
+                </div>
             </div>
 
             <div className="accounts-container">
