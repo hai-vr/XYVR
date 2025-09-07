@@ -12,6 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\audit-urls\audit-urls.csproj" />
       <ProjectReference Include="..\core\core.csproj" />
     </ItemGroup>
 

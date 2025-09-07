@@ -4,6 +4,7 @@ using System.Text;
 using System.Web;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using XYVR.API.Audit;
 using XYVR.Core;
 using XYVR.Data.Collection;
 
@@ -12,17 +13,10 @@ namespace XYVR.API.VRChat;
 public class VRChatAPI
 {
     private const string VRChatApiSourceName = "vrchat_web_api";
-    
-    // https://github.com/vrchatapi/specification/commit/558c0ca50202c45194a49d515f27e64f62079ba4#diff-5fa520d3bb34f9ae444cdbdf2b9eccff2361eb89a0cd3f4dba1e2e0fa9bba452R15
-    // https://discord.com/channels/418093857394262020/418512124529344523/1303873667473866752
-    // "Yes, going forward, all API requests need to go through api.vrchat.cloud instead"
-    private const string RootUrl = "https://api.vrchat.cloud/api/1"; // Formerly: "https://vrchat.com/api/1"
-    private const string CookieDomainBit = "api.vrchat.cloud";
-    private const string CookieDomain = $"https://{CookieDomainBit}";
-    private const string AuthUrl = RootUrl + "/auth/user";
-    private const string LogoutUrl = RootUrl + "/logout";
-    private const string EmailOtpUrl = RootUrl + "/auth/twofactorauth/emailotp/verify";
-    private const string TotpUrl = RootUrl + "/auth/twofactorauth/totp/verify";
+    private const string AuthUrl = AuditUrls.VrcApiUrl + "/auth/user";
+    private const string LogoutUrl = AuditUrls.VrcApiUrl + "/logout";
+    private const string EmailOtpUrl = AuditUrls.VrcApiUrl + "/auth/twofactorauth/emailotp/verify";
+    private const string TotpUrl = AuditUrls.VrcApiUrl + "/auth/twofactorauth/totp/verify";
 
     private readonly IResponseCollector _responseCollector;
     
@@ -59,8 +53,8 @@ public class VRChatAPI
     {
         _cookies = new CookieContainer();
         var deserialized = JsonConvert.DeserializeObject<VrcAuthenticationCookies>(userinput_cookies__sensitive);
-        if (deserialized.auth != null) _cookies.Add(new Uri(CookieDomain), RebuildCookie(deserialized.auth, "auth"));
-        if (deserialized.twoFactorAuth != null) _cookies.Add(new Uri(CookieDomain), RebuildCookie(deserialized.twoFactorAuth, "twoFactorAuth"));
+        if (deserialized.auth != null) _cookies.Add(new Uri(AuditUrls.VrcCookieDomain), RebuildCookie(deserialized.auth, "auth"));
+        if (deserialized.twoFactorAuth != null) _cookies.Add(new Uri(AuditUrls.VrcCookieDomain), RebuildCookie(deserialized.twoFactorAuth, "twoFactorAuth"));
         var handler = new HttpClientHandler
         {
             CookieContainer = _cookies
@@ -79,7 +73,7 @@ public class VRChatAPI
     {
         return new Cookie
         {
-            Domain = CookieDomainBit,
+            Domain = AuditUrls.VrcCookieDomainBit,
             Name = name,
             Value = cookie.Value,
             Expires = cookie.Expires,
@@ -90,7 +84,7 @@ public class VRChatAPI
 
     private VrcAuthenticationCookies CompileCookies()
     {
-        var subCookies = _cookies.GetCookies(new Uri(CookieDomain)).ToArray();
+        var subCookies = _cookies.GetCookies(new Uri(AuditUrls.VrcCookieDomain)).ToArray();
         var authNullable = subCookies.Where(cookie => cookie.Name == "auth").Select(Cookify).FirstOrDefault();
         var twoFactorAuthNullable = subCookies.Where(cookie => cookie.Name == "twoFactorAuth").Select(Cookify).FirstOrDefault();
         
@@ -215,7 +209,7 @@ public class VRChatAPI
     {
         ThrowIfNotLoggedIn();
         
-        var url = $"{RootUrl}/auth/user";
+        var url = $"{AuditUrls.VrcApiUrl}/auth/user";
         var requestGuid = Guid.NewGuid().ToString();
 
         try
@@ -247,7 +241,7 @@ public class VRChatAPI
 
         var offline = listFriendsRequestType == ListFriendsRequestType.OnlyOffline ? "true" : "false";
         await foreach (var friend in GetPaginatedResults<VRChatFriend>(dataCollectionReason, requestGuid, (offset, pageSize) =>
-                           Task.FromResult($"{RootUrl}/auth/user/friends?offset={offset}&n={pageSize}&offline={offline}")))
+                           Task.FromResult($"{AuditUrls.VrcApiUrl}/auth/user/friends?offset={offset}&n={pageSize}&offline={offline}")))
         {
             yield return friend;
         }
@@ -258,7 +252,7 @@ public class VRChatAPI
     {
         ThrowIfNotLoggedIn();
         
-        var url = $"{RootUrl}/users/{userId}";
+        var url = $"{AuditUrls.VrcApiUrl}/users/{userId}";
         var requestGuid = Guid.NewGuid().ToString();
         try
         {
@@ -292,7 +286,7 @@ public class VRChatAPI
         var requestGuid = Guid.NewGuid().ToString();
         
         await foreach (var note in GetPaginatedResults<VRChatNoteFull>(dataCollectionReason, requestGuid, (offset, pageSize) =>
-            Task.FromResult($"{RootUrl}/userNotes?offset={offset}&n={pageSize}")))
+            Task.FromResult($"{AuditUrls.VrcApiUrl}/userNotes?offset={offset}&n={pageSize}")))
         {
             yield return note;
         }

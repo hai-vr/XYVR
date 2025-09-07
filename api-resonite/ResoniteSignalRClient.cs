@@ -1,12 +1,12 @@
 ﻿using System.Text.Json;
 using Microsoft.AspNetCore.SignalR.Client;
 using Newtonsoft.Json;
+using XYVR.API.Audit;
 
 namespace XYVR.API.Resonite;
 
 public class ResoniteSignalRClient
 {
-    private readonly string _hubUrl = "https://api.resonite.com/hub";
     private HubConnection? _connection;
     
     public event StatusUpdate? OnStatusUpdate;
@@ -17,7 +17,7 @@ public class ResoniteSignalRClient
     public async Task StartAsync(ResAuthenticationStorage authStorage__sensitive)
     {
         _connection = new HubConnectionBuilder()
-            .WithUrl(_hubUrl, options =>
+            .WithUrl(AuditUrls.ResoniteHubUrl, options =>
             {
                 options.Headers.Add("Authorization", $"res {authStorage__sensitive.userId}:{authStorage__sensitive.token}");
             })

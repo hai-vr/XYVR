@@ -2,6 +2,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using Newtonsoft.Json;
+using XYVR.API.Audit;
 using XYVR.Core;
 using XYVR.Data.Collection;
 
@@ -11,8 +12,7 @@ namespace XYVR.API.Resonite;
 public class ResoniteAPI
 {
     private const string ResoniteApiSourceName = "resonite_web_api";
-    private const string PrefixWithSlash = "https://api.resonite.com/";
-    
+
     private readonly string _secretMachineId;
     private readonly string _uid;
     private readonly IResponseCollector _responseCollector;
@@ -54,7 +54,7 @@ public class ResoniteAPI
             secretMachineId = _secretMachineId,
             rememberMe = stayLoggedIn
         };
-        var request__sensitive = new HttpRequestMessage(HttpMethod.Post, $"{PrefixWithSlash}userSessions");
+        var request__sensitive = new HttpRequestMessage(HttpMethod.Post, $"{AuditUrls.ResoniteApiUrl}/userSessions");
         request__sensitive.Content = ToCarefulJsonContent__Sensitive(obj__sensitive);
         request__sensitive.Headers.Add("UID", _uid);
         if (twoferTotp != null) request__sensitive.Headers.Add("TOTP", twoferTotp);
@@ -106,7 +106,7 @@ public class ResoniteAPI
     
     public async Task<ContactResponseElementJsonObject[]> GetUserContacts(DataCollectionReason dataCollectionReason)
     {
-        var url = $"{PrefixWithSlash}users/{_myUserId}/contacts";
+        var url = $"{AuditUrls.ResoniteApiUrl}/users/{_myUserId}/contacts";
         var requestGuid = Guid.NewGuid().ToString();
         try
         {
@@ -136,7 +136,7 @@ public class ResoniteAPI
 
     public async Task<UserResponseJsonObject?> GetUser(string userId, DataCollectionReason dataCollectionReason)
     {
-        var url = $"{PrefixWithSlash}users/{userId}";
+        var url = $"{AuditUrls.ResoniteApiUrl}/users/{userId}";
         var requestGuid = Guid.NewGuid().ToString();
         try
         {
