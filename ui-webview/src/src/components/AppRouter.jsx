@@ -8,6 +8,7 @@ import './AppRouter.css'
 function AppRouter() {
     const [isDark, setIsDark] = useState(true)
     const [showOnlyContacts, setShowOnlyContacts] = useState(false)
+    const [compactMode, setCompactMode] = useState(false)
     const [preferences, setPreferences] = useState({})
     const [isPreferencesObtained, setIsPreferencesObtained] = useState(false)
 
@@ -64,7 +65,7 @@ function AppRouter() {
                 <main className="page-content">
                     <Routes>
                         <Route path="/" element={<Navigate to="/address-book" replace />} />
-                        <Route path="/address-book" element={<AddressBookPage isDark={isDark} setIsDark={setIsDark} showOnlyContacts={showOnlyContacts} setShowOnlyContacts={setShowOnlyContacts} />} />
+                        <Route path="/address-book" element={<AddressBookPage isDark={isDark} setIsDark={setIsDark} showOnlyContacts={showOnlyContacts} setShowOnlyContacts={setShowOnlyContacts} compactMode={compactMode} setCompactMode={setCompactMode} />} />
                         <Route path="/data-collection" element={<DataCollectionPage isDark={isDark} setIsDark={setIsDark} />} />
                     </Routes>
                 </main>

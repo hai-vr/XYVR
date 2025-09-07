@@ -64,7 +64,7 @@ const useFilteredIndividuals = (individuals, searchTerm, showOnlyContacts, merge
     }, [individuals, searchTerm, showOnlyContacts, mergeAccountGuidOrUnd]);
 };
 
-function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyContacts }) {
+function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyContacts, compactMode, setCompactMode }) {
     const navigate = useNavigate()
     const searchInputRef = useRef(null)
     const [initialized, setInitialized] = useState(false);
@@ -297,9 +297,16 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
 
                             <div className="header-buttons">
                                 <button
+                                    onClick={() => setCompactMode(!compactMode)}
+                                    aria-pressed={compactMode}
+                                    title={`${compactMode ? 'Switch to full mode' : 'Switch to compact mode'}`}
+                                >
+                                    👓
+                                </button>
+                                <button
                                     onClick={() => setShowOnlyContacts(!showOnlyContacts)}
                                     aria-pressed={showOnlyContacts}
-                                    title={`${showOnlyContacts ? 'Show contacts and users with notes' : 'Show only contacts'}`}
+                                    title={`${showOnlyContacts ? 'Switch to show contacts and users with notes' : 'Switch to show only contacts'}`}
                                 >
                                     📝
                                 </button>
@@ -395,6 +402,8 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                             isBeingMerged={mergeAccountGuidOrUnd === individual.guid}
                             displayNameOfOtherBeingMergedOrUnd={displayNameOfOtherBeingMergedOrUnd}
                             fusionAccounts={fusionAccounts}
+                            compactMode={compactMode}
+                            setCompactMode={setCompactMode}
                         />
                     ))}
                 </div>

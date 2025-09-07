@@ -10,7 +10,9 @@ function Individual({
                         setMergeAccountGuidOrUnd,
                         isBeingMerged = false,
                         displayNameOfOtherBeingMergedOrUnd = undefined,
-                        fusionAccounts
+                        fusionAccounts,
+                        compactMode,
+                        setCompactMode
                     }) {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const dropdownRef = useRef(null);
@@ -93,60 +95,62 @@ function Individual({
     };
     
     return (
-        <div className={`individual-container ${!isVisible ? 'hidden' : ''} ${isBeingMerged ? 'being-merged' : ''}`}>
-            <div className="individual-header">
-                <div className="individual-avatar">
-                    {getFirstNonPunctuationChar(individual.displayName)}
-                </div>
-                <h3 className="individual-name">
-                    {individual.displayName}
-                </h3>
-                {individual.isAnyContact && (
-                    <span className="contact-badge">
+        <div className={`${!compactMode ? 'individual-container' : ''} ${!isVisible ? 'hidden' : ''} ${isBeingMerged ? 'being-merged' : ''}`}>
+            {!compactMode && (<>
+                <div className="individual-header">
+                    <div className="individual-avatar">
+                        {getFirstNonPunctuationChar(individual.displayName)}
+                    </div>
+                    <h3 className="individual-name">
+                        {individual.displayName}
+                    </h3>
+                    {individual.isAnyContact && (
+                        <span className="contact-badge">
                         📞 Contact
                     </span>
-                )}
-                <div className="individual-menu" ref={dropdownRef}>
-                    <button
-                        className="menu-button"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            setIsDropdownOpen(!isDropdownOpen);
-                        }}
-                        title="More actions"
-                    >
-                        ⋯
-                    </button>
-                    {isDropdownOpen && (
-                        <div className="dropdown-menu">
-                            {displayNameOfOtherBeingMergedOrUnd !== undefined && !isBeingMerged && (<button
-                                className="dropdown-item"
-                                onClick={(e) => handleMenuAction('confirmMerge', e)}
-                            >
-                                Merge {displayNameOfOtherBeingMergedOrUnd} into this
-                            </button>)}
-                            {displayNameOfOtherBeingMergedOrUnd === undefined && <button
-                                className="dropdown-item"
-                                onClick={(e) => handleMenuAction('merge', e)}
-                            >
-                                Merge account...
-                            </button>}
-                            {displayNameOfOtherBeingMergedOrUnd !== undefined && <button
-                                className="dropdown-item"
-                                onClick={(e) => handleMenuAction('cancelMerge', e)}
-                            >
-                                Cancel merge
-                            </button>}
-                            <button
-                                className="dropdown-item"
-                                onClick={(e) => handleMenuAction('details', e)}
-                            >
-                                Show details
-                            </button>
-                        </div>
                     )}
+                    <div className="individual-menu" ref={dropdownRef}>
+                        <button
+                            className="menu-button"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setIsDropdownOpen(!isDropdownOpen);
+                            }}
+                            title="More actions"
+                        >
+                            ⋯
+                        </button>
+                        {isDropdownOpen && (
+                            <div className="dropdown-menu">
+                                {displayNameOfOtherBeingMergedOrUnd !== undefined && !isBeingMerged && (<button
+                                    className="dropdown-item"
+                                    onClick={(e) => handleMenuAction('confirmMerge', e)}
+                                >
+                                    Merge {displayNameOfOtherBeingMergedOrUnd} into this
+                                </button>)}
+                                {displayNameOfOtherBeingMergedOrUnd === undefined && <button
+                                    className="dropdown-item"
+                                    onClick={(e) => handleMenuAction('merge', e)}
+                                >
+                                    Merge account...
+                                </button>}
+                                {displayNameOfOtherBeingMergedOrUnd !== undefined && <button
+                                    className="dropdown-item"
+                                    onClick={(e) => handleMenuAction('cancelMerge', e)}
+                                >
+                                    Cancel merge
+                                </button>}
+                                <button
+                                    className="dropdown-item"
+                                    onClick={(e) => handleMenuAction('details', e)}
+                                >
+                                    Show details
+                                </button>
+                            </div>
+                        )}
+                    </div>
                 </div>
-            </div>
+            </>)}
 
             <div className="accounts-container">
                 {individual.accounts && individual.accounts.length > 0 ? (
@@ -162,7 +166,7 @@ function Individual({
                 )}
             </div>
 
-            {vrChatLinks.length > 0 && (
+            {!compactMode && vrChatLinks.length > 0 && (
                 <div className="vrchat-links-list">
                     {vrChatLinks.map((url, linkIndex) => (
                         <div key={linkIndex} className="vrchat-link-item">
