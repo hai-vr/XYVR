@@ -1,8 +1,8 @@
 ﻿using System.Runtime.InteropServices;
 using System.Windows;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using XYVR.Core;
+using XYVR.Scaffold;
 
 namespace XYVR.UI.WebviewUI;
 
@@ -11,8 +11,7 @@ public interface IAppBFF
 {
     string GetAppVersion();
     string GetAllExposedIndividualsOrderedByContact();
-    void ShowMessage(string message);
-    string GetCurrentTime();
+    Task FusionIndividuals(string toAugment, string toDestroy);
     void CloseApp();
 }
 
@@ -45,6 +44,17 @@ public class AppBFF : IAppBFF
             .ToList();
         
         return JsonConvert.SerializeObject(responseObj, Formatting.None, _serializer);
+    }
+
+    public async Task FusionIndividuals(string toAugment, string toDestroy)
+    {
+        Console.WriteLine($"Fusion individuals was called: {toAugment}, {toDestroy}");
+        if (toAugment == toDestroy) throw new ArgumentException("Cannot fusion an Individual with itself");
+        
+        var to = _mainWindow.IndividualRepository.GetByGuid(toAugment);
+        var beingDestroyed = _mainWindow.IndividualRepository.GetByGuid(toDestroy);
+        _mainWindow.IndividualRepository.FusionIndividuals(to, beingDestroyed);
+        await Scaffolding.SaveRepository(_mainWindow.IndividualRepository);
     }
 
     internal static FrontIndividual ToFront(Individual individual, LiveStatusMonitoring live)
@@ -81,16 +91,6 @@ public class AppBFF : IAppBFF
             
             onlineStatus = nonNullStatus.Count > 0 ? nonNullStatus.FirstOrDefault(it => it != OnlineStatus.Offline, OnlineStatus.Offline) : null,
         };
-    }
-
-    public void ShowMessage(string message)
-    {
-        MessageBox.Show(message, "From WebView", MessageBoxButton.OK, MessageBoxImage.Information);
-    }
-
-    public string GetCurrentTime()
-    {
-        return DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
     }
 
     public void CloseApp()
