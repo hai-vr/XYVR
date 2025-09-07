@@ -61,12 +61,14 @@ const Account = ({ account, imposter, showAlias }) => {
             case 'VRChatDND':
                 return '⛔';
             case 'ResoniteAway':
+                return '🌗';
             case 'VRChatAskMe':
                 return '🔶';
             case 'ResoniteSociable':
             case 'VRChatJoinMe':
                 return '🟦';
             case 'Offline':
+                return '';
             default:
                 return '';
         }
@@ -88,9 +90,11 @@ const Account = ({ account, imposter, showAlias }) => {
                 return 'Sociable';
             case 'VRChatJoinMe':
                 return 'Join Me';
+            case 'Offline':
+                return '';
             case '':
             default:
-                return '';
+                return onlineStatus;
         }
     };
 

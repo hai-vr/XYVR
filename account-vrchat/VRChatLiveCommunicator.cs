@@ -51,7 +51,7 @@ public class VRChatLiveCommunicator
                     namedApp = NamedApp.VRChat,
                     qualifiedAppName = VRChatCommunicator.VRChatQualifiedAppName,
                     inAppIdentifier = content.userId,
-                    onlineStatus = ParseStatus(content.user),
+                    onlineStatus = ParseStatus(type, content.user),
                     callerInAppIdentifier = _callerInAppIdentifier,
                 });
             }
@@ -63,8 +63,10 @@ public class VRChatLiveCommunicator
         }
     }
 
-    private OnlineStatus ParseStatus(VRChatUser vrcUser)
+    private OnlineStatus ParseStatus(string type, VRChatUser vrcUser)
     {
+        if (type == "friend-offline") return OnlineStatus.Offline;
+        
         return vrcUser.status switch
         {
             "offline" => OnlineStatus.Offline,

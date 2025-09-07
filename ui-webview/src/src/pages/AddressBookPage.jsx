@@ -154,7 +154,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                     let onlineStatusVals = accounts?.filter(acc => acc.onlineStatus !== undefined && acc.onlineStatus !== null);
                     newIndividuals[index] = {
                         ...prevIndividuals[index],
-                        accounts: accounts,
+                        accounts: [...accounts],
                         onlineStatus: onlineStatusVals.length > 0 ? onlineStatusVals.filter(it => it !== 'Offline').at(0) || 'Offline' : undefined,
                     };
 

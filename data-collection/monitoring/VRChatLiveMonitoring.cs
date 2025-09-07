@@ -1,4 +1,6 @@
-﻿using XYVR.AccountAuthority.VRChat;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using XYVR.AccountAuthority.VRChat;
 using XYVR.Core;
 
 namespace XYVR.Data.Collection.monitoring;
@@ -26,10 +28,16 @@ public class VRChatLiveMonitoring : ILiveMonitoring
         try
         {
             if (_isConnected) return;
+            
+            var serializer = new JsonSerializerSettings()
+            {
+                Converters = { new StringEnumConverter() }
+            };
+            
             _liveComms = new VRChatLiveCommunicator(_credentialsStorage, _callerInAppIdentifier);
             _liveComms.OnLiveUpdateReceived += async update =>
             {
-                Console.WriteLine($"The user is {update.inAppIdentifier} and they're {update.onlineStatus}");
+                Console.WriteLine($"OnLiveUpdateReceived: {JsonConvert.SerializeObject(update, serializer)}");
                 await _monitoring.Merge(update);
             };
             await _liveComms.Connect();
