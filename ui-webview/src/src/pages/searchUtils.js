@@ -84,7 +84,15 @@ export const parseSearchTerms = (searchTerm) => {
     const regularTerms = [];
 
     terms.forEach(term => {
-        if (term.startsWith('app:') || term.startsWith('accounts:') || term.startsWith('links:') || term.startsWith('bio:') || term.startsWith('alias:') || term === 'has:alt' || term === 'has:bot' || term === ':help') {
+        if (term.startsWith('app:')
+            || term.startsWith('accounts:')
+            || term.startsWith('links:')
+            || term.startsWith('bio:')
+            || term.startsWith('alias:')
+            || term.startsWith('on:')
+            || term === 'has:alt'
+            || term === 'has:bot'
+            || term === ':help') {
             specialTerms.push(term);
         } else {
             regularTerms.push(term);
@@ -149,6 +157,18 @@ export const matchesSpecialTerms = (individual, specialTerms) => {
 
             case 'app:chilloutvr':
                 return individual.accounts?.some(account => account.namedApp === "ChilloutVR") || false;
+
+            case 'on:resonite':
+                return individual.accounts?.some(account => account.namedApp === "Resonite" && account.onlineStatus && account.onlineStatus !== 'Offline') || false;
+
+            case 'on:vrchat':
+                return individual.accounts?.some(account => account.namedApp === "VRChat" && account.onlineStatus && account.onlineStatus !== 'Offline') || false;
+
+            case 'on:cluster':
+                return individual.accounts?.some(account => account.namedApp === "Cluster" && account.onlineStatus && account.onlineStatus !== 'Offline') || false;
+
+            case 'on:chilloutvr':
+                return individual.accounts?.some(account => account.namedApp === "ChilloutVR" && account.onlineStatus && account.onlineStatus !== 'Offline') || false;
 
             case 'has:bot':
                 return individual.accounts?.some(account => account.isTechnical) || false;
