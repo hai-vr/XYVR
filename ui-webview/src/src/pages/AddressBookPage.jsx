@@ -10,6 +10,60 @@ import {
     shouldShowBio, shouldShowHelp, shouldShowAlias,
 } from './searchUtils.js'
 
+// Extract the sorting logic into a utility function
+const sortIndividuals = (individuals, searchTerm) => {
+    if (!searchTerm) {
+        // Sort by online status first, even when there's no search term
+        return [...individuals].sort((a, b) => {
+            const aIsOnline = a.onlineStatus !== undefined && a.onlineStatus !== null && a.onlineStatus !== "Offline";
+            const bIsOnline = b.onlineStatus !== undefined && b.onlineStatus !== null && b.onlineStatus !== "Offline";
+
+            // First priority: online status
+            if (aIsOnline && !bIsOnline) return -1;
+            if (!aIsOnline && bIsOnline) return 1;
+
+            // If both have same online status, maintain original order
+            return 0;
+        });
+    }
+
+    // Sort by priority: online status first, then display name matches, then identifier matches, then original order
+    return [...individuals].sort((a, b) => {
+        const aIsOnline = a.onlineStatus !== undefined && a.onlineStatus !== null && a.onlineStatus !== "Offline";
+        const bIsOnline = b.onlineStatus !== undefined && b.onlineStatus !== null && b.onlineStatus !== "Offline";
+        const aHasDisplayNameMatch = hasDisplayNameMatch(a, searchTerm);
+        const bHasDisplayNameMatch = hasDisplayNameMatch(b, searchTerm);
+        const aHasIdentifierMatch = hasIdentifierMatch(a, searchTerm);
+        const bHasIdentifierMatch = hasIdentifierMatch(b, searchTerm);
+
+        // display name matches
+        if (aHasDisplayNameMatch && !bHasDisplayNameMatch) return -1;
+        if (!aHasDisplayNameMatch && bHasDisplayNameMatch) return 1;
+
+        // identifier matches (only if both don't have display name matches and same online status)
+        if (!aHasDisplayNameMatch && !bHasDisplayNameMatch) {
+            if (aHasIdentifierMatch && !bHasIdentifierMatch) return -1;
+            if (!aHasIdentifierMatch && bHasIdentifierMatch) return 1;
+        }
+
+        // online status
+        if (aIsOnline && !bIsOnline) return -1;
+        if (!aIsOnline && bIsOnline) return 1;
+
+        // If both have the same priority level, maintain original order
+        return 0;
+    });
+};
+
+// Custom hook for filtering individuals
+const useFilteredIndividuals = (individuals, searchTerm, showOnlyContacts) => {
+    return useMemo(() => {
+        console.log(`useFilteredIndividuals memo running ${individuals.length} individuals, searchTerm: ${searchTerm || 'none'}`);
+        // it's faster to filter first then sort on a subset of the data
+        return sortIndividuals(individuals.filter(ind => isIndividualVisible(ind, searchTerm, showOnlyContacts)), searchTerm);
+    }, [individuals, searchTerm, showOnlyContacts]);
+};
+
 function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyContacts }) {
     const navigate = useNavigate()
     const searchInputRef = useRef(null)
@@ -96,15 +150,20 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                 if (index !== -1) {
                     console.log('Found individual to update at index: ' + index);
                     const newIndividuals = [...prevIndividuals];
+                    let accounts = prevIndividuals[index].accounts?.map(acc =>
+                        acc.qualifiedAppName === liveUpdate.qualifiedAppName && acc.inAppIdentifier === liveUpdate.inAppIdentifier
+                            ? { ...acc, onlineStatus: liveUpdate.onlineStatus }
+                            : acc
+                    );
+                    let onlineStatusVals = accounts?.filter(acc => acc.onlineStatus !== undefined && acc.onlineStatus !== null);
                     newIndividuals[index] = {
                         ...prevIndividuals[index],
-                        accounts: prevIndividuals[index].accounts?.map(acc =>
-                            acc.qualifiedAppName === liveUpdate.qualifiedAppName && acc.inAppIdentifier === liveUpdate.inAppIdentifier
-                                ? { ...acc, onlineStatus: liveUpdate.onlineStatus }
-                                : acc
-                        )
+                        accounts: accounts,
+                        onlineStatus: onlineStatusVals.length > 0 ? onlineStatusVals.filter(it => it !== 'Offline').at(0) || 'Offline' : undefined,
                     };
+
                     return newIndividuals;
+
                 } else {
                     console.log('Individual not found for update');
                     return prevIndividuals;
@@ -120,57 +179,13 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
         };
     }, []);
 
-// Create sorted and filtered individuals array (now using debouncedSearchTerm)
-    const sortedAndFilteredIndividuals = useMemo(() => {
-        const visibleIndividuals = individuals.filter(ind => isIndividualVisible(ind, debouncedSearchTerm, showOnlyContacts));
-
-        if (!debouncedSearchTerm) {
-            // Sort by online status first, even when there's no search term
-            return visibleIndividuals.sort((a, b) => {
-                const aIsOnline = a.onlineStatus !== undefined && a.onlineStatus !== null && a.onlineStatus !== "Offline";
-                const bIsOnline = b.onlineStatus !== undefined && b.onlineStatus !== null && b.onlineStatus !== "Offline";
-
-                // First priority: online status
-                if (aIsOnline && !bIsOnline) return -1;
-                if (!aIsOnline && bIsOnline) return 1;
-
-                // If both have same online status, maintain original order
-                return 0;
-            });
-        }
-
-        // Sort by priority: online status first, then display name matches, then identifier matches, then original order
-        return visibleIndividuals.sort((a, b) => {
-            const aIsOnline = a.onlineStatus !== undefined && a.onlineStatus !== null && a.onlineStatus !== "Offline";
-            const bIsOnline = b.onlineStatus !== undefined && b.onlineStatus !== null && b.onlineStatus !== "Offline";
-            const aHasDisplayNameMatch = hasDisplayNameMatch(a, debouncedSearchTerm);
-            const bHasDisplayNameMatch = hasDisplayNameMatch(b, debouncedSearchTerm);
-            const aHasIdentifierMatch = hasIdentifierMatch(a, debouncedSearchTerm);
-            const bHasIdentifierMatch = hasIdentifierMatch(b, debouncedSearchTerm);
-
-            // First priority: online status
-            if (aIsOnline && !bIsOnline) return -1;
-            if (!aIsOnline && bIsOnline) return 1;
-
-            // Second priority: display name matches (only if both have same online status)
-            if (aHasDisplayNameMatch && !bHasDisplayNameMatch) return -1;
-            if (!aHasDisplayNameMatch && bHasDisplayNameMatch) return 1;
-
-            // Third priority: identifier matches (only if both don't have display name matches and same online status)
-            if (!aHasDisplayNameMatch && !bHasDisplayNameMatch) {
-                if (aHasIdentifierMatch && !bHasIdentifierMatch) return -1;
-                if (!aHasIdentifierMatch && bHasIdentifierMatch) return 1;
-            }
-
-            // If both have the same priority level, maintain original order
-            return 0;
-        });
-    }, [individuals, debouncedSearchTerm, showOnlyContacts]);
+    // Use the custom hooks for sorting and filtering
+    const filteredIndividuals = useFilteredIndividuals(individuals, debouncedSearchTerm, showOnlyContacts);
 
     // Get the currently displayed individuals (for infinite scrolling)
     const displayedIndividuals = useMemo(() => {
-        return sortedAndFilteredIndividuals.slice(0, displayedCount);
-    }, [sortedAndFilteredIndividuals, displayedCount]);
+        return filteredIndividuals.slice(0, displayedCount);
+    }, [filteredIndividuals, displayedCount]);
 
     // Infinite scroll handler
     const loadMoreItems = useCallback(() => {
@@ -181,16 +196,16 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
         // Simulate a small delay for better UX
         setTimeout(() => {
             setDisplayedCount(prev => {
-                let nextCount = Math.min(prev + ITEMS_PER_LOAD, sortedAndFilteredIndividuals.length);
+                let nextCount = Math.min(prev + ITEMS_PER_LOAD, filteredIndividuals.length);
                 if (nextCount > 199) {
                     // If the user scrolls too much, just show everything immediately
-                    return sortedAndFilteredIndividuals.length;
+                    return filteredIndividuals.length;
                 }
                 return nextCount;
             });
             setIsLoading(false);
         }, 100);
-    }, [isLoading, sortedAndFilteredIndividuals.length]);
+    }, [isLoading, filteredIndividuals.length]);
 
     // Scroll event handler
     useEffect(() => {
@@ -203,7 +218,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
 
             // Load more when user is 200px from the bottom
             if (scrollTop + windowHeight >= documentHeight - 200) {
-                if (displayedCount < sortedAndFilteredIndividuals.length) {
+                if (displayedCount < filteredIndividuals.length) {
                     loadMoreItems();
                 }
             }
@@ -211,10 +226,10 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
 
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
-    }, [loadMoreItems, displayedCount, sortedAndFilteredIndividuals.length, isLoading]);
+    }, [loadMoreItems, displayedCount, filteredIndividuals.length, isLoading]);
 
-    // Calculate visible individuals count using the sorted array
-    const totalFilteredCount = sortedAndFilteredIndividuals.length;
+    // Calculate visible individuals count using the filtered array
+    const totalFilteredCount = filteredIndividuals.length;
 
     // Check if bio should be shown based on search terms
     const showBio = useMemo(() => {
@@ -320,12 +335,12 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                             <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('app:cluster '); focusSearchInput(); }}>app:cluster</code> for Cluster account owners.</p>
                             <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('app:chilloutvr '); focusSearchInput(); }}>app:chilloutvr</code> for ChilloutVR account owners.</p>
                             <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('app:resonite app:vrchat '); focusSearchInput(); }}>app:resonite app:vrchat</code> for Resonite account owners who also have a VRChat account.</p>
-                            
+
                             <p>Open the <a title="Open https://docs.hai-vr.dev/docs/products/xyvr/search in your browser" href="https://docs.hai-vr.dev/docs/products/xyvr/search">search documentation</a> in your browser.</p>
                         </div>
                     </div>
                 )}
-                
+
                 <div>
                     {debouncedSearchTerm && (
                         <div className="search-results-info">
