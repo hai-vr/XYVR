@@ -156,7 +156,7 @@ function Individual({
                                     className="dropdown-item"
                                     onClick={(e) => handleMenuAction('confirmMerge', e)}
                                 >
-                                    Merge {displayNameOfOtherBeingMergedOrUnd} into this
+                                    Merge {_D(displayNameOfOtherBeingMergedOrUnd, demoMode)} into this
                                 </button>)}
                                 {displayNameOfOtherBeingMergedOrUnd === undefined && <button
                                     className="dropdown-item"
@@ -205,7 +205,7 @@ function Individual({
                                 rel="noopener noreferrer"
                                 className="vrchat-link"
                             >
-                                {_D2(url, demoMode, '/')}
+                                {demoMode ? 'https://' + _D2(url.replace('http://', '').replace('https://', ''), demoMode, '/') : _D2(url, demoMode, '/')}
                             </a>
                             <button
                                 onClick={(e) => copyToClipboard(url, e)}
