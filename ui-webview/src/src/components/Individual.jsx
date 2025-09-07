@@ -2,7 +2,16 @@
 import "./Individual.css";
 import { useState, useRef, useEffect } from "react";
 
-function Individual({ individual, isVisible = true, showBio = false, showAlias = false, setMergeAccountGuidOrUnd, isBeingMerged = false }) {
+function Individual({
+                        individual,
+                        isVisible = true,
+                        showBio = false,
+                        showAlias = false,
+                        setMergeAccountGuidOrUnd,
+                        isBeingMerged = false,
+                        displayNameOfOtherBeingMergedOrUnd = undefined,
+                        fusionAccounts
+                    }) {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const dropdownRef = useRef(null);
 
@@ -39,18 +48,19 @@ function Individual({ individual, isVisible = true, showBio = false, showAlias =
         await navigator.clipboard.writeText(url);
     };
 
-    const handleMenuAction = (action, event) => {
+    const handleMenuAction = async (action, event) => {
         event.stopPropagation();
         setIsDropdownOpen(false);
 
         switch (action) {
+            case 'confirmMerge':
+                await fusionAccounts(individual.guid);
+                break;
+            case 'cancelMerge':
+                setMergeAccountGuidOrUnd(undefined);
+                break;
             case 'merge':
-                if (isBeingMerged) {
-                    setMergeAccountGuidOrUnd(undefined);
-                }
-                else {
-                    setMergeAccountGuidOrUnd(individual.guid);
-                }
+                setMergeAccountGuidOrUnd(individual.guid);
                 break;
             case 'details':
                 // TODO: Implement show details functionality
@@ -81,7 +91,7 @@ function Individual({ individual, isVisible = true, showBio = false, showAlias =
         // If all characters are punctuation or whitespace, return the first character or '?'
         return str.charAt(0).toUpperCase() || '?';
     };
-
+    
     return (
         <div className={`individual-container ${!isVisible ? 'hidden' : ''} ${isBeingMerged ? 'being-merged' : ''}`}>
             <div className="individual-header">
@@ -109,12 +119,24 @@ function Individual({ individual, isVisible = true, showBio = false, showAlias =
                     </button>
                     {isDropdownOpen && (
                         <div className="dropdown-menu">
-                            <button
+                            {displayNameOfOtherBeingMergedOrUnd !== undefined && !isBeingMerged && (<button
+                                className="dropdown-item"
+                                onClick={(e) => handleMenuAction('confirmMerge', e)}
+                            >
+                                Merge {displayNameOfOtherBeingMergedOrUnd} into this
+                            </button>)}
+                            {displayNameOfOtherBeingMergedOrUnd === undefined && <button
                                 className="dropdown-item"
                                 onClick={(e) => handleMenuAction('merge', e)}
                             >
-                                {isBeingMerged ? 'Cancel merge' : 'Merge account...'}
-                            </button>
+                                Merge account...
+                            </button>}
+                            {displayNameOfOtherBeingMergedOrUnd !== undefined && <button
+                                className="dropdown-item"
+                                onClick={(e) => handleMenuAction('cancelMerge', e)}
+                            >
+                                Cancel merge
+                            </button>}
                             <button
                                 className="dropdown-item"
                                 onClick={(e) => handleMenuAction('details', e)}

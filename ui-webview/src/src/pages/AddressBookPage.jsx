@@ -71,13 +71,26 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
     const [individuals, setIndividuals] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+
     const [mergeAccountGuidOrUnd, setMergeAccountGuidOrUnd] = useState(undefined);
+    const mergeAccountGuidOrUndRef = useRef(mergeAccountGuidOrUnd);
+    const [displayNameOfOtherBeingMergedOrUnd, setDisplayNameOfOtherBeingMergedOrUnd] = useState(undefined);
 
     // Infinite scrolling state
     const [displayedCount, setDisplayedCount] = useState(50); // Start with 50 items
     const [isLoading, setIsLoading] = useState(false);
     const ITEMS_PER_LOAD = 25; // Load 25 more items each time
     const SEARCH_DELAY = 100; // 300ms delay for search
+
+    useEffect(() => {
+        const firstInd = individuals.filter(ind => ind.guid === mergeAccountGuidOrUnd).at(0);
+        if (firstInd !== undefined) {
+            setDisplayNameOfOtherBeingMergedOrUnd(firstInd.displayName);
+        }
+        else {
+            setDisplayNameOfOtherBeingMergedOrUnd(undefined);
+        }
+    }, [mergeAccountGuidOrUnd, individuals]);
 
     // Debounce search term
     useEffect(() => {
@@ -240,6 +253,24 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
     // Show load more button helper
     const hasMoreItems = displayedCount < totalFilteredCount;
 
+    useEffect(() => {
+        mergeAccountGuidOrUndRef.current = mergeAccountGuidOrUnd;
+    }, [mergeAccountGuidOrUnd]);
+
+    const fusionAccounts = async function (toAugment) {
+        const toDestroy = mergeAccountGuidOrUndRef.current;
+        if (toDestroy === undefined) return;
+        if (toDestroy === toAugment) return;
+        if (toAugment === undefined) return;
+
+        await window.chrome.webview.hostObjects.appApi.FusionIndividuals(toAugment, toDestroy);
+        setMergeAccountGuidOrUnd(undefined);
+
+        const allIndividuals = await window.chrome.webview.hostObjects.appApi.GetAllExposedIndividualsOrderedByContact();
+        const individualsArray = JSON.parse(allIndividuals);
+        setIndividuals(individualsArray);
+    };
+
     return (
         <>
             <div className="individuals-container">
@@ -348,6 +379,8 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                             showAlias={showAlias}
                             setMergeAccountGuidOrUnd={setMergeAccountGuidOrUnd}
                             isBeingMerged={mergeAccountGuidOrUnd === individual.guid}
+                            displayNameOfOtherBeingMergedOrUnd={displayNameOfOtherBeingMergedOrUnd}
+                            fusionAccounts={fusionAccounts}
                         />
                     ))}
                 </div>

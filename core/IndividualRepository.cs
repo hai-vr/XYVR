@@ -420,4 +420,9 @@ public class IndividualRepository
     {
         return _namedAppToInAppIdToIndividual[accountIdentification.namedApp][accountIdentification.inAppIdentifier];
     }
+
+    public Individual GetByGuid(string guid)
+    {
+        return Individuals.First(individual => individual.guid == guid);
+    }
 }

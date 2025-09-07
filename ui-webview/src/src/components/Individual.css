@@ -93,7 +93,7 @@
     border-radius: 8px;
     box-shadow: 0 4px 12px var(--shadow-medium);
     z-index: 1000;
-    min-width: 160px;
+    min-width: 200px;
     overflow: hidden;
     margin-top: 4px;
 }
