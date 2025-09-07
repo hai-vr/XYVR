@@ -1,6 +1,6 @@
 ﻿import React from 'react';
 import './Account.css';
-import {CircleDot, CircleOff, Clipboard, DiamondMinus, Globe, SquareCheck} from "lucide-react";
+import {CircleDot, CircleOff, Clipboard, DiamondMinus, Globe, TriangleAlert} from "lucide-react";
 
 const Account = ({ account, imposter, showAlias }) => {
     const hasNote = account.isAnyCallerNote;
@@ -161,16 +161,13 @@ const Account = ({ account, imposter, showAlias }) => {
 
             {account.isPendingUpdate && (
                 <p className="warning-message">
-                    <span className="warning-icon">⚠️</span>
+                    <span className="warning-icon"><TriangleAlert /></span>
                     We have not yet collected all information for this account. Notes, bio, and links may be missing.
                 </p>
             )}
 
             {account.callers && account.callers.filter(caller => caller.note.status === "Exists").map((caller, index) => (
                 <div key={index} className="note-container">
-                    <div className="note-header">
-                        📝 Note:
-                    </div>
                     <div className="note-text">
                         {caller.note.text.startsWith('mt ') ? ('Met through ' + caller.note.text.substring(3)) : caller.note.text}
                     </div>
