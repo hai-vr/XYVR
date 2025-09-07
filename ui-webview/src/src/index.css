@@ -330,3 +330,42 @@ button:disabled:hover {
     background: #c82333;
     border-color: #c82333;
 }
+
+.status-char {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    min-width: 16px;
+    min-height: 16px;
+}
+
+.status-icon {
+    width: 16px;
+    height: 16px;
+    min-width: 16px;
+    min-height: 16px;
+}
+
+.status-online {
+    color: greenyellow;
+}
+
+.status-away {
+    color: yellow;
+}
+
+.status-askme {
+    color: orange;
+}
+
+.status-askme {
+    color: orange;
+}
+
+.status-busy {
+    color: red;
+}
+
+.status-joinme {
+    color: #00e1ff;
+}

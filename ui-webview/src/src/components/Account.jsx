@@ -1,6 +1,6 @@
 ﻿import React from 'react';
 import './Account.css';
-import {Clipboard, Globe} from "lucide-react";
+import {CircleDot, CircleOff, Clipboard, DiamondMinus, Globe, SquareCheck} from "lucide-react";
 
 const Account = ({ account, imposter, showAlias }) => {
     const hasNote = account.isAnyCallerNote;
@@ -57,17 +57,17 @@ const Account = ({ account, imposter, showAlias }) => {
     const getOnlineStatusEmoji = (onlineStatus) => {
         switch (onlineStatus) {
             case 'Online':
-                return '🟢';
+                return <span className="status-char status-online">⬤</span>;
             case 'ResoniteBusy':
             case 'VRChatDND':
-                return '⛔';
+                return <CircleOff className="status-icon status-busy" />;
             case 'ResoniteAway':
-                return '💤';
+                return <CircleDot className="status-icon status-away" />;
             case 'VRChatAskMe':
-                return '🔶';
+                return <DiamondMinus className="status-icon status-askme" />;
             case 'ResoniteSociable':
             case 'VRChatJoinMe':
-                return '🟦';
+                return <span className="status-char status-joinme">■</span>;
             case 'Offline':
                 return '';
             default:
