@@ -91,7 +91,8 @@
     --copy-button-hover-bg: rgba(104, 151, 187, 0.2);
 
     /* App icon colors */
-    --app-resonite: linear-gradient(170deg, #84ea22 20%, #fff834 80%);
+    /*--app-resonite: linear-gradient(170deg, #84ea22 20%, #fff834 80%);*/
+    --app-resonite: #2d3136;
     --app-vrchat: #186dcd;
     --app-cluster: #02a8ea;
     --app-chilloutvr: #e43802;

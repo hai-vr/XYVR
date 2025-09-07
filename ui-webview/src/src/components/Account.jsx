@@ -2,6 +2,7 @@
 import './Account.css';
 import {CircleDot, CircleOff, Clipboard, DiamondMinus, Globe, TriangleAlert} from "lucide-react";
 import {_D, _D2} from "../haiUtils.js";
+import resoniteIcon from "../assets/Resonite_Wiki-Icon.png";
 
 const Account = ({ account, imposter, showAlias, showNotes, demoMode }) => {
     const hasNote = account.isAnyCallerNote;
@@ -28,7 +29,7 @@ const Account = ({ account, imposter, showAlias, showNotes, demoMode }) => {
     const getAppIcon = (namedApp) => {
         switch (namedApp) {
             case "Resonite":
-                return '⚡';
+                return <img src={resoniteIcon} alt="Resonite" className="app-icon-img" title="Resonite" />;
             case "VRChat":
                 return '💬';
             case "Cluster":
