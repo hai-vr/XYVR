@@ -14,7 +14,8 @@ function Individual({
                         displayNameOfOtherBeingMergedOrUnd = undefined,
                         fusionAccounts,
                         compactMode,
-                        searchTerm
+                        searchTerm,
+                        showNotes
                     }) {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [filteredAccounts, setFilteredAccounts] = useState([]);
@@ -183,7 +184,7 @@ function Individual({
                 {filteredAccounts && filteredAccounts.length > 0 ? (
                     <div className="accounts-grid">
                         {filteredAccounts.map((account, accountIndex) => (
-                            <Account key={account.guid} account={account} showAlias={showAlias} />
+                            <Account key={account.guid} account={account} showAlias={showAlias} showNotes={showNotes} />
                         ))}
                     </div>
                 ) : (

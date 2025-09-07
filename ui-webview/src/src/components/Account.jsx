@@ -2,7 +2,7 @@
 import './Account.css';
 import {CircleDot, CircleOff, Clipboard, DiamondMinus, Globe, TriangleAlert} from "lucide-react";
 
-const Account = ({ account, imposter, showAlias }) => {
+const Account = ({ account, imposter, showAlias, showNotes }) => {
     const hasNote = account.isAnyCallerNote;
 
     const copyInAppIdentifier = async () => {
@@ -166,7 +166,7 @@ const Account = ({ account, imposter, showAlias }) => {
                 </p>
             )}
 
-            {account.callers && account.callers.filter(caller => caller.note.status === "Exists").map((caller, index) => (
+            {showNotes && account.callers && account.callers.filter(caller => caller.note.status === "Exists").map((caller, index) => (
                 <div key={index} className="note-container">
                     <div className="note-text">
                         {caller.note.text.startsWith('mt ') ? ('Met through ' + caller.note.text.substring(3)) : caller.note.text}

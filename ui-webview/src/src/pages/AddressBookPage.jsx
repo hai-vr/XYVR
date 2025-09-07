@@ -12,7 +12,19 @@ import {
     shouldShowHelp,
     getOnlineStatusPriority
 } from './searchUtils.js'
-import {NotebookPen, Moon, Sun, Glasses, Search, X, Settings} from 'lucide-react'
+import {
+    NotebookPen,
+    Moon,
+    Sun,
+    Glasses,
+    Search,
+    X,
+    Settings,
+    UserStar,
+    UserPen,
+    Binoculars,
+    NotebookText, Notebook
+} from 'lucide-react'
 import DarkModeToggleButton from "../components/DarkModeToggleButton.jsx";
 
 const sortIndividuals = (individuals, searchTerm) => {
@@ -58,7 +70,7 @@ const sortIndividuals = (individuals, searchTerm) => {
 };
 
 // Custom hook for filtering individuals
-function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyContacts, compactMode, setCompactMode }) {
+function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyContacts, compactMode, setCompactMode, showNotes, setShowNotes }) {
     const navigate = useNavigate()
     const searchInputRef = useRef(null)
     const [initialized, setInitialized] = useState(false);
@@ -303,7 +315,15 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                                     aria-pressed={compactMode}
                                     title={`${compactMode ? 'Switch to full mode' : 'Switch to compact mode'}`}
                                 >
-                                    <Glasses />
+                                    {compactMode ? <Binoculars /> : <Glasses />}
+                                </button>
+                                <button
+                                    className="theme-toggle-btn"
+                                    onClick={() => setShowNotes(!showNotes)}
+                                    aria-pressed={showNotes}
+                                    title={`${showNotes ? 'Switch to hide notes' : 'Switch to show notes'}`}
+                                >
+                                    {showNotes ? <NotebookText /> : <Notebook />}
                                 </button>
                                 <button
                                     className="theme-toggle-btn"
@@ -311,9 +331,8 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                                     aria-pressed={showOnlyContacts}
                                     title={`${showOnlyContacts ? 'Switch to show contacts and users with notes' : 'Switch to show only contacts'}`}
                                 >
-                                    <NotebookPen />
+                                    {showOnlyContacts ? <UserStar /> : <UserPen />}
                                 </button>
-
                                 <DarkModeToggleButton isDark={isDark} setIsDark={setIsDark} />
                             </div>
                         </div>
@@ -401,6 +420,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                             fusionAccounts={fusionAccounts}
                             compactMode={compactMode}
                             searchTerm={debouncedSearchTerm}
+                            showNotes={showNotes}
                         />
                     ))}
                 </div>
