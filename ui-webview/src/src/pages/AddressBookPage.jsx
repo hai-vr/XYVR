@@ -297,6 +297,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
 
                             <div className="header-buttons">
                                 <button
+                                    className="theme-toggle-btn"
                                     onClick={() => setCompactMode(!compactMode)}
                                     aria-pressed={compactMode}
                                     title={`${compactMode ? 'Switch to full mode' : 'Switch to compact mode'}`}
@@ -304,6 +305,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                                     👓
                                 </button>
                                 <button
+                                    className="theme-toggle-btn"
                                     onClick={() => setShowOnlyContacts(!showOnlyContacts)}
                                     aria-pressed={showOnlyContacts}
                                     title={`${showOnlyContacts ? 'Switch to show contacts and users with notes' : 'Switch to show only contacts'}`}
@@ -364,7 +366,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                             <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('links:'); focusSearchInput(); }}>links:<i>misskey</i></code> to search in the links.</p>
                             <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('alias:'); focusSearchInput(); }}>alias:<i>aoi</i></code> to search in previous user names.</p>
                             <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('accounts:>1 '); focusSearchInput(); }}>accounts:&gt;1</code> for users who have more than one account.</p>
-                            <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('has:alt '); focusSearchInput(); }}>has:alt</code> for users who have more than one non-bot account on the same app.</p>
+                            <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('on: '); focusSearchInput(); }}>on:</code> for currently online users on any app.</p>
                             <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('app:resonite '); focusSearchInput(); }}>app:resonite</code> for Resonite account owners, and <code className="inline-code-clickable" onClick={() => { setSearchTerm('on:resonite '); focusSearchInput(); }}>on:resonite</code> for currently online users.</p>
                             <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('app:vrchat '); focusSearchInput(); }}>app:vrchat</code> for VRChat account owners, and <code className="inline-code-clickable" onClick={() => { setSearchTerm('on:vrchat '); focusSearchInput(); }}>on:vrchat</code> for currently online users.</p>
                             <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('app:cluster '); focusSearchInput(); }}>app:cluster</code> for Cluster account owners, and <code className="inline-code-clickable" onClick={() => { setSearchTerm('on:cluster '); focusSearchInput(); }}>on:cluster</code> for currently online users.</p>
@@ -390,7 +392,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                     )}
                 </div>
 
-                <div className="individuals-grid">
+                <div className={`individuals-grid ${compactMode ? 'compact-mode' : ''}`}>
                     {displayedIndividuals.map((individual, index) => (
                         <Individual
                             key={individual.guid || index}

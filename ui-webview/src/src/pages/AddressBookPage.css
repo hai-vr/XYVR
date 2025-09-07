@@ -102,6 +102,10 @@
     grid-template-columns: 1fr;
 }
 
+.individuals-grid.compact-mode {
+    row-gap: 0;
+}
+
 @media (min-width: 768px) {
     .individuals-grid {
         grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));

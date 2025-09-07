@@ -158,6 +158,9 @@ export const matchesSpecialTerms = (individual, specialTerms) => {
             case 'app:chilloutvr':
                 return individual.accounts?.some(account => account.namedApp === "ChilloutVR") || false;
 
+            case 'on:':
+                return individual.accounts?.some(account => account.onlineStatus && account.onlineStatus !== 'Offline') || false;
+
             case 'on:resonite':
                 return individual.accounts?.some(account => account.namedApp === "Resonite" && account.onlineStatus && account.onlineStatus !== 'Offline') || false;
 
