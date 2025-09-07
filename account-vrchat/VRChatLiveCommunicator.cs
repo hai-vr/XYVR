@@ -33,9 +33,8 @@ public class VRChatLiveCommunicator
     public async Task Connect()
     {
         _api ??= await InitializeAPI();
-        
-        var contactsAsyncEnum = _api.ListFriends(ListFriendsRequestType.OnlyOnline, DataCollectionReason.FindUndiscoveredAccounts)
-            .Concat(_api.ListFriends(ListFriendsRequestType.OnlyOffline, DataCollectionReason.FindUndiscoveredAccounts));
+
+        var contactsAsyncEnum = _api.ListFriends(ListFriendsRequestType.OnlyOnline, DataCollectionReason.FindUndiscoveredAccounts);
         await foreach (var friend in contactsAsyncEnum)
         {
             if (OnLiveUpdateReceived != null)
@@ -45,7 +44,7 @@ public class VRChatLiveCommunicator
                     namedApp = NamedApp.VRChat,
                     qualifiedAppName = VRChatCommunicator.VRChatQualifiedAppName,
                     inAppIdentifier = friend.id,
-                    onlineStatus = ParseStatus("xxx", friend.platform, friend.status),
+                    onlineStatus = ParseStatus("xxx", friend.location, friend.platform, friend.status),
                     callerInAppIdentifier = _callerInAppIdentifier,
                     customStatus = friend.statusDescription
                 });
@@ -67,9 +66,11 @@ public class VRChatLiveCommunicator
             var rootObj = JObject.Parse(msg);
             var type = rootObj["type"].Value<string>();
         
-            if (type is "friend-online" or "friend-update" or "friend-offline" or "friend-location" or "friend-active")
+            if (type is "friend-online" or "friend-update" or "friend-offline" or "friend-location" or "friend-active" or "user-location")
             {
-                Console.Write($"{type} ");
+                // FIXME: We are ignoring user-update for now, it causes issues where the user is considered to be back online even though they are just on the website
+                // despite the `onlineStatus = type is "user-update" ? null : ...` below
+                
                 var content = JsonConvert.DeserializeObject<VRChatWebsocketContentContainingUser>(rootObj["content"].Value<string>())!;
                 if (OnLiveUpdateReceived != null)
                 {
@@ -79,7 +80,7 @@ public class VRChatLiveCommunicator
                         namedApp = NamedApp.VRChat,
                         qualifiedAppName = VRChatCommunicator.VRChatQualifiedAppName,
                         inAppIdentifier = content.userId,
-                        onlineStatus = ParseStatus(type, content.user.platform, content.user.status),
+                        onlineStatus = type is "user-update" ? null : ParseStatus(type, content.location, content.user.platform, content.user.status),
                         callerInAppIdentifier = _callerInAppIdentifier,
                         customStatus = content.user.statusDescription
                     });
@@ -97,10 +98,14 @@ public class VRChatLiveCommunicator
         }
     }
 
-    private OnlineStatus ParseStatus(string type, string platform, string userStatus)
+    private OnlineStatus ParseStatus(string type, string contentLocation, string platform, string userStatus)
     {
-        if (platform == "web") return OnlineStatus.Offline;
+        if (contentLocation == "offline:offline") return OnlineStatus.Offline;
+        
+        if (type == "friend-active") return OnlineStatus.Offline;
         if (type == "friend-offline") return OnlineStatus.Offline;
+        
+        if (platform == "web") return OnlineStatus.Offline;
         
         return userStatus switch
         {

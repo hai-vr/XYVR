@@ -4,6 +4,10 @@ public class VRChatWebsocketContentContainingUser
 {
     public string userId;
     public VRChatUser user;
+    
+    public string location; //": "offline:offline",
+    public string instance; //": "offline",
+    public string travelingToLocation; //": "offline",
 }
 
 public class VRChatFriend
