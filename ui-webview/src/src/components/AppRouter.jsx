@@ -45,14 +45,12 @@ function AppRouter() {
 
     useEffect(() => {
         const initializeApi = async () => {
-            if (window.chrome && window.chrome.webview && window.chrome.webview.hostObjects) {
-                if (!isPreferencesObtained) {
-                    const prefs = JSON.parse(await window.chrome.webview.hostObjects.preferencesApi.GetPreferences());
-                    setPreferences(prefs);
-                    setIsDark(prefs.isDark);
-                    setShowOnlyContacts(prefs.showOnlyContacts);
-                    setIsPreferencesObtained(true);
-                }
+            if (!isPreferencesObtained) {
+                const prefs = JSON.parse(await window.chrome.webview.hostObjects.preferencesApi.GetPreferences());
+                setPreferences(prefs);
+                setIsDark(prefs.isDark);
+                setShowOnlyContacts(prefs.showOnlyContacts);
+                setIsPreferencesObtained(true);
             }
         };
 

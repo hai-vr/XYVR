@@ -24,54 +24,50 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated }
     };
 
     const tryLogin = async () => {
-        if (window.chrome && window.chrome.webview && window.chrome.webview.hostObjects) {
-            setIsRequestInProgress(true);
-            if (!isInTwoFactorMode) {
-                const json = await window.chrome.webview.hostObjects.dataCollectionApi.TryLogin(connector.guid, login, password, stayLoggedIn);
-                setIsRequestInProgress(false);
-                const obj = JSON.parse(json);
-                if (obj.type === 'NeedsTwoFactorCode') {
-                    setIsInTwoFactorMode(true);
-                    setIsTwoFactorEmail(obj.isTwoFactorEmail)
-                    setLogin('');
-                    setPassword('');
-                }
-                else if (obj.type === 'Success') {
-                    setIsInTwoFactorMode(false);
-                    setLogin('');
-                    setPassword('');
-                    setIsTwoFactorEmail(false)
-                    setTwoFactorCode('')
-                    connector.isLoggedIn = true; // Prevents the input fields from being shown until the parent fetches the connector state
-                    onConnectorUpdated();
-                }
+        setIsRequestInProgress(true);
+        if (!isInTwoFactorMode) {
+            const json = await window.chrome.webview.hostObjects.dataCollectionApi.TryLogin(connector.guid, login, password, stayLoggedIn);
+            setIsRequestInProgress(false);
+            const obj = JSON.parse(json);
+            if (obj.type === 'NeedsTwoFactorCode') {
+                setIsInTwoFactorMode(true);
+                setIsTwoFactorEmail(obj.isTwoFactorEmail)
+                setLogin('');
+                setPassword('');
             }
-            else {
-                const json = await window.chrome.webview.hostObjects.dataCollectionApi.TryTwoFactor(connector.guid, isTwoFactorEmail, twoFactorCode, stayLoggedIn);
-                setIsRequestInProgress(false);
-                const obj = JSON.parse(json);
-                if (obj.type === 'Success') {
-                    setIsInTwoFactorMode(false);
-                    setLogin('');
-                    setPassword('');
-                    setTwoFactorCode('')
-                    connector.isLoggedIn = true; // Prevents the input fields from being shown until the parent fetches the connector state
-                    onConnectorUpdated();
-                }
+            else if (obj.type === 'Success') {
+                setIsInTwoFactorMode(false);
+                setLogin('');
+                setPassword('');
+                setIsTwoFactorEmail(false)
+                setTwoFactorCode('')
+                connector.isLoggedIn = true; // Prevents the input fields from being shown until the parent fetches the connector state
+                onConnectorUpdated();
+            }
+        }
+        else {
+            const json = await window.chrome.webview.hostObjects.dataCollectionApi.TryTwoFactor(connector.guid, isTwoFactorEmail, twoFactorCode, stayLoggedIn);
+            setIsRequestInProgress(false);
+            const obj = JSON.parse(json);
+            if (obj.type === 'Success') {
+                setIsInTwoFactorMode(false);
+                setLogin('');
+                setPassword('');
+                setTwoFactorCode('')
+                connector.isLoggedIn = true; // Prevents the input fields from being shown until the parent fetches the connector state
+                onConnectorUpdated();
             }
         }
     }
 
     const tryLogout = async () => {
-        if (window.chrome && window.chrome.webview && window.chrome.webview.hostObjects) {
-            setIsRequestInProgress(true);
-            const json = await window.chrome.webview.hostObjects.dataCollectionApi.TryLogout(connector.guid);
-            setIsRequestInProgress(false);
-            const obj = JSON.parse(json);
-            if (obj.type === 'LoggedOut') {
-                connector.isLoggedIn = false;
-                onConnectorUpdated();
-            }
+        setIsRequestInProgress(true);
+        const json = await window.chrome.webview.hostObjects.dataCollectionApi.TryLogout(connector.guid);
+        setIsRequestInProgress(false);
+        const obj = JSON.parse(json);
+        if (obj.type === 'LoggedOut') {
+            connector.isLoggedIn = false;
+            onConnectorUpdated();
         }
     }
 

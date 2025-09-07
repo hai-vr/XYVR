@@ -8,27 +8,11 @@ function App() {
     useEffect(() => {
         // Wait for WebView2 API to be available
         const initializeApi = async () => {
-            if (window.chrome && window.chrome.webview && window.chrome.webview.hostObjects) {
-                try {
-                    const version = await window.chrome.webview.hostObjects.appApi.GetAppVersion();
-                    setAppVersion(version);
-                } catch (error) {
-                    console.error('API not ready yet:', error);
-                }
-            }
+            const version = await window.chrome.webview.hostObjects.appApi.GetAppVersion();
+            setAppVersion(version);
         };
 
-        // Try to initialize immediately
         initializeApi();
-
-        // Also listen for when the DOM is fully loaded
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initializeApi);
-        }
-
-        return () => {
-            document.removeEventListener('DOMContentLoaded', initializeApi);
-        };
     }, []);
 
     return <AppRouter />

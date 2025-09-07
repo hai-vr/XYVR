@@ -13,38 +13,21 @@ function DataCollectionPage({ isDark, setIsDark }) {
 
     useEffect(() => {
         const initializeApi = async () => {
-            if (window.chrome && window.chrome.webview && window.chrome.webview.hostObjects) {
-                try {
-                    const json = await window.chrome.webview.hostObjects.dataCollectionApi.GetConnectors();
-                    const arr = JSON.parse(json);
-                    setConnectors(arr);
-                    setInitialized(true);
-                } catch (error) {
-                    console.error('API not ready yet:', error);
-                }
-            }
-        };
-        
-        initializeApi();
-
-        // Also listen for when the DOM is fully loaded
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initializeApi);
-        }
-
-        return () => {
-            document.removeEventListener('DOMContentLoaded', initializeApi);
-        };
-    }, []);
-
-    const createNewConnector = async (connectorType) => {
-        if (window.chrome && window.chrome.webview && window.chrome.webview.hostObjects) {
-            await window.chrome.webview.hostObjects.dataCollectionApi.CreateConnector(connectorType);
-
             const json = await window.chrome.webview.hostObjects.dataCollectionApi.GetConnectors();
             const arr = JSON.parse(json);
             setConnectors(arr);
-        }
+            setInitialized(true);
+        };
+        
+        initializeApi();
+    }, []);
+
+    const createNewConnector = async (connectorType) => {
+        await window.chrome.webview.hostObjects.dataCollectionApi.CreateConnector(connectorType);
+
+        const json = await window.chrome.webview.hostObjects.dataCollectionApi.GetConnectors();
+        const arr = JSON.parse(json);
+        setConnectors(arr);
     }
 
     const handleDeleteClick = (guid) => {
@@ -84,21 +67,17 @@ function DataCollectionPage({ isDark, setIsDark }) {
     };
 
     const deleteConnector = async (guid) => {
-        if (window.chrome && window.chrome.webview && window.chrome.webview.hostObjects) {
-            await window.chrome.webview.hostObjects.dataCollectionApi.DeleteConnector(guid);
+        await window.chrome.webview.hostObjects.dataCollectionApi.DeleteConnector(guid);
 
-            const json = await window.chrome.webview.hostObjects.dataCollectionApi.GetConnectors();
-            const arr = JSON.parse(json);
-            setConnectors(arr);
-        }
+        const json = await window.chrome.webview.hostObjects.dataCollectionApi.GetConnectors();
+        const arr = JSON.parse(json);
+        setConnectors(arr);
     }
 
     const refreshConnectors = async () => {
-        if (window.chrome && window.chrome.webview && window.chrome.webview.hostObjects) {
-            const json = await window.chrome.webview.hostObjects.dataCollectionApi.GetConnectors();
-            const arr = JSON.parse(json);
-            setConnectors(arr);
-        }
+        const json = await window.chrome.webview.hostObjects.dataCollectionApi.GetConnectors();
+        const arr = JSON.parse(json);
+        setConnectors(arr);
     }
 
     const startDataCollection = async () => {

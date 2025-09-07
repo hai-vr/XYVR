@@ -88,33 +88,15 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
     }, [searchTerm, SEARCH_DELAY]);
 
     useEffect(() => {
-        // Wait for WebView2 API to be available
         const initializeApi = async () => {
-            if (window.chrome && window.chrome.webview && window.chrome.webview.hostObjects) {
-                try {
-                    // Load individuals when the component loads
-                    const allIndividuals = await window.chrome.webview.hostObjects.appApi.GetAllExposedIndividualsOrderedByContact();
-                    const individualsArray = JSON.parse(allIndividuals);
-                    setIndividuals(individualsArray);
-                    setInitialized(true);
-
-                } catch (error) {
-                    console.error('API not ready yet:', error);
-                }
-            }
+            // Load individuals when the component loads
+            const allIndividuals = await window.chrome.webview.hostObjects.appApi.GetAllExposedIndividualsOrderedByContact();
+            const individualsArray = JSON.parse(allIndividuals);
+            setIndividuals(individualsArray);
+            setInitialized(true);
         };
 
-        // Try to initialize immediately
         initializeApi();
-
-        // Also listen for when the DOM is fully loaded
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initializeApi);
-        }
-
-        return () => {
-            document.removeEventListener('DOMContentLoaded', initializeApi);
-        };
     }, []);
 
     // Reset displayed count when debounced search term or filter changes
