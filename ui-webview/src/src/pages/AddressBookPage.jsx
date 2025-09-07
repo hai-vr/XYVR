@@ -10,17 +10,26 @@ import {
     shouldShowBio, shouldShowHelp, shouldShowAlias,
 } from './searchUtils.js'
 
-// Extract the sorting logic into a utility function
+const getOnlineStatusPriority = (onlineStatus) => {
+    if (!onlineStatus || onlineStatus === "Offline") return 5;
+    if (onlineStatus === "Indeterminate") return 6;
+    if (onlineStatus === "ResoniteBusy" || onlineStatus === "VRChatDND") return 4;
+    if (onlineStatus === "ResoniteAway" || onlineStatus === "VRChatAskMe") return 3;
+    if (onlineStatus === "Online") return 2;
+    if (onlineStatus === "ResoniteSociable" || onlineStatus === "VRChatJoinMe") return 1;
+    return 5; // Default to same as offline for unknown statuses
+};
+
+
 const sortIndividuals = (individuals, searchTerm) => {
     if (!searchTerm) {
         // Sort by online status first, even when there's no search term
         return [...individuals].sort((a, b) => {
-            const aIsOnline = a.onlineStatus !== undefined && a.onlineStatus !== null && a.onlineStatus !== "Offline";
-            const bIsOnline = b.onlineStatus !== undefined && b.onlineStatus !== null && b.onlineStatus !== "Offline";
+            const aPriority = getOnlineStatusPriority(a.onlineStatus);
+            const bPriority = getOnlineStatusPriority(b.onlineStatus);
 
-            // First priority: online status
-            if (aIsOnline && !bIsOnline) return -1;
-            if (!aIsOnline && bIsOnline) return 1;
+            // First priority: online status (lower number = higher priority)
+            if (aPriority !== bPriority) return aPriority - bPriority;
 
             // If both have same online status, maintain original order
             return 0;
@@ -29,8 +38,8 @@ const sortIndividuals = (individuals, searchTerm) => {
 
     // Sort by priority: online status first, then display name matches, then identifier matches, then original order
     return [...individuals].sort((a, b) => {
-        const aIsOnline = a.onlineStatus !== undefined && a.onlineStatus !== null && a.onlineStatus !== "Offline";
-        const bIsOnline = b.onlineStatus !== undefined && b.onlineStatus !== null && b.onlineStatus !== "Offline";
+        const aPriority = getOnlineStatusPriority(a.onlineStatus);
+        const bPriority = getOnlineStatusPriority(b.onlineStatus);
         const aHasDisplayNameMatch = hasDisplayNameMatch(a, searchTerm);
         const bHasDisplayNameMatch = hasDisplayNameMatch(b, searchTerm);
         const aHasIdentifierMatch = hasIdentifierMatch(a, searchTerm);
@@ -46,9 +55,8 @@ const sortIndividuals = (individuals, searchTerm) => {
             if (!aHasIdentifierMatch && bHasIdentifierMatch) return 1;
         }
 
-        // online status
-        if (aIsOnline && !bIsOnline) return -1;
-        if (!aIsOnline && bIsOnline) return 1;
+        // online status (lower number = higher priority)
+        if (aPriority !== bPriority) return aPriority - bPriority;
 
         // If both have the same priority level, maintain original order
         return 0;
@@ -158,11 +166,15 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                     );
                     let onlineStatusVals = accounts?.filter(acc => acc.onlineStatus !== undefined && acc.onlineStatus !== null);
 
-                    // Determine the best online status: prefer any non-offline status, otherwise use 'Offline'
+                    // Determine the best online status using priority system
                     let bestOnlineStatus = undefined;
                     if (onlineStatusVals.length > 0) {
-                        const nonOfflineStatuses = onlineStatusVals.filter(acc => acc.onlineStatus !== 'Offline');
-                        bestOnlineStatus = nonOfflineStatuses.length > 0 ? nonOfflineStatuses[0].onlineStatus : 'Offline';
+                        // Find the status with the highest priority (lowest priority number)
+                        bestOnlineStatus = onlineStatusVals.reduce((best, acc) => {
+                            const bestPriority = getOnlineStatusPriority(best?.onlineStatus);
+                            const accPriority = getOnlineStatusPriority(acc.onlineStatus);
+                            return accPriority < bestPriority ? acc : best;
+                        }).onlineStatus;
                     }
 
                     newIndividuals[index] = {
@@ -170,7 +182,6 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                         accounts: [...accounts],
                         onlineStatus: bestOnlineStatus
                     };
-
 
                     return newIndividuals;
 
