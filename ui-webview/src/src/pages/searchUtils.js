@@ -103,7 +103,7 @@ export const parseSearchTerms = (searchTerm) => {
 };
 
 // Special search term matching
-export const anyAccountMatchesSpecialTerms = (accounts, specialTerms) => {
+export const anyAccountMatchesSpecialTerms = (accounts, specialTerms, inAccountMode) => {
     return specialTerms.every(term => {
         if (term.startsWith('links:')) {
             const searchString = term.substring(6); // Remove 'links:' prefix
@@ -195,6 +195,8 @@ export const anyAccountMatchesSpecialTerms = (accounts, specialTerms) => {
             }
 
             default:
+                if (inAccountMode) return true;
+
                 if (term.startsWith('accounts:>')) {
                     const minCount = parseInt(term.substring(10));
                     if (isNaN(minCount)) return false;
@@ -262,7 +264,7 @@ export const isIndividualVisible = (individual, searchTerm, showOnlyContacts = f
     const { specialTerms, regularTerms } = parseSearchTerms(searchTerm);
 
     // Check special terms first
-    if (specialTerms.length > 0 && !anyAccountMatchesSpecialTerms(individual.accounts, specialTerms)) {
+    if (specialTerms.length > 0 && !anyAccountMatchesSpecialTerms(individual.accounts, specialTerms, false)) {
         return false;
     }
 

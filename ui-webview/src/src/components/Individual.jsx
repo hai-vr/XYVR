@@ -87,7 +87,7 @@ function Individual({
             const { specialTerms, regularTerms } = parseSearchTerms(searchTerm);
 
             const filtered = individual.accounts.filter(account => {
-                if (specialTerms.length > 0 && !anyAccountMatchesSpecialTerms([account], specialTerms)) return false;
+                if (specialTerms.length > 0 && !anyAccountMatchesSpecialTerms([account], specialTerms, true)) return false;
                 if (regularTerms.length === 0) {
                     return true;
                 }

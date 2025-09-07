@@ -52,6 +52,7 @@ The following work has been done:
 - Make the connection code easily auditable.
 - Set up workflow automation to build the React app and the .NET app.
 - Write the necessary API connectors to fetch live session data and display the current social VR application that a user is playing.
+- Provide a graphical UI to group accounts belonging to a single individual.
 
 The following work remains to be done:
 - Reported issues:
@@ -60,7 +61,6 @@ The following work remains to be done:
     - ~~The system does not handle authenticator 2FA, only email.~~
     - There is no feedback on the progress of data collection.
     - The Resonite login does not support TOTP.
-- Provide a graphical UI to group accounts belonging to a single individual.
 - Provide a graphical UI to import an existing set of pre-made requests so that it does not require a direct connection.
 
 ## Technology in use
