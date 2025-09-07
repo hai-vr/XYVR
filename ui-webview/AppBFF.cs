@@ -11,7 +11,8 @@ public interface IAppBFF
 {
     string GetAppVersion();
     string GetAllExposedIndividualsOrderedByContact();
-    Task FusionIndividuals(string toAugment, string toDestroy);
+    Task FusionIndividuals(string toDesolidarize, string toDestroy);
+    Task DesolidarizeIndividuals(string toDesolidarize);
     void CloseApp();
 }
 
@@ -46,14 +47,25 @@ public class AppBFF : IAppBFF
         return JsonConvert.SerializeObject(responseObj, Formatting.None, _serializer);
     }
 
-    public async Task FusionIndividuals(string toAugment, string toDestroy)
+    public async Task FusionIndividuals(string toDesolidarize, string toDestroy)
     {
-        Console.WriteLine($"Fusion individuals was called: {toAugment}, {toDestroy}");
-        if (toAugment == toDestroy) throw new ArgumentException("Cannot fusion an Individual with itself");
+        Console.WriteLine($"Fusion individuals was called: {toDesolidarize}, {toDestroy}");
+        if (toDesolidarize == toDestroy) throw new ArgumentException("Cannot fusion an Individual with itself");
         
-        var to = _mainWindow.IndividualRepository.GetByGuid(toAugment);
+        var to = _mainWindow.IndividualRepository.GetByGuid(toDesolidarize);
         var beingDestroyed = _mainWindow.IndividualRepository.GetByGuid(toDestroy);
         _mainWindow.IndividualRepository.FusionIndividuals(to, beingDestroyed);
+        await Scaffolding.SaveRepository(_mainWindow.IndividualRepository);
+    }
+
+    public async Task DesolidarizeIndividuals(string toDesolidarize)
+    {
+        Console.WriteLine($"Desolidarize was called: {toDesolidarize}");
+        
+        var individual = _mainWindow.IndividualRepository.GetByGuid(toDesolidarize);
+        if (individual.accounts.Count <= 1) return;
+        
+        _mainWindow.IndividualRepository.DesolidarizeIndividualAccounts(individual);
         await Scaffolding.SaveRepository(_mainWindow.IndividualRepository);
     }
 

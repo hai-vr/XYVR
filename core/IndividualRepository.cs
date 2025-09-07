@@ -163,6 +163,28 @@ public class IndividualRepository
         }
     }
 
+    public void DesolidarizeIndividualAccounts(Individual toDesolidarize)
+    {
+        if (toDesolidarize.accounts.Count <= 1) return;
+
+        var originalAccounts = toDesolidarize.accounts.ToList();
+        
+        toDesolidarize.accounts = [originalAccounts[0]];
+        RebuildAccountDictionary();
+
+        for (var index = 1; index < originalAccounts.Count; index++)
+        {
+            var account = originalAccounts[index];
+            var newIndividual = CreateNewIndividualFromAccount(account);
+            newIndividual.customName = toDesolidarize.customName;
+            newIndividual.note = new Note
+            {
+                status = toDesolidarize.note.status,
+                text = toDesolidarize.note.text
+            };
+        }
+    }
+
     private static bool SynchronizeAccount(Account existingAccount, Account inputAccount)
     {
         var isSameAppAndIdentifier = IsSameApp(existingAccount, inputAccount) && existingAccount.inAppIdentifier == inputAccount.inAppIdentifier;

@@ -14,6 +14,7 @@ function Individual({
                         isBeingMerged = false,
                         displayNameOfOtherBeingMergedOrUnd = undefined,
                         fusionAccounts,
+                        unmergeAccounts,
                         compactMode,
                         searchTerm,
                         showNotes,
@@ -63,6 +64,9 @@ function Individual({
         switch (action) {
             case 'confirmMerge':
                 await fusionAccounts(individual.guid);
+                break;
+            case 'unmerge':
+                await unmergeAccounts(individual.guid);
                 break;
             case 'cancelMerge':
                 setMergeAccountGuidOrUnd(undefined);
@@ -169,6 +173,12 @@ function Individual({
                                     onClick={(e) => handleMenuAction('cancelMerge', e)}
                                 >
                                     Cancel merge
+                                </button>}
+                                {individual.accounts.length > 1 && <button
+                                    className="dropdown-item"
+                                    onClick={(e) => handleMenuAction('unmerge', e)}
+                                >
+                                    Unmerge accounts
                                 </button>}
                                 <button
                                     className="dropdown-item"

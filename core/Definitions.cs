@@ -13,8 +13,6 @@ public class Individual
     public string guid;
     public List<Account> accounts = new();
     public string displayName;
-
-    public Note note = new();
     
     public bool isAnyContact;
     
@@ -31,6 +29,7 @@ public class Individual
     
     // This field is up to the app users' judgement
     public string? customName;
+    public Note note = new();
 }
 
 public class Account

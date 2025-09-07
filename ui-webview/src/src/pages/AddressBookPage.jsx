@@ -299,6 +299,16 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
         setIndividuals(individualsArray);
     };
 
+    const unmergeAccounts = async function (toDesolidarize) {
+        if (toDesolidarize === undefined) return;
+
+        await window.chrome.webview.hostObjects.appApi.DesolidarizeIndividuals(toDesolidarize);
+
+        const allIndividuals = await window.chrome.webview.hostObjects.appApi.GetAllExposedIndividualsOrderedByContact();
+        const individualsArray = JSON.parse(allIndividuals);
+        setIndividuals(individualsArray);
+    };
+
     return (
         <>
             <div className="individuals-container">
@@ -419,6 +429,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                             isBeingMerged={mergeAccountGuidOrUnd === individual.guid}
                             displayNameOfOtherBeingMergedOrUnd={displayNameOfOtherBeingMergedOrUnd}
                             fusionAccounts={fusionAccounts}
+                            unmergeAccounts={unmergeAccounts}
                             compactMode={compactMode}
                             searchTerm={debouncedSearchTerm}
                             showNotes={showNotes}
