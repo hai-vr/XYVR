@@ -177,6 +177,7 @@ export const anyAccountMatchesSpecialTerms = (accounts, specialTerms, inAccountM
                 return accounts?.some(account => account.isTechnical) || false;
 
             case 'has:alt': {
+                if (inAccountMode) return true;
                 if (!accounts) return false;
 
                 // Group accounts by namedApp, excluding technical accounts
