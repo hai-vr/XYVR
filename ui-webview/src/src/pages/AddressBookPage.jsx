@@ -71,6 +71,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
     const [individuals, setIndividuals] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+    const [mergeAccountGuidOrUnd, setMergeAccountGuidOrUnd] = useState(undefined);
 
     // Infinite scrolling state
     const [displayedCount, setDisplayedCount] = useState(50); // Start with 50 items
@@ -345,6 +346,8 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                             isVisible={true}
                             showBio={showBio}
                             showAlias={showAlias}
+                            setMergeAccountGuidOrUnd={setMergeAccountGuidOrUnd}
+                            isBeingMerged={mergeAccountGuidOrUnd === individual.guid}
                         />
                     ))}
                 </div>

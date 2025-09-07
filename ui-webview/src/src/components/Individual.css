@@ -6,9 +6,17 @@
     padding: 24px;
     box-shadow: 0 2px 8px var(--shadow-medium);
     cursor: pointer;
+    outline: 0px solid transparent;
+    outline-offset: -4px;
+    transition: outline 0.3s ease;
 }
 .individual-container.hidden {
     display: none;
+}
+
+.individual-container.being-merged {
+    outline: 4px solid #ffdd00;
+    outline-offset: -4px;
 }
 
 .individual-header {

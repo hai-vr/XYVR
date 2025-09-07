@@ -2,7 +2,7 @@
 import "./Individual.css";
 import { useState, useRef, useEffect } from "react";
 
-function Individual({ individual, isVisible = true, showBio = false, showAlias = false }) {
+function Individual({ individual, isVisible = true, showBio = false, showAlias = false, setMergeAccountGuidOrUnd, isBeingMerged = false }) {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const dropdownRef = useRef(null);
 
@@ -45,8 +45,12 @@ function Individual({ individual, isVisible = true, showBio = false, showAlias =
 
         switch (action) {
             case 'merge':
-                // TODO: Implement merge account functionality
-                console.log('Merge account clicked for:', individual.displayName);
+                if (isBeingMerged) {
+                    setMergeAccountGuidOrUnd(undefined);
+                }
+                else {
+                    setMergeAccountGuidOrUnd(individual.guid);
+                }
                 break;
             case 'details':
                 // TODO: Implement show details functionality
@@ -79,7 +83,7 @@ function Individual({ individual, isVisible = true, showBio = false, showAlias =
     };
 
     return (
-        <div className={`individual-container ${!isVisible ? 'hidden' : ''}`}>
+        <div className={`individual-container ${!isVisible ? 'hidden' : ''} ${isBeingMerged ? 'being-merged' : ''}`}>
             <div className="individual-header">
                 <div className="individual-avatar">
                     {getFirstNonPunctuationChar(individual.displayName)}
@@ -109,7 +113,7 @@ function Individual({ individual, isVisible = true, showBio = false, showAlias =
                                 className="dropdown-item"
                                 onClick={(e) => handleMenuAction('merge', e)}
                             >
-                                Merge account...
+                                {isBeingMerged ? 'Cancel merge' : 'Merge account...'}
                             </button>
                             <button
                                 className="dropdown-item"
