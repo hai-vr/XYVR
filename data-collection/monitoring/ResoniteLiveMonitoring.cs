@@ -14,6 +14,7 @@ public class ResoniteLiveMonitoring : ILiveMonitoring, IDisposable
     private string? _callerInAppIdentifier;
     
     private ResoniteLiveCommunicator? _liveComms;
+    private CancellationTokenSource _cancellationTokenSource;
 
     public ResoniteLiveMonitoring(ICredentialsStorage credentialsStorage, LiveStatusMonitoring monitoring)
     {
@@ -35,6 +36,8 @@ public class ResoniteLiveMonitoring : ILiveMonitoring, IDisposable
         try
         {
             if (_isConnected) return;
+            _cancellationTokenSource = new CancellationTokenSource();
+            
             _liveComms = new ResoniteLiveCommunicator(_credentialsStorage, _callerInAppIdentifier);
             
             var serializer = new JsonSerializerSettings()
@@ -63,11 +66,24 @@ public class ResoniteLiveMonitoring : ILiveMonitoring, IDisposable
             };
             
             await _liveComms.Connect();
+            
+            _ = Task.Run(BackgroundTask, _cancellationTokenSource.Token);
             _isConnected = true;
         }
         finally
         {
             _operationLock.Release();
+        }
+    }
+
+    private async Task BackgroundTask()
+    {
+        while (true) // Canceled by token
+        {
+            // Unsure why, but if it runs for a while, we won't receive any updates until the user actually starts the game?
+            // Request a full update every so often
+            await Task.Delay(TimeSpan.FromMinutes(5));
+            await _liveComms.RequestFullUpdate();
         }
     }
 
@@ -77,6 +93,8 @@ public class ResoniteLiveMonitoring : ILiveMonitoring, IDisposable
         try
         {
             if (!_isConnected) return;
+            await _cancellationTokenSource.CancelAsync();
+            
             await _liveComms.Disconnect();
             _liveComms = null;
             _isConnected = false;
