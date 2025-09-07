@@ -13,7 +13,7 @@ env:
   netProject: "ui-webview"
   netCsProj: "ui-webview/ui-webview.csproj"
   packageName: "dev.hai-vr.xyvr"
-  applicationName: "xyvr"
+  applicationName: "XYVR"
 
 permissions:
   contents: write
