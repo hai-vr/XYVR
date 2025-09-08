@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using XYVR.Core;
 using XYVR.Scaffold;
 
 namespace XYVR.UI.WebviewUI;
@@ -12,5 +13,6 @@ public partial class App : Application
         Scaffolding.DefineSavePathFromArgsOrUseDefault(e.Args);
 
         Console.WriteLine("Application startup");
+        Console.WriteLine($"Version is {VERSION.version}");
     }
 }

@@ -61,6 +61,9 @@ The following work remains to be done:
     - ~~The system does not handle authenticator 2FA, only email.~~
     - There is no feedback on the progress of data collection.
     - The Resonite login does not support TOTP.
+- Handle the lifecycle of successful newly logged-in connections with live monitoring.
+- Review the request lifecycle towards external systems.
+- Better expose the data update to the UI.
 - Provide a graphical UI to import an existing set of pre-made requests so that it does not require a direct connection.
 
 ## Technology in use

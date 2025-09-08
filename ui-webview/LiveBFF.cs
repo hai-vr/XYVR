@@ -78,4 +78,9 @@ public class LiveBFF : ILiveBFF
     {
         await _mainWindow.SendEventToReact("liveUpdateMerged", update);
     }
+
+    public void OnClosed()
+    {
+        StopMonitoring().Wait();
+    }
 }

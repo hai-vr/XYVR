@@ -18,6 +18,7 @@ public partial class MainWindow : Window
     private readonly LiveBFF _liveBff;
     private readonly JsonSerializerSettings _serializer;
 
+    public App AppHandle { get; private set; }
     public IndividualRepository IndividualRepository { get; private set; }
     public ConnectorManagement ConnectorsMgt { get; private set; }
     public CredentialsManagement CredentialsMgt { get; private set; }
@@ -32,20 +33,23 @@ public partial class MainWindow : Window
         _liveBff = new LiveBFF(this);
         _serializer = BFFUtils.NewSerializer();
 
-        Title = "XYVR";
+        Title = XYVRValues.ApplicationTitle;
         
-        Loaded += MainWindow_Loaded;
+        Loaded += (sender, evt) => _ = MainWindow_Loaded(sender, evt);
         Closed += OnClosed;
     }
 
     private void OnClosed(object? sender, EventArgs e)
     {
         _preferencesBff.OnClosed();
+        _liveBff.OnClosed();
     }
 
-    private async void MainWindow_Loaded(object sender, RoutedEventArgs evt)
+    private async Task MainWindow_Loaded(object sender, RoutedEventArgs evt)
     {
         Console.WriteLine("WebView: Main window loaded.");
+        
+        AppHandle = (App)Application.Current;
         
         IndividualRepository = new IndividualRepository(await Scaffolding.OpenRepository());
         ConnectorsMgt = new ConnectorManagement(await Scaffolding.OpenConnectors());
@@ -70,6 +74,7 @@ public partial class MainWindow : Window
         WebView.Source = new Uri($"https://{VirtualHost}/index.html");
     }
 
+    // Triggered especially when the user middle-clicks a link.
     private void CoreWebView2_NewWindowRequested(object? sender, CoreWebView2NewWindowRequestedEventArgs evt)
     {
         // Cancel the new window request to prevent popups from middle-clicks
@@ -88,6 +93,7 @@ public partial class MainWindow : Window
         }
     }
 
+    // Triggered when the user clicks a link.
     private void CoreWebView2_NavigationStarting(object? sender, CoreWebView2NavigationStartingEventArgs evt)
     {
         var uriString = evt.Uri;
