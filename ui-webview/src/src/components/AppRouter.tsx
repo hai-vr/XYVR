@@ -1,16 +1,20 @@
-﻿import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+﻿import {HashRouter as Router, Routes, Route, Navigate} from 'react-router-dom'
+import {useState, useEffect} from 'react'
+// @ts-ignore
 import AddressBookPage from '../pages/AddressBookPage.jsx'
+// @ts-ignore
 import DataCollectionPage from '../pages/DataCollectionPage.jsx'
 import './AppRouter.css'
 import {Toaster} from "react-hot-toast";
+import type {ReactAppPreferences} from "../types/APITypes.ts";
 
-function AppRouter() {
+// @ts-ignore
+const AppRouter = ({ appVersion }: { appVersion: string }) => {
     const [isDark, setIsDark] = useState(true)
     const [showOnlyContacts, setShowOnlyContacts] = useState(false)
     const [compactMode, setCompactMode] = useState(false)
     const [showNotes, setShowNotes] = useState(true)
-    const [preferences, setPreferences] = useState({})
+    const [preferences, setPreferences] = useState<ReactAppPreferences>({isDark: true, showOnlyContacts: false})
     const [isPreferencesObtained, setIsPreferencesObtained] = useState(false)
     const [debugMode, setDebugMode] = useState(false)
 
@@ -24,13 +28,13 @@ function AppRouter() {
             void 0;
         }
 
-        const updatedPreferences = { ...preferences, isDark };
+        const updatedPreferences = {...preferences, isDark};
         setPreferences(updatedPreferences);
 
     }, [isDark])
 
     useEffect(() => {
-        const updatedPreferences = { ...preferences, showOnlyContacts };
+        const updatedPreferences = {...preferences, showOnlyContacts};
         setPreferences(updatedPreferences);
 
     }, [showOnlyContacts])
@@ -49,7 +53,7 @@ function AppRouter() {
     useEffect(() => {
         const initializeApi = async () => {
             if (!isPreferencesObtained) {
-                const prefs = JSON.parse(await window.chrome.webview.hostObjects.preferencesApi.GetPreferences());
+                const prefs: ReactAppPreferences = JSON.parse(await window.chrome.webview.hostObjects.preferencesApi.GetPreferences());
                 setPreferences(prefs);
                 setIsDark(prefs.isDark);
                 setShowOnlyContacts(prefs.showOnlyContacts);
@@ -62,7 +66,7 @@ function AppRouter() {
 
     // Keyboard shortcut handler for CTRL-SHIFT-D
     useEffect(() => {
-        const handleKeyDown = (event) => {
+        const handleKeyDown = (event: any) => {
             if (event.ctrlKey && event.shiftKey && event.key === 'D') {
                 event.preventDefault()
                 setDebugMode(prevMode => !prevMode)
@@ -81,7 +85,7 @@ function AppRouter() {
             <div className="app-container">
                 <main className="page-content">
                     <Routes>
-                        <Route path="/" element={<Navigate to="/address-book" replace />} />
+                        <Route path="/" element={<Navigate to="/address-book" replace/>}/>
                         <Route path="/address-book" element={<AddressBookPage isDark={isDark}
                                                                               setIsDark={setIsDark}
                                                                               showOnlyContacts={showOnlyContacts}
@@ -92,7 +96,9 @@ function AppRouter() {
                                                                               setShowNotes={setShowNotes}
                                                                               demoMode={debugMode}
                         />}/>
-                        <Route path="/data-collection" element={<DataCollectionPage isDark={isDark} setIsDark={setIsDark} demoMode={debugMode} />} />
+                        <Route path="/data-collection"
+                               element={<DataCollectionPage isDark={isDark} setIsDark={setIsDark}
+                                                            demoMode={debugMode}/>}/>
                     </Routes>
                 </main>
                 <Toaster

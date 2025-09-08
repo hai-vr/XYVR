@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import './App.css'
-import AppRouter from './components/AppRouter.jsx'
+import AppRouter from './components/AppRouter.tsx'
 
 function App() {
+// @ts-ignore
     const [appVersion, setAppVersion] = useState('');
 
     useEffect(() => {
@@ -15,7 +16,7 @@ function App() {
         initializeApi();
     }, []);
 
-    return <AppRouter />
+    return <AppRouter appVersion={appVersion} />
 }
 
 export default App
