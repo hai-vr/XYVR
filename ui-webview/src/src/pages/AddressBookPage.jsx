@@ -26,7 +26,7 @@ import {
     NotebookText, Notebook
 } from 'lucide-react'
 import DarkModeToggleButton from "../components/DarkModeToggleButton.jsx";
-import {_D2} from "../haiUtils.js";
+import {_D2} from "../haiUtils.ts";
 
 const sortIndividuals = (individuals, searchTerm) => {
     if (!searchTerm) {

@@ -3,7 +3,7 @@ import "./Individual.css";
 import { useState, useRef, useEffect } from "react";
 import {Clipboard, Phone} from "lucide-react";
 import {accountMatchesFromRegularTerms, anyAccountMatchesSpecialTerms, parseSearchTerms} from "../pages/searchUtils.js";
-import {_D, _D2} from "../haiUtils.js";
+import {_D, _D2} from "../haiUtils.ts";
 
 function Individual({
                         individual,

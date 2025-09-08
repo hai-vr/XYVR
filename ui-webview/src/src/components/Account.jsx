@@ -1,7 +1,7 @@
 ﻿import React from 'react';
 import './Account.css';
 import {CircleDot, CircleOff, Clipboard, DiamondMinus, Globe, TriangleAlert} from "lucide-react";
-import {_D, _D2} from "../haiUtils.js";
+import {_D, _D2} from "../haiUtils.ts";
 import resoniteIcon from "../assets/Resonite_Wiki-Icon.png";
 
 const Account = ({ account, imposter, showAlias, showNotes, demoMode }) => {
