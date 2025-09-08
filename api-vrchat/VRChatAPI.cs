@@ -25,7 +25,6 @@ public class VRChatAPI
     
     private CookieContainer _cookies;
     private HttpClient _client;
-    private readonly string _userAgent;
 
     public bool IsLoggedIn { get; private set; }
 
@@ -40,8 +39,7 @@ public class VRChatAPI
             CookieContainer = _cookies
         };
         _client = new HttpClient(handler);
-        _userAgent = $"Hai.XYVR/{VERSION.version} (docs.hai-vr.dev/docs/products/xyvr/user-agent)";
-        _client.DefaultRequestHeaders.UserAgent.ParseAdd(_userAgent);
+        _client.DefaultRequestHeaders.UserAgent.ParseAdd(XYVRValues.UserAgent);
     }
 
     public string GetAllCookies__Sensitive()
@@ -60,7 +58,7 @@ public class VRChatAPI
             CookieContainer = _cookies
         };
         _client = new HttpClient(handler);
-        _client.DefaultRequestHeaders.UserAgent.ParseAdd(_userAgent);
+        _client.DefaultRequestHeaders.UserAgent.ParseAdd(XYVRValues.UserAgent);
         
         // Assume that if the user has an auth cookie, then they're logged in.
         // There is a route to check if the token is still valid, but for privacy, we don't want the application to send a request

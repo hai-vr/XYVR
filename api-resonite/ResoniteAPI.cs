@@ -38,7 +38,7 @@ public class ResoniteAPI
             CookieContainer = _cookies
         };
         _client = new HttpClient(handler);
-        _client.DefaultRequestHeaders.UserAgent.ParseAdd($"Hai.XYVR/{VERSION.version} (docs.hai-vr.dev/docs/products/xyvr#user-agent)");
+        _client.DefaultRequestHeaders.UserAgent.ParseAdd(XYVRValues.UserAgent);
     }
 
     public async Task<LoginResponseJsonObject> Login(string username__sensitive, string password__sensitive, bool stayLoggedIn, string? twoferTotp = null)

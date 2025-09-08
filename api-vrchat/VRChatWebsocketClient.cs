@@ -30,7 +30,7 @@ public class VRChatWebsocketClient : IDisposable
         try
         {
             var uri = new Uri($"{AuditUrls.VrcWebsocketUrl}?authToken={authToken}");
-            _webSocket.Options.SetRequestHeader("User-Agent", $"Hai.XYVR/{VERSION.version} (docs.hai-vr.dev/docs/products/xyvr/user-agent)");
+            _webSocket.Options.SetRequestHeader("User-Agent", XYVRValues.UserAgent);
             await _webSocket.ConnectAsync(uri, _cancellationTokenSource.Token);
             
             Connected?.Invoke();
