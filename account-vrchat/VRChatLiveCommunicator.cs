@@ -10,7 +10,7 @@ public class VRChatLiveCommunicator
 {
     private readonly ICredentialsStorage _credentialsStorage;
     private readonly string _callerInAppIdentifier;
-    private readonly VRChatWebsocketClient _wsClient;
+    private VRChatWebsocketClient _wsClient;
     private readonly IResponseCollector _responseCollector;
     
     private VRChatAPI? _api;
@@ -24,16 +24,30 @@ public class VRChatLiveCommunicator
         _credentialsStorage = credentialsStorage;
         _callerInAppIdentifier = callerInAppIdentifier;
         _responseCollector = responseCollector;
-
-        _wsClient = new VRChatWebsocketClient();
-        _wsClient.Connected += WhenConnected;
-        _wsClient.MessageReceived += WhenMessageReceived;
-        _wsClient.Disconnected += WhenDisconnected;
     }
 
     public async Task Connect()
     {
         _hasInitiatedDisconnect = false;
+        
+        if (_wsClient != null)
+        {
+            _wsClient.Disconnected -= WhenDisconnected;
+            try { await _wsClient.Disconnect(); }
+            catch { // ignored
+            }
+
+            try { _wsClient.Dispose(); }
+            catch { // ignored
+            }
+            _wsClient = null;
+        }
+        
+        _wsClient = new VRChatWebsocketClient();
+        _wsClient.Connected += WhenConnected;
+        _wsClient.MessageReceived += WhenMessageReceived;
+        _wsClient.Disconnected += WhenDisconnected;
+        
         _api ??= await InitializeAPI();
 
         var contactsAsyncEnum = _api.ListFriends(ListFriendsRequestType.OnlyOnline, DataCollectionReason.FindUndiscoveredAccounts);
