@@ -132,7 +132,6 @@ public class VRChatLiveCommunicator
         {
             Task.Run(async () =>
             {
-                await _wsClient.Disconnect();
                 await Connect();
             }).Wait();
         }
