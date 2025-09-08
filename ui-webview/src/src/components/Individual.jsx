@@ -102,6 +102,12 @@ function Individual({
 
                 return false;
             });
+            
+            if (filtered.length === 0) {
+                // If none match, show all. This is to support weird stuff like `app:resonite app:vrchat` or `app:resonite somenote` where `somenote` actually comes from a VRChat account.
+                setFilteredAccounts(individual.accounts);
+                return;
+            }
 
             setFilteredAccounts(filtered);
         }
