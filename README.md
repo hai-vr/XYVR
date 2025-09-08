@@ -9,7 +9,7 @@ The address book remains fully functional even if access to the original account
 If you have multiple accounts on different social VR platforms (or even on the same platform), you can
 view your contacts as one single address book.
 
-<img width="624" height="846" alt="gFXOM4aH1Z" src="https://github.com/user-attachments/assets/55f337a2-87d8-467b-bfdc-a0e6dc848087" />
+<img width="416" height="564" alt="gFXOM4aH1Z" src="https://github.com/user-attachments/assets/55f337a2-87d8-467b-bfdc-a0e6dc848087" /><img width="376" height="564" alt="ui-webview_YEm46Ch1Qv" src="https://github.com/user-attachments/assets/916fe6b4-6373-44fd-a6be-be17ead6b8fa" />
 
 # User documentation
 
