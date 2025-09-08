@@ -14,6 +14,7 @@ public class VRChatLiveCommunicator
     private readonly IResponseCollector _responseCollector;
     
     private VRChatAPI? _api;
+    private bool _hasInitiatedDisconnect;
 
     public event LiveUpdateReceived? OnLiveUpdateReceived;
     public delegate Task LiveUpdateReceived(LiveUpdate liveUpdate);
@@ -32,6 +33,7 @@ public class VRChatLiveCommunicator
 
     public async Task Connect()
     {
+        _hasInitiatedDisconnect = false;
         _api ??= await InitializeAPI();
 
         var contactsAsyncEnum = _api.ListFriends(ListFriendsRequestType.OnlyOnline, DataCollectionReason.FindUndiscoveredAccounts);
@@ -56,6 +58,7 @@ public class VRChatLiveCommunicator
 
     public async Task Disconnect()
     {
+        _hasInitiatedDisconnect = true;
         await _wsClient.Disconnect();
     }
 
@@ -124,6 +127,15 @@ public class VRChatLiveCommunicator
 
     private void WhenDisconnected(string reason)
     {
+        Console.WriteLine($"We got disconnected from the vrc ws api. Reason: {reason}");
+        if (!_hasInitiatedDisconnect)
+        {
+            Task.Run(async () =>
+            {
+                await _wsClient.Disconnect();
+                await Connect();
+            }).Wait();
+        }
     }
 
     private async Task<string> GetToken__sensitive()
