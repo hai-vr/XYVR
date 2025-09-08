@@ -4,9 +4,9 @@
  * @param {string} text - Input text containing potentially confusable characters
  * @returns {string} Text with Cyrillic characters converted to Latin equivalents
  */
-export function convertConfusablesToLatin(text) {
+export function convertConfusablesToLatin(text: string): string {
     // Mapping of confusable Cyrillic characters to Latin equivalents
-    const confusableMap = {
+    const confusableMap: Record<string, string> = {
         // Lowercase Cyrillic to Latin
         'а': 'a', // U+0430 → U+0061
         'е': 'e', // U+0435 → U+0065
@@ -58,7 +58,7 @@ export function convertConfusablesToLatin(text) {
     return text.replace(/./g, char => confusableMap[char] || char);
 }
 
-export function detectConfusables(text) {
+export function detectConfusables(text: string) {
     const confusableChars = [];
     const converted = convertConfusablesToLatin(text);
 
@@ -68,7 +68,7 @@ export function detectConfusables(text) {
                 original: text[i],
                 converted: converted[i],
                 position: i,
-                codePoint: text[i].codePointAt(0).toString(16).toUpperCase()
+                codePoint: text[i].codePointAt(0)!.toString(16).toUpperCase()
             });
         }
     }

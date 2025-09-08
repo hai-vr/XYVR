@@ -25,11 +25,12 @@ internal class FrontAccount
     public string inAppDisplayName;
     public List<CallerAccount> callers;
     public bool isTechnical;
-    public bool isAnyCallerContact;
-    public bool isAnyCallerNote;
     public object? specifics;
     public List<string> allDisplayNames;
     public bool isPendingUpdate;
+    
+    public bool isAnyCallerContact;
+    public bool isAnyCallerNote;
     
     public OnlineStatus? onlineStatus;
     public string? customStatus;

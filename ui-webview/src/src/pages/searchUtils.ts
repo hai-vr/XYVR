@@ -1,7 +1,13 @@
 ﻿// Text normalization utilities
-import {convertConfusablesToLatin} from "./confusables.jsx";
+import {convertConfusablesToLatin} from "./confusables.ts";
+import {
+    type FrontAccount,
+    type FrontIndividual,
+    OnlineStatus,
+    type OnlineStatusType
+} from "../types/CoreTypes.ts";
 
-export const removeDiacritics = (str, convertConfusables) => {
+export const removeDiacritics = (str: string, convertConfusables: boolean = false) => {
     let diacriticsRemoved = str.normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '') // Replaces diacritics
         .replace(/\u2024/g, '.') // Replaces the crappy "one dot leader" character with a proper period
@@ -24,7 +30,7 @@ export const removeDiacritics = (str, convertConfusables) => {
 
 // Japanese text conversion utilities
 // (note: this is flawed)
-const romajiToHiragana = {
+const romajiToHiragana: Record<string, string> = {
     'a': 'あ', 'i': 'い', 'u': 'う', 'e': 'え', 'o': 'お',
     'ka': 'か', 'ki': 'き', 'ku': 'く', 'ke': 'け', 'ko': 'こ',
     'ga': 'が', 'gi': 'ぎ', 'gu': 'ぐ', 'ge': 'げ', 'go': 'ご',
@@ -53,13 +59,13 @@ const romajiToHiragana = {
     'rya': 'りゃ', 'ryu': 'りゅ', 'ryo': 'りょ'
 };
 
-const hiraganaToKatakana = (hiragana) => {
+const hiraganaToKatakana = (hiragana: string) => {
     return hiragana.replace(/[\u3041-\u3096]/g, (char) => {
         return String.fromCharCode(char.charCodeAt(0) + 0x60);
     });
 };
 
-const convertRomajiToKana = (romaji) => {
+const convertRomajiToKana = (romaji: string) => {
     let result = romaji.toLowerCase();
     const sortedKeys = Object.keys(romajiToHiragana).sort((a, b) => b.length - a.length);
 
@@ -70,7 +76,7 @@ const convertRomajiToKana = (romaji) => {
     return result;
 };
 
-export const generateKanaVariants = (term) => {
+export const generateKanaVariants = (term: string) => {
     const variants = [term];
 
     // Try to convert romaji to hiragana
@@ -87,10 +93,10 @@ export const generateKanaVariants = (term) => {
 };
 
 // Search term parsing utilities
-export const parseSearchTerms = (searchTerm) => {
-    const terms = searchTerm.toLowerCase().trim().split(' ').filter(term => term.trim() !== '');
-    const specialTerms = [];
-    const regularTerms = [];
+export const parseSearchTerms = (unparsedSearchTerms: string) => {
+    const terms = unparsedSearchTerms.toLowerCase().trim().split(' ').filter(term => term.trim() !== '');
+    const specialTerms: string[] = [];
+    const regularTerms: string[] = [];
 
     terms.forEach(term => {
         if (term.startsWith('app:')
@@ -114,7 +120,7 @@ export const parseSearchTerms = (searchTerm) => {
 };
 
 // Special search term matching
-export const anyAccountMatchesSpecialTerms = (accounts, specialTerms, inAccountMode, convertConfusables) => {
+export const anyAccountMatchesSpecialTerms = (accounts: FrontAccount[], specialTerms: string[], inAccountMode: boolean, convertConfusables: boolean) => {
     return specialTerms.every(term => {
         if (term === ':confusables') return true;
         if (term === ':help') return true;
@@ -124,7 +130,7 @@ export const anyAccountMatchesSpecialTerms = (accounts, specialTerms, inAccountM
             if (!searchString) return true; // Empty search string matches all
 
             return accounts?.some(account =>
-                account.specifics?.urls?.some(url =>
+                account.specifics?.urls?.some((url: string) =>
                     url.toLowerCase().includes(searchString)
                 )
             ) || false;
@@ -195,7 +201,7 @@ export const anyAccountMatchesSpecialTerms = (accounts, specialTerms, inAccountM
                 if (!accounts) return false;
 
                 // Group accounts by namedApp, excluding technical accounts
-                const accountGroups = {};
+                const accountGroups: Record<string, number> = {};
                 accounts.forEach(account => {
                     if (account.isTechnical === false || account.isTechnical === undefined) {
                         if (!accountGroups[account.namedApp]) {
@@ -224,8 +230,7 @@ export const anyAccountMatchesSpecialTerms = (accounts, specialTerms, inAccountM
     });
 };
 
-export const accountMatchesFromRegularTerms = (account, regularTerms, convertConfusables) => {
-    const accountNote = account.note?.text || '';
+export const accountMatchesFromRegularTerms = (account: FrontAccount, regularTerms: string[], convertConfusables: boolean) => {
     const accountDisplayName = account.inAppDisplayName || '';
     const accountIdentifier = account.inAppIdentifier || '';
 
@@ -235,14 +240,13 @@ export const accountMatchesFromRegularTerms = (account, regularTerms, convertCon
 
         return kanaVariants.some(variant => {
             const variantNormalized = removeDiacritics(variant);
-            const noteMatch = removeDiacritics(accountNote.toLowerCase()).includes(variantNormalized);
             const displayNameMatch = removeDiacritics(accountDisplayName.toLowerCase(), convertConfusables).includes(variantNormalized);
 
             // Only search in inAppIdentifier if namedApp equals 3 (Cluster)
             const identifierMatch = account.namedApp === "Cluster" &&
                 removeDiacritics(accountIdentifier.toLowerCase()).includes(variantNormalized);
 
-            return noteMatch || displayNameMatch || identifierMatch;
+            return displayNameMatch || identifierMatch;
         });
     });
 
@@ -266,7 +270,7 @@ export const accountMatchesFromRegularTerms = (account, regularTerms, convertCon
 };
 
 // Main filtering function
-export const isIndividualVisible = (individual, searchTerm, showOnlyContacts = false, mergeAccountGuidOrUnd = undefined) => {
+export const isIndividualVisible = (individual: FrontIndividual, unparsedSearchTerms: string, showOnlyContacts: boolean = false, mergeAccountGuidOrUnd?: string) => {
     if (mergeAccountGuidOrUnd !== undefined && individual.guid === mergeAccountGuidOrUnd) return true;
 
     // First apply the contact filter
@@ -274,9 +278,9 @@ export const isIndividualVisible = (individual, searchTerm, showOnlyContacts = f
         return false;
     }
 
-    if (!searchTerm) return true;
+    if (!unparsedSearchTerms) return true;
 
-    const { specialTerms, regularTerms } = parseSearchTerms(searchTerm);
+    const { specialTerms, regularTerms } = parseSearchTerms(unparsedSearchTerms);
     var convertConfusables = specialTerms.includes(':confusables');
 
     // Check special terms first
@@ -317,10 +321,10 @@ export const isIndividualVisible = (individual, searchTerm, showOnlyContacts = f
 };
 
 // Sorting helper functions
-export const hasDisplayNameMatch = (individual, searchTerm) => {
-    if (!searchTerm) return false;
+export const hasDisplayNameMatch = (individual: FrontIndividual, unparsedSearchTerms: string) => {
+    if (!unparsedSearchTerms) return false;
 
-    const { regularTerms } = parseSearchTerms(searchTerm);
+    const { regularTerms } = parseSearchTerms(unparsedSearchTerms);
     if (regularTerms.length === 0) return false;
 
     const displayName = individual.displayName || '';
@@ -335,10 +339,10 @@ export const hasDisplayNameMatch = (individual, searchTerm) => {
     });
 };
 
-export const hasIdentifierMatch = (individual, searchTerm) => {
-    if (!searchTerm) return false;
+export const hasIdentifierMatch = (individual: FrontIndividual, unparsedSearchTerms: string) => {
+    if (!unparsedSearchTerms) return false;
 
-    const { regularTerms } = parseSearchTerms(searchTerm);
+    const { regularTerms } = parseSearchTerms(unparsedSearchTerms);
     if (regularTerms.length === 0) return false;
 
     return individual.accounts?.some(account => {
@@ -359,30 +363,30 @@ export const hasIdentifierMatch = (individual, searchTerm) => {
 };
 
 // Utility function to check if bio should be shown
-export const shouldShowBio = (searchTerm) => {
-    if (!searchTerm) return false;
-    const { specialTerms } = parseSearchTerms(searchTerm);
+export const shouldShowBio = (unparsedSearchTerms: string) => {
+    if (!unparsedSearchTerms) return false;
+    const { specialTerms } = parseSearchTerms(unparsedSearchTerms);
     return specialTerms.some(term => term.startsWith('bio:'));
 };
 
-export const shouldShowHelp = (searchTerm) => {
-    if (!searchTerm) return false;
-    const { specialTerms } = parseSearchTerms(searchTerm);
+export const shouldShowHelp = (unparsedSearchTerms: string) => {
+    if (!unparsedSearchTerms) return false;
+    const { specialTerms } = parseSearchTerms(unparsedSearchTerms);
     return specialTerms.some(term => term === ':help');
 };
 
-export const shouldShowAlias = (searchTerm) => {
-    if (!searchTerm) return false;
-    const { specialTerms } = parseSearchTerms(searchTerm);
+export const shouldShowAlias = (unparsedSearchTerms: string) => {
+    if (!unparsedSearchTerms) return false;
+    const { specialTerms } = parseSearchTerms(unparsedSearchTerms);
     return specialTerms.some(term => term.startsWith('alias:'));
 };
 
-export const getOnlineStatusPriority = (onlineStatus) => {
+export const getOnlineStatusPriority = (onlineStatus: OnlineStatusType) => {
     if (!onlineStatus || onlineStatus === "Offline") return 5;
-    if (onlineStatus === "Indeterminate") return 6;
-    if (onlineStatus === "ResoniteBusy" || onlineStatus === "VRChatDND") return 4;
-    if (onlineStatus === "ResoniteAway" || onlineStatus === "VRChatAskMe") return 3;
-    if (onlineStatus === "Online") return 2;
-    if (onlineStatus === "ResoniteSociable" || onlineStatus === "VRChatJoinMe") return 1;
+    if (onlineStatus === OnlineStatus.Indeterminate) return 6;
+    if (onlineStatus === OnlineStatus.ResoniteBusy || onlineStatus === OnlineStatus.VRChatDND) return 4;
+    if (onlineStatus === OnlineStatus.ResoniteAway || onlineStatus === OnlineStatus.VRChatAskMe) return 3;
+    if (onlineStatus === OnlineStatus.Online) return 2;
+    if (onlineStatus === OnlineStatus.ResoniteSociable || onlineStatus === OnlineStatus.VRChatJoinMe) return 1;
     return 5; // Default to same as offline for unknown statuses
 };

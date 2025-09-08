@@ -11,7 +11,7 @@ import {
     shouldShowBio,
     shouldShowHelp,
     getOnlineStatusPriority
-} from './searchUtils.js'
+} from './searchUtils.ts'
 import {
     NotebookPen,
     Moon,
