@@ -91,13 +91,14 @@ function Individual({
 
         if (individual.accounts) {
             const { specialTerms, regularTerms } = parseSearchTerms(searchTerm);
+            var convertConfusables = specialTerms.includes(':confusables');
 
             const filtered = individual.accounts.filter(account => {
-                if (specialTerms.length > 0 && !anyAccountMatchesSpecialTerms([account], specialTerms, true)) return false;
+                if (specialTerms.length > 0 && !anyAccountMatchesSpecialTerms([account], specialTerms, true, convertConfusables)) return false;
                 if (regularTerms.length === 0) {
                     return true;
                 }
-                if (accountMatchesFromRegularTerms(account, regularTerms)) return true;
+                if (accountMatchesFromRegularTerms(account, regularTerms, convertConfusables)) return true;
 
                 return false;
             });

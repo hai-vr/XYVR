@@ -1,6 +1,8 @@
 ﻿// Text normalization utilities
-export const removeDiacritics = (str) => {
-    return str.normalize('NFD')
+import {convertConfusablesToLatin} from "./confusables.jsx";
+
+export const removeDiacritics = (str, convertConfusables) => {
+    let diacriticsRemoved = str.normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '') // Replaces diacritics
         .replace(/\u2024/g, '.') // Replaces the crappy "one dot leader" character with a proper period
         .replace(/[\uFF00-\uFFEF]/g, (char) => {
@@ -12,6 +14,12 @@ export const removeDiacritics = (str) => {
             }
             return char;
         });
+
+    if (convertConfusables) {
+        return convertConfusablesToLatin(diacriticsRemoved);
+    }
+
+    return diacriticsRemoved;
 };
 
 // Japanese text conversion utilities
@@ -91,6 +99,8 @@ export const parseSearchTerms = (searchTerm) => {
             || term.startsWith('bio:')
             || term.startsWith('alias:')
             || term.startsWith('on:')
+            || term === ':confusables'
+            || term === ':help'
             || term === 'has:alt'
             || term === 'has:bot'
             || term === ':help') {
@@ -104,8 +114,11 @@ export const parseSearchTerms = (searchTerm) => {
 };
 
 // Special search term matching
-export const anyAccountMatchesSpecialTerms = (accounts, specialTerms, inAccountMode) => {
+export const anyAccountMatchesSpecialTerms = (accounts, specialTerms, inAccountMode, convertConfusables) => {
     return specialTerms.every(term => {
+        if (term === ':confusables') return true;
+        if (term === ':help') return true;
+
         if (term.startsWith('links:')) {
             const searchString = term.substring(6); // Remove 'links:' prefix
             if (!searchString) return true; // Empty search string matches all
@@ -139,7 +152,7 @@ export const anyAccountMatchesSpecialTerms = (accounts, specialTerms, inAccountM
 
                 return account.allDisplayNames.some(displayName => {
                     return kanaVariants.some(variant => {
-                        const variantNormalized = removeDiacritics(variant);
+                        const variantNormalized = removeDiacritics(variant, convertConfusables);
                         return removeDiacritics(displayName.toLowerCase()).includes(variantNormalized);
                     });
                 });
@@ -211,7 +224,7 @@ export const anyAccountMatchesSpecialTerms = (accounts, specialTerms, inAccountM
     });
 };
 
-export const accountMatchesFromRegularTerms = (account, regularTerms) => {
+export const accountMatchesFromRegularTerms = (account, regularTerms, convertConfusables) => {
     const accountNote = account.note?.text || '';
     const accountDisplayName = account.inAppDisplayName || '';
     const accountIdentifier = account.inAppIdentifier || '';
@@ -223,7 +236,7 @@ export const accountMatchesFromRegularTerms = (account, regularTerms) => {
         return kanaVariants.some(variant => {
             const variantNormalized = removeDiacritics(variant);
             const noteMatch = removeDiacritics(accountNote.toLowerCase()).includes(variantNormalized);
-            const displayNameMatch = removeDiacritics(accountDisplayName.toLowerCase()).includes(variantNormalized);
+            const displayNameMatch = removeDiacritics(accountDisplayName.toLowerCase(), convertConfusables).includes(variantNormalized);
 
             // Only search in inAppIdentifier if namedApp equals 3 (Cluster)
             const identifierMatch = account.namedApp === "Cluster" &&
@@ -264,9 +277,10 @@ export const isIndividualVisible = (individual, searchTerm, showOnlyContacts = f
     if (!searchTerm) return true;
 
     const { specialTerms, regularTerms } = parseSearchTerms(searchTerm);
+    var convertConfusables = specialTerms.includes(':confusables');
 
     // Check special terms first
-    if (specialTerms.length > 0 && !anyAccountMatchesSpecialTerms(individual.accounts, specialTerms, false)) {
+    if (specialTerms.length > 0 && !anyAccountMatchesSpecialTerms(individual.accounts, specialTerms, false, convertConfusables)) {
         return false;
     }
 
@@ -296,7 +310,7 @@ export const isIndividualVisible = (individual, searchTerm, showOnlyContacts = f
     if (individualMatch) return true;
 
     const accountNotesMatch = individual.accounts?.some(account => {
-        return accountMatchesFromRegularTerms(account, regularTerms);
+        return accountMatchesFromRegularTerms(account, regularTerms, convertConfusables);
     }) || false;
 
     return accountNotesMatch;
