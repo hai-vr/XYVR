@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import AddressBookPage from '../pages/AddressBookPage.jsx'
 import DataCollectionPage from '../pages/DataCollectionPage.jsx'
 import './AppRouter.css'
+import {Toaster} from "react-hot-toast";
 
 function AppRouter() {
     const [isDark, setIsDark] = useState(true)
@@ -94,6 +95,16 @@ function AppRouter() {
                         <Route path="/data-collection" element={<DataCollectionPage isDark={isDark} setIsDark={setIsDark} demoMode={debugMode} />} />
                     </Routes>
                 </main>
+                <Toaster
+                    position="bottom-right"
+                    toastOptions={{
+                        duration: 4000,
+                        style: {
+                            background: '#333',
+                            color: '#fff',
+                        },
+                    }}
+                />
             </div>
         </Router>
     )
