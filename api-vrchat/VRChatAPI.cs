@@ -214,7 +214,7 @@ public class VRChatAPI
         {
             var response = await _client.GetAsync(url);
 
-            await EnsureRateLimiting(url);
+            await EnsureRateLimiting(url, response.StatusCode);
 
             EnsureSuccessOrThrowVerbose(response);
 
@@ -256,7 +256,7 @@ public class VRChatAPI
         {
             var response = await _client.GetAsync(url);
 
-            await EnsureRateLimiting(url);
+            await EnsureRateLimiting(url, response.StatusCode);
 
             if (response.StatusCode == HttpStatusCode.NotFound)
             {
@@ -305,7 +305,7 @@ public class VRChatAPI
                 url = await urlBuilder(offset, pageSize);
                 var response = await _client.GetAsync(url);
         
-                await EnsureRateLimiting(url);
+                await EnsureRateLimiting(url, response.StatusCode);
         
                 EnsureSuccessOrThrowVerbose(response);
 
@@ -343,8 +343,16 @@ public class VRChatAPI
 
     }
 
-    private async Task EnsureRateLimiting(string urlForLogging)
+    private async Task EnsureRateLimiting(string urlForLogging, HttpStatusCode statusCode)
     {
+        if (statusCode == HttpStatusCode.TooManyRequests)
+        {
+            Console.WriteLine($"Got {urlForLogging} ; however, TooManyRequests was received. Waiting 70 seconds.");
+            await Task.Delay(TimeSpan.FromSeconds(70));
+            
+            return;
+        }
+        
         if (!_useRateLimiting) return;
 
         var millisecondsDelay = _random.Next(700, 1300); // Introduce some irregularity
