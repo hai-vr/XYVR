@@ -13,9 +13,6 @@ import {
     getOnlineStatusPriority
 } from './searchUtils.ts'
 import {
-    NotebookPen,
-    Moon,
-    Sun,
     Glasses,
     Search,
     X,
@@ -27,13 +24,14 @@ import {
 } from 'lucide-react'
 import DarkModeToggleButton from "../components/DarkModeToggleButton.tsx";
 import {_D2} from "../haiUtils.ts";
+import {type FrontIndividual, OnlineStatus} from "../types/CoreTypes.ts";
 
-const sortIndividuals = (individuals, searchTerm) => {
+const sortIndividuals = (individuals: FrontIndividual[], searchTerm: string) => {
     if (!searchTerm) {
         // Sort by online status first, even when there's no search term
         return [...individuals].sort((a, b) => {
-            const aPriority = getOnlineStatusPriority(a.onlineStatus);
-            const bPriority = getOnlineStatusPriority(b.onlineStatus);
+            const aPriority = getOnlineStatusPriority(a.onlineStatus || OnlineStatus.Offline);
+            const bPriority = getOnlineStatusPriority(b.onlineStatus || OnlineStatus.Offline);
 
             // First priority: online status (lower number = higher priority)
             if (aPriority !== bPriority) return aPriority - bPriority;
@@ -45,8 +43,8 @@ const sortIndividuals = (individuals, searchTerm) => {
 
     // Sort by priority: online status first, then display name matches, then identifier matches, then original order
     return [...individuals].sort((a, b) => {
-        const aPriority = getOnlineStatusPriority(a.onlineStatus);
-        const bPriority = getOnlineStatusPriority(b.onlineStatus);
+        const aPriority = getOnlineStatusPriority(a.onlineStatus || OnlineStatus.Offline);
+        const bPriority = getOnlineStatusPriority(b.onlineStatus || OnlineStatus.Offline);
         const aHasDisplayNameMatch = hasDisplayNameMatch(a, searchTerm);
         const bHasDisplayNameMatch = hasDisplayNameMatch(b, searchTerm);
         const aHasIdentifierMatch = hasIdentifierMatch(a, searchTerm);
@@ -70,19 +68,30 @@ const sortIndividuals = (individuals, searchTerm) => {
     });
 };
 
-// Custom hook for filtering individuals
-function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyContacts, compactMode, setCompactMode, showNotes, setShowNotes, demoMode }) {
+interface AddressBookPageProps {
+    isDark: boolean;
+    setIsDark: (isDark: boolean) => void;
+    showOnlyContacts: boolean;
+    setShowOnlyContacts: (showOnlyContacts: boolean) => void;
+    compactMode: boolean;
+    setCompactMode: (compactMode: boolean) => void;
+    showNotes: boolean;
+    setShowNotes: (showNotes: boolean) => void;
+    demoMode: boolean;
+}
+
+function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyContacts, compactMode, setCompactMode, showNotes, setShowNotes, demoMode }: AddressBookPageProps) {
     const navigate = useNavigate()
-    const searchInputRef = useRef(null)
+    const searchInputRef = useRef<HTMLInputElement>(null)
     const [initialized, setInitialized] = useState(false);
-    const [individuals, setIndividuals] = useState([]);
-    const [sortedIndividuals, setSortedIndividuals] = useState([]);
+    const [individuals, setIndividuals] = useState<FrontIndividual[]>([]);
+    const [sortedIndividuals, setSortedIndividuals] = useState<FrontIndividual[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
 
-    const [mergeAccountGuidOrUnd, setMergeAccountGuidOrUnd] = useState(undefined);
+    const [mergeAccountGuidOrUnd, setMergeAccountGuidOrUnd] = useState<string | undefined>(undefined);
     const mergeAccountGuidOrUndRef = useRef(mergeAccountGuidOrUnd);
-    const [displayNameOfOtherBeingMergedOrUnd, setDisplayNameOfOtherBeingMergedOrUnd] = useState(undefined);
+    const [displayNameOfOtherBeingMergedOrUnd, setDisplayNameOfOtherBeingMergedOrUnd] = useState<string | undefined>(undefined);
 
     // Infinite scrolling state
     const [displayedCount, setDisplayedCount] = useState(50); // Start with 50 items
@@ -127,7 +136,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
     }, [debouncedSearchTerm, showOnlyContacts]);
 
     useEffect(() => {
-        const individualUpdated = (event) => {
+        const individualUpdated = (event: any) => {
             console.log('Individual updated event:', event.detail);
             const updatedIndividual = event.detail;
 
@@ -143,7 +152,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                 }
             });
         };
-        const liveUpdateMerged = (event) => {
+        const liveUpdateMerged = (event: any) => {
             // TODO: we should just use individualUpdated event and drive-by update the status from there
             console.log('Live update merge event:', event.detail);
             const liveUpdate = event.detail;
@@ -285,7 +294,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
         mergeAccountGuidOrUndRef.current = mergeAccountGuidOrUnd;
     }, [mergeAccountGuidOrUnd]);
 
-    const fusionAccounts = async function (toAugment) {
+    const fusionAccounts = async function (toAugment?: string) {
         const toDestroy = mergeAccountGuidOrUndRef.current;
         if (toDestroy === undefined) return;
         if (toDestroy === toAugment) return;
@@ -299,7 +308,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
         setIndividuals(individualsArray);
     };
 
-    const unmergeAccounts = async function (toDesolidarize) {
+    const unmergeAccounts = async function (toDesolidarize?: string) {
         if (toDesolidarize === undefined) return;
 
         await window.chrome.webview.hostObjects.appApi.DesolidarizeIndividuals(toDesolidarize);

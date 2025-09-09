@@ -1,8 +1,6 @@
 ﻿import {HashRouter as Router, Routes, Route, Navigate} from 'react-router-dom'
 import {useState, useEffect} from 'react'
-// @ts-ignore
-import AddressBookPage from '../pages/AddressBookPage.jsx'
-// @ts-ignore
+import AddressBookPage from '../pages/AddressBookPage.tsx'
 import DataCollectionPage from '../pages/DataCollectionPage.tsx'
 import './AppRouter.css'
 import {Toaster} from "react-hot-toast";

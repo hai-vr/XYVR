@@ -1,10 +1,14 @@
 ﻿declare global {
+    // noinspection JSUnusedGlobalSymbols
     interface Window {
         chrome: {
             webview: {
                 hostObjects: {
                     appApi: {
                         GetAppVersion(): Promise<string>;
+                        FusionIndividuals(toAugment: string, toDestroy: string): Promise<void>;
+                        DesolidarizeIndividuals(toDesolidarize: string): Promise<void>;
+                        GetAllExposedIndividualsOrderedByContact(): Promise<string>;
                     };
                     preferencesApi: {
                         GetPreferences(): Promise<string>;
