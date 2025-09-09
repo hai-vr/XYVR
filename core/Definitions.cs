@@ -72,81 +72,6 @@ public class Account
     }
 }
 
-public class IncompleteAccount
-{
-    public NamedApp namedApp;
-    public string qualifiedAppName;
-    
-    public string inAppIdentifier;
-    public string inAppDisplayName;
-    
-    public List<IncompleteCallerAccount> callers = new();
-    
-    public bool IsAnyCallerContact() => callers.Any(caller => caller.isContact ?? false);
-
-    public AccountIdentification AsIdentification()
-    {
-        return new AccountIdentification
-        {
-            inAppIdentifier = inAppIdentifier,
-            namedApp = namedApp,
-            qualifiedAppName = qualifiedAppName,
-        };
-    }
-
-    public static Account MakeIndexed(IncompleteAccount incompleteAccount)
-    {
-        return new Account
-        {
-            guid = XYVRGuids.ForAccount(),
-            namedApp = incompleteAccount.namedApp,
-            qualifiedAppName = incompleteAccount.qualifiedAppName,
-            inAppIdentifier = incompleteAccount.inAppIdentifier,
-            inAppDisplayName = incompleteAccount.inAppDisplayName,
-            callers = incompleteAccount.callers.Select(IncompleteCallerAccount.MakeComplete).ToList(),
-            allDisplayNames = [incompleteAccount.inAppDisplayName],
-            isTechnical = false,
-            
-            isPendingUpdate = true // true because indexing an IncompleteAccount means we're missing note and specifics information in it.
-        };
-    }
-}
-
-public class NonIndexedAccount
-{
-    public NamedApp namedApp;
-    public string qualifiedAppName;
-    public string inAppIdentifier;
-    public string inAppDisplayName;
-    [JsonConverter(typeof(SpecificsConverter))]
-    public object? specifics;
-    public List<CallerAccount> callers = new();
-
-    public AccountIdentification AsIdentification()
-    {
-        return new AccountIdentification
-        {
-            inAppIdentifier = inAppIdentifier,
-            namedApp = namedApp,
-            qualifiedAppName = qualifiedAppName,
-        };
-    }
-
-    public static Account MakeIndexed(NonIndexedAccount nonIndexedAccount)
-    {
-        return new Account
-        {
-            guid = XYVRGuids.ForAccount(),
-            namedApp = nonIndexedAccount.namedApp,
-            qualifiedAppName = nonIndexedAccount.qualifiedAppName,
-            inAppIdentifier = nonIndexedAccount.inAppIdentifier,
-            inAppDisplayName = nonIndexedAccount.inAppDisplayName,
-            specifics = nonIndexedAccount.specifics,
-            callers = nonIndexedAccount.callers.Select(caller => caller.ShallowCopy()).ToList(),
-        };
-    }
-}
-
 public class AccountIdentification
 {
     public NamedApp namedApp;
@@ -181,29 +106,6 @@ public class AccountIdentification
             hashCode = (hashCode * 397) ^ inAppIdentifier.GetHashCode();
             return hashCode;
         }
-    }
-}
-
-public class IncompleteCallerAccount
-{
-    public bool isAnonymous;
-    public string? inAppIdentifier; // Can only be null if it's an anonymous caller.
-    
-    public bool? isContact;
-
-    public static CallerAccount MakeComplete(IncompleteCallerAccount incomplete)
-    {
-        return new CallerAccount
-        {
-            inAppIdentifier = incomplete.inAppIdentifier,
-            isAnonymous = incomplete.isAnonymous,
-            isContact = incomplete.isContact ?? false,
-            note = new Note
-            {
-                status = NoteState.NeverHad,
-                text = null
-            }
-        };
     }
 }
 
