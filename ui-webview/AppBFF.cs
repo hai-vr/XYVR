@@ -41,7 +41,7 @@ public class AppBFF : IAppBFF
         var responseObj = _mainWindow.IndividualRepository.Individuals
             .Where(individual => individual.isExposed)
             .OrderByDescending(individual => individual.isAnyContact)
-            .Select(individual => ToFront(individual, live))
+            .Select(individual => FrontIndividual.FromCore(individual, live))
             .ToList();
         
         return JsonConvert.SerializeObject(responseObj, Formatting.None, _serializer);
@@ -67,47 +67,6 @@ public class AppBFF : IAppBFF
         
         _mainWindow.IndividualRepository.DesolidarizeIndividualAccounts(individual);
         await Scaffolding.SaveRepository(_mainWindow.IndividualRepository);
-    }
-
-    internal static FrontIndividual ToFront(Individual individual, LiveStatusMonitoring live)
-    {
-        var accounts = individual.accounts
-            .Select(account =>
-            {
-                var sessionState = live.GetLiveSessionStateOrNull(account.namedApp, account.inAppIdentifier);
-                return new FrontAccount
-                {
-                    guid = account.guid,
-                    namedApp = account.namedApp,
-                    qualifiedAppName = account.qualifiedAppName,
-                    inAppIdentifier = account.inAppIdentifier,
-                    inAppDisplayName = account.inAppDisplayName,
-                    specifics = account.specifics,
-                    callers = account.callers,
-                    isTechnical = account.isTechnical,
-                    isAnyCallerContact = account.callers.Any(caller => caller.isContact),
-                    isAnyCallerNote = account.callers.Any(caller => caller.note.status == NoteState.Exists),
-                    allDisplayNames = account.allDisplayNames,
-                    isPendingUpdate = account.isPendingUpdate,
-
-                    onlineStatus = sessionState?.onlineStatus,
-                    customStatus = sessionState?.customStatus
-                };
-            }).ToList();
-
-        var nonNullStatus = accounts.Select(account => account.onlineStatus).Where(status => status != null).ToList();
-        return new FrontIndividual
-        {
-            guid = individual.guid,
-            accounts = accounts,
-            displayName = individual.displayName,
-            note = individual.note,
-            isAnyContact = individual.isAnyContact,
-            isExposed = individual.isExposed,
-            customName = individual.customName,
-            
-            onlineStatus = nonNullStatus.Count > 0 ? nonNullStatus.FirstOrDefault(it => it != OnlineStatus.Offline, OnlineStatus.Offline) : null,
-        };
     }
 
     public void CloseApp()

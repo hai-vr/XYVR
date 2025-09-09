@@ -181,10 +181,10 @@ const Account = ({ account, imposter, showAlias, showNotes, demoMode }: AccountP
                 </p>
             )}
 
-            {showNotes && account.callers && account.callers.filter(caller => caller.note.status === "Exists").map((caller, index) => (
+            {showNotes && account.callers && account.callers.filter(caller => caller.note).map((caller, index) => (
                 <div key={index} className="note-container">
                     <div className="note-text">
-                        {caller.note.text!.startsWith('mt ') ? (_D2('Met through ' + caller.note.text!.substring(3), demoMode)) : _D2(caller.note.text!, demoMode)}
+                        {caller.note!.startsWith('mt ') ? (_D2('Met through ' + caller.note!.substring(3), demoMode)) : _D2(caller.note!, demoMode)}
                     </div>
                 </div>
             ))}

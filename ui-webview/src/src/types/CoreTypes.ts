@@ -18,15 +18,10 @@ export const NoteState = {
 
 export type NoteStateType = typeof NoteState[keyof typeof NoteState];
 
-export type Note = {
-    status: NoteStateType;
-    text?: string;
-};
-
 export type CallerAccount = {
     isAnonymous: boolean;
     inAppIdentifier?: string;
-    note: Note;
+    note?: string;
     isContact: boolean;
 };
 
@@ -62,7 +57,7 @@ export type IndividualType = {
     isAnyContact: boolean;
     isExposed: boolean;
     customName?: string;
-    note: Note;
+    note?: string;
 };
 
 export const OnlineStatus = {
@@ -106,7 +101,7 @@ export type FrontIndividual = {
     isAnyContact: boolean;
     isExposed: boolean;
     customName?: string;
-    note: Note;
+    note?: string;
 
     onlineStatus?: OnlineStatusType;
     customStatus?: string;

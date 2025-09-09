@@ -254,7 +254,7 @@ export const accountMatchesFromRegularTerms = (account: FrontAccount, regularTer
 
     // Check caller notes
     const callerNotesMatch = account.callers?.some(caller => {
-        const callerNote = caller.note?.text || '';
+        const callerNote = caller.note || '';
 
         return regularTerms.every(term => {
             const kanaVariants = generateKanaVariants(term);
@@ -299,7 +299,7 @@ export const isIndividualVisible = (individual: FrontIndividual, unparsedSearchT
 
     // Check regular search terms (existing logic)
     const displayName = individual.displayName || '';
-    const individualNote = individual.note?.text || '';
+    const individualNote = individual.note || '';
 
     const individualMatch = regularTerms.every(term => {
         const kanaVariants = generateKanaVariants(term);

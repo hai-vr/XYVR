@@ -56,7 +56,7 @@ public class DataCollectionBFF : IDataCollectionBFF
                 .Cast<IDataCollection>()
                 .ToList()) as IDataCollection;
 
-            await dataCollection.IncrementalUpdateRepository(new UIProgressJobHandler(repository, async individual => await _mainWindow.SendEventToReact("individualUpdated", AppBFF.ToFront(individual, _mainWindow.LiveStatusMonitoring))));
+            await dataCollection.IncrementalUpdateRepository(new UIProgressJobHandler(repository, async individual => await _mainWindow.SendEventToReact("individualUpdated", FrontIndividual.FromCore(individual, _mainWindow.LiveStatusMonitoring))));
             await Scaffolding.SaveRepository(repository);
         }
         finally
@@ -71,7 +71,7 @@ public class DataCollectionBFF : IDataCollectionBFF
         var connectors = _mainWindow.ConnectorsMgt.Connectors;
         
         var connectorF = (await Task.WhenAll(connectors
-            .Select(async connector => new FrontConnector(connector, await _mainWindow.CredentialsMgt.IsLoggedIn(connector)))
+            .Select(async connector => FrontConnector.FromCore(connector, await _mainWindow.CredentialsMgt.IsLoggedIn(connector)))
             .ToList())).ToList();
         
         return ToJSON(connectorF);
