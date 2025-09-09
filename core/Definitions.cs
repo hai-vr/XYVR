@@ -93,6 +93,23 @@ public class IncompleteAccount
             qualifiedAppName = qualifiedAppName,
         };
     }
+
+    public static Account MakeIndexed(IncompleteAccount incompleteAccount)
+    {
+        return new Account
+        {
+            guid = XYVRGuids.ForAccount(),
+            namedApp = incompleteAccount.namedApp,
+            qualifiedAppName = incompleteAccount.qualifiedAppName,
+            inAppIdentifier = incompleteAccount.inAppIdentifier,
+            inAppDisplayName = incompleteAccount.inAppDisplayName,
+            callers = incompleteAccount.callers.Select(IncompleteCallerAccount.MakeComplete).ToList(),
+            allDisplayNames = [incompleteAccount.inAppDisplayName],
+            isTechnical = false,
+            
+            isPendingUpdate = true // true because indexing an IncompleteAccount means we're missing note and specifics information in it.
+        };
+    }
 }
 
 public class NonIndexedAccount
@@ -104,9 +121,6 @@ public class NonIndexedAccount
     [JsonConverter(typeof(SpecificsConverter))]
     public object? specifics;
     public List<CallerAccount> callers = new();
-    public List<string> allDisplayNames = new();
-    // public bool isPendingUpdate;
-    // public bool isTechnical;
 
     public AccountIdentification AsIdentification()
     {
@@ -129,7 +143,6 @@ public class NonIndexedAccount
             inAppDisplayName = nonIndexedAccount.inAppDisplayName,
             specifics = nonIndexedAccount.specifics,
             callers = nonIndexedAccount.callers.Select(caller => caller.ShallowCopy()).ToList(),
-            allDisplayNames = nonIndexedAccount.allDisplayNames,
         };
     }
 }
@@ -174,9 +187,24 @@ public class AccountIdentification
 public class IncompleteCallerAccount
 {
     public bool isAnonymous;
-    public string? inAppIdentifier;
+    public string? inAppIdentifier; // Can only be null if it's an anonymous caller.
     
     public bool? isContact;
+
+    public static CallerAccount MakeComplete(IncompleteCallerAccount incomplete)
+    {
+        return new CallerAccount
+        {
+            inAppIdentifier = incomplete.inAppIdentifier,
+            isAnonymous = incomplete.isAnonymous,
+            isContact = incomplete.isContact ?? false,
+            note = new Note
+            {
+                status = NoteState.NeverHad,
+                text = null
+            }
+        };
+    }
 }
 
 public class CallerAccount

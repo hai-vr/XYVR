@@ -217,7 +217,6 @@ public class IndividualRepository
             }
 
             var workingDisplayNames = existingAccount.allDisplayNames.ToList();
-            workingDisplayNames.AddRange(inputAccount.allDisplayNames);
             if (!workingDisplayNames.Contains(inputAccount.inAppDisplayName))
             {
                 workingDisplayNames.Add(inputAccount.inAppDisplayName);
@@ -255,7 +254,7 @@ public class IndividualRepository
                 }
                 if (!callerExists)
                 {
-                    existingAccount.callers.Add(CallerFromIncompleteCaller(inputCaller));
+                    existingAccount.callers.Add(IncompleteCallerAccount.MakeComplete(inputCaller));
                 }
             }
 
@@ -272,21 +271,6 @@ public class IndividualRepository
         }
 
         return false;
-    }
-
-    private static CallerAccount CallerFromIncompleteCaller(IncompleteCallerAccount inputCaller)
-    {
-        return new CallerAccount
-        {
-            inAppIdentifier = inputCaller.inAppIdentifier,
-            isAnonymous = inputCaller.isAnonymous,
-            isContact = inputCaller.isContact ?? false,
-            note = new Note
-            {
-                status = NoteState.NeverHad,
-                text = null
-            }
-        };
     }
 
     private static void UpdateExistingNote(Note existingNote, Note inputNote)
@@ -385,34 +369,14 @@ public class IndividualRepository
     private Individual CreateNewIndividualFromNonIndexedAccount(NonIndexedAccount nonIndexedAccount)
     {
         var account = NonIndexedAccount.MakeIndexed(nonIndexedAccount);
-        return CreateNewIndividualFromAccount(account);
+        return InternalCreateFromAccount(account);
     }
 
+    // It is the responsibility of the caller to never call this when that account is already owned by an Individual.
     private Individual CreateNewIndividualFromIncompleteAccount(IncompleteAccount incompleteAccount)
     {
-        var isAnyContact = incompleteAccount.IsAnyCallerContact();
-        var individual = new Individual
-        {
-            guid = XYVRGuids.ForIndividual(),
-            accounts = [new Account
-            {
-                guid = XYVRGuids.ForAccount(),
-                namedApp = incompleteAccount.namedApp,
-                qualifiedAppName = incompleteAccount.qualifiedAppName,
-                inAppIdentifier = incompleteAccount.inAppIdentifier,
-                inAppDisplayName = incompleteAccount.inAppDisplayName,
-                callers = incompleteAccount.callers.Select(CallerFromIncompleteCaller).ToList(),
-                allDisplayNames = [incompleteAccount.inAppDisplayName],
-                isTechnical = false,
-                
-                isPendingUpdate = true // true because this individual was just created from an incomplete account
-            }],
-            displayName = incompleteAccount.inAppDisplayName,
-            isAnyContact = isAnyContact,
-            isExposed = isAnyContact,
-        };
-        Individuals.Add(individual);
-        return individual;
+        var account = IncompleteAccount.MakeIndexed(incompleteAccount);
+        return InternalCreateFromAccount(account);
     }
 
     public void FusionIndividuals(Individual toAugment, Individual toDestroy)
