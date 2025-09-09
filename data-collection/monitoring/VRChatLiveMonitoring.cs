@@ -38,7 +38,7 @@ public class VRChatLiveMonitoring : ILiveMonitoring
             _liveComms.OnLiveUpdateReceived += async update =>
             {
                 Console.WriteLine($"OnLiveUpdateReceived: {JsonConvert.SerializeObject(update, serializer)}");
-                await _monitoring.Merge(update);
+                await _monitoring.MergeUser(update);
             };
             await _liveComms.Connect();
             

@@ -107,7 +107,7 @@ public class ResoniteAPI
     public async Task<ContactResponseElementJsonObject[]> GetUserContacts(DataCollectionReason dataCollectionReason)
     {
         var url = $"{AuditUrls.ResoniteApiUrl}/users/{_myUserId}/contacts";
-        var requestGuid = Guid.NewGuid().ToString();
+        var requestGuid = XYVRGuids.ForRequest();
         try
         {
             var request = new HttpRequestMessage(HttpMethod.Get, url);
@@ -137,7 +137,7 @@ public class ResoniteAPI
     public async Task<UserResponseJsonObject?> GetUser(string userId, DataCollectionReason dataCollectionReason)
     {
         var url = $"{AuditUrls.ResoniteApiUrl}/users/{userId}";
-        var requestGuid = Guid.NewGuid().ToString();
+        var requestGuid = XYVRGuids.ForRequest();
         try
         {
             var request = new HttpRequestMessage(HttpMethod.Get, url);
@@ -170,7 +170,7 @@ public class ResoniteAPI
         _responseCollector.Ingest(new ResponseCollectionTrail
         {
             timestamp = _responseCollector.GetCurrentTime(),
-            trailGuid = Guid.NewGuid().ToString(),
+            trailGuid = XYVRGuids.ForTrail(),
             requestGuid = requestGuid,
             reason = dataCollectionReason,
             apiSource = ResoniteApiSourceName,
@@ -186,7 +186,7 @@ public class ResoniteAPI
         _responseCollector.Ingest(new ResponseCollectionTrail
         {
             timestamp = _responseCollector.GetCurrentTime(),
-            trailGuid = Guid.NewGuid().ToString(),
+            trailGuid = XYVRGuids.ForTrail(),
             requestGuid = requestGuid,
             reason = dataCollectionReason,
             apiSource = ResoniteApiSourceName,
@@ -202,7 +202,7 @@ public class ResoniteAPI
         _responseCollector.Ingest(new ResponseCollectionTrail
         {
             timestamp = _responseCollector.GetCurrentTime(),
-            trailGuid = Guid.NewGuid().ToString(),
+            trailGuid = XYVRGuids.ForTrail(),
             requestGuid = requestGuid,
             reason = dataCollectionReason,
             apiSource = ResoniteApiSourceName,

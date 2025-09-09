@@ -119,7 +119,7 @@ public class VRChatCommunicator
     {
         return new Account
         {
-            guid = Guid.NewGuid().ToString(),
+            guid = XYVRGuids.ForAccount(),
             namedApp = NamedApp.VRChat,
             qualifiedAppName = VRChatQualifiedAppName,
             inAppIdentifier = user.id,

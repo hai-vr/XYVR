@@ -42,7 +42,7 @@ public class IndividualRepository
             {
                 if (string.IsNullOrWhiteSpace(account.guid))
                 {
-                    account.guid = Guid.NewGuid().ToString();
+                    account.guid = XYVRGuids.ForAccount();
                 }
 
                 if (account.allDisplayNames == null || account.allDisplayNames.Count == 0)
@@ -366,7 +366,7 @@ public class IndividualRepository
         var isAnyContact = account.IsAnyCallerContact();
         var individual = new Individual
         {
-            guid = Guid.NewGuid().ToString(),
+            guid = XYVRGuids.ForIndividual(),
             accounts = [account],
             displayName = account.inAppDisplayName,
             isAnyContact = isAnyContact,
@@ -381,10 +381,10 @@ public class IndividualRepository
         var isAnyContact = incompleteAccount.IsAnyCallerContact();
         var individual = new Individual
         {
-            guid = Guid.NewGuid().ToString(),
+            guid = XYVRGuids.ForIndividual(),
             accounts = [new Account
             {
-                guid = Guid.NewGuid().ToString(),
+                guid = XYVRGuids.ForAccount(),
                 namedApp = incompleteAccount.namedApp,
                 qualifiedAppName = incompleteAccount.qualifiedAppName,
                 inAppIdentifier = incompleteAccount.inAppIdentifier,

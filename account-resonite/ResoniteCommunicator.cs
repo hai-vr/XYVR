@@ -39,7 +39,7 @@ public class ResoniteCommunicator
 
     public async Task ResoniteLogin()
     {
-        var api = new ResoniteAPI(Guid.NewGuid().ToString(), _uid, _responseCollector);
+        var api = new ResoniteAPI(XYVRGuids.ForResoniteMachineId(), _uid, _responseCollector);
         
         _ = await api.Login(_username__sensitive, _password__sensitive, _stayLoggedIn);
         await _credentialsStorage.StoreCookieOrToken(api.GetAllUserAndToken__Sensitive());
@@ -52,7 +52,7 @@ public class ResoniteCommunicator
 
         return new Account
         {
-            guid = Guid.NewGuid().ToString(),
+            guid = XYVRGuids.ForAccount(),
             namedApp = NamedApp.Resonite,
             qualifiedAppName = ResoniteQualifiedAppName,
             inAppIdentifier = _callerUserId,
@@ -93,7 +93,7 @@ public class ResoniteCommunicator
         var user = (UserResponseJsonObject)userN;
         return new Account
         {
-            guid = Guid.NewGuid().ToString(),
+            guid = XYVRGuids.ForAccount(),
             namedApp = NamedApp.Resonite,
             qualifiedAppName = ResoniteQualifiedAppName,
             inAppIdentifier = user.id,
@@ -145,7 +145,7 @@ public class ResoniteCommunicator
     {
         return new Account
         {
-            guid = Guid.NewGuid().ToString(),
+            guid = XYVRGuids.ForAccount(),
             namedApp = NamedApp.Resonite,
             qualifiedAppName = ResoniteQualifiedAppName,
             inAppIdentifier = user.id,
@@ -169,7 +169,7 @@ public class ResoniteCommunicator
 
     private async Task<ResoniteAPI> InitializeApi()
     {
-        var api = new ResoniteAPI(Guid.NewGuid().ToString(), _uid, _responseCollector);
+        var api = new ResoniteAPI(XYVRGuids.ForResoniteMachineId(), _uid, _responseCollector);
 
         var userAndToken__sensitive = await _credentialsStorage.RequireCookieOrToken();
         if (userAndToken__sensitive != null)

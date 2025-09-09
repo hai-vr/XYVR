@@ -13,7 +13,7 @@ public class ConnectorManagement
     {
         var connector = new Connector
         {
-            guid = Guid.NewGuid().ToString(),
+            guid = XYVRGuids.ForConnector(),
             displayName = "",
             type = connectorType,
             refreshMode = RefreshMode.ContinuousFullUpdates,

@@ -89,7 +89,7 @@ public class LiveBFF : ILiveBFF
         _liveMonitoringAgents = null;
     }
 
-    private async Task WhenLiveUpdateMerged(LiveUpdate update)
+    private async Task WhenLiveUpdateMerged(LiveUserUpdate update)
     {
         await _mainWindow.SendEventToReact("liveUpdateMerged", update);
     }

@@ -64,7 +64,7 @@ internal class FrontAccount
     public OnlineStatus? onlineStatus;
     public string? customStatus;
 
-    public static FrontAccount ToFrontAccount(Account account, LiveUpdate? sessionState)
+    public static FrontAccount ToFrontAccount(Account account, LiveUserUpdate? sessionState)
     {
         return new FrontAccount
         {

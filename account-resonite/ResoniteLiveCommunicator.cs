@@ -11,7 +11,7 @@ public class ResoniteLiveCommunicator
     private readonly ResoniteSignalRClient _srClient;
     
     public event LiveUpdateReceived? OnLiveUpdateReceived;
-    public delegate Task LiveUpdateReceived(LiveUpdate liveUpdate);
+    public delegate Task LiveUpdateReceived(LiveUserUpdate liveUpdate);
     
     public event Action OnReconnected;
 
@@ -47,7 +47,7 @@ public class ResoniteLiveCommunicator
 
         if (OnLiveUpdateReceived != null)
         {
-            await OnLiveUpdateReceived(new LiveUpdate
+            await OnLiveUpdateReceived(new LiveUserUpdate
             {
                 trigger = "SignalR-OnStatusUpdate",
                 namedApp = NamedApp.Resonite,
@@ -60,21 +60,21 @@ public class ResoniteLiveCommunicator
         }
     }
 
-    private static LiveSessionState DeriveSessionState(UserStatusUpdate statusUpdate, OnlineStatus status)
+    private static LiveUserSessionState DeriveSessionState(UserStatusUpdate statusUpdate, OnlineStatus status)
     {
         if (status == OnlineStatus.Offline)
         {
-            return new LiveSessionState
+            return new LiveUserSessionState
             {
                 knowledge = LiveSessionKnowledge.Indeterminate,
                 knownSession = null
             };
         }
 
-        return new LiveSessionState
+        return new LiveUserSessionState
         {
             knowledge = LiveSessionKnowledge.Known,
-            knownSession = new LiveKnownSession
+            knownSession = new LiveUserKnownSession
             {
                 inAppSessionIdentifier = statusUpdate.userSessionId
             }

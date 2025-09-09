@@ -208,7 +208,7 @@ public class VRChatAPI
         ThrowIfNotLoggedIn();
         
         var url = $"{AuditUrls.VrcApiUrl}/auth/user";
-        var requestGuid = Guid.NewGuid().ToString();
+        var requestGuid = XYVRGuids.ForRequest();
 
         try
         {
@@ -235,7 +235,7 @@ public class VRChatAPI
     {
         ThrowIfNotLoggedIn();
         
-        var requestGuid = Guid.NewGuid().ToString();
+        var requestGuid = XYVRGuids.ForRequest();
 
         var offline = listFriendsRequestType == ListFriendsRequestType.OnlyOffline ? "true" : "false";
         await foreach (var friend in GetPaginatedResults<VRChatFriend>(dataCollectionReason, requestGuid, (offset, pageSize) =>
@@ -251,7 +251,7 @@ public class VRChatAPI
         ThrowIfNotLoggedIn();
         
         var url = $"{AuditUrls.VrcApiUrl}/users/{userId}";
-        var requestGuid = Guid.NewGuid().ToString();
+        var requestGuid = XYVRGuids.ForRequest();
         try
         {
             var response = await _client.GetAsync(url);
@@ -281,7 +281,7 @@ public class VRChatAPI
     {
         ThrowIfNotLoggedIn();
         
-        var requestGuid = Guid.NewGuid().ToString();
+        var requestGuid = XYVRGuids.ForRequest();
         
         await foreach (var note in GetPaginatedResults<VRChatNoteFull>(dataCollectionReason, requestGuid, (offset, pageSize) =>
             Task.FromResult($"{AuditUrls.VrcApiUrl}/userNotes?offset={offset}&n={pageSize}")))
@@ -379,7 +379,7 @@ public class VRChatAPI
         _responseCollector.Ingest(new ResponseCollectionTrail
         {
             timestamp = _responseCollector.GetCurrentTime(),
-            trailGuid = Guid.NewGuid().ToString(),
+            trailGuid = XYVRGuids.ForTrail(),
             requestGuid = requestGuid,
             reason = dataCollectionReason,
             apiSource = VRChatApiSourceName,
@@ -395,7 +395,7 @@ public class VRChatAPI
         _responseCollector.Ingest(new ResponseCollectionTrail
         {
             timestamp = _responseCollector.GetCurrentTime(),
-            trailGuid = Guid.NewGuid().ToString(),
+            trailGuid = XYVRGuids.ForTrail(),
             requestGuid = requestGuid,
             reason = dataCollectionReason,
             apiSource = VRChatApiSourceName,
@@ -411,7 +411,7 @@ public class VRChatAPI
         _responseCollector.Ingest(new ResponseCollectionTrail
         {
             timestamp = _responseCollector.GetCurrentTime(),
-            trailGuid = Guid.NewGuid().ToString(),
+            trailGuid = XYVRGuids.ForTrail(),
             requestGuid = requestGuid,
             reason = dataCollectionReason,
             apiSource = VRChatApiSourceName,

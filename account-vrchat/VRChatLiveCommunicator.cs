@@ -17,7 +17,7 @@ public class VRChatLiveCommunicator
     private bool _hasInitiatedDisconnect;
 
     public event LiveUpdateReceived? OnLiveUpdateReceived;
-    public delegate Task LiveUpdateReceived(LiveUpdate liveUpdate);
+    public delegate Task LiveUpdateReceived(LiveUserUpdate liveUpdate);
 
     public VRChatLiveCommunicator(ICredentialsStorage credentialsStorage, string callerInAppIdentifier, IResponseCollector responseCollector)
     {
@@ -55,7 +55,7 @@ public class VRChatLiveCommunicator
         {
             if (OnLiveUpdateReceived != null)
             {
-                await OnLiveUpdateReceived(new LiveUpdate
+                await OnLiveUpdateReceived(new LiveUserUpdate
                 {
                     trigger = "API-ListFriends",
                     namedApp = NamedApp.VRChat,
@@ -93,7 +93,7 @@ public class VRChatLiveCommunicator
                 if (OnLiveUpdateReceived != null)
                 {
                     // FIXME: This is a task???
-                    OnLiveUpdateReceived(new LiveUpdate
+                    OnLiveUpdateReceived(new LiveUserUpdate
                     {
                         trigger = $"WS-{type}",
                         namedApp = NamedApp.VRChat,
