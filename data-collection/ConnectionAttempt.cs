@@ -1,4 +1,5 @@
-﻿using XYVR.Core;
+﻿using JetBrains.Annotations;
+using XYVR.Core;
 
 namespace XYVR.Data.Collection;
 
@@ -17,7 +18,8 @@ public class ConnectionAttemptResult
     public string guid;
     public ConnectionAttemptResultType type;
     public ConnectorAccount account;
-    public bool isTwoFactorEmail; // This is not unused, it's read by the front.
+    // The React app needs this field to decide which of our endpoints to invoke, even though the backend doesn't read it.
+    [PublicAPI] public bool isTwoFactorEmail;
 }
 
 public enum ConnectionAttemptResultType
