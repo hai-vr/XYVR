@@ -1,47 +1,61 @@
-﻿import React from 'react';
-import './Account.css';
+﻿import './Account.css';
 import {CircleDot, CircleOff, Clipboard, DiamondMinus, Globe, TriangleAlert} from "lucide-react";
 import {_D, _D2} from "../haiUtils.ts";
 import resoniteIcon from "../assets/Resonite_Wiki-Icon.png";
+import {
+    type FrontAccount,
+    NamedApp,
+    type NamedAppType,
+    OnlineStatus,
+    type OnlineStatusType
+} from "../types/CoreTypes.ts";
 
-const Account = ({ account, imposter, showAlias, showNotes, demoMode }) => {
+interface AccountProps {
+    account: FrontAccount;
+    imposter: boolean;
+    showAlias: boolean;
+    showNotes: boolean;
+    demoMode: boolean;
+}
+
+const Account = ({ account, imposter, showAlias, showNotes, demoMode }: AccountProps) => {
     const hasNote = account.isAnyCallerNote;
 
     const copyInAppIdentifier = async () => {
         await navigator.clipboard.writeText(account.inAppIdentifier);
     };
 
-    const getAppIconClass = (namedApp) => {
+    const getAppIconClass = (namedApp: NamedAppType) => {
         switch (namedApp) {
-            case "Resonite":
+            case NamedApp.Resonite:
                 return "app-icon resonite";
-            case "VRChat":
+            case NamedApp.VRChat:
                 return "app-icon vrchat";
-            case "Cluster":
+            case NamedApp.Cluster:
                 return "app-icon cluster";
-            case "ChilloutVR":
+            case NamedApp.ChilloutVR:
                 return "app-icon chilloutvr";
             default:
                 return "app-icon default";
         }
     };
 
-    const getAppIcon = (namedApp) => {
+    const getAppIcon = (namedApp: NamedAppType) => {
         switch (namedApp) {
-            case "Resonite":
+            case NamedApp.Resonite:
                 return <img src={resoniteIcon} alt="Resonite" className="app-icon-img" title="Resonite" />;
-            case "VRChat":
+            case NamedApp.VRChat:
                 return '💬';
-            case "Cluster":
+            case NamedApp.Cluster:
                 return '☁️';
-            case "ChilloutVR":
+            case NamedApp.ChilloutVR:
                 return '🌆';
             default:
                 return '❓';
         }
     };
 
-    const getAppDisplayName = (account) => {
+    const getAppDisplayName = (account: FrontAccount) => {
         switch (account.namedApp) {
             case "Resonite":
                 return 'Resonite';
@@ -56,46 +70,45 @@ const Account = ({ account, imposter, showAlias, showNotes, demoMode }) => {
         }
     };
     
-    const getOnlineStatusEmoji = (onlineStatus) => {
+    const getOnlineStatusEmoji = (onlineStatus: OnlineStatusType) => {
         switch (onlineStatus) {
-            case 'Online':
+            case OnlineStatus.Online:
                 return <span className="status-char status-online">⬤</span>;
-            case 'ResoniteBusy':
-            case 'VRChatDND':
+            case OnlineStatus.ResoniteBusy:
+            case OnlineStatus.VRChatDND:
                 return <CircleOff className="status-icon status-busy" />;
-            case 'ResoniteAway':
+            case OnlineStatus.ResoniteAway:
                 return <CircleDot className="status-icon status-away" />;
-            case 'VRChatAskMe':
+            case OnlineStatus.VRChatAskMe:
                 return <DiamondMinus className="status-icon status-askme" />;
-            case 'ResoniteSociable':
-            case 'VRChatJoinMe':
+            case OnlineStatus.ResoniteSociable:
+            case OnlineStatus.VRChatJoinMe:
                 return <span className="status-char status-joinme">■</span>;
-            case 'Offline':
+            case OnlineStatus.Offline:
                 return '';
             default:
                 return '';
         }
     };
     
-    const getOnlineStatusText = (onlineStatus) => {
+    const getOnlineStatusText = (onlineStatus: OnlineStatusType) => {
         switch (onlineStatus) {
-            case 'Online':
+            case OnlineStatus.Online:
                 return 'Online';
-            case 'ResoniteBusy':
+            case OnlineStatus.ResoniteBusy:
                 return 'Busy';
-            case 'VRChatDND':
+            case OnlineStatus.VRChatDND:
                 return 'Do Not Disturb';
-            case 'ResoniteAway':
+            case OnlineStatus.ResoniteAway:
                 return 'Away';
-            case 'VRChatAskMe':
+            case OnlineStatus.VRChatAskMe:
                 return 'Ask Me';
-            case 'ResoniteSociable':
+            case OnlineStatus.ResoniteSociable:
                 return 'Sociable';
-            case 'VRChatJoinMe':
+            case OnlineStatus.VRChatJoinMe:
                 return 'Join Me';
-            case 'Offline':
+            case OnlineStatus.Offline:
                 return '';
-            case '':
             default:
                 return onlineStatus;
         }
@@ -110,18 +123,18 @@ const Account = ({ account, imposter, showAlias, showNotes, demoMode }) => {
                     </div>
                     <div>
                         <div className="account-display-name" title={!imposter && account.allDisplayNames?.map(it => _D(it, demoMode)).join('\n') || ``}>
-                            {_D(account.inAppDisplayName, demoMode)} {getOnlineStatusEmoji(account.onlineStatus)} {getOnlineStatusText(account.onlineStatus)}
+                            {_D(account.inAppDisplayName, demoMode)} {getOnlineStatusEmoji(account.onlineStatus || OnlineStatus.Offline)} {getOnlineStatusText(account.onlineStatus || OnlineStatus.Offline)}
                         </div>
                         {!imposter && showAlias && account.allDisplayNames && account.allDisplayNames
-                            .toReversed()
-                            .filter((displayName) => displayName !== account.inAppDisplayName)
-                            .map((displayName, index) => (
+                            .slice().reverse()
+                            .filter((displayName: string) => displayName !== account.inAppDisplayName)
+                            .map((displayName: string, index: number) => (
                             <div key={index} className="account-display-name">
                                 {_D(displayName, demoMode)}
                             </div>
                         ))}
                         <div className="account-app-name">
-                            {!account.customStatus && getAppDisplayName(account)} {_D2(account.customStatus, demoMode)}
+                            {!account.customStatus && getAppDisplayName(account)} {_D2(account.customStatus || '', demoMode)}
                         </div>
                     </div>
                 </div>
@@ -171,7 +184,7 @@ const Account = ({ account, imposter, showAlias, showNotes, demoMode }) => {
             {showNotes && account.callers && account.callers.filter(caller => caller.note.status === "Exists").map((caller, index) => (
                 <div key={index} className="note-container">
                     <div className="note-text">
-                        {caller.note.text.startsWith('mt ') ? (_D2('Met through ' + caller.note.text.substring(3), demoMode)) : _D2(caller.note.text, demoMode)}
+                        {caller.note.text!.startsWith('mt ') ? (_D2('Met through ' + caller.note.text!.substring(3), demoMode)) : _D2(caller.note.text!, demoMode)}
                     </div>
                 </div>
             ))}

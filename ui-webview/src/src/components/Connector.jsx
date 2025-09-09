@@ -1,5 +1,5 @@
 ﻿import React, { useState } from 'react';
-import Account from './Account.jsx';
+import Account from './Account.tsx';
 import './Connector.css';
 import '../InputFields.css';
 import {TriangleAlert, X} from "lucide-react";

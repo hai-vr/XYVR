@@ -1,4 +1,4 @@
-﻿import Account from "./Account.jsx";
+﻿import Account from "./Account.tsx";
 import "./Individual.css";
 import { useState, useRef, useEffect } from "react";
 import {Clipboard, Phone} from "lucide-react";
