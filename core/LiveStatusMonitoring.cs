@@ -7,8 +7,11 @@ public class LiveStatusMonitoring
     private readonly Dictionary<string, LiveSession> _guidToSession = new();
     private readonly Dictionary<NamedApp, Dictionary<string, LiveSession>> _namedAppToInAppIdToSession = new();
 
-    private event LiveUpdateMerged? OnLiveUserUpdateMerged;
-    public delegate Task LiveUpdateMerged(LiveUserUpdate liveUpdate);
+    private event LiveUserUpdateMerged? OnLiveUserUpdateMerged;
+    public delegate Task LiveUserUpdateMerged(LiveUserUpdate liveUpdate);
+
+    private event LiveSessionUpdated? OnLiveSessionUpdated;
+    public delegate Task LiveSessionUpdated(LiveSession session);
 
     public LiveStatusMonitoring()
     {
@@ -41,10 +44,11 @@ public class LiveStatusMonitoring
         // The UI side or BFF would have to decide what status to associate with that account.
         _liveUpdatesByAppByUser[liveUpdate.namedApp][liveUpdate.inAppIdentifier] = liveUpdate;
 
-        if (liveUpdate.mainSession != null && liveUpdate.mainSession.knowledge == LiveSessionKnowledge.Known)
+        LiveSession? liveSession = null;
+        if (liveUpdate.mainSession is { knowledge: LiveSessionKnowledge.Known })
         {
-            var userKnownSession = liveUpdate.mainSession.knownSession as LiveUserKnownSession;
-            var session = new NonIndexedLiveSession
+            var userKnownSession = liveUpdate.mainSession.knownSession!;
+            var nonIndexedSession = new NonIndexedLiveSession
             {
                 namedApp = liveUpdate.namedApp,
                 qualifiedAppName = liveUpdate.qualifiedAppName,
@@ -59,9 +63,17 @@ public class LiveStatusMonitoring
                     }
                     : null,
             };
-            await MergeSession(session);
+            liveSession = InternalMergeSessionAndGet(nonIndexedSession);
         }
 
+        // We want to send the updates in a preferred order:
+        // - Session first, so that the receiver side may register that session.
+        // - User next, so that the receiver side may have a better luck associating the user with that session.
+        // This isn't required.
+        if (liveSession != null && OnLiveSessionUpdated != null)
+        {
+            await OnLiveSessionUpdated.Invoke(liveSession);
+        }
         if (OnLiveUserUpdateMerged != null)
         {
             await OnLiveUserUpdateMerged.Invoke(liveUpdate);
@@ -70,10 +82,21 @@ public class LiveStatusMonitoring
 
     public async Task MergeSession(NonIndexedLiveSession inputSession)
     {
+        var liveSession = InternalMergeSessionAndGet(inputSession);
+        
+        if (OnLiveSessionUpdated != null)
+        {
+            await OnLiveSessionUpdated.Invoke(liveSession);
+        }
+    }
+
+    private LiveSession InternalMergeSessionAndGet(NonIndexedLiveSession inputSession)
+    {
         if (_namedAppToInAppIdToSession[inputSession.namedApp].TryGetValue(inputSession.inAppSessionIdentifier, out var existingSession))
         {
             if (inputSession.inAppSessionName != null) existingSession.inAppSessionName = inputSession.inAppSessionName;
             if (inputSession.inAppVirtualSpaceName != null) existingSession.inAppVirtualSpaceName = inputSession.inAppVirtualSpaceName;
+            return existingSession;
         }
         else
         {
@@ -82,18 +105,31 @@ public class LiveStatusMonitoring
             _sessions.Add(liveSession);
             _guidToSession[liveSession.guid] = liveSession;
             _namedAppToInAppIdToSession[liveSession.namedApp][liveSession.inAppSessionIdentifier] = liveSession;
+            
+            return liveSession;
         }
     }
 
-    public void AddMergeListener(LiveUpdateMerged listener)
+    public void AddUserUpdateMergedListener(LiveUserUpdateMerged listener)
     {
         OnLiveUserUpdateMerged -= listener;
         OnLiveUserUpdateMerged += listener;
     }
 
-    public void RemoveListener(LiveUpdateMerged listener)
+    public void RemoveUserUpdateMergedListener(LiveUserUpdateMerged listener)
     {
         OnLiveUserUpdateMerged -= listener;
+    }
+
+    public void AddSessionUpdatedListener(LiveSessionUpdated listener)
+    {
+        OnLiveSessionUpdated -= listener;
+        OnLiveSessionUpdated += listener;
+    }
+
+    public void RemoveSessionUpdatedListener(LiveSessionUpdated listener)
+    {
+        OnLiveSessionUpdated -= listener;
     }
 
     public LiveUserUpdate? GetLiveSessionStateOrNull(NamedApp accountNamedApp, string accountInAppIdentifier)

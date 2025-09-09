@@ -42,7 +42,8 @@ public class LiveBFF : ILiveBFF
         var credentials = _mainWindow.CredentialsMgt;
         var monitoring = _mainWindow.LiveStatusMonitoring;
 
-        monitoring.AddMergeListener(WhenLiveUpdateMerged);
+        monitoring.AddUserUpdateMergedListener(WhenUserUpdateMerged);
+        monitoring.AddSessionUpdatedListener(WhenSessionUpdated);
         
         ILiveMonitoring?[] liveMonitorings = await Task.WhenAll(connectors.Connectors
             .Where(connector => connector.liveMode != LiveMode.NoLiveFunction)
@@ -65,7 +66,9 @@ public class LiveBFF : ILiveBFF
         if (_liveMonitoringAgents == null) return;
 
         var monitoring = _mainWindow.LiveStatusMonitoring;
-        monitoring.RemoveListener(WhenLiveUpdateMerged);
+        
+        monitoring.RemoveUserUpdateMergedListener(WhenUserUpdateMerged);
+        monitoring.RemoveSessionUpdatedListener(WhenSessionUpdated);
         
         var tasks = _liveMonitoringAgents.Select(agent =>
         {
@@ -89,9 +92,14 @@ public class LiveBFF : ILiveBFF
         _liveMonitoringAgents = null;
     }
 
-    private async Task WhenLiveUpdateMerged(LiveUserUpdate update)
+    private async Task WhenUserUpdateMerged(LiveUserUpdate update)
     {
-        await _mainWindow.SendEventToReact("liveUpdateMerged", update);
+        await _mainWindow.SendEventToReact("liveUpdateMerged", FrontLiveUserUpdate.FromCore(update));
+    }
+
+    private async Task WhenSessionUpdated(LiveSession session)
+    {
+        await _mainWindow.SendEventToReact("liveSessionUpdated", FrontLiveSession.FromCore(session));
     }
 
     public void OnClosed()

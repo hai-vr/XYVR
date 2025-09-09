@@ -199,12 +199,19 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                 }
             });
         };
+        const liveSessionUpdated = (event: any) => {
+            console.log('Live session updated event:', event.detail);
+            // @ts-ignore
+            const liveSession = event.detail;
+        }
 
         window.addEventListener('individualUpdated', individualUpdated);
         window.addEventListener('liveUpdateMerged', liveUpdateMerged);
+        window.addEventListener('liveSessionUpdated', liveSessionUpdated);
         return () => {
             window.removeEventListener('individualUpdated', individualUpdated);
             window.removeEventListener('liveUpdateMerged', liveUpdateMerged);
+            window.removeEventListener('liveSessionUpdated', liveSessionUpdated);
         };
     }, []);
 

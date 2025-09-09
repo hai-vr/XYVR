@@ -71,12 +71,27 @@ public class ResoniteLiveCommunicator
             };
         }
 
+        Session? sessionNullable;
+        var index = statusUpdate.currentSessionIndex;
+        if (index >= 0 && index < statusUpdate.sessions.Count)
+        {
+            sessionNullable = statusUpdate.sessions[index];
+        }
+        else
+        {
+            sessionNullable = null;
+        }
+        
         return new LiveUserSessionState
         {
             knowledge = LiveSessionKnowledge.Known,
             knownSession = new LiveUserKnownSession
             {
-                inAppSessionIdentifier = statusUpdate.userSessionId
+                inAppSessionIdentifier = statusUpdate.userSessionId,
+                inAppHost = sessionNullable is { isHost: true } ? new LiveSessionHost
+                {
+                    inAppHostIdentifier = statusUpdate.userId,
+                } : null
             }
         };
     }
