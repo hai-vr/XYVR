@@ -1,4 +1,6 @@
-﻿export const NamedApp = {
+﻿import type {ConnectorAccount, ConnectorTypeType, LiveModeType, RefreshModeType} from "./ConnectorTypes.ts";
+
+export const NamedApp = {
     NotNamed: "NotNamed",
     Resonite: "Resonite",
     VRChat: "VRChat",
@@ -109,3 +111,14 @@ export type FrontIndividual = {
     onlineStatus?: OnlineStatusType;
     customStatus?: string;
 };
+
+export type ConnectorTypeWithExtraTracking = {
+    guid: string;
+    displayName: string;
+    type: ConnectorTypeType;
+    refreshMode: RefreshModeType;
+    liveMode: LiveModeType;
+    account?: ConnectorAccount;
+
+    isLoggedIn?: boolean;
+}

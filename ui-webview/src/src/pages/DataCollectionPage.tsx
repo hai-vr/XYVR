@@ -1,16 +1,27 @@
-﻿
-import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+﻿import {useEffect, useState} from 'react'
+import {useNavigate} from 'react-router-dom'
 import './DataCollectionPage.css'
 import '../Header.css'
 import Connector from "../components/Connector.tsx";
 import DarkModeToggleButton from "../components/DarkModeToggleButton.tsx";
+import type {ConnectorTypeWithExtraTracking} from "../types/CoreTypes.ts";
 
-function DataCollectionPage({ isDark, setIsDark, demoMode }) {
+interface DataCollectionPageProps {
+    isDark: boolean;
+    setIsDark: (isDark: boolean) => void;
+    demoMode: boolean;
+}
+
+interface DeleteStateType {
+    confirming: boolean;
+    firstClick: number;
+}
+
+function DataCollectionPage({ isDark, setIsDark, demoMode }: DataCollectionPageProps) {
     const navigate = useNavigate()
     const [initialized, setInitialized] = useState(false);
-    const [connectors, setConnectors] = useState([]);
-    const [deleteStates, setDeleteStates] = useState({}); // Track delete confirmation states
+    const [connectors, setConnectors] = useState<ConnectorTypeWithExtraTracking[]>([]);
+    const [deleteStates, setDeleteStates] = useState<{ [key: string]: DeleteStateType }>({});
 
     useEffect(() => {
         const initializeApi = async () => {
@@ -23,7 +34,7 @@ function DataCollectionPage({ isDark, setIsDark, demoMode }) {
         initializeApi();
     }, []);
 
-    const createNewConnector = async (connectorType) => {
+    const createNewConnector = async (connectorType: string) => {
         await window.chrome.webview.hostObjects.dataCollectionApi.CreateConnector(connectorType);
 
         const json = await window.chrome.webview.hostObjects.dataCollectionApi.GetConnectors();
@@ -31,7 +42,7 @@ function DataCollectionPage({ isDark, setIsDark, demoMode }) {
         setConnectors(arr);
     }
 
-    const handleDeleteClick = (guid) => {
+    const handleDeleteClick = (guid: string) => {
         const currentTime = Date.now();
         const deleteState = deleteStates[guid];
 
@@ -67,7 +78,7 @@ function DataCollectionPage({ isDark, setIsDark, demoMode }) {
         }
     };
 
-    const deleteConnector = async (guid) => {
+    const deleteConnector = async (guid: string) => {
         await window.chrome.webview.hostObjects.dataCollectionApi.DeleteConnector(guid);
 
         const json = await window.chrome.webview.hostObjects.dataCollectionApi.GetConnectors();

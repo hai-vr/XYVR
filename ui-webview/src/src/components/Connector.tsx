@@ -1,32 +1,18 @@
-﻿import { useState } from 'react';
+﻿import {useState} from 'react';
 import Account from './Account.tsx';
 import './Connector.css';
 import '../InputFields.css';
 import {TriangleAlert, X} from "lucide-react";
-import {type FrontAccount, NamedApp, type NamedAppType} from "../types/CoreTypes.ts";
+import {type ConnectorTypeWithExtraTracking, type FrontAccount, NamedApp} from "../types/CoreTypes.ts";
+import type {ConnectorAccount} from "../types/ConnectorTypes.ts";
 
 interface DeleteState {
     confirming: boolean;
     firstClick?: number;
 }
 
-interface ConnectorAccount {
-    namedApp: NamedAppType;
-    qualifiedAppName: string;
-
-    inAppIdentifier: string;
-    inAppDisplayName: string;
-}
-
-interface ConnectorData {
-    guid: string;
-    type: 'VRChatAPI' | 'ResoniteAPI' | 'Offline';
-    isLoggedIn: boolean;
-    account?: ConnectorAccount;
-}
-
 interface ConnectorProps {
-    connector: ConnectorData;
+    connector: ConnectorTypeWithExtraTracking;
     onDeleteClick: (guid: string) => void;
     deleteState?: DeleteState;
     onConnectorUpdated: () => void;

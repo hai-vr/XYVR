@@ -3,7 +3,7 @@ import {useState, useEffect} from 'react'
 // @ts-ignore
 import AddressBookPage from '../pages/AddressBookPage.jsx'
 // @ts-ignore
-import DataCollectionPage from '../pages/DataCollectionPage.jsx'
+import DataCollectionPage from '../pages/DataCollectionPage.tsx'
 import './AppRouter.css'
 import {Toaster} from "react-hot-toast";
 import type {ReactAppPreferences} from "../types/APITypes.ts";
