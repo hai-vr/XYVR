@@ -21,6 +21,7 @@ public class ResoniteSignalRClient
             {
                 options.Headers.Add("Authorization", $"res {authStorage__sensitive.userId}:{authStorage__sensitive.token}");
             })
+            .WithAutomaticReconnect()
             .Build();
 
         // _connection.On<object>("ReceiveSessionUpdate", OnReceiveSessionUpdate);
