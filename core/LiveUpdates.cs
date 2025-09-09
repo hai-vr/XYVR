@@ -100,6 +100,7 @@ public enum LiveUserSessionKnowledge
 {
     Indeterminate,
     Known,
+    KnownButNoData,
     // Resonite
     ContactsOnlyWorld,
     PrivateSession,

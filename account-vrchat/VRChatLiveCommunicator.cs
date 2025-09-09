@@ -101,27 +101,37 @@ public class VRChatLiveCommunicator
         {
             if (OnLiveUpdateReceived != null)
             {
-                await OnLiveUpdateReceived(new LiveUserUpdate
+                try
                 {
-                    trigger = "API-ListFriends",
-                    namedApp = NamedApp.VRChat,
-                    qualifiedAppName = VRChatCommunicator.VRChatQualifiedAppName,
-                    inAppIdentifier = friend.id,
-                    onlineStatus = ParseStatus("xxx", friend.location, friend.platform, friend.status),
-                    callerInAppIdentifier = _callerInAppIdentifier,
-                    customStatus = friend.statusDescription,
-                    mainSession = new LiveUserSessionState
+                    var session = friend.location != "private" && friend.location != "offline" && friend.location != "traveling" ? new LiveUserKnownSession
                     {
-                        knowledge = friend.location == "private" ? LiveUserSessionKnowledge.PrivateWorld : LiveUserSessionKnowledge.Known, // "offline" counts as known
-                        knownSession = friend.location != "private" && friend.location != "offline" && friend.location != "traveling" ? new LiveUserKnownSession
+                        inAppSessionIdentifier = friend.location,
+                        inAppHost = null,
+                        inAppSessionName = null,
+                        inAppVirtualSpaceName = GetVirtualSpaceNameOrQueueFetchIfApplicable(friend.location),
+                    } : null;
+                    await OnLiveUpdateReceived(new LiveUserUpdate
+                    {
+                        trigger = "API-ListFriends",
+                        namedApp = NamedApp.VRChat,
+                        qualifiedAppName = VRChatCommunicator.VRChatQualifiedAppName,
+                        inAppIdentifier = friend.id,
+                        onlineStatus = ParseStatus("xxx", friend.location, friend.platform, friend.status),
+                        callerInAppIdentifier = _callerInAppIdentifier,
+                        customStatus = friend.statusDescription,
+                        mainSession = new LiveUserSessionState
                         {
-                            inAppSessionIdentifier = friend.location,
-                            inAppHost = null,
-                            inAppSessionName = null,
-                            inAppVirtualSpaceName = GetVirtualSpaceNameOrQueueFetchIfApplicable(friend.location),
-                        } : null
-                    }
-                });
+                            knowledge = friend.location == "private" ? LiveUserSessionKnowledge.PrivateWorld
+                                : (session != null ? LiveUserSessionKnowledge.Known : LiveUserSessionKnowledge.KnownButNoData),
+                            knownSession = session
+                        }
+                    });
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    throw;
+                }
             }
         }
         
@@ -261,12 +271,15 @@ public class VRChatLiveCommunicator
         {
             return _worldMemoizer.Get(worldId);
         }
-        
-        Console.WriteLine($"We don't know world id {worldId}, will queue fetch...");
 
-        _allQueued.Add(worldId);
-        _queue.Enqueue(worldId);
-        WakeUpQueue();
+        if (!_allQueued.Contains(worldId))
+        {
+            Console.WriteLine($"We don't know world id {worldId}, will queue fetch...");
+
+            _allQueued.Add(worldId);
+            _queue.Enqueue(worldId);
+            WakeUpQueue();
+        }
             
         return null;
     }
