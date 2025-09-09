@@ -76,7 +76,8 @@ public class ResoniteCommunicator
                 {
                     isAnonymous = false,
                     inAppIdentifier = _callerUserId,
-                    isContact = contact.isAccepted
+                    isContact = contact.isAccepted,
+                    note = null
                 }]
             };
         }

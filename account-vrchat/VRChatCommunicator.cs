@@ -30,12 +30,12 @@ public class VRChatCommunicator
         return UserAsAccount((VRChatUser)user, _callerUserId);
     }
     
-    public async IAsyncEnumerable<IncompleteAccount> FindIncompleteAccounts()
+    /// This lists the friends and then the notes. Some notes may refer to friends that have already been returned, so there may be multiple references to the same account.
+    /// The caller of this method needs to take that into consideration.
+    public async IAsyncEnumerable<IncompleteAccount> FindIncompleteAccountsMayIncludeDuplicateReferences()
     {
         _api ??= await InitializeAPI();
 
-        var accountsCollectedSoFar = new HashSet<string>();
-        
         var contactsAsyncEnum = _api.ListFriends(ListFriendsRequestType.OnlyOnline, DataCollectionReason.FindUndiscoveredAccounts)
             .Concat(_api.ListFriends(ListFriendsRequestType.OnlyOffline, DataCollectionReason.FindUndiscoveredAccounts));
         await foreach (var friend in contactsAsyncEnum)
@@ -52,16 +52,17 @@ public class VRChatCommunicator
                     {
                         isAnonymous = false,
                         inAppIdentifier = _callerUserId,
-                        isContact = true
+                        isContact = true,
+                        note = null
                     }
                 ]
             };
-            accountsCollectedSoFar.Add(acc.inAppIdentifier);
             yield return acc;
         }
         
         await foreach (var note in _api.ListUserNotes(DataCollectionReason.FindUndiscoveredAccounts))
         {
+            var hasNote = string.IsNullOrWhiteSpace(note.note);
             var acc = new IncompleteAccount
             {
                 namedApp = NamedApp.VRChat,
@@ -74,15 +75,17 @@ public class VRChatCommunicator
                     {
                         isAnonymous = false,
                         inAppIdentifier = _callerUserId,
-                        isContact = null // We don't know if it's a contact.
+                        isContact = null, // We don't know if it's a contact.
+                        note = new Note
+                        {
+                            status = hasNote ? NoteState.Exists : NoteState.NeverHad,
+                            text = hasNote ? note.note : null
+                        }
                     }
                 ]
             };
 
-            if (!accountsCollectedSoFar.Contains(acc.inAppIdentifier))
-            {
-                yield return acc;
-            }
+            yield return acc;
         }
     }
 

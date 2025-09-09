@@ -248,6 +248,7 @@ public class IndividualRepository
                     {
                         callerExists = true;
                         if (inputCaller.isContact != null) { existingCaller.isContact = (bool)inputCaller.isContact; }
+                        if (inputCaller.note != null) { UpdateExistingNote(existingCaller.note, inputCaller.note); }
                         
                         break;
                     }

@@ -91,6 +91,7 @@ public class IncompleteCallerAccount
     public string? inAppIdentifier; // Can only be null if it's an anonymous caller.
     
     public bool? isContact;
+    public Note? note;
 
     public static CallerAccount MakeComplete(IncompleteCallerAccount incomplete)
     {
@@ -99,7 +100,7 @@ public class IncompleteCallerAccount
             inAppIdentifier = incomplete.inAppIdentifier,
             isAnonymous = incomplete.isAnonymous,
             isContact = incomplete.isContact ?? false,
-            note = new Note
+            note = incomplete.note ?? new Note
             {
                 status = NoteState.NeverHad,
                 text = null

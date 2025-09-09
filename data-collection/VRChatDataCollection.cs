@@ -53,7 +53,7 @@ public class VRChatDataCollection(IndividualRepository repository, ResponseColle
         
         var undiscoveredUserIds = new HashSet<string>();
         var incompleteAccounts = new HashSet<AccountIdentification>();
-        await foreach (var incompleteAccount in _vrChatCommunicator.FindIncompleteAccounts())
+        await foreach (var incompleteAccount in _vrChatCommunicator.FindIncompleteAccountsMayIncludeDuplicateReferences())
         {
             undiscoveredUserIds.Add(incompleteAccount.inAppIdentifier);
             incompleteAccounts.Add(incompleteAccount.AsIdentification());
