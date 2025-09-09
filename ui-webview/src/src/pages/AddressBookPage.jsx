@@ -25,7 +25,7 @@ import {
     Binoculars,
     NotebookText, Notebook
 } from 'lucide-react'
-import DarkModeToggleButton from "../components/DarkModeToggleButton.jsx";
+import DarkModeToggleButton from "../components/DarkModeToggleButton.tsx";
 import {_D2} from "../haiUtils.ts";
 
 const sortIndividuals = (individuals, searchTerm) => {

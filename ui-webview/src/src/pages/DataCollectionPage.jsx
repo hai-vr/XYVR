@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import './DataCollectionPage.css'
 import '../Header.css'
 import Connector from "../components/Connector.jsx";
-import DarkModeToggleButton from "../components/DarkModeToggleButton.jsx";
+import DarkModeToggleButton from "../components/DarkModeToggleButton.tsx";
 
 function DataCollectionPage({ isDark, setIsDark, demoMode }) {
     const navigate = useNavigate()

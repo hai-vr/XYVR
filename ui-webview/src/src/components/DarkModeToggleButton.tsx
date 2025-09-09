@@ -1,7 +1,11 @@
-﻿import React from 'react';
-import { Moon, Sun } from "lucide-react";
+﻿import { Moon, Sun } from "lucide-react";
 
-const DarkModeToggleButton = ({ isDark, setIsDark }) => {
+interface DarkModeToggleButtonProps {
+    isDark: boolean;
+    setIsDark: (isDark: boolean) => void;
+}
+
+const DarkModeToggleButton = ({ isDark, setIsDark }: DarkModeToggleButtonProps) => {
     return (
         <button
             className="theme-toggle-btn"
