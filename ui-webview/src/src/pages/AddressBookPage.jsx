@@ -2,7 +2,7 @@
 import {useNavigate} from 'react-router-dom'
 import './AddressBookPage.css'
 import '../Header.css'
-import Individual from "../components/Individual.jsx"
+import Individual from "../components/Individual.tsx"
 import {
     hasDisplayNameMatch,
     hasIdentifierMatch,

@@ -1,9 +1,26 @@
 ﻿import Account from "./Account.tsx";
 import "./Individual.css";
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {Clipboard, Phone} from "lucide-react";
 import {accountMatchesFromRegularTerms, anyAccountMatchesSpecialTerms, parseSearchTerms} from "../pages/searchUtils.ts";
 import {_D, _D2} from "../haiUtils.ts";
+import type {FrontAccount, FrontIndividual} from "../types/CoreTypes.ts";
+
+interface IndividualProps {
+    individual: FrontIndividual;
+    isVisible?: boolean;
+    showBio?: boolean;
+    showAlias?: boolean;
+    setMergeAccountGuidOrUnd: (guid: string | undefined) => void;
+    isBeingMerged?: boolean;
+    displayNameOfOtherBeingMergedOrUnd?: string;
+    fusionAccounts: (guid: string) => Promise<void>;
+    unmergeAccounts: (guid: string) => Promise<void>;
+    compactMode: boolean;
+    searchTerm: string;
+    showNotes: boolean;
+    demoMode: boolean;
+}
 
 function Individual({
                         individual,
@@ -19,10 +36,10 @@ function Individual({
                         searchTerm,
                         showNotes,
                         demoMode
-                    }) {
+                    }: IndividualProps) {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const [filteredAccounts, setFilteredAccounts] = useState([]);
-    const dropdownRef = useRef(null);
+    const [filteredAccounts, setFilteredAccounts] = useState<FrontAccount[]>([]);
+    const dropdownRef = useRef<HTMLDivElement>(null);
 
     // Get all VRChat account links and filter to only show http/https URLs
     const vrChatLinks = individual.accounts
@@ -33,14 +50,14 @@ function Individual({
         ?.filter(url => url && (url.startsWith('http://') || url.startsWith('https://'))) || [];
 
     // Get all VRChat account bios
-    const vrcBios = showBio && individual.accounts
+    const vrcBios: string[] = showBio && individual.accounts
         ?.filter(account => account.namedApp === "VRChat" && account.specifics?.bio)
         ?.map(account => account.specifics.bio)
         ?.filter(bio => bio.trim() !== '') || [];
 
     // Close dropdown when clicking outside
     useEffect(() => {
-        const handleClickOutside = (event) => {
+        const handleClickOutside = (event: any) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
                 setIsDropdownOpen(false);
             }
@@ -52,12 +69,12 @@ function Individual({
         };
     }, []);
 
-    const copyToClipboard = async (url, event) => {
+    const copyToClipboard = async (url: string, event: React.MouseEvent<HTMLButtonElement>) => {
         event.stopPropagation(); // Prevent the container click event
         await navigator.clipboard.writeText(url);
     };
 
-    const handleMenuAction = async (action, event) => {
+    const handleMenuAction = async (action: string, event: React.MouseEvent<HTMLButtonElement>) => {
         event.stopPropagation();
         setIsDropdownOpen(false);
 
@@ -114,7 +131,7 @@ function Individual({
     }, [individual, searchTerm, compactMode])
 
     // Helper function to get the first non-punctuation character
-    const getFirstNonPunctuationChar = (str) => {
+    const getFirstNonPunctuationChar = (str: string) => {
         if (!str) return '?';
 
         // Regular expression to match various punctuation marks including:
@@ -202,8 +219,8 @@ function Individual({
             <div className="accounts-container">
                 {filteredAccounts && filteredAccounts.length > 0 ? (
                     <div className="accounts-grid">
-                        {filteredAccounts.map((account, accountIndex) => (
-                            <Account key={account.guid} account={account} showAlias={showAlias} showNotes={showNotes} demoMode={demoMode} />
+                        {filteredAccounts.map((account) => (
+                            <Account key={account.guid} account={account} showAlias={showAlias} showNotes={showNotes} demoMode={demoMode} imposter={false} />
                         ))}
                     </div>
                 ) : (
