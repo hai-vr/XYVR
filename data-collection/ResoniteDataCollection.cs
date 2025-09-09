@@ -14,7 +14,7 @@ public class ResoniteDataCollection(IndividualRepository repository, ResponseCol
     
     public ResoniteCommunicator Temp__GetCommunicator() => _resoniteCommunicator;
     
-    public async Task<List<Account>> RebuildFromDataCollectionStorage(List<ResponseCollectionTrail> trails)
+    public async Task<List<NonIndexedAccount>> RebuildFromDataCollectionStorage(List<ResponseCollectionTrail> trails)
     {
         await Task.CompletedTask;
 
@@ -94,7 +94,7 @@ public class ResoniteDataCollection(IndividualRepository repository, ResponseCol
         return identification.namedApp == NamedApp.Resonite;
     }
 
-    public async Task<Account?> TryGetForIncrementalUpdate__Flawed__NonContactOnly(AccountIdentification toTryUpdate)
+    public async Task<NonIndexedAccount?> TryGetForIncrementalUpdate__Flawed__NonContactOnly(AccountIdentification toTryUpdate)
     {
         // FIXME: By default, this will always consider the returned user to be a non-Contact, so it's quite flawed. The name of this data collection method was changed BECAUSE OF this flaw in this specific collector.
         var result = await _resoniteCommunicator.CollectAllLenient([toTryUpdate.inAppIdentifier], []);

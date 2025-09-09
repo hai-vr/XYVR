@@ -20,7 +20,7 @@ public class VRChatCommunicator
         _credentialsStorage = credentialsStorage;
     }
 
-    public async Task<Account> CallerAccount()
+    public async Task<NonIndexedAccount> CallerAccount()
     {
         _api ??= await InitializeAPI();
 
@@ -89,7 +89,7 @@ public class VRChatCommunicator
     /// Given a list of user IDs that may or may not exist, return a list of accounts.<br/>
     /// The returned list may be smaller than the input list, especially if some accounts no longer exist.<br/>
     /// User IDs do not necessarily start with usr_ as this supports some oldschool accounts.
-    public async Task<List<Account>> CollectAllLenient(List<string> notNecessarilyValidUserIds)
+    public async Task<List<NonIndexedAccount>> CollectAllLenient(List<string> notNecessarilyValidUserIds)
     {
         var distinctNotNecessarilyValidUserIds = notNecessarilyValidUserIds
             .Distinct() // Get rid of duplicates
@@ -97,7 +97,7 @@ public class VRChatCommunicator
         
         _api ??= await InitializeAPI();
 
-        var accounts = new List<Account>();
+        var accounts = new List<NonIndexedAccount>();
         foreach (var userId in distinctNotNecessarilyValidUserIds)
         {
             var user = await _api.GetUserLenient(userId, DataCollectionReason.CollectExistingAccount);
@@ -110,16 +110,15 @@ public class VRChatCommunicator
         return accounts;
     }
 
-    public Account ConvertUserAsAccount(VRChatUser user, string callerUserId)
+    public NonIndexedAccount ConvertUserAsAccount(VRChatUser user, string callerUserId)
     {
         return UserAsAccount(user, callerUserId);
     }
 
-    private static Account UserAsAccount(VRChatUser user, string callerUserId)
+    private static NonIndexedAccount UserAsAccount(VRChatUser user, string callerUserId)
     {
-        return new Account
+        return new NonIndexedAccount
         {
-            guid = XYVRGuids.ForAccount(),
             namedApp = NamedApp.VRChat,
             qualifiedAppName = VRChatQualifiedAppName,
             inAppIdentifier = user.id,

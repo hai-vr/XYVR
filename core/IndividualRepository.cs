@@ -141,7 +141,7 @@ public class IndividualRepository
         }
     }
 
-    public void MergeAccounts(List<Account> accounts)
+    public void MergeAccounts(List<NonIndexedAccount> accounts)
     {
         foreach (var inputAccount in accounts)
         {
@@ -157,7 +157,7 @@ public class IndividualRepository
             else
             {
                 Console.WriteLine($"Creating new individual: {inputAccount.namedApp} {inputAccount.inAppIdentifier} {inputAccount.inAppDisplayName}");
-                var newIndividual = CreateNewIndividualFromAccount(inputAccount);
+                var newIndividual = CreateNewIndividualFromNonIndexedAccount(inputAccount);
                 _namedAppToInAppIdToIndividual[inputAccount.namedApp].Add(inputAccount.inAppIdentifier, newIndividual);
             }
         }
@@ -185,7 +185,7 @@ public class IndividualRepository
         }
     }
 
-    private static bool SynchronizeAccount(Account existingAccount, Account inputAccount)
+    private static bool SynchronizeAccount(Account existingAccount, NonIndexedAccount inputAccount)
     {
         var isSameAppAndIdentifier = IsSameApp(existingAccount, inputAccount) && existingAccount.inAppIdentifier == inputAccount.inAppIdentifier;
         if (isSameAppAndIdentifier)
@@ -332,7 +332,7 @@ public class IndividualRepository
         existingIndividual.displayName = existingIndividual.accounts.First().inAppDisplayName;
     }
 
-    private static bool IsSameApp(Account existingAccount, Account inputAccount)
+    private static bool IsSameApp(Account existingAccount, NonIndexedAccount inputAccount)
     {
         var sameNamedApp = existingAccount.namedApp == inputAccount.namedApp;
         if (!sameNamedApp)
@@ -363,6 +363,11 @@ public class IndividualRepository
     // It is the responsibility of the caller to never call this when that account is already owned by an Individual.
     private Individual CreateNewIndividualFromAccount(Account account)
     {
+        return InternalCreateFromAccount(account);
+    }
+
+    private Individual InternalCreateFromAccount(Account account)
+    {
         var isAnyContact = account.IsAnyCallerContact();
         var individual = new Individual
         {
@@ -374,6 +379,13 @@ public class IndividualRepository
         };
         Individuals.Add(individual);
         return individual;
+    }
+
+    // It is the responsibility of the caller to never call this when that account is already owned by an Individual.
+    private Individual CreateNewIndividualFromNonIndexedAccount(NonIndexedAccount nonIndexedAccount)
+    {
+        var account = NonIndexedAccount.MakeIndexed(nonIndexedAccount);
+        return CreateNewIndividualFromAccount(account);
     }
 
     private Individual CreateNewIndividualFromIncompleteAccount(IncompleteAccount incompleteAccount)

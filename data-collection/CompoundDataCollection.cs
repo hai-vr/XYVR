@@ -6,9 +6,9 @@ public class CompoundDataCollection(IndividualRepository repository, List<IDataC
 {
     private readonly List<IDataCollection> _collectors = collectors.ToList();
 
-    public async Task<List<Account>> RebuildFromDataCollectionStorage(List<ResponseCollectionTrail> trails)
+    public async Task<List<NonIndexedAccount>> RebuildFromDataCollectionStorage(List<ResponseCollectionTrail> trails)
     {
-        var results = new List<Account>();
+        var results = new List<NonIndexedAccount>();
         
         foreach (var dataCollection in _collectors)
         {
@@ -60,7 +60,7 @@ public class CompoundDataCollection(IndividualRepository repository, List<IDataC
         return _collectors.Any(collection => collection.CanAttemptIncrementalUpdateOn(identification));
     }
 
-    public async Task<Account?> TryGetForIncrementalUpdate__Flawed__NonContactOnly(AccountIdentification notUpdatedIdentification)
+    public async Task<NonIndexedAccount?> TryGetForIncrementalUpdate__Flawed__NonContactOnly(AccountIdentification notUpdatedIdentification)
     {
         foreach (var collector in _collectors)
         {

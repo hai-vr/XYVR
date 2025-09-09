@@ -292,7 +292,7 @@ public class CredentialsManagement
         };
     }
 
-    private static ConnectorAccount AsConnectorAccount(Account callerAccount)
+    private static ConnectorAccount AsConnectorAccount(NonIndexedAccount callerAccount)
     {
         return new ConnectorAccount
         {

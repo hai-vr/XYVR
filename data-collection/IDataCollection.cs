@@ -5,7 +5,7 @@ namespace XYVR.Data.Collection;
 public interface IDataCollection
 {
     /// Using a data collection storage, try to rebuild account data.
-    Task<List<Account>> RebuildFromDataCollectionStorage(List<ResponseCollectionTrail> trails);
+    Task<List<NonIndexedAccount>> RebuildFromDataCollectionStorage(List<ResponseCollectionTrail> trails);
     
     Task<List<AccountIdentification>> IncrementalUpdateRepository(IIncrementalDataCollectionJobHandler jobHandler);
     
@@ -15,5 +15,5 @@ public interface IDataCollection
     /// Attempt an incremental update of the given identification, which MUST have been passed to CanAttemptIncrementalUpdateOn beforehand.<br/>
     /// Attempt can fail on accounts removed by the upstream service, which is the reason this function returns nullable.<br/>
     /// Return whether it was successful.
-    Task<Account?> TryGetForIncrementalUpdate__Flawed__NonContactOnly(AccountIdentification toTryUpdate);
+    Task<NonIndexedAccount?> TryGetForIncrementalUpdate__Flawed__NonContactOnly(AccountIdentification toTryUpdate);
 }

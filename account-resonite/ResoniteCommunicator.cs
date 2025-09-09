@@ -45,14 +45,13 @@ public class ResoniteCommunicator
         await _credentialsStorage.StoreCookieOrToken(api.GetAllUserAndToken__Sensitive());
     }
 
-    public async Task<Account> CallerAccount()
+    public async Task<NonIndexedAccount> CallerAccount()
     {
         _api ??= await InitializeApi();
         // Initializing the API actually gets the caller account.
 
-        return new Account
+        return new NonIndexedAccount
         {
-            guid = XYVRGuids.ForAccount(),
             namedApp = NamedApp.Resonite,
             qualifiedAppName = ResoniteQualifiedAppName,
             inAppIdentifier = _callerUserId,
@@ -83,7 +82,7 @@ public class ResoniteCommunicator
         }
     }
     
-    public async Task<Account?> GetUser(string id, bool isContact)
+    public async Task<NonIndexedAccount?> GetUser(string id, bool isContact)
     {
         _api ??= await InitializeApi();
 
@@ -91,9 +90,8 @@ public class ResoniteCommunicator
         if (userN == null) return null;
         
         var user = (UserResponseJsonObject)userN;
-        return new Account
+        return new NonIndexedAccount
         {
-            guid = XYVRGuids.ForAccount(),
             namedApp = NamedApp.Resonite,
             qualifiedAppName = ResoniteQualifiedAppName,
             inAppIdentifier = user.id,
@@ -115,7 +113,7 @@ public class ResoniteCommunicator
         };
     }
 
-    public async Task<List<Account>> CollectAllLenient(List<string> notNecessarilyValidUserIds, HashSet<string> resoniteContactIds)
+    public async Task<List<NonIndexedAccount>> CollectAllLenient(List<string> notNecessarilyValidUserIds, HashSet<string> resoniteContactIds)
     {
         var distinctNotNecessarilyValidUserIds = notNecessarilyValidUserIds
             .Distinct() // Get rid of duplicates
@@ -123,7 +121,7 @@ public class ResoniteCommunicator
 
         _api ??= await InitializeApi();
 
-        var accounts = new List<Account>();
+        var accounts = new List<NonIndexedAccount>();
         foreach (var userId in distinctNotNecessarilyValidUserIds)
         {
             var userN = await _api.GetUser(userId, DataCollectionReason.CollectExistingAccount);
@@ -136,16 +134,15 @@ public class ResoniteCommunicator
         return accounts;
     }
 
-    public Account ConvertUserAsAccount(UserResponseJsonObject user, string callerUserId, HashSet<string> resoniteContactIds)
+    public NonIndexedAccount ConvertUserAsAccount(UserResponseJsonObject user, string callerUserId, HashSet<string> resoniteContactIds)
     {
         return UserAsAccount(user, callerUserId, resoniteContactIds);
     }
 
-    private static Account UserAsAccount(UserResponseJsonObject user, string callerUserId, HashSet<string> resoniteContactIds)
+    private static NonIndexedAccount UserAsAccount(UserResponseJsonObject user, string callerUserId, HashSet<string> resoniteContactIds)
     {
-        return new Account
+        return new NonIndexedAccount
         {
-            guid = XYVRGuids.ForAccount(),
             namedApp = NamedApp.Resonite,
             qualifiedAppName = ResoniteQualifiedAppName,
             inAppIdentifier = user.id,

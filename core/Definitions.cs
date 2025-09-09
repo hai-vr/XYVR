@@ -95,6 +95,45 @@ public class IncompleteAccount
     }
 }
 
+public class NonIndexedAccount
+{
+    public NamedApp namedApp;
+    public string qualifiedAppName;
+    public string inAppIdentifier;
+    public string inAppDisplayName;
+    [JsonConverter(typeof(SpecificsConverter))]
+    public object? specifics;
+    public List<CallerAccount> callers = new();
+    public List<string> allDisplayNames = new();
+    // public bool isPendingUpdate;
+    // public bool isTechnical;
+
+    public AccountIdentification AsIdentification()
+    {
+        return new AccountIdentification
+        {
+            inAppIdentifier = inAppIdentifier,
+            namedApp = namedApp,
+            qualifiedAppName = qualifiedAppName,
+        };
+    }
+
+    public static Account MakeIndexed(NonIndexedAccount nonIndexedAccount)
+    {
+        return new Account
+        {
+            guid = XYVRGuids.ForAccount(),
+            namedApp = nonIndexedAccount.namedApp,
+            qualifiedAppName = nonIndexedAccount.qualifiedAppName,
+            inAppIdentifier = nonIndexedAccount.inAppIdentifier,
+            inAppDisplayName = nonIndexedAccount.inAppDisplayName,
+            specifics = nonIndexedAccount.specifics,
+            callers = nonIndexedAccount.callers.Select(caller => caller.ShallowCopy()).ToList(),
+            allDisplayNames = nonIndexedAccount.allDisplayNames,
+        };
+    }
+}
+
 public class AccountIdentification
 {
     public NamedApp namedApp;
@@ -147,6 +186,11 @@ public class CallerAccount
     
     public Note note = new();
     public bool isContact;
+
+    public CallerAccount ShallowCopy()
+    {
+        return (CallerAccount)MemberwiseClone();
+    }
 }
 
 public class VRChatSpecifics

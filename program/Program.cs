@@ -1,6 +1,5 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using XYVR.AccountAuthority.Resonite;
 using XYVR.API.Resonite;
 using XYVR.Core;
 using XYVR.Data.Collection;
@@ -69,7 +68,7 @@ internal class Program
                 var firstResoniteConnector = connectors.Connectors.First(connector => connector.type == ConnectorType.ResoniteAPI);
                 var resoniteDataCollector = await credentials.GetConnectedDataCollectionOrNull(firstResoniteConnector, repository, storage) as ResoniteDataCollection;
 
-                var memoizerUserIdToUsername = new Dictionary<string, Account?>();
+                var memoizerUserIdToUsername = new Dictionary<string, NonIndexedAccount?>();
                 
                 var srClient = new ResoniteSignalRClient();
                 srClient.OnStatusUpdate += async status =>
