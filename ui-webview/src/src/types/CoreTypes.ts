@@ -1,6 +1,4 @@
-﻿import type {ConnectorAccount, ConnectorTypeType, LiveModeType, RefreshModeType} from "./ConnectorTypes.ts";
-
-export const NamedApp = {
+﻿export const NamedApp = {
     NotNamed: "NotNamed",
     Resonite: "Resonite",
     VRChat: "VRChat",
@@ -9,56 +7,6 @@ export const NamedApp = {
 } as const;
 
 export type NamedAppType = typeof NamedApp[keyof typeof NamedApp];
-
-export const NoteState = {
-    NeverHad: "NeverHad",
-    Exists: "Exists",
-    WasRemoved: "WasRemoved",
-} as const;
-
-export type NoteStateType = typeof NoteState[keyof typeof NoteState];
-
-export type CallerAccount = {
-    isAnonymous: boolean;
-    inAppIdentifier?: string;
-    note?: string;
-    isContact: boolean;
-};
-
-export type AccountIdentification = {
-    namedApp: NamedAppType;
-    qualifiedAppName: string;
-    inAppIdentifier: string;
-};
-
-export type VRChatSpecifics = {
-    urls: string[];
-    bio: string;
-    pronouns: string;
-};
-
-export type AccountType = {
-    guid: string;
-    namedApp: NamedAppType;
-    qualifiedAppName: string;
-    inAppIdentifier: string;
-    inAppDisplayName: string;
-    specifics?: any;
-    callers: CallerAccount[];
-    allDisplayNames: string[];
-    isPendingUpdate: boolean;
-    isTechnical: boolean;
-};
-
-export type IndividualType = {
-    guid: string;
-    accounts: AccountType[];
-    displayName: string;
-    isAnyContact: boolean;
-    isExposed: boolean;
-    customName?: string;
-    note?: string;
-};
 
 export const OnlineStatus = {
     Indeterminate: "Indeterminate",
@@ -75,14 +23,14 @@ export const OnlineStatus = {
 
 export type OnlineStatusType = typeof OnlineStatus[keyof typeof OnlineStatus];
 
-export type FrontAccount = {
+export interface FrontAccount {
     guid: string;
     namedApp: NamedAppType;
     qualifiedAppName: string;
     inAppIdentifier: string;
     inAppDisplayName: string;
     specifics?: any;
-    callers: CallerAccount[];
+    callers: FrontCallerAccount[];
     allDisplayNames: string[];
     isPendingUpdate: boolean;
     isTechnical: boolean;
@@ -92,9 +40,9 @@ export type FrontAccount = {
 
     onlineStatus?: OnlineStatusType;
     customStatus?: string;
-};
+}
 
-export type FrontIndividual = {
+export interface FrontIndividual {
     guid: string;
     accounts: FrontAccount[];
     displayName: string;
@@ -105,15 +53,17 @@ export type FrontIndividual = {
 
     onlineStatus?: OnlineStatusType;
     customStatus?: string;
-};
+}
 
-export type ConnectorTypeWithExtraTracking = {
-    guid: string;
-    displayName: string;
-    type: ConnectorTypeType;
-    refreshMode: RefreshModeType;
-    liveMode: LiveModeType;
-    account?: ConnectorAccount;
+export interface FrontCallerAccount {
+    isAnonymous: boolean;
+    inAppIdentifier?: string;
+    note?: string;
+    isContact: boolean;
+}
 
-    isLoggedIn?: boolean;
+export interface VRChatSpecifics {
+    urls: string[];
+    bio: string;
+    pronouns: string;
 }

@@ -1,13 +1,5 @@
 ﻿import {type NamedAppType} from "./CoreTypes.ts";
 
-export interface ConnectorAccount {
-    namedApp: NamedAppType;
-    qualifiedAppName: string;
-
-    inAppIdentifier: string;
-    inAppDisplayName: string;
-}
-
 export const ConnectorType =
 {
     Offline: 'Offline',
@@ -34,3 +26,22 @@ export const LiveMode =
 } as const;
 
 export type LiveModeType = typeof LiveMode[keyof typeof LiveMode];
+
+export interface FrontConnector {
+    guid: string;
+    displayName: string;
+    type: ConnectorTypeType;
+    refreshMode: RefreshModeType;
+    liveMode: LiveModeType;
+    account?: FrontConnectorAccount;
+
+    isLoggedIn?: boolean;
+}
+
+export interface FrontConnectorAccount {
+    namedApp: NamedAppType;
+    qualifiedAppName: string;
+
+    inAppIdentifier: string;
+    inAppDisplayName: string;
+}

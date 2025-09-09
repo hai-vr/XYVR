@@ -4,7 +4,7 @@ import './DataCollectionPage.css'
 import '../Header.css'
 import Connector from "../components/Connector.tsx";
 import DarkModeToggleButton from "../components/DarkModeToggleButton.tsx";
-import type {ConnectorTypeWithExtraTracking} from "../types/CoreTypes.ts";
+import type {FrontConnector} from "../types/ConnectorTypes.ts";
 
 interface DataCollectionPageProps {
     isDark: boolean;
@@ -20,7 +20,7 @@ interface DeleteStateType {
 function DataCollectionPage({ isDark, setIsDark, demoMode }: DataCollectionPageProps) {
     const navigate = useNavigate()
     const [initialized, setInitialized] = useState(false);
-    const [connectors, setConnectors] = useState<ConnectorTypeWithExtraTracking[]>([]);
+    const [connectors, setConnectors] = useState<FrontConnector[]>([]);
     const [deleteStates, setDeleteStates] = useState<{ [key: string]: DeleteStateType }>({});
 
     useEffect(() => {

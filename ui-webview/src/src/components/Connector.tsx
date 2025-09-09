@@ -3,8 +3,8 @@ import Account from './Account.tsx';
 import './Connector.css';
 import '../InputFields.css';
 import {TriangleAlert, X} from "lucide-react";
-import {type ConnectorTypeWithExtraTracking, type FrontAccount, NamedApp} from "../types/CoreTypes.ts";
-import type {ConnectorAccount} from "../types/ConnectorTypes.ts";
+import {type FrontAccount, NamedApp} from "../types/CoreTypes.ts";
+import type {FrontConnector, FrontConnectorAccount} from "../types/ConnectorTypes.ts";
 
 interface DeleteState {
     confirming: boolean;
@@ -12,7 +12,7 @@ interface DeleteState {
 }
 
 interface ConnectorProps {
-    connector: ConnectorTypeWithExtraTracking;
+    connector: FrontConnector;
     onDeleteClick: (guid: string) => void;
     deleteState?: DeleteState;
     onConnectorUpdated: () => void;
@@ -32,7 +32,7 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated, 
         || connector.type === 'ResoniteAPI' && NamedApp.Resonite
         || NamedApp.NotNamed;
 
-    const tempAccount: ConnectorAccount = {
+    const tempAccount: FrontConnectorAccount = {
         inAppDisplayName: `Adding a new ${virtualApp == NamedApp.NotNamed && 'Offline' || virtualApp} connection...`,
         qualifiedAppName: 'internal.imposter',
         inAppIdentifier: '???',
