@@ -49,6 +49,7 @@ public class ResoniteLiveCommunicator
         {
             await OnLiveUpdateReceived(new LiveUpdate
             {
+                trigger = "SignalR-OnStatusUpdate",
                 namedApp = NamedApp.Resonite,
                 qualifiedAppName = ResoniteCommunicator.ResoniteQualifiedAppName,
                 inAppIdentifier = statusUpdate.userId,

@@ -57,6 +57,7 @@ public class VRChatLiveCommunicator
             {
                 await OnLiveUpdateReceived(new LiveUpdate
                 {
+                    trigger = "API-ListFriends",
                     namedApp = NamedApp.VRChat,
                     qualifiedAppName = VRChatCommunicator.VRChatQualifiedAppName,
                     inAppIdentifier = friend.id,
@@ -94,6 +95,7 @@ public class VRChatLiveCommunicator
                     // FIXME: This is a task???
                     OnLiveUpdateReceived(new LiveUpdate
                     {
+                        trigger = $"WS-{type}",
                         namedApp = NamedApp.VRChat,
                         qualifiedAppName = VRChatCommunicator.VRChatQualifiedAppName,
                         inAppIdentifier = content.userId,

@@ -3,6 +3,7 @@
 public class LiveUpdate
 {
     public NamedApp namedApp;
+    public string trigger;
     public string qualifiedAppName;
     public string inAppIdentifier;
 
