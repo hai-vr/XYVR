@@ -41,8 +41,16 @@ public partial class MainWindow : Window
 
     private void OnClosed(object? sender, EventArgs e)
     {
-        _preferencesBff.OnClosed();
-        _liveBff.OnClosed();
+        try
+        {
+            _preferencesBff.OnClosed();
+            _liveBff.OnClosed();
+        }
+        catch (Exception exception)
+        {
+            Console.WriteLine(exception);
+            throw;
+        }
     }
 
     private async Task MainWindow_Loaded(object sender, RoutedEventArgs evt)

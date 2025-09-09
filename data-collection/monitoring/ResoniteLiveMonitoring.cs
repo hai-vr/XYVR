@@ -78,12 +78,20 @@ public class ResoniteLiveMonitoring : ILiveMonitoring, IDisposable
 
     private async Task BackgroundTask()
     {
-        while (true) // Canceled by token
+        try
         {
-            // Unsure why, but if it runs for a while, we won't receive any updates until the user actually starts the game?
-            // Request a full update every so often
-            await Task.Delay(TimeSpan.FromMinutes(5));
-            await _liveComms.RequestFullUpdate();
+            while (true) // Canceled by token
+            {
+                // Unsure why, but if it runs for a while, we won't receive any updates until the user actually starts the game?
+                // Request a full update every so often
+                await Task.Delay(TimeSpan.FromMinutes(5), _cancellationTokenSource.Token);
+                await _liveComms.RequestFullUpdate();
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
         }
     }
 
@@ -93,9 +101,15 @@ public class ResoniteLiveMonitoring : ILiveMonitoring, IDisposable
         try
         {
             if (!_isConnected) return;
-            await _cancellationTokenSource.CancelAsync();
+            
+            Console.WriteLine("Will try to cancel token");
+            // await _cancellationTokenSource.CancelAsync();
+            _cancellationTokenSource.CancelAsync(); // FIXME: we have a problem when we wait for this to finish, it never completes. Why?
+            Console.WriteLine("Token cancelled. Will try to disconnect");
             
             await _liveComms.Disconnect();
+            Console.WriteLine("Disconnected.");
+            
             _liveComms = null;
             _isConnected = false;
         }

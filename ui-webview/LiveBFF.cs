@@ -66,10 +66,25 @@ public class LiveBFF : ILiveBFF
 
         var monitoring = _mainWindow.LiveStatusMonitoring;
         monitoring.RemoveListener(WhenLiveUpdateMerged);
-        foreach (var agent in _liveMonitoringAgents)
+        
+        var tasks = _liveMonitoringAgents.Select(agent =>
         {
-            await agent.StopMonitoring();
-        }
+            return Task.Run(async () =>
+            {
+                try
+                {
+                    Console.WriteLine($"Stopping monitoring of {agent.GetType().Name}");
+                    await agent.StopMonitoring();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    throw;
+                }
+            });
+        }).ToList();
+        
+        await Task.WhenAll(tasks);
 
         _liveMonitoringAgents = null;
     }
@@ -81,6 +96,12 @@ public class LiveBFF : ILiveBFF
 
     public void OnClosed()
     {
-        StopMonitoring().Wait();
+        // FIXME: We start a task because we're having an issue cancelling the task. So: stop monitoring without awaiting, wait a second, then close.
+        Task.Run(async () =>
+        {
+            StopMonitoring();
+            await Task.Delay(1000);
+            // Close for real
+        }).Wait();
     }
 }

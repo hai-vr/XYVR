@@ -146,6 +146,7 @@ public class VRChatLiveCommunicator
         Console.WriteLine($"We got disconnected from the vrc ws api. Reason: {reason}");
         if (!_hasInitiatedDisconnect)
         {
+            Console.WriteLine("Will try reconnecting.");
             Task.Run(async () =>
             {
                 await Connect();
