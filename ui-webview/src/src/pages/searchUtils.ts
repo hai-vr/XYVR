@@ -293,7 +293,7 @@ export const isIndividualVisible = (individual: FrontIndividual, unparsedSearchT
         return true;
     }
     
-    if (regularTerms.some(searchTerm => individual.accounts?.some(account => account.inAppIdentifier === searchTerm))) {
+    if (regularTerms.some(searchTerm => individual.accounts?.some(account => account.inAppIdentifier.toLowerCase() === searchTerm))) {
         return true;
     }
 
