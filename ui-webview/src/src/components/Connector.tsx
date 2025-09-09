@@ -1,10 +1,39 @@
-﻿import React, { useState } from 'react';
+﻿import { useState } from 'react';
 import Account from './Account.tsx';
 import './Connector.css';
 import '../InputFields.css';
 import {TriangleAlert, X} from "lucide-react";
+import {type FrontAccount, NamedApp, type NamedAppType} from "../types/CoreTypes.ts";
 
-const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated, demoMode }) => {
+interface DeleteState {
+    confirming: boolean;
+    firstClick?: number;
+}
+
+interface ConnectorAccount {
+    namedApp: NamedAppType;
+    qualifiedAppName: string;
+
+    inAppIdentifier: string;
+    inAppDisplayName: string;
+}
+
+interface ConnectorData {
+    guid: string;
+    type: 'VRChatAPI' | 'ResoniteAPI' | 'Offline';
+    isLoggedIn: boolean;
+    account?: ConnectorAccount;
+}
+
+interface ConnectorProps {
+    connector: ConnectorData;
+    onDeleteClick: (guid: string) => void;
+    deleteState?: DeleteState;
+    onConnectorUpdated: () => void;
+    demoMode: boolean;
+}
+
+const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated, demoMode } : ConnectorProps) => {
     const [login, setLogin] = useState('');
     const [password, setPassword] = useState('');
     const [twoFactorCode, setTwoFactorCode] = useState('');
@@ -13,15 +42,15 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated, 
     const [isInTwoFactorMode, setIsInTwoFactorMode] = useState(false);
     const [isRequestInProgress, setIsRequestInProgress] = useState(false);
 
-    let virtualApp = connector.type === 'VRChatAPI' && 'VRChat'
-        || connector.type === 'ResoniteAPI' && 'Resonite'
-        || 'Offline';
+    let virtualApp = connector.type === 'VRChatAPI' && NamedApp.VRChat
+        || connector.type === 'ResoniteAPI' && NamedApp.Resonite
+        || NamedApp.NotNamed;
 
-    const tempAccount = {
-        inAppDisplayName: `Adding a new ${virtualApp} connection...`,
+    const tempAccount: ConnectorAccount = {
+        inAppDisplayName: `Adding a new ${virtualApp == NamedApp.NotNamed && 'Offline' || virtualApp} connection...`,
+        qualifiedAppName: 'internal.imposter',
         inAppIdentifier: '???',
         namedApp: virtualApp,
-        isTechnical: false
     };
 
     const tryLogin = async () => {
@@ -75,10 +104,10 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated, 
     return (
         <div className="connector-card">
             {connector.account && (
-                <Account account={connector.account} demoMode={demoMode} />
+                <Account account={connector.account as FrontAccount} demoMode={demoMode} imposter={false} showAlias={false} showNotes={false} />
             )}
             {!connector.account && (
-                <Account account={tempAccount} imposter={true} />
+                <Account account={tempAccount as FrontAccount} demoMode={false} imposter={true} showAlias={false} showNotes={false} />
             )}
 
             {!connector.isLoggedIn && (
@@ -156,7 +185,7 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated, 
                     <button title="Confirm" className="delete-button" onClick={() => tryLogout()} disabled={isRequestInProgress}>Log out</button>
                 )}
                 <button
-                    disabled={isRequestInProgress || !isInTwoFactorMode && (login || password) || isInTwoFactorMode && twoFactorCode}
+                    disabled={isRequestInProgress || !isInTwoFactorMode && (!!login || !!password) || isInTwoFactorMode && !!twoFactorCode}
                     className={`delete-button ${deleteState?.confirming ? '' : ''}`}
                     onClick={() => onDeleteClick(connector.guid)}
                     title={deleteState?.confirming ? 'Click again to confirm remove' : 'Remove connector'}

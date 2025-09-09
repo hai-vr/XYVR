@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './DataCollectionPage.css'
 import '../Header.css'
-import Connector from "../components/Connector.jsx";
+import Connector from "../components/Connector.tsx";
 import DarkModeToggleButton from "../components/DarkModeToggleButton.tsx";
 
 function DataCollectionPage({ isDark, setIsDark, demoMode }) {
