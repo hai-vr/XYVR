@@ -40,6 +40,25 @@ public class VRChatLiveMonitoring : ILiveMonitoring
                 Console.WriteLine($"OnLiveUpdateReceived: {JsonConvert.SerializeObject(update, serializer)}");
                 await _monitoring.MergeUser(update);
             };
+            _liveComms.OnWorldResolved += async resolution =>
+            {
+                Console.WriteLine($"OnWorldResolved: {JsonConvert.SerializeObject(resolution, serializer)}");
+                if (resolution.wasFound)
+                {
+                    var vrcLiveUpdates = _monitoring.GetAll(NamedApp.VRChat)
+                        // FIXME: We need the world identifier here
+                        .Where(update => update.mainSession?.knownSession?.inAppSessionIdentifier.StartsWith(resolution.worldId) == true)
+                        .ToList();
+                    foreach (var liveUpdate in vrcLiveUpdates)
+                    {
+                        // Re-emit events
+                        // TODO: Don't mutate the original objects..?
+                        liveUpdate.trigger = "Queue-WorldResolved";
+                        liveUpdate.mainSession!.knownSession!.inAppVirtualSpaceName = resolution.world!.name;
+                        await _monitoring.MergeUser(liveUpdate);
+                    }
+                }
+            };
             await _liveComms.Connect();
             
             _isConnected = true;

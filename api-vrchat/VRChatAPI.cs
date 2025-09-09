@@ -289,7 +289,41 @@ public class VRChatAPI
             yield return note;
         }
     }
-    
+
+    public async Task<VRChatWorld?> GetWorldLenient(DataCollectionReason dataCollectionReason, string worldId)
+    {
+        ThrowIfNotLoggedIn();
+        
+        var url = $"{AuditUrls.VrcApiUrl}/worlds/{worldId}";
+        var requestGuid = XYVRGuids.ForRequest();
+
+        try
+        {
+            var response = await _client.GetAsync(url);
+
+            await EnsureRateLimiting(url, response.StatusCode);
+
+            EnsureSuccessOrThrowVerbose(response);
+
+            if (response.StatusCode == HttpStatusCode.NotFound)
+            {
+                DataCollectNotFound(url, requestGuid, await response.Content.ReadAsStringAsync(), dataCollectionReason);
+                return null;
+            }
+
+            var responseStr = await response.Content.ReadAsStringAsync();
+
+            DataCollectSuccess(url, requestGuid, responseStr, dataCollectionReason);
+
+            return JsonConvert.DeserializeObject<VRChatWorld>(responseStr)!;
+        }
+        catch (Exception _)
+        {
+            DataCollectFailure(url, requestGuid, dataCollectionReason);
+            throw;
+        }
+    }
+
     private async IAsyncEnumerable<T> GetPaginatedResults<T>(DataCollectionReason dataCollectionReason, string requestGuid, Func<int, int, Task<string>> urlBuilder, int pageSize = 100)
     {
         var hasMoreData = true;

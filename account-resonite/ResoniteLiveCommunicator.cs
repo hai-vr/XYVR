@@ -66,29 +66,29 @@ public class ResoniteLiveCommunicator
         {
             return new LiveUserSessionState
             {
-                knowledge = LiveSessionKnowledge.Indeterminate,
+                knowledge = LiveUserSessionKnowledge.Indeterminate,
                 knownSession = null
             };
         }
 
-        Session? sessionNullable;
+        Session? session;
         var index = statusUpdate.currentSessionIndex;
         if (index >= 0 && index < statusUpdate.sessions.Count)
         {
-            sessionNullable = statusUpdate.sessions[index];
+            session = statusUpdate.sessions[index];
         }
         else
         {
-            sessionNullable = null;
+            session = null;
         }
         
         return new LiveUserSessionState
         {
-            knowledge = LiveSessionKnowledge.Known,
+            knowledge = LiveUserSessionKnowledge.Known,
             knownSession = new LiveUserKnownSession
             {
                 inAppSessionIdentifier = statusUpdate.userSessionId,
-                inAppHost = sessionNullable is { isHost: true } ? new LiveSessionHost
+                inAppHost = session is { isHost: true } ? new LiveSessionHost
                 {
                     inAppHostIdentifier = statusUpdate.userId,
                 } : null

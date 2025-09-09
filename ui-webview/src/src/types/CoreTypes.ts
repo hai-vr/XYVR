@@ -1,4 +1,6 @@
-﻿export const NamedApp = {
+﻿import type {FrontLiveUserSessionState} from "./LiveUpdateTypes.ts";
+
+export const NamedApp = {
     NotNamed: "NotNamed",
     Resonite: "Resonite",
     VRChat: "VRChat",
@@ -40,6 +42,7 @@ export interface FrontAccount {
 
     onlineStatus?: OnlineStatusType;
     customStatus?: string;
+    mainSession?: FrontLiveUserSessionState
 }
 
 export interface FrontIndividual {

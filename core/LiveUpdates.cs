@@ -33,7 +33,7 @@ public enum OnlineStatus
 public class LiveUserSessionState
 {
     public LiveUserKnownSession? knownSession;
-    public LiveSessionKnowledge knowledge;
+    public LiveUserSessionKnowledge knowledge;
 }
 
 public class LiveSession
@@ -96,7 +96,7 @@ public class UnknownAccount
     public string? inAppDisplayName;
 }
 
-public enum LiveSessionKnowledge
+public enum LiveUserSessionKnowledge
 {
     Indeterminate,
     Known,
@@ -106,6 +106,7 @@ public enum LiveSessionKnowledge
     // VRChat
     PrivateWorld,
     OffPlatform,
+    VRCTraveling
 }
 
 public class LiveUserKnownSession

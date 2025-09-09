@@ -16,9 +16,10 @@ interface AccountProps {
     showAlias: boolean;
     showNotes: boolean;
     demoMode: boolean;
+    showSession?: boolean;
 }
 
-const Account = ({ account, imposter, showAlias, showNotes, demoMode }: AccountProps) => {
+const Account = ({ account, imposter, showAlias, showNotes, demoMode, showSession }: AccountProps) => {
     const hasNote = account.isAnyCallerNote;
 
     const copyInAppIdentifier = async () => {
@@ -173,6 +174,11 @@ const Account = ({ account, imposter, showAlias, showNotes, demoMode }: AccountP
                     </button>
                 </div>)}
             </div>
+
+            {showSession && account.mainSession && <p className="warning-message">
+                <span title={account.mainSession.knownSession && account.mainSession.knownSession.inAppSessionIdentifier}>
+                {account.mainSession.knownSession && _D2(account.mainSession.knownSession.inAppVirtualSpaceName || '', demoMode) || _D2(account.mainSession.knownSession?.inAppSessionIdentifier || '', demoMode)}
+            </span> {(!account.mainSession.knownSession || account.mainSession.knownSession && !account.mainSession.knownSession.inAppVirtualSpaceName) && <strong>{account.mainSession.knowledge}</strong>}</p>}
 
             {account.isPendingUpdate && (
                 <p className="warning-message">

@@ -25,6 +25,7 @@ import {
 import DarkModeToggleButton from "../components/DarkModeToggleButton.tsx";
 import {_D2} from "../haiUtils.ts";
 import {type FrontIndividual, OnlineStatus} from "../types/CoreTypes.ts";
+import type {FrontLiveSession, FrontLiveUserUpdate} from "../types/LiveUpdateTypes.ts";
 
 const sortIndividuals = (individuals: FrontIndividual[], searchTerm: string) => {
     if (!searchTerm) {
@@ -138,7 +139,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
     useEffect(() => {
         const individualUpdated = (event: any) => {
             console.log('Individual updated event:', event.detail);
-            const updatedIndividual = event.detail;
+            const updatedIndividual: FrontIndividual = event.detail;
 
             setIndividuals(prevIndividuals => {
                 const existingIndex = prevIndividuals.findIndex(ind => ind.guid === updatedIndividual.guid);
@@ -155,7 +156,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
         const liveUpdateMerged = (event: any) => {
             // TODO: we should just use individualUpdated event and drive-by update the status from there
             console.log('Live update merge event:', event.detail);
-            const liveUpdate = event.detail;
+            const liveUpdate: FrontLiveUserUpdate = event.detail;
 
             setIndividuals(prevIndividuals => {
                 // FIXME: This should be attached to the account itself
@@ -169,6 +170,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                                 ...acc,
                                 onlineStatus: liveUpdate.onlineStatus || acc.onlineStatus,
                                 customStatus: liveUpdate.customStatus || acc.customStatus,
+                                mainSession: liveUpdate.mainSession || acc.mainSession,
                             }
                             : acc
                     );
@@ -179,8 +181,8 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                     if (onlineStatusVals.length > 0) {
                         // Find the status with the highest priority (lowest priority number)
                         bestOnlineStatus = onlineStatusVals.reduce((best, acc) => {
-                            const bestPriority = getOnlineStatusPriority(best?.onlineStatus);
-                            const accPriority = getOnlineStatusPriority(acc.onlineStatus);
+                            const bestPriority = getOnlineStatusPriority(best?.onlineStatus || OnlineStatus.Offline);
+                            const accPriority = getOnlineStatusPriority(acc.onlineStatus || OnlineStatus.Offline);
                             return accPriority < bestPriority ? acc : best;
                         }).onlineStatus;
                     }
@@ -202,7 +204,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
         const liveSessionUpdated = (event: any) => {
             console.log('Live session updated event:', event.detail);
             // @ts-ignore
-            const liveSession = event.detail;
+            const liveSession: FrontLiveSession = event.detail;
         }
 
         window.addEventListener('individualUpdated', individualUpdated);

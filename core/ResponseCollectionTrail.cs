@@ -22,6 +22,7 @@ public enum DataCollectionReason
     FindUndiscoveredAccounts,
     CollectUndiscoveredAccount,
     CollectExistingAccount,
+    CollectSessionLocationInformation
 }
 
 public enum DataCollectionResponseStatus

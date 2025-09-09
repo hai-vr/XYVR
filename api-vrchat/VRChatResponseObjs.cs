@@ -8,6 +8,7 @@ public class VRChatWebsocketContentContainingUser
     public string location; //": "offline:offline",
     public string instance; //": "offline",
     public string travelingToLocation; //": "offline",
+    public string worldId;
 }
 
 public class VRChatFriend
@@ -120,4 +121,71 @@ public class VRChatNoteFullTargetUser
     public string id;
     public string profilePicOverride;
     public string userIcon;
+}
+
+public class VRChatWorld
+{
+    public string authorId;
+    public string authorName;
+    public int capacity;
+    public int recommendedCapacity;
+    public DateTime created_at;
+    public VRChatWorldContentSettings defaultContentSettings;
+    public string description;
+    public int favorites;
+    public bool featured;
+    public int heat;
+    public string id;
+    public string imageUrl;
+    public object[][] instances;
+    public string labsPublicationDate;
+    public string name;
+    public string @namespace;
+    public int occupants;
+    public string organization;
+    public int popularity;
+    public string previewYoutubeId;
+    public int privateOccupants;
+    public int publicOccupants;
+    public string publicationDate;
+    public string releaseStatus;
+    public string storeId;
+    public string[] tags;
+    public string thumbnailImageUrl;
+    public VRChatUnityPackage[] unityPackages;
+    public DateTime updated_at;
+    public string[] urlList;
+    public int version;
+    public int visits;
+    public string[] udonProducts;
+}
+
+public class VRChatWorldContentSettings
+{
+    public bool drones;
+    public bool emoji;
+    public bool pedestals;
+    public bool prints;
+    public bool stickers;
+    public bool props;
+}
+
+public class VRChatUnityPackage
+{
+    public string id;
+    public string assetUrl;
+    public object assetUrlObject;
+    public int assetVersion;
+    public DateTime created_at;
+    public string impostorizerVersion;
+    public string performanceRating;
+    public string platform;
+    public string pluginUrl;
+    public object pluginUrlObject;
+    public long unitySortNumber;
+    public string unityVersion;
+    public string worldSignature;
+    public string impostorUrl;
+    public string scanStatus;
+    public string variant;
 }

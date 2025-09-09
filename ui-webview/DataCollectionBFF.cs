@@ -56,7 +56,10 @@ public class DataCollectionBFF : IDataCollectionBFF
                 .Cast<IDataCollection>()
                 .ToList()) as IDataCollection;
 
-            await dataCollection.IncrementalUpdateRepository(new UIProgressJobHandler(repository, async individual => await _mainWindow.SendEventToReact("individualUpdated", FrontIndividual.FromCore(individual, _mainWindow.LiveStatusMonitoring))));
+            await dataCollection.IncrementalUpdateRepository(new UIProgressJobHandler(repository, async individual =>
+            {
+                await _mainWindow.SendEventToReact(FrontEvents.EventForIndividualUpdated, FrontIndividual.FromCore(individual, _mainWindow.LiveStatusMonitoring));
+            }));
             await Scaffolding.SaveRepository(repository);
         }
         finally

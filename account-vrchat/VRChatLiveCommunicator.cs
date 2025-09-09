@@ -10,20 +10,66 @@ public class VRChatLiveCommunicator
 {
     private readonly ICredentialsStorage _credentialsStorage;
     private readonly string _callerInAppIdentifier;
-    private VRChatWebsocketClient _wsClient;
     private readonly IResponseCollector _responseCollector;
-    
+    private readonly VRChatWorldMemoizer _worldMemoizer;
+
+    private readonly Lock _queueLock = new();
+    private readonly HashSet<string> _allQueued = new();
+    private readonly Queue<string> _queue = new();
+    private Task _queueTask = Task.CompletedTask;
+
+    private VRChatWebsocketClient _wsClient;
     private VRChatAPI? _api;
     private bool _hasInitiatedDisconnect;
 
     public event LiveUpdateReceived? OnLiveUpdateReceived;
     public delegate Task LiveUpdateReceived(LiveUserUpdate liveUpdate);
 
+    public event WorldResolved? OnWorldResolved;
+    public delegate Task WorldResolved(MemoizedWorld world);
+
     public VRChatLiveCommunicator(ICredentialsStorage credentialsStorage, string callerInAppIdentifier, IResponseCollector responseCollector)
     {
         _credentialsStorage = credentialsStorage;
         _callerInAppIdentifier = callerInAppIdentifier;
         _responseCollector = responseCollector;
+        _worldMemoizer = new VRChatWorldMemoizer();
+    }
+
+    private void WakeUpQueue()
+    {
+        lock (_queueLock)
+        {
+            if (_queueTask.IsCompleted)
+            {
+                _queueTask = Task.Run(ProcessQueue);
+            }
+        }
+    }
+
+    private async Task ProcessQueue()
+    {
+        Console.WriteLine("Processing queue");
+        _api ??= await InitializeAPI();
+        
+        while (_queue.Count > 0)
+        {
+            var worldId = _queue.Dequeue();
+            var worldLenient = await _api.GetWorldLenient(DataCollectionReason.CollectSessionLocationInformation, worldId);
+            if (worldLenient != null)
+            {
+                _worldMemoizer.Found(worldId, worldLenient);
+            }
+            else
+            {
+                _worldMemoizer.NotFound(worldId);
+            }
+
+            if (OnWorldResolved != null)
+            {
+                await OnWorldResolved.Invoke(_worldMemoizer.Get(worldId));
+            }
+        }
     }
 
     public async Task Connect()
@@ -63,7 +109,18 @@ public class VRChatLiveCommunicator
                     inAppIdentifier = friend.id,
                     onlineStatus = ParseStatus("xxx", friend.location, friend.platform, friend.status),
                     callerInAppIdentifier = _callerInAppIdentifier,
-                    customStatus = friend.statusDescription
+                    customStatus = friend.statusDescription,
+                    mainSession = new LiveUserSessionState
+                    {
+                        knowledge = friend.location == "private" ? LiveUserSessionKnowledge.PrivateWorld : LiveUserSessionKnowledge.Known, // "offline" counts as known
+                        knownSession = friend.location != "private" && friend.location != "offline" && friend.location != "traveling" ? new LiveUserKnownSession
+                        {
+                            inAppSessionIdentifier = friend.location,
+                            inAppHost = null,
+                            inAppSessionName = null,
+                            inAppVirtualSpaceName = GetVirtualSpaceNameOrQueueFetchIfApplicable(friend.location),
+                        } : null
+                    }
                 });
             }
         }
@@ -79,6 +136,8 @@ public class VRChatLiveCommunicator
 
     private void WhenMessageReceived(string msg)
     {
+        if (OnLiveUpdateReceived == null) return;
+        
         try
         {
             var rootObj = JObject.Parse(msg);
@@ -90,20 +149,19 @@ public class VRChatLiveCommunicator
                 // despite the `onlineStatus = type is "user-update" ? null : ...` below
                 
                 var content = JsonConvert.DeserializeObject<VRChatWebsocketContentContainingUser>(rootObj["content"].Value<string>())!;
-                if (OnLiveUpdateReceived != null)
+
+                // FIXME: This is a task???
+                OnLiveUpdateReceived(new LiveUserUpdate
                 {
-                    // FIXME: This is a task???
-                    OnLiveUpdateReceived(new LiveUserUpdate
-                    {
-                        trigger = $"WS-{type}",
-                        namedApp = NamedApp.VRChat,
-                        qualifiedAppName = VRChatCommunicator.VRChatQualifiedAppName,
-                        inAppIdentifier = content.userId,
-                        onlineStatus = type is "user-update" ? null : ParseStatus(type, content.location, content.user.platform, content.user.status),
-                        callerInAppIdentifier = _callerInAppIdentifier,
-                        customStatus = content.user.statusDescription
-                    });
-                }
+                    trigger = $"WS-{type}",
+                    namedApp = NamedApp.VRChat,
+                    qualifiedAppName = VRChatCommunicator.VRChatQualifiedAppName,
+                    inAppIdentifier = content.userId,
+                    onlineStatus = type is "user-update" ? null : ParseStatus(type, content.location, content.user.platform, content.user.status),
+                    callerInAppIdentifier = _callerInAppIdentifier,
+                    customStatus = content.user.statusDescription,
+                    mainSession = FigureOutSessionStateOrNull(type, content)
+                });
             }
             else
             {
@@ -115,6 +173,102 @@ public class VRChatLiveCommunicator
             Console.WriteLine(e);
             throw;
         }
+    }
+
+    private LiveUserSessionState? FigureOutSessionStateOrNull(string type, VRChatWebsocketContentContainingUser content)
+    {
+        if (type != "friend-location") return null;
+        
+        // Order matters. "private" check comes first.
+        if (content.worldId == "private")
+        {
+            return new LiveUserSessionState
+            {
+                knowledge = LiveUserSessionKnowledge.PrivateWorld,
+                knownSession = null
+            };
+        }
+
+        var location = content.location;
+        
+        if (location == "traveling")
+        {
+            return new LiveUserSessionState
+            {
+                knowledge = LiveUserSessionKnowledge.VRCTraveling,
+                knownSession = new LiveUserKnownSession
+                {
+                    inAppSessionIdentifier = content.travelingToLocation,
+                    inAppHost = null,
+                    inAppSessionName = null,
+                    inAppVirtualSpaceName = null,
+                }
+            };
+        }
+
+        var virtualSpaceName = GetVirtualSpaceNameOrQueueFetchIfApplicable(location);
+
+        return new LiveUserSessionState
+        {
+            knowledge = LiveUserSessionKnowledge.Known,
+            knownSession = new LiveUserKnownSession
+            {
+                inAppSessionIdentifier = location,
+                inAppHost = null,
+                inAppSessionName = null,
+                inAppVirtualSpaceName = virtualSpaceName,
+            }
+        };
+    }
+
+    private string? GetVirtualSpaceNameOrQueueFetchIfApplicable(string location)
+    {
+        string? virtualSpaceName;
+        if (location.StartsWith("wrld_"))
+        {
+            var separator = location.IndexOf(':');
+            if (separator != -1)
+            {
+                var worldId = location.Substring(0, separator);
+                var memoizedWorld = GetOrQueueWorldFetch(worldId);
+                if (memoizedWorld != null && memoizedWorld.wasFound)
+                {
+                    virtualSpaceName = memoizedWorld.world!.name;
+                }
+                else
+                {
+                    virtualSpaceName = null;
+                }
+            }
+            else
+            {
+                virtualSpaceName = null;
+                Console.WriteLine($"Location is not parseable as a world: {location}");
+            }
+        }
+        else
+        {
+            virtualSpaceName = null;
+            Console.WriteLine($"Unknown location: {location}");
+        }
+
+        return virtualSpaceName;
+    }
+
+    private MemoizedWorld? GetOrQueueWorldFetch(string worldId)
+    {
+        if (_worldMemoizer.HasMemoized(worldId))
+        {
+            return _worldMemoizer.Get(worldId);
+        }
+        
+        Console.WriteLine($"We don't know world id {worldId}, will queue fetch...");
+
+        _allQueued.Add(worldId);
+        _queue.Enqueue(worldId);
+        WakeUpQueue();
+            
+        return null;
     }
 
     private OnlineStatus ParseStatus(string type, string contentLocation, string platform, string userStatus)

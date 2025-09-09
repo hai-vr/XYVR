@@ -94,12 +94,12 @@ public class LiveBFF : ILiveBFF
 
     private async Task WhenUserUpdateMerged(LiveUserUpdate update)
     {
-        await _mainWindow.SendEventToReact("liveUpdateMerged", FrontLiveUserUpdate.FromCore(update));
+        await _mainWindow.SendEventToReact(FrontEvents.EventForLiveUpdateMerged, FrontLiveUserUpdate.FromCore(update));
     }
 
     private async Task WhenSessionUpdated(LiveSession session)
     {
-        await _mainWindow.SendEventToReact("liveSessionUpdated", FrontLiveSession.FromCore(session));
+        await _mainWindow.SendEventToReact(FrontEvents.EventForLiveSessionUpdated, FrontLiveSession.FromCore(session, _mainWindow.LiveStatusMonitoring));
     }
 
     public void OnClosed()

@@ -42,10 +42,21 @@ public class LiveStatusMonitoring
         // In that case, we may need to avoid deduplicating status by inAppIdentifier alone,
         // and also use the callerInAppIdentifier, to know where we got the status from.
         // The UI side or BFF would have to decide what status to associate with that account.
-        _liveUpdatesByAppByUser[liveUpdate.namedApp][liveUpdate.inAppIdentifier] = liveUpdate;
+        if (_liveUpdatesByAppByUser[liveUpdate.namedApp].TryGetValue(liveUpdate.inAppIdentifier, out var existingLiveUpdate))
+        {
+            liveUpdate.trigger = existingLiveUpdate.trigger;
+            
+            if (liveUpdate.onlineStatus != null) existingLiveUpdate.onlineStatus = liveUpdate.onlineStatus;
+            if (liveUpdate.customStatus != null) existingLiveUpdate.customStatus = liveUpdate.customStatus;
+            if (liveUpdate.mainSession != null) existingLiveUpdate.mainSession = liveUpdate.mainSession;
+        }
+        else
+        {
+            _liveUpdatesByAppByUser[liveUpdate.namedApp][liveUpdate.inAppIdentifier] = liveUpdate;
+        }
 
         LiveSession? liveSession = null;
-        if (liveUpdate.mainSession is { knowledge: LiveSessionKnowledge.Known })
+        if (liveUpdate.mainSession is { knowledge: LiveUserSessionKnowledge.Known })
         {
             var userKnownSession = liveUpdate.mainSession.knownSession!;
             var nonIndexedSession = new NonIndexedLiveSession

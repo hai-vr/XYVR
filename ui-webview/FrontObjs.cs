@@ -63,8 +63,9 @@ internal class FrontAccount
     
     public OnlineStatus? onlineStatus;
     public string? customStatus;
+    public FrontLiveUserSessionState? mainSession;
 
-    public static FrontAccount ToFrontAccount(Account account, LiveUserUpdate? sessionState)
+    public static FrontAccount ToFrontAccount(Account account, LiveUserUpdate? liveSessionState)
     {
         return new FrontAccount
         {
@@ -81,13 +82,14 @@ internal class FrontAccount
             allDisplayNames = account.allDisplayNames,
             isPendingUpdate = account.isPendingUpdate,
 
-            onlineStatus = sessionState?.onlineStatus,
-            customStatus = sessionState?.customStatus
+            onlineStatus = liveSessionState?.onlineStatus,
+            customStatus = liveSessionState?.customStatus,
+            mainSession = liveSessionState?.mainSession != null ? FrontLiveUserSessionState.FromCore(liveSessionState.mainSession) : null,
         };
     }
 }
 
-public class FrontCallerAccount
+internal class FrontCallerAccount
 {
     public bool isAnonymous;
     public string? inAppIdentifier; // Can only be null if it's an anonymous caller.
@@ -107,7 +109,7 @@ public class FrontCallerAccount
     }
 }
 
-public class FrontConnector
+internal class FrontConnector
 {
     public string guid;
     public string displayName;
@@ -134,7 +136,7 @@ public class FrontConnector
     }
 }
 
-public class FrontConnectorAccount
+internal class FrontConnectorAccount
 {
     public NamedApp namedApp;
     public string qualifiedAppName;
@@ -154,7 +156,7 @@ public class FrontConnectorAccount
     }
 }
 
-public class FrontLiveUserUpdate
+internal class FrontLiveUserUpdate
 {
     public NamedApp namedApp;
     public string trigger;
@@ -162,8 +164,8 @@ public class FrontLiveUserUpdate
     public string inAppIdentifier;
 
     public OnlineStatus? onlineStatus;
-    public FrontLiveUserSessionState? mainSession;
     public string? customStatus;
+    public FrontLiveUserSessionState? mainSession;
 
     public string callerInAppIdentifier;
     
@@ -183,10 +185,10 @@ public class FrontLiveUserUpdate
     }
 }
 
-public class FrontLiveUserSessionState
+internal class FrontLiveUserSessionState
 {
     public FrontLiveUserKnownSession? knownSession;
-    public LiveSessionKnowledge knowledge;
+    public LiveUserSessionKnowledge knowledge;
     
     public static FrontLiveUserSessionState FromCore(LiveUserSessionState liveUserSessionState)
     {
@@ -198,7 +200,7 @@ public class FrontLiveUserSessionState
     }
 }
 
-public class FrontLiveUserKnownSession
+internal class FrontLiveUserKnownSession
 {
     public string inAppSessionIdentifier;
     
@@ -219,7 +221,7 @@ public class FrontLiveUserKnownSession
     }
 }
 
-public class FrontLiveSession
+internal class FrontLiveSession
 {
     public string guid;
 
@@ -235,7 +237,7 @@ public class FrontLiveSession
 
     public List<FrontParticipant> participants = new();
     
-    public static FrontLiveSession FromCore(LiveSession liveSession)
+    public static FrontLiveSession FromCore(LiveSession liveSession, LiveStatusMonitoring monitoring)
     {
         return new FrontLiveSession
         {
@@ -246,32 +248,39 @@ public class FrontLiveSession
             inAppSessionName = liveSession.inAppSessionName,
             inAppVirtualSpaceName = liveSession.inAppVirtualSpaceName,
             inAppHost = liveSession.inAppHost != null ? FrontLiveSessionHost.FromCore(liveSession.inAppHost) : null,
-            participants = liveSession.participants.Select(FrontParticipant.FromCore).ToList()
+            participants = liveSession.participants.Select(participant =>
+            {
+                var sessionState = participant.isKnown
+                    ? monitoring.GetLiveSessionStateOrNull(liveSession.namedApp, participant.knownAccount!.inAppIdentifier)
+                    : null;
+
+                return FrontParticipant.FromCore(participant, sessionState);
+            }).ToList()
         };
     }
 }
 
-public class FrontParticipant
+internal class FrontParticipant
 {
     public bool isKnown;
-    public Account? knownAccount;
+    public FrontAccount? knownAccount;
     public FrontUnknownAccount? unknownAccount;
 
     public bool isHost;
     
-    public static FrontParticipant FromCore(Participant participant)
+    public static FrontParticipant FromCore(Participant participant, LiveUserUpdate? liveSessionState)
     {
         return new FrontParticipant
         {
             isKnown = participant.isKnown,
-            knownAccount = participant.knownAccount,
+            knownAccount = participant.knownAccount != null ? FrontAccount.ToFrontAccount(participant.knownAccount, liveSessionState) : null,
             unknownAccount = participant.unknownAccount != null ? FrontUnknownAccount.FromCore(participant.unknownAccount) : null,
             isHost = participant.isHost
         };
     }
 }
 
-public class FrontUnknownAccount
+internal class FrontUnknownAccount
 {
     public string? inAppIdentifier;
     public string? inAppDisplayName;
@@ -286,7 +295,7 @@ public class FrontUnknownAccount
     }
 }
 
-public class FrontLiveSessionHost
+internal class FrontLiveSessionHost
 {
     public string inAppHostIdentifier;
     public string? inAppHostDisplayName;
