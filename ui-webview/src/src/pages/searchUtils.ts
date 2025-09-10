@@ -95,7 +95,84 @@ export const generateKanaVariants = (term: string) => {
 
 // Search term parsing utilities
 export const parseSearchTerms = (unparsedSearchTerms: string) => {
-    const terms = unparsedSearchTerms.toLowerCase().trim().split(' ').filter(term => term.trim() !== '');
+    /*
+Can you modify this to parse differently?
+
+The following input :
+"hello world" something else
+should return the following terms:
+["hello world", "something", "else"]
+
+The following input :
+something else "hello world
+should return the following terms:
+["something", "else", "hello world"]
+
+The following input :
+"hello world" "something else"
+should return the following terms:
+["hello world", "something else"]
+
+The following input :
+alias:"hello world" something else
+should return the following terms:
+["alias:hello world", "something", "else"]
+
+~~~~~~
+
+Are you sure this handles the following?:
+session:"hello world"
+     */
+    const parseQuotedTerms = (input: string): string[] => {
+        const terms: string[] = [];
+        let current = '';
+        let inQuotes = false;
+        let i = 0;
+
+        while (i < input.length) {
+            const char = input[i];
+
+            if (char === '"') {
+                if (inQuotes) {
+                    // End of quoted section - don't add the quote
+                    inQuotes = false;
+                    // Check if we're at the end or next char is space
+                    if (i + 1 >= input.length || input[i + 1] === ' ') {
+                        if (current.trim()) {
+                            terms.push(current.trim());
+                            current = '';
+                        }
+                    }
+                } else {
+                    // Start of quoted section - don't add the quote
+                    inQuotes = true;
+                }
+            } else if (char === ' ') {
+                if (inQuotes) {
+                    // Inside quotes, spaces are part of the term
+                    current += char;
+                } else {
+                    // Outside quotes, space is a delimiter
+                    if (current.trim()) {
+                        terms.push(current.trim());
+                        current = '';
+                    }
+                }
+            } else {
+                current += char;
+            }
+            i++;
+        }
+
+        // Handle remaining content
+        if (current.trim()) {
+            terms.push(current.trim());
+        }
+
+        return terms;
+    };
+
+    const terms = parseQuotedTerms(unparsedSearchTerms.toLowerCase().trim());
     const specialTerms: string[] = [];
     const regularTerms: string[] = [];
 
@@ -110,8 +187,7 @@ export const parseSearchTerms = (unparsedSearchTerms: string) => {
             || term === ':confusables'
             || term === ':help'
             || term === 'has:alt'
-            || term === 'has:bot'
-            || term === ':help') {
+            || term === 'has:bot') {
             specialTerms.push(term);
         } else {
             regularTerms.push(term);
