@@ -61,6 +61,7 @@ The following work remains to be done:
     - ~~The system does not handle authenticator 2FA, only email.~~
     - There is no feedback on the progress of data collection.
     - The Resonite login does not support TOTP.
+    - Resonite SignalR session events occupy 50 kiloBytes per second of network usage even when idle. This is not normal, the Resonite client itself doesn't even take that much when idling.
 - Handle the lifecycle of successful newly logged-in connections with live monitoring.
 - Review the request lifecycle towards external systems.
 - Better expose the data update to the UI.
