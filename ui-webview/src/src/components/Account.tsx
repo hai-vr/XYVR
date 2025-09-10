@@ -139,7 +139,7 @@ const Account = ({ account, imposter, showAlias, showNotes, demoMode, showSessio
                             {!account.customStatus && getAppDisplayName(account)} {_D2(account.customStatus || '', demoMode)}
                         </div>
                         {showSession && worldName && <div className="account-app-name">
-                            <i>{worldName}</i>
+                            <i>{_D2(worldName, demoMode)}</i>
                         </div>}
                     </div>
                 </div>
