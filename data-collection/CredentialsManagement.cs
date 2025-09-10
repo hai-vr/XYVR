@@ -100,8 +100,7 @@ public class CredentialsManagement
     private async Task<bool> ResoniteCheckIsLoggedIn(string cookieOrToken)
     {
         var communicator = new ResoniteCommunicator(
-            new DoNotStoreAnythingStorage(),
-            null, null, false, await _resoniteUidProviderFn(),
+            new DoNotStoreAnythingStorage(), false, await _resoniteUidProviderFn(),
             new InMemoryCredentialsStorage(cookieOrToken)
         );
         
@@ -199,8 +198,6 @@ public class CredentialsManagement
         
         var communicator = new ResoniteCommunicator(
             new DoNotStoreAnythingStorage(),
-            connectionAttempt.login__sensitive,
-            connectionAttempt.password__sensitive,
             connectionAttempt.stayLoggedIn,
             await _resoniteUidProviderFn(),
             credentialsStorage
@@ -209,7 +206,7 @@ public class CredentialsManagement
         Console.WriteLine("Connecting to Resonite...");
         try
         {
-            await communicator.ResoniteLogin();
+            await communicator.ResoniteLogin(connectionAttempt.login__sensitive, connectionAttempt.password__sensitive);
             
             var callerAccount = await communicator.CallerAccount();
             var connectorAccount = AsConnectorAccount(callerAccount);
@@ -313,10 +310,9 @@ public class CredentialsManagement
                 return null;
             case ConnectorType.ResoniteAPI:
             {
-                ILiveMonitoring liveMonitoring = new ResoniteLiveMonitoring(credentialsStorage, monitoring);
+                ILiveMonitoring liveMonitoring = new ResoniteLiveMonitoring(credentialsStorage, monitoring, await _resoniteUidProviderFn());
                 var res = new ResoniteCommunicator(
-                    new DoNotStoreAnythingStorage(),
-                    null, null, false, await _resoniteUidProviderFn(),
+                    new DoNotStoreAnythingStorage(), false, await _resoniteUidProviderFn(),
                     credentialsStorage
                 );
                 var caller = await res.CallerAccount();

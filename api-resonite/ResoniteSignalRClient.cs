@@ -11,6 +11,9 @@ public class ResoniteSignalRClient
     
     public event StatusUpdate? OnStatusUpdate;
     public delegate Task StatusUpdate(UserStatusUpdate statusUpdate);
+    
+    public event SessionUpdate? OnSessionUpdate;
+    public delegate Task SessionUpdate(SessionUpdateJsonObject sessionUpdate);
 
     public event Func<Task>? OnReconnected;
 
@@ -24,9 +27,9 @@ public class ResoniteSignalRClient
             .WithAutomaticReconnect()
             .Build();
 
-        // _connection.On<object>("ReceiveSessionUpdate", OnReceiveSessionUpdate);
+        _connection.On<object>("ReceiveSessionUpdate", OnReceiveSessionUpdate);
         _connection.On<object>("ReceiveStatusUpdate", OnReceiveStatusUpdate);
-
+        
         _connection.Closed += WhenConnectionClosed;
         _connection.Reconnecting += WhenReconnecting;
         _connection.Reconnected += WhenReconnected;
@@ -41,10 +44,6 @@ public class ResoniteSignalRClient
         await _connection.StopAsync();
         await _connection.DisposeAsync();
         _connection = null;
-    }
-
-    private void OnReceiveSessionUpdate(object sessionUpdate)
-    {
     }
 
     public async Task SubmitRequestStatus(string? userId = null, bool weAreInvisible = false)
@@ -72,6 +71,14 @@ public class ResoniteSignalRClient
         var obj = JsonConvert.DeserializeObject<UserStatusUpdate>(rawText);
         
         if (OnStatusUpdate != null) await OnStatusUpdate?.Invoke(obj);
+    }
+
+    private async Task OnReceiveSessionUpdate(object sessionUpdate)
+    {
+        var rawText = ((JsonElement)sessionUpdate).GetRawText();
+        var obj = JsonConvert.DeserializeObject<SessionUpdateJsonObject>(rawText);
+
+        if (OnSessionUpdate != null) await OnSessionUpdate?.Invoke(obj);
     }
 
     private Task WhenConnectionClosed(Exception? exception)

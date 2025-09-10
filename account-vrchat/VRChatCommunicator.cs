@@ -152,11 +152,14 @@ public class VRChatCommunicator
     {
         var api = new VRChatAPI(_responseCollector);
         var userinput_cookies__sensitive = await _credentialsStorage.RequireCookieOrToken();
-        if (userinput_cookies__sensitive != null)
+        if (userinput_cookies__sensitive == null)
         {
-            api.ProvideCookies(userinput_cookies__sensitive);
+            throw new ArgumentException("User must have already logged in before establishing communication");
         }
 
+        api.ProvideCookies(userinput_cookies__sensitive);
+
+        // TODO: Check token expiration
         if (!api.IsLoggedIn)
         {
             throw new ArgumentException("User must be already logged in before establishing communication");

@@ -11,8 +11,6 @@ public class ResoniteCommunicator
     private readonly IResponseCollector _responseCollector;
     private readonly ICredentialsStorage _credentialsStorage;
 
-    private readonly string _username__sensitive;
-    private readonly string _password__sensitive;
     private readonly bool _stayLoggedIn;
     private readonly string _uid;
     
@@ -20,13 +18,11 @@ public class ResoniteCommunicator
     private string _callerUserId;
     private string _callerDisplayName;
 
-    public ResoniteCommunicator(IResponseCollector responseCollector, string? username__sensitive, string? password__sensitive, bool stayLoggedIn, string uid__sensitive, ICredentialsStorage credentialsStorage)
+    public ResoniteCommunicator(IResponseCollector responseCollector, bool stayLoggedIn, string uid__sensitive, ICredentialsStorage credentialsStorage)
     {
         _responseCollector = responseCollector;
         _credentialsStorage = credentialsStorage;
 
-        _username__sensitive = username__sensitive!;
-        _password__sensitive = password__sensitive!;
         _stayLoggedIn = stayLoggedIn;
         _uid = uid__sensitive;
         
@@ -37,11 +33,11 @@ public class ResoniteCommunicator
         }
     }
 
-    public async Task ResoniteLogin()
+    public async Task ResoniteLogin(string username__sensitive, string password__sensitive)
     {
         var api = new ResoniteAPI(XYVRGuids.ForResoniteMachineId(), _uid, _responseCollector);
         
-        _ = await api.Login(_username__sensitive, _password__sensitive, _stayLoggedIn);
+        _ = await api.Login(username__sensitive, password__sensitive, _stayLoggedIn);
         await _credentialsStorage.StoreCookieOrToken(api.GetAllUserAndToken__Sensitive());
     }
 
@@ -170,28 +166,18 @@ public class ResoniteCommunicator
         var api = new ResoniteAPI(XYVRGuids.ForResoniteMachineId(), _uid, _responseCollector);
 
         var userAndToken__sensitive = await _credentialsStorage.RequireCookieOrToken();
-        if (userAndToken__sensitive != null)
+        if (userAndToken__sensitive == null)
         {
-            api.ProvideUserAndToken(userAndToken__sensitive);
-            var user = await api.GetUser__self(DataCollectionReason.CollectCallerAccount);
-            _callerUserId = user.id;
-            _callerDisplayName = user.username;
+            // TODO: Check token expiration
+            throw new ArgumentException("User must have already logged in before establishing communication");
+        }
+        
+        api.ProvideUserAndToken(userAndToken__sensitive);
+        
+        var user = await api.GetUser__self(DataCollectionReason.CollectCallerAccount);
+        _callerUserId = user.id;
+        _callerDisplayName = user.username;
             
-            return api;
-        }
-        
-        var loginResult = await api.Login(_username__sensitive, _password__sensitive, false);
-        await _credentialsStorage.StoreCookieOrToken(api.GetAllUserAndToken__Sensitive());
-        
-        var callerUserN = await api.GetUser(loginResult.entity.userId, DataCollectionReason.CollectCallerAccount);
-        if (callerUserN == null)
-        {
-            throw new Exception("Not Found returned while getting the caller's account data"); // FIXME: Proper exception type
-        }
-        
-        _callerUserId = loginResult.entity.userId;
-        _callerDisplayName = ((UserResponseJsonObject)callerUserN).username;
-        
         return api;
     }
 }

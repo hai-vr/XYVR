@@ -115,6 +115,7 @@ const Account = ({ account, imposter, showAlias, showNotes, demoMode, showSessio
         }
     };
 
+    const worldName = account.mainSession && (account.mainSession.knownSession && (account.mainSession.knownSession.inAppVirtualSpaceName || '???')) || undefined;
     return (
         <div className="account-container">
             <div className="account-header">
@@ -137,6 +138,9 @@ const Account = ({ account, imposter, showAlias, showNotes, demoMode, showSessio
                         <div className="account-app-name">
                             {!account.customStatus && getAppDisplayName(account)} {_D2(account.customStatus || '', demoMode)}
                         </div>
+                        {showSession && worldName && <div className="account-app-name">
+                            <i>{worldName}</i>
+                        </div>}
                     </div>
                 </div>
                 {!imposter && (<div className="account-badges">
@@ -174,11 +178,6 @@ const Account = ({ account, imposter, showAlias, showNotes, demoMode, showSessio
                     </button>
                 </div>)}
             </div>
-
-            {showSession && account.mainSession && <p className="warning-message">
-                <span title={account.mainSession.knownSession && account.mainSession.knownSession.inAppSessionIdentifier}>
-                {account.mainSession.knownSession && _D2(account.mainSession.knownSession.inAppVirtualSpaceName || '', demoMode) || _D2(account.mainSession.knownSession?.inAppSessionIdentifier || '', demoMode)}
-            </span> {(!account.mainSession.knownSession || account.mainSession.knownSession && !account.mainSession.knownSession.inAppVirtualSpaceName) && <strong>{account.mainSession.knowledge}</strong>}</p>}
 
             {account.isPendingUpdate && (
                 <p className="warning-message">

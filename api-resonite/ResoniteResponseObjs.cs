@@ -116,3 +116,55 @@ public struct QuotaByteSourcesJsonObject
     public long baseQuota;
     public long patreon;
 }
+
+public class SessionUpdateJsonObject
+{
+    public string name;
+    public string description;
+    // public CorrespondingWorldIdJsonObject correspondingWorldId;
+    // public List<string> tags;
+    public string sessionId;
+    public string normalizedSessionId;
+    public string hostUserId;
+    public string hostUserSessionId;
+    public string hostMachineId;
+    public string hostUsername;
+    // public string compatibilityHash;
+    // public string systemCompatibilityHash;
+    // public List<DataModelAssemblyJsonObject> dataModelAssemblies;
+    // public string universeId;
+    // public string appVersion;
+    // public bool headlessHost;
+    // public List<string> sessionURLs;
+    // public List<string> parentSessionIds;
+    // public List<string> nestedSessionIds;
+    // public List<string> sessionUsers;
+    // public string thumbnailUrl;
+    // public int joinedUsers;
+    // public int activeUsers;
+    // public int totalJoinedUsers;
+    // public int totalActiveUsers;
+    // public int maxUsers;
+    // public bool mobileFriendly;
+    // public DateTime sessionBeginTime;
+    // public DateTime lastUpdate;
+    // public string accessLevel;
+    // public bool hideFromListing;
+    // public string broadcastKey;
+    // public bool awayKickEnabled;
+    // public int awayKickMinutes;
+    // public bool hasEnded;
+    // public bool isValid;
+}
+
+public class CorrespondingWorldIdJsonObject
+{
+    public string recordId;
+    public string ownerId;
+}
+
+public class DataModelAssemblyJsonObject
+{
+    public string name;
+    public string compatibilityHash;
+}

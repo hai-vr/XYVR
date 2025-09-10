@@ -9,6 +9,8 @@ public class ResoniteLiveMonitoring : ILiveMonitoring, IDisposable
 {
     private readonly ICredentialsStorage _credentialsStorage;
     private readonly LiveStatusMonitoring _monitoring;
+    private readonly string _uid__sensitive;
+    
     private readonly SemaphoreSlim _operationLock = new(1, 1);
     private bool _isConnected;
     private string? _callerInAppIdentifier;
@@ -16,10 +18,11 @@ public class ResoniteLiveMonitoring : ILiveMonitoring, IDisposable
     private ResoniteLiveCommunicator? _liveComms;
     private CancellationTokenSource _cancellationTokenSource;
 
-    public ResoniteLiveMonitoring(ICredentialsStorage credentialsStorage, LiveStatusMonitoring monitoring)
+    public ResoniteLiveMonitoring(ICredentialsStorage credentialsStorage, LiveStatusMonitoring monitoring, string uid__sensitive)
     {
         _credentialsStorage = credentialsStorage;
         _monitoring = monitoring;
+        _uid__sensitive = uid__sensitive;
     }
 
     public Task DefineCaller(string callerInAppIdentifier)
@@ -38,7 +41,7 @@ public class ResoniteLiveMonitoring : ILiveMonitoring, IDisposable
             if (_isConnected) return;
             _cancellationTokenSource = new CancellationTokenSource();
             
-            _liveComms = new ResoniteLiveCommunicator(_credentialsStorage, _callerInAppIdentifier);
+            _liveComms = new ResoniteLiveCommunicator(_credentialsStorage, _callerInAppIdentifier, _uid__sensitive, new DoNotStoreAnythingStorage());
             
             var serializer = new JsonSerializerSettings()
             {
