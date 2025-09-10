@@ -10,7 +10,7 @@ import {
     shouldShowAlias,
     shouldShowBio,
     shouldShowHelp,
-    getOnlineStatusPriority
+    getOnlineStatusPriority, parseSearchField
 } from './searchUtils.ts'
 import {
     Glasses,
@@ -27,8 +27,8 @@ import {_D2} from "../haiUtils.ts";
 import {type FrontIndividual, OnlineStatus} from "../types/CoreTypes.ts";
 import type {FrontLiveSession, FrontLiveUserUpdate} from "../types/LiveUpdateTypes.ts";
 
-const sortIndividuals = (individuals: FrontIndividual[], searchTerm: string) => {
-    if (!searchTerm) {
+const sortIndividuals = (individuals: FrontIndividual[], unparsedSearchField: string) => {
+    if (!unparsedSearchField) {
         // Sort by online status first, even when there's no search term
         return [...individuals].sort((a, b) => {
             const aPriority = getOnlineStatusPriority(a.onlineStatus || OnlineStatus.Offline);
@@ -42,14 +42,16 @@ const sortIndividuals = (individuals: FrontIndividual[], searchTerm: string) => 
         });
     }
 
+    const { regularTerms } = parseSearchField(unparsedSearchField);
+
     // Sort by priority: online status first, then display name matches, then identifier matches, then original order
     return [...individuals].sort((a, b) => {
         const aPriority = getOnlineStatusPriority(a.onlineStatus || OnlineStatus.Offline);
         const bPriority = getOnlineStatusPriority(b.onlineStatus || OnlineStatus.Offline);
-        const aHasDisplayNameMatch = hasDisplayNameMatch(a, searchTerm);
-        const bHasDisplayNameMatch = hasDisplayNameMatch(b, searchTerm);
-        const aHasIdentifierMatch = hasIdentifierMatch(a, searchTerm);
-        const bHasIdentifierMatch = hasIdentifierMatch(b, searchTerm);
+        const aHasDisplayNameMatch = hasDisplayNameMatch(a, regularTerms);
+        const bHasDisplayNameMatch = hasDisplayNameMatch(b, regularTerms);
+        const aHasIdentifierMatch = hasIdentifierMatch(a, regularTerms);
+        const bHasIdentifierMatch = hasIdentifierMatch(b, regularTerms);
 
         // display name matches
         if (aHasDisplayNameMatch && !bHasDisplayNameMatch) return -1;
@@ -87,8 +89,8 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
     const [initialized, setInitialized] = useState(false);
     const [individuals, setIndividuals] = useState<FrontIndividual[]>([]);
     const [sortedIndividuals, setSortedIndividuals] = useState<FrontIndividual[]>([]);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+    const [searchField, setSearchField] = useState('');
+    const [debouncedSearchField, setDebouncedSearchField] = useState('');
 
     const [mergeAccountGuidOrUnd, setMergeAccountGuidOrUnd] = useState<string | undefined>(undefined);
     const mergeAccountGuidOrUndRef = useRef(mergeAccountGuidOrUnd);
@@ -113,11 +115,11 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
     // Debounce search term
     useEffect(() => {
         const timer = setTimeout(() => {
-            setDebouncedSearchTerm(searchTerm);
+            setDebouncedSearchField(searchField);
         }, SEARCH_DELAY);
 
         return () => clearTimeout(timer);
-    }, [searchTerm, SEARCH_DELAY]);
+    }, [searchField, SEARCH_DELAY]);
 
     useEffect(() => {
         const initializeApi = async () => {
@@ -134,7 +136,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
     // Reset displayed count when debounced search term or filter changes
     useEffect(() => {
         setDisplayedCount(50);
-    }, [debouncedSearchTerm, showOnlyContacts]);
+    }, [debouncedSearchField, showOnlyContacts]);
 
     useEffect(() => {
         const individualUpdated = (event: any) => {
@@ -219,10 +221,10 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
 
     // Use the custom hooks for sorting and filtering
     useEffect(() => {
-        console.log(`useFilteredIndividuals useEffect running ${individuals.length} individuals, searchTerm: ${debouncedSearchTerm || 'none'}`);
+        console.log(`useFilteredIndividuals useEffect running ${individuals.length} individuals, searchTerm: ${debouncedSearchField || 'none'}`);
         // it's faster to filter first then sort on a subset of the data
-        setSortedIndividuals(sortIndividuals(individuals.filter(ind => isIndividualVisible(ind, debouncedSearchTerm, showOnlyContacts, mergeAccountGuidOrUnd)), debouncedSearchTerm));
-    }, [individuals, debouncedSearchTerm, showOnlyContacts, mergeAccountGuidOrUnd]);
+        setSortedIndividuals(sortIndividuals(individuals.filter(ind => isIndividualVisible(ind, debouncedSearchField, showOnlyContacts, mergeAccountGuidOrUnd)), debouncedSearchField));
+    }, [individuals, debouncedSearchField, showOnlyContacts, mergeAccountGuidOrUnd]);
 
     // Get the currently displayed individuals (for infinite scrolling)
     const displayedIndividuals = useMemo(() => {
@@ -275,16 +277,16 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
 
     // Check if bio should be shown based on search terms
     const showBio = useMemo(() => {
-        return shouldShowBio(debouncedSearchTerm);
-    }, [debouncedSearchTerm]);
+        return shouldShowBio(debouncedSearchField);
+    }, [debouncedSearchField]);
 
     const showHelp = useMemo(() => {
-        return shouldShowHelp(debouncedSearchTerm);
-    }, [debouncedSearchTerm]);
+        return shouldShowHelp(debouncedSearchField);
+    }, [debouncedSearchField]);
 
     const showAlias = useMemo(() => {
-        return shouldShowAlias(debouncedSearchTerm);
-    }, [debouncedSearchTerm]);
+        return shouldShowAlias(debouncedSearchField);
+    }, [debouncedSearchField]);
 
     // Function to focus search input and move cursor to end
     const focusSearchInput = () => {
@@ -378,16 +380,16 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                         ref={searchInputRef}
                         type={demoMode ? 'password' : 'text'}
                         placeholder="Search by name or note..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
+                        value={searchField}
+                        onChange={(e) => setSearchField(e.target.value)}
                         className="search-input"
                     />
                     <span className="search-icon">
                         <Search />
                     </span>
-                    {searchTerm && (
+                    {searchField && (
                         <button
-                            onClick={() => setSearchTerm('')}
+                            onClick={() => setSearchField('')}
                             className="icon-button search-clear-button"
                         >
                             <X size={16} />
@@ -395,30 +397,30 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                     )}
                 </div>
 
-                {debouncedSearchTerm && (totalFilteredCount === 0 || showHelp) && (
+                {debouncedSearchField && (totalFilteredCount === 0 || showHelp) && (
                     <div className="no-results-message">
                         <div className="no-results-icon"><Search size={48}/></div>
                         {!showHelp && <>
                             <div className="no-results-text">No individuals found matching
-                                "<strong>{_D2(debouncedSearchTerm, demoMode)}</strong>"
+                                "<strong>{_D2(debouncedSearchField, demoMode)}</strong>"
                             </div>
                         </>}
                         <div className="no-results-hint">
                             <p>Try searching by name, note content, or use special terms like:</p>
-                            <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('bio:'); focusSearchInput(); }}>bio:<i>creator</i></code> to display and search in the bio.</p>
-                            <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('links:'); focusSearchInput(); }}>links:<i>misskey</i></code> to search in the links.</p>
-                            <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('alias:'); focusSearchInput(); }}>alias:<i>aoi</i></code> to search in previous user names.</p>
-                            <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('session:'); focusSearchInput(); }}>session:<i>mmc</i></code> to search for the name of an active session.</p>
-                            <p>Search for groups of words using quotation marks, such as <code className="inline-code-clickable" onClick={() => { setSearchTerm('session:"'); focusSearchInput(); }}>session:<i>"h p"</i></code></p>
-                            <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('accounts:>1 '); focusSearchInput(); }}>accounts:&gt;1</code> for users who have more than one account.</p>
-                            <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('has:alt '); focusSearchInput(); }}>has:alt</code> for users who have several accounts on the same app.</p>
-                            <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('on: '); focusSearchInput(); }}>on:</code> for currently online users on any app.</p>
-                            <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('app:resonite '); focusSearchInput(); }}>app:resonite</code> for Resonite account owners, and <code className="inline-code-clickable" onClick={() => { setSearchTerm('on:resonite '); focusSearchInput(); }}>on:resonite</code> for currently online users.</p>
-                            <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('app:vrchat '); focusSearchInput(); }}>app:vrchat</code> for VRChat account owners, and <code className="inline-code-clickable" onClick={() => { setSearchTerm('on:vrchat '); focusSearchInput(); }}>on:vrchat</code> for currently online users.</p>
-                            <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('app:cluster '); focusSearchInput(); }}>app:cluster</code> for Cluster account owners, and <code className="inline-code-clickable" onClick={() => { setSearchTerm('on:cluster '); focusSearchInput(); }}>on:cluster</code> for currently online users.</p>
-                            <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('app:chilloutvr '); focusSearchInput(); }}>app:chilloutvr</code> for ChilloutVR account owners, and <code className="inline-code-clickable" onClick={() => { setSearchTerm('on:chilloutvr '); focusSearchInput(); }}>on:chilloutvr</code> for currently online users.</p>
-                            <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('app:resonite app:vrchat '); focusSearchInput(); }}>app:resonite app:vrchat</code> for Resonite account owners who also have a VRChat account.</p>
-                            <p><code className="inline-code-clickable" onClick={() => { setSearchTerm(':confusables ' + searchTerm); focusSearchInput(); }}>:confusables</code> converts some cyrillic and special characters visually similar to latin when searching for names.</p>
+                            <p><code className="inline-code-clickable" onClick={() => { setSearchField('bio:'); focusSearchInput(); }}>bio:<i>creator</i></code> to display and search in the bio.</p>
+                            <p><code className="inline-code-clickable" onClick={() => { setSearchField('links:'); focusSearchInput(); }}>links:<i>misskey</i></code> to search in the links.</p>
+                            <p><code className="inline-code-clickable" onClick={() => { setSearchField('alias:'); focusSearchInput(); }}>alias:<i>aoi</i></code> to search in previous user names.</p>
+                            <p><code className="inline-code-clickable" onClick={() => { setSearchField('session:'); focusSearchInput(); }}>session:<i>mmc</i></code> to search for the name of an active session.</p>
+                            <p>Search for groups of words using quotation marks, such as <code className="inline-code-clickable" onClick={() => { setSearchField('session:"'); focusSearchInput(); }}>session:<i>"h p"</i></code></p>
+                            <p><code className="inline-code-clickable" onClick={() => { setSearchField('accounts:>1 '); focusSearchInput(); }}>accounts:&gt;1</code> for users who have more than one account.</p>
+                            <p><code className="inline-code-clickable" onClick={() => { setSearchField('has:alt '); focusSearchInput(); }}>has:alt</code> for users who have several accounts on the same app.</p>
+                            <p><code className="inline-code-clickable" onClick={() => { setSearchField('on: '); focusSearchInput(); }}>on:</code> for currently online users on any app.</p>
+                            <p><code className="inline-code-clickable" onClick={() => { setSearchField('app:resonite '); focusSearchInput(); }}>app:resonite</code> for Resonite account owners, and <code className="inline-code-clickable" onClick={() => { setSearchField('on:resonite '); focusSearchInput(); }}>on:resonite</code> for currently online users.</p>
+                            <p><code className="inline-code-clickable" onClick={() => { setSearchField('app:vrchat '); focusSearchInput(); }}>app:vrchat</code> for VRChat account owners, and <code className="inline-code-clickable" onClick={() => { setSearchField('on:vrchat '); focusSearchInput(); }}>on:vrchat</code> for currently online users.</p>
+                            <p><code className="inline-code-clickable" onClick={() => { setSearchField('app:cluster '); focusSearchInput(); }}>app:cluster</code> for Cluster account owners, and <code className="inline-code-clickable" onClick={() => { setSearchField('on:cluster '); focusSearchInput(); }}>on:cluster</code> for currently online users.</p>
+                            <p><code className="inline-code-clickable" onClick={() => { setSearchField('app:chilloutvr '); focusSearchInput(); }}>app:chilloutvr</code> for ChilloutVR account owners, and <code className="inline-code-clickable" onClick={() => { setSearchField('on:chilloutvr '); focusSearchInput(); }}>on:chilloutvr</code> for currently online users.</p>
+                            <p><code className="inline-code-clickable" onClick={() => { setSearchField('app:resonite app:vrchat '); focusSearchInput(); }}>app:resonite app:vrchat</code> for Resonite account owners who also have a VRChat account.</p>
+                            <p><code className="inline-code-clickable" onClick={() => { setSearchField(':confusables ' + searchField); focusSearchInput(); }}>:confusables</code> converts some cyrillic and special characters visually similar to latin when searching for names.</p>
 
                             <p>Open the <a title="Open https://docs.hai-vr.dev/docs/products/xyvr/search in your browser" href="https://docs.hai-vr.dev/docs/products/xyvr/search">search documentation</a> in your browser.</p>
                         </div>
@@ -426,14 +428,14 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                 )}
 
                 <div>
-                    {debouncedSearchTerm && (
+                    {debouncedSearchField && (
                         <div className="search-results-info">
                             {totalFilteredCount === 0
-                                ? `No results found for "${debouncedSearchTerm}"`
+                                ? `No results found for "${debouncedSearchField}"`
                                 : <>{totalFilteredCount > 1 && `Showing ${totalFilteredCount} results. ` || `Only one result. `}
-                                    Type <code className="inline-code-clickable"onClick={() => { setSearchTerm(':help '); focusSearchInput(); }}>:help</code> for help.
-                                    Type <code className="inline-code-clickable"onClick={() => { setSearchTerm(searchTerm + ' alias:'); focusSearchInput(); }}>alias:</code> to show previous names.
-                                    Type <code className="inline-code-clickable"onClick={() => { setSearchTerm(searchTerm + ' bio:'); focusSearchInput(); }}>bio:</code> to show bios.</>
+                                    Type <code className="inline-code-clickable"onClick={() => { setSearchField(':help '); focusSearchInput(); }}>:help</code> for help.
+                                    Type <code className="inline-code-clickable"onClick={() => { setSearchField(searchField + ' alias:'); focusSearchInput(); }}>alias:</code> to show previous names.
+                                    Type <code className="inline-code-clickable"onClick={() => { setSearchField(searchField + ' bio:'); focusSearchInput(); }}>bio:</code> to show bios.</>
                             }
                         </div>
                     )}
@@ -453,7 +455,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                             fusionAccounts={fusionAccounts}
                             unmergeAccounts={unmergeAccounts}
                             compactMode={compactMode}
-                            searchTerm={debouncedSearchTerm}
+                            searchField={debouncedSearchField}
                             showNotes={showNotes}
                             demoMode={demoMode}
                         />

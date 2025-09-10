@@ -94,7 +94,7 @@ export const generateKanaVariants = (term: string) => {
 };
 
 // Search term parsing utilities
-export const parseSearchTerms = (unparsedSearchTerms: string) => {
+export const parseSearchField = (unparsedSearchField: string) => {
     /*
 Can you modify this to parse differently?
 
@@ -172,7 +172,7 @@ session:"hello world"
         return terms;
     };
 
-    const terms = parseQuotedTerms(unparsedSearchTerms.toLowerCase().trim());
+    const terms: string[] = parseQuotedTerms(unparsedSearchField.toLowerCase().trim());
     const specialTerms: string[] = [];
     const regularTerms: string[] = [];
 
@@ -365,7 +365,7 @@ export const isIndividualVisible = (individual: FrontIndividual, unparsedSearchT
 
     if (!unparsedSearchTerms) return true;
 
-    const { specialTerms, regularTerms } = parseSearchTerms(unparsedSearchTerms);
+    const { specialTerms, regularTerms } = parseSearchField(unparsedSearchTerms);
     var convertConfusables = specialTerms.includes(':confusables');
 
     // Check special terms first
@@ -406,10 +406,7 @@ export const isIndividualVisible = (individual: FrontIndividual, unparsedSearchT
 };
 
 // Sorting helper functions
-export const hasDisplayNameMatch = (individual: FrontIndividual, unparsedSearchTerms: string) => {
-    if (!unparsedSearchTerms) return false;
-
-    const { regularTerms } = parseSearchTerms(unparsedSearchTerms);
+export const hasDisplayNameMatch = (individual: FrontIndividual, regularTerms: string[]) => {
     if (regularTerms.length === 0) return false;
 
     const displayName = individual.displayName || '';
@@ -424,10 +421,7 @@ export const hasDisplayNameMatch = (individual: FrontIndividual, unparsedSearchT
     });
 };
 
-export const hasIdentifierMatch = (individual: FrontIndividual, unparsedSearchTerms: string) => {
-    if (!unparsedSearchTerms) return false;
-
-    const { regularTerms } = parseSearchTerms(unparsedSearchTerms);
+export const hasIdentifierMatch = (individual: FrontIndividual, regularTerms: string[]) => {
     if (regularTerms.length === 0) return false;
 
     return individual.accounts?.some(account => {
@@ -450,19 +444,19 @@ export const hasIdentifierMatch = (individual: FrontIndividual, unparsedSearchTe
 // Utility function to check if bio should be shown
 export const shouldShowBio = (unparsedSearchTerms: string) => {
     if (!unparsedSearchTerms) return false;
-    const { specialTerms } = parseSearchTerms(unparsedSearchTerms);
+    const { specialTerms } = parseSearchField(unparsedSearchTerms);
     return specialTerms.some(term => term.startsWith('bio:'));
 };
 
 export const shouldShowHelp = (unparsedSearchTerms: string) => {
     if (!unparsedSearchTerms) return false;
-    const { specialTerms } = parseSearchTerms(unparsedSearchTerms);
+    const { specialTerms } = parseSearchField(unparsedSearchTerms);
     return specialTerms.some(term => term === ':help');
 };
 
 export const shouldShowAlias = (unparsedSearchTerms: string) => {
     if (!unparsedSearchTerms) return false;
-    const { specialTerms } = parseSearchTerms(unparsedSearchTerms);
+    const { specialTerms } = parseSearchField(unparsedSearchTerms);
     return specialTerms.some(term => term.startsWith('alias:'));
 };
 

@@ -2,7 +2,7 @@
 import "./Individual.css";
 import React, { useState, useRef, useEffect } from "react";
 import {Clipboard, Phone} from "lucide-react";
-import {accountMatchesFromRegularTerms, anyAccountMatchesSpecialTerms, parseSearchTerms} from "../pages/searchUtils.ts";
+import {accountMatchesFromRegularTerms, anyAccountMatchesSpecialTerms, parseSearchField} from "../pages/searchUtils.ts";
 import {_D, _D2} from "../haiUtils.ts";
 import type {FrontAccount, FrontIndividual} from "../types/CoreTypes.ts";
 
@@ -17,7 +17,7 @@ interface IndividualProps {
     fusionAccounts: (guid: string) => Promise<void>;
     unmergeAccounts: (guid: string) => Promise<void>;
     compactMode: boolean;
-    searchTerm: string;
+    searchField: string;
     showNotes: boolean;
     demoMode: boolean;
 }
@@ -33,7 +33,7 @@ function Individual({
                         fusionAccounts,
                         unmergeAccounts,
                         compactMode,
-                        searchTerm,
+                        searchField,
                         showNotes,
                         demoMode
                     }: IndividualProps) {
@@ -101,13 +101,13 @@ function Individual({
     };
 
     useEffect(() => {
-        if (!compactMode || !searchTerm) {
+        if (!compactMode || !searchField) {
             setFilteredAccounts(individual.accounts);
             return;
         }
 
         if (individual.accounts) {
-            const { specialTerms, regularTerms } = parseSearchTerms(searchTerm);
+            const { specialTerms, regularTerms } = parseSearchField(searchField);
             var convertConfusables = specialTerms.includes(':confusables');
 
             const filtered = individual.accounts.filter(account => {
@@ -128,7 +128,7 @@ function Individual({
 
             setFilteredAccounts(filtered);
         }
-    }, [individual, searchTerm, compactMode])
+    }, [individual, searchField, compactMode])
 
     // Helper function to get the first non-punctuation character
     const getFirstNonPunctuationChar = (str: string) => {
