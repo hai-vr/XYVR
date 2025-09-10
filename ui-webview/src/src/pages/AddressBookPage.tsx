@@ -408,6 +408,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                             <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('bio:'); focusSearchInput(); }}>bio:<i>creator</i></code> to display and search in the bio.</p>
                             <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('links:'); focusSearchInput(); }}>links:<i>misskey</i></code> to search in the links.</p>
                             <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('alias:'); focusSearchInput(); }}>alias:<i>aoi</i></code> to search in previous user names.</p>
+                            <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('session:'); focusSearchInput(); }}>session:<i>mmc</i></code> to search for the name of an active session.</p>
                             <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('accounts:>1 '); focusSearchInput(); }}>accounts:&gt;1</code> for users who have more than one account.</p>
                             <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('has:alt '); focusSearchInput(); }}>has:alt</code> for users who have several accounts on the same app.</p>
                             <p><code className="inline-code-clickable" onClick={() => { setSearchTerm('on: '); focusSearchInput(); }}>on:</code> for currently online users on any app.</p>

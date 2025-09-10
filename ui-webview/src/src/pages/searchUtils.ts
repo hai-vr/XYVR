@@ -6,6 +6,7 @@ import {
     OnlineStatus,
     type OnlineStatusType
 } from "../types/CoreTypes.ts";
+import {LiveSessionKnowledge} from "../types/LiveUpdateTypes.ts";
 
 export const removeDiacritics = (str: string, convertConfusables: boolean = false) => {
     let diacriticsRemoved = str.normalize('NFD')
@@ -105,6 +106,7 @@ export const parseSearchTerms = (unparsedSearchTerms: string) => {
             || term.startsWith('bio:')
             || term.startsWith('alias:')
             || term.startsWith('on:')
+            || term.startsWith('session:')
             || term === ':confusables'
             || term === ':help'
             || term === 'has:alt'
@@ -163,6 +165,13 @@ export const anyAccountMatchesSpecialTerms = (accounts: FrontAccount[], specialT
                     });
                 });
             }) || false;
+        }
+
+        if (term.startsWith('session:')) {
+            const searchString = term.substring(8);
+
+            return accounts?.some(account => account.mainSession?.knowledge === LiveSessionKnowledge.Known
+                && (!searchString || account.mainSession?.knownSession?.inAppVirtualSpaceName?.toLowerCase().includes(searchString))) || false;
         }
 
         switch (term) {
