@@ -33,7 +33,7 @@ public class ResoniteAuthority : IAuthority
         return new ResoniteLiveMonitoring(credentialsStorage, monitoring, await _resoniteUidProviderFn());
     }
 
-    public async Task<NonIndexedAccount> ResolveCallerAccount(ICredentialsStorage credentialsStorage)
+    public async Task<ImmutableNonIndexedAccount> ResolveCallerAccount(ICredentialsStorage credentialsStorage)
     {
         // Reminder: The same authority may be used for multiple connectors (different caller accounts).
         

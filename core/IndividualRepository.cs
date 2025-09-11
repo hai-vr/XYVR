@@ -35,7 +35,10 @@ public class IndividualRepository
         {
             if (individual.note.status == 0)
             {
-                individual.note.status = NoteState.NeverHad;
+                individual.note = individual.note with
+                {
+                    status = NoteState.NeverHad
+                };
             }
 
             foreach (var account in individual.accounts)
@@ -119,7 +122,9 @@ public class IndividualRepository
         return results;
     }
 
-    public void MergeIncompleteAccounts(List<IncompleteAccount> incompleteAccounts)
+    /// The list of accounts may contain references to the same account but with different data.
+    /// It needs to be applied sequentially without deduplication.
+    public void MergeIncompleteAccounts(List<ImmutableIncompleteAccount> incompleteAccounts)
     {
         foreach (var inputAccount in incompleteAccounts)
         {
@@ -141,7 +146,9 @@ public class IndividualRepository
         }
     }
 
-    public void MergeAccounts(List<NonIndexedAccount> accounts)
+    /// The list of accounts may contain references to the same account but with different data.
+    /// It needs to be applied sequentially without deduplication.
+    public void MergeAccounts(List<ImmutableNonIndexedAccount> accounts)
     {
         foreach (var inputAccount in accounts)
         {
@@ -177,7 +184,7 @@ public class IndividualRepository
             var account = originalAccounts[index];
             var newIndividual = CreateNewIndividualFromAccount(account);
             newIndividual.customName = toDesolidarize.customName;
-            newIndividual.note = new Note
+            newIndividual.note = new ImmutableNote
             {
                 status = toDesolidarize.note.status,
                 text = toDesolidarize.note.text
@@ -185,7 +192,7 @@ public class IndividualRepository
         }
     }
 
-    private static bool SynchronizeAccount(Account existingAccount, NonIndexedAccount inputAccount)
+    private static bool SynchronizeAccount(Account existingAccount, ImmutableNonIndexedAccount inputAccount)
     {
         var isSameAppAndIdentifier = IsSameApp(existingAccount, inputAccount) && existingAccount.inAppIdentifier == inputAccount.inAppIdentifier;
         if (isSameAppAndIdentifier)
@@ -198,18 +205,24 @@ public class IndividualRepository
             foreach (var inputCaller in inputAccount.callers)
             {
                 var callerExists = false;
-                foreach (var existingCaller in existingAccount.callers)
+                for (var index = 0; index < existingAccount.callers.Count; index++)
                 {
+                    var existingCaller = existingAccount.callers[index];
                     if (inputCaller.isAnonymous && existingCaller.isAnonymous
-                         || !inputCaller.isAnonymous && !existingCaller.isAnonymous && existingCaller.inAppIdentifier == inputCaller.inAppIdentifier)
+                        || !inputCaller.isAnonymous && !existingCaller.isAnonymous && existingCaller.inAppIdentifier == inputCaller.inAppIdentifier)
                     {
                         callerExists = true;
-                        existingCaller.isContact = inputCaller.isContact;
-                        UpdateExistingNote(existingCaller.note, inputCaller.note);
                         
+                        existingAccount.callers[index] = existingCaller with
+                        {
+                            isContact = inputCaller.isContact,
+                            note = UpdateExistingNote(existingCaller.note, inputCaller.note)
+                        };
+
                         break;
                     }
                 }
+
                 if (!callerExists)
                 {
                     existingAccount.callers.Add(inputCaller);
@@ -231,7 +244,7 @@ public class IndividualRepository
         return false;
     }
 
-    private static bool SynchronizeIncompleteAccount(Account existingAccount, IncompleteAccount inputAccount)
+    private static bool SynchronizeIncompleteAccount(Account existingAccount, ImmutableIncompleteAccount inputAccount)
     {
         var isSameAppAndIdentifier = IsSameApp(existingAccount, inputAccount) && existingAccount.inAppIdentifier == inputAccount.inAppIdentifier;
         if (isSameAppAndIdentifier)
@@ -241,21 +254,28 @@ public class IndividualRepository
             foreach (var inputCaller in inputAccount.callers)
             {
                 var callerExists = false;
-                foreach (var existingCaller in existingAccount.callers)
+                for (var index = 0; index < existingAccount.callers.Count; index++)
                 {
+                    var existingCaller = existingAccount.callers[index];
                     if (inputCaller.isAnonymous && existingCaller.isAnonymous
                         || !inputCaller.isAnonymous && !existingCaller.isAnonymous && existingCaller.inAppIdentifier == inputCaller.inAppIdentifier)
                     {
                         callerExists = true;
-                        if (inputCaller.isContact != null) { existingCaller.isContact = (bool)inputCaller.isContact; }
-                        if (inputCaller.note != null) { UpdateExistingNote(existingCaller.note, inputCaller.note); }
+
+                        var modifiedCaller = existingCaller;
                         
+                        if (inputCaller.isContact != null) { modifiedCaller = modifiedCaller with { isContact = (bool)inputCaller.isContact }; }
+                        if (inputCaller.note != null) { modifiedCaller = modifiedCaller with { note = UpdateExistingNote(existingCaller.note, inputCaller.note) }; }
+
+                        existingAccount.callers[index] = modifiedCaller;
+
                         break;
                     }
                 }
+
                 if (!callerExists)
                 {
-                    existingAccount.callers.Add(IncompleteCallerAccount.MakeComplete(inputCaller));
+                    existingAccount.callers.Add(ImmutableIncompleteCallerAccount.MakeComplete(inputCaller));
                 }
             }
 
@@ -274,37 +294,24 @@ public class IndividualRepository
         return false;
     }
 
-    private static void UpdateExistingNote(Note existingNote, Note inputNote)
+    private static ImmutableNote UpdateExistingNote(ImmutableNote existingNote, ImmutableNote inputNote)
     {
-        switch (inputNote.status)
+        return inputNote.status switch
         {
-            case NoteState.Exists:
+            NoteState.Exists => existingNote with
             {
-                existingNote.status = NoteState.Exists;
-                existingNote.text = inputNote.text;
-                break;
-            }
-            case NoteState.NeverHad:
-            {
-                if (existingNote.status == NoteState.Exists)
-                {
-                    existingNote.status = NoteState.WasRemoved;
-                    // We don't overwrite the text
-                }
-                break;
-            }
-            case NoteState.WasRemoved:
-            {
-                if (existingNote.status is NoteState.Exists or NoteState.NeverHad)
-                {
-                    existingNote.status = NoteState.WasRemoved;
-                    // We don't overwrite the text
-                }
-                break;
-            }
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
+                status = NoteState.Exists,
+                text = inputNote.text
+            },
+            NoteState.NeverHad => existingNote.status == NoteState.Exists 
+                // We don't overwrite the text
+                ? existingNote with { status = NoteState.WasRemoved }
+                : existingNote,
+            NoteState.WasRemoved => existingNote.status is NoteState.Exists or NoteState.NeverHad
+                ? existingNote with { status = NoteState.WasRemoved }
+                : existingNote,
+            _ => throw new ArgumentOutOfRangeException()
+        };
     }
 
     private static void UpdateIndividualBasedOnAccounts(Individual existingIndividual)
@@ -317,7 +324,7 @@ public class IndividualRepository
         existingIndividual.displayName = existingIndividual.accounts.First().inAppDisplayName;
     }
 
-    private static bool IsSameApp(Account existingAccount, NonIndexedAccount inputAccount)
+    private static bool IsSameApp(Account existingAccount, ImmutableNonIndexedAccount inputAccount)
     {
         var sameNamedApp = existingAccount.namedApp == inputAccount.namedApp;
         if (!sameNamedApp)
@@ -331,7 +338,7 @@ public class IndividualRepository
         return true;
     }
 
-    private static bool IsSameApp(Account existingAccount, IncompleteAccount inputAccount)
+    private static bool IsSameApp(Account existingAccount, ImmutableIncompleteAccount inputAccount)
     {
         var sameNamedApp = existingAccount.namedApp == inputAccount.namedApp;
         if (!sameNamedApp)
@@ -367,16 +374,16 @@ public class IndividualRepository
     }
 
     // It is the responsibility of the caller to never call this when that account is already owned by an Individual.
-    private Individual CreateNewIndividualFromNonIndexedAccount(NonIndexedAccount nonIndexedAccount)
+    private Individual CreateNewIndividualFromNonIndexedAccount(ImmutableNonIndexedAccount nonIndexedAccount)
     {
-        var account = NonIndexedAccount.MakeIndexed(nonIndexedAccount);
+        var account = ImmutableNonIndexedAccount.MakeIndexed(nonIndexedAccount);
         return InternalCreateFromAccount(account);
     }
 
     // It is the responsibility of the caller to never call this when that account is already owned by an Individual.
-    private Individual CreateNewIndividualFromIncompleteAccount(IncompleteAccount incompleteAccount)
+    private Individual CreateNewIndividualFromIncompleteAccount(ImmutableIncompleteAccount incompleteAccount)
     {
-        var account = IncompleteAccount.MakeIndexed(incompleteAccount);
+        var account = ImmutableIncompleteAccount.MakeIndexed(incompleteAccount);
         return InternalCreateFromAccount(account);
     }
 
@@ -393,8 +400,11 @@ public class IndividualRepository
         {
             if (toDestroy.note.status is NoteState.Exists or NoteState.WasRemoved)
             {
-                toAugment.note.status = toDestroy.note.status;
-                toAugment.note.text = toDestroy.note.text;
+                toAugment.note = toAugment.note with
+                {
+                    status = toDestroy.note.status,
+                    text = toDestroy.note.text
+                };
             }
         }
         // Order matters
@@ -415,7 +425,7 @@ public class IndividualRepository
         Individuals.RemoveAt(indexToDestroy);
     }
 
-    public Individual GetIndividualByAccount(AccountIdentification accountIdentification)
+    public Individual GetIndividualByAccount(ImmutableAccountIdentification accountIdentification)
     {
         return _namedAppToInAppIdToIndividual[accountIdentification.namedApp][accountIdentification.inAppIdentifier];
     }

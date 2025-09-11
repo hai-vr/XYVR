@@ -14,7 +14,7 @@ public class SpecificsConverter : JsonConverter
             return null;
         }
     
-        return token.ToObject<VRChatSpecifics>(serializer);
+        return token.ToObject<ImmutableVRChatSpecifics>(serializer);
     }
 
     public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)

@@ -32,7 +32,7 @@ public class VRChatAuthority : IAuthority
         return Task.FromResult<ILiveMonitoring>(new VRChatLiveMonitoring(credentialsStorage, monitoring, _worldNameCache));
     }
 
-    public async Task<NonIndexedAccount> ResolveCallerAccount(ICredentialsStorage credentialsStorage)
+    public async Task<ImmutableNonIndexedAccount> ResolveCallerAccount(ICredentialsStorage credentialsStorage)
     {
         // Reminder: The same authority may be used for multiple connectors (different caller accounts).
         

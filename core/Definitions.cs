@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System.Collections.Immutable;
+using Newtonsoft.Json;
 
 namespace XYVR.Core;
 
@@ -29,7 +30,7 @@ public class Individual
     
     // This field is up to the app users' judgement
     public string? customName;
-    public Note note = new();
+    public ImmutableNote note = new();
 }
 
 public class Account
@@ -48,7 +49,7 @@ public class Account
     // As the account can be retrieved by different connections, we need to keep track of which connection caused this account
     // to be retrieved: That's the caller account.
     // In addition, there is information specific to that caller account, such as notes, or whether it's a contact.
-    public List<CallerAccount> callers = new();
+    public List<ImmutableCallerAccount> callers = new();
     
     public List<string> allDisplayNames = new();
     
@@ -61,9 +62,9 @@ public class Account
     public bool IsAnyCallerContact() => callers.Any(caller => caller.isContact);
     public bool HasAnyCallerNote() => callers.Any(caller => caller.note.status == NoteState.Exists);
 
-    public AccountIdentification AsIdentification()
+    public ImmutableAccountIdentification AsIdentification()
     {
-        return new AccountIdentification
+        return new ImmutableAccountIdentification
         {
             inAppIdentifier = inAppIdentifier,
             namedApp = namedApp,
@@ -72,68 +73,39 @@ public class Account
     }
 }
 
-public class AccountIdentification
+public record ImmutableAccountIdentification
 {
-    public NamedApp namedApp;
-    public string qualifiedAppName;
+    public NamedApp namedApp { get; init; }
+    public string qualifiedAppName { get; init; }
 
-    public string inAppIdentifier;
+    public string inAppIdentifier { get; init; }
     
     public override string ToString()
     {
         return $"{namedApp}:{qualifiedAppName}:{inAppIdentifier}";
     }
-
-    protected bool Equals(AccountIdentification other)
-    {
-        return namedApp == other.namedApp && qualifiedAppName == other.qualifiedAppName && inAppIdentifier == other.inAppIdentifier;
-    }
-
-    public override bool Equals(object? obj)
-    {
-        if (obj is null) return false;
-        if (ReferenceEquals(this, obj)) return true;
-        if (obj.GetType() != GetType()) return false;
-        return Equals((AccountIdentification)obj);
-    }
-
-    public override int GetHashCode()
-    {
-        unchecked
-        {
-            var hashCode = (int)namedApp;
-            hashCode = (hashCode * 397) ^ qualifiedAppName.GetHashCode();
-            hashCode = (hashCode * 397) ^ inAppIdentifier.GetHashCode();
-            return hashCode;
-        }
-    }
 }
 
-public class CallerAccount
+public record ImmutableCallerAccount
 {
-    public bool isAnonymous;
-    public string? inAppIdentifier; // Can only be null if it's an anonymous caller.
+    public bool isAnonymous { get; init; }
+    public string? inAppIdentifier { get; init; } // Can only be null if it's an anonymous caller.
     
-    public Note note = new();
-    public bool isContact;
-
-    public CallerAccount ShallowCopy()
-    {
-        return (CallerAccount)MemberwiseClone();
-    }
+    public ImmutableNote note { get; init; }
+    public bool isContact { get; init; }
 }
 
-public class VRChatSpecifics
+public class ImmutableVRChatSpecifics
 {
-    public List<string> urls = new();
-    public string bio;
-    public string pronouns;
+    public ImmutableArray<string> urls { get; init; }
+    public string bio { get; init; }
+    public string pronouns { get; init; }
 }
 
-public class Note
+public record ImmutableNote
 {
-    public NoteState status = NoteState.NeverHad;
-    public string? text;
+    public NoteState status { get; init; } = NoteState.NeverHad;
+    public string? text { get; init; }
 }
 
 public enum NoteState

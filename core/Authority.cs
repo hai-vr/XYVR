@@ -11,5 +11,5 @@ public interface IAuthority
     public Task<IDataCollection> NewDataCollection(IndividualRepository repository, ICredentialsStorage credentialsStorage, IResponseCollector storage);
     public Task<ILiveMonitoring> NewLiveMonitoring(LiveStatusMonitoring monitoring, ICredentialsStorage credentialsStorage);
 
-    public Task<NonIndexedAccount> ResolveCallerAccount(ICredentialsStorage credentialsStorage);
+    public Task<ImmutableNonIndexedAccount> ResolveCallerAccount(ICredentialsStorage credentialsStorage);
 }

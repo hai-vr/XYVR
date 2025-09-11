@@ -9,7 +9,7 @@ public class ResoniteDataCollection(IndividualRepository repository, IResponseCo
 {
     private readonly ResoniteCommunicator _resoniteCommunicator = new(responseCollectionStorage, false, resoniteUid, credentialsStorage);
 
-    public async Task<List<NonIndexedAccount>> RebuildFromDataCollectionStorage(List<ResponseCollectionTrail> trails)
+    public async Task<List<ImmutableNonIndexedAccount>> RebuildFromDataCollectionStorage(List<ResponseCollectionTrail> trails)
     {
         await Task.CompletedTask;
 
@@ -52,7 +52,7 @@ public class ResoniteDataCollection(IndividualRepository repository, IResponseCo
         return resoniteAccounts;
     }
 
-    public async Task<List<AccountIdentification>> IncrementalUpdateRepository(IIncrementalDataCollectionJobHandler jobHandler)
+    public async Task<List<ImmutableAccountIdentification>> IncrementalUpdateRepository(IIncrementalDataCollectionJobHandler jobHandler)
     {
         var eTracker = await jobHandler.NewEnumerationTracker();
 
@@ -65,7 +65,7 @@ public class ResoniteDataCollection(IndividualRepository repository, IResponseCo
         repository.MergeIncompleteAccounts(incAccs);
         await jobHandler.NotifyAccountUpdated(incAccs.Select(account => account.AsIdentification()).ToList());
 
-        var incompleteAccountsIds = new List<AccountIdentification>();
+        var incompleteAccountsIds = new List<ImmutableAccountIdentification>();
         foreach (var incompleteAccount in incAccs)
         {
             var account = await _resoniteCommunicator.GetUser(incompleteAccount.inAppIdentifier, incompleteAccount.callers[0].isContact ?? false);
@@ -78,18 +78,18 @@ public class ResoniteDataCollection(IndividualRepository repository, IResponseCo
             }
         }
         
-        return new List<AccountIdentification> { resoniteCaller.AsIdentification() }
+        return new List<ImmutableAccountIdentification> { resoniteCaller.AsIdentification() }
             .Concat(incompleteAccountsIds)
             .Distinct()
             .ToList();
     }
 
-    public bool CanAttemptIncrementalUpdateOn(AccountIdentification identification)
+    public bool CanAttemptIncrementalUpdateOn(ImmutableAccountIdentification identification)
     {
         return identification.namedApp == NamedApp.Resonite;
     }
 
-    public async Task<NonIndexedAccount?> TryGetForIncrementalUpdate__Flawed__NonContactOnly(AccountIdentification toTryUpdate)
+    public async Task<ImmutableNonIndexedAccount?> TryGetForIncrementalUpdate__Flawed__NonContactOnly(ImmutableAccountIdentification toTryUpdate)
     {
         // FIXME: By default, this will always consider the returned user to be a non-Contact, so it's quite flawed. The name of this data collection method was changed BECAUSE OF this flaw in this specific collector.
         var result = await _resoniteCommunicator.CollectAllLenient([toTryUpdate.inAppIdentifier], []);

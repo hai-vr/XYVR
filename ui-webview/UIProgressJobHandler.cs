@@ -7,7 +7,7 @@ public class UIProgressJobHandler(IndividualRepository repository, Func<Individu
 {
     private int _prevEnumTotalCount;
 
-    public async Task NotifyAccountUpdated(List<AccountIdentification> increment)
+    public async Task NotifyAccountUpdated(List<ImmutableAccountIdentification> increment)
     {
         Console.WriteLine($"Updated the following {increment.Count} accounts: {string.Join(", ", increment)}");
         foreach (var accountIdentification in increment)

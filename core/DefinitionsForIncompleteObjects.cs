@@ -1,22 +1,23 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Collections.Immutable;
+using System.Text.Json.Serialization;
 
 namespace XYVR.Core;
 
 /// A non-indexed account is built from data coming from external services. Thus, it doesn't have a Guid because
 /// it represents objects that are not indexed. It also doesn't have a list of past display names.
-public class NonIndexedAccount
+public record ImmutableNonIndexedAccount
 {
-    public NamedApp namedApp;
-    public string qualifiedAppName;
-    public string inAppIdentifier;
-    public string inAppDisplayName;
+    public NamedApp namedApp { get; init; }
+    public string qualifiedAppName { get; init; }
+    public string inAppIdentifier { get; init; }
+    public string inAppDisplayName { get; init; }
     [JsonConverter(typeof(SpecificsConverter))]
-    public object? specifics;
-    public List<CallerAccount> callers = new();
+    public object? specifics { get; init; }
+    public ImmutableArray<ImmutableCallerAccount> callers { get; init; }
 
-    public AccountIdentification AsIdentification()
+    public ImmutableAccountIdentification AsIdentification()
     {
-        return new AccountIdentification
+        return new ImmutableAccountIdentification
         {
             inAppIdentifier = inAppIdentifier,
             namedApp = namedApp,
@@ -24,7 +25,7 @@ public class NonIndexedAccount
         };
     }
 
-    public static Account MakeIndexed(NonIndexedAccount nonIndexedAccount)
+    public static Account MakeIndexed(ImmutableNonIndexedAccount nonIndexedAccount)
     {
         return new Account
         {
@@ -34,7 +35,7 @@ public class NonIndexedAccount
             inAppIdentifier = nonIndexedAccount.inAppIdentifier,
             inAppDisplayName = nonIndexedAccount.inAppDisplayName,
             specifics = nonIndexedAccount.specifics,
-            callers = nonIndexedAccount.callers.Select(caller => caller.ShallowCopy()).ToList(),
+            callers = nonIndexedAccount.callers.ToList(),
         };
     }
 }
@@ -44,19 +45,19 @@ public class NonIndexedAccount
 /// show up in the UI as early as possible without actually needing to make calls and retrieve additional information about them.<br/>
 /// The consequence of this is that when we convert this incomplete account to an indexed account, it is marked in the UI as pending,
 /// so that the user knows the information about that account is incomplete.
-public class IncompleteAccount
+public class ImmutableIncompleteAccount
 {
-    public NamedApp namedApp;
-    public string qualifiedAppName;
+    public NamedApp namedApp { get; init; }
+    public string qualifiedAppName { get; init; }
     
-    public string inAppIdentifier;
-    public string inAppDisplayName;
+    public string inAppIdentifier { get; init; }
+    public string inAppDisplayName { get; init; }
     
-    public List<IncompleteCallerAccount> callers = new();
+    public ImmutableArray<ImmutableIncompleteCallerAccount> callers { get; init; }
     
-    public AccountIdentification AsIdentification()
+    public ImmutableAccountIdentification AsIdentification()
     {
-        return new AccountIdentification
+        return new ImmutableAccountIdentification
         {
             inAppIdentifier = inAppIdentifier,
             namedApp = namedApp,
@@ -64,7 +65,7 @@ public class IncompleteAccount
         };
     }
 
-    public static Account MakeIndexed(IncompleteAccount incompleteAccount)
+    public static Account MakeIndexed(ImmutableIncompleteAccount incompleteAccount)
     {
         return new Account
         {
@@ -73,7 +74,7 @@ public class IncompleteAccount
             qualifiedAppName = incompleteAccount.qualifiedAppName,
             inAppIdentifier = incompleteAccount.inAppIdentifier,
             inAppDisplayName = incompleteAccount.inAppDisplayName,
-            callers = incompleteAccount.callers.Select(IncompleteCallerAccount.MakeComplete).ToList(),
+            callers = incompleteAccount.callers.Select(ImmutableIncompleteCallerAccount.MakeComplete).ToList(),
             allDisplayNames = [incompleteAccount.inAppDisplayName],
             isTechnical = false,
             
@@ -85,22 +86,22 @@ public class IncompleteAccount
 /// The caller account may be incomplete, as we do not necessarily know if that account is a contact of the account it is attached to;
 /// for example, when fetching recent notes as notes can be attached to non-contacts.<br/>
 /// When that incomplete caller account is ingested and merged into an existing account, we only write about what we know about this caller.
-public class IncompleteCallerAccount
+public record ImmutableIncompleteCallerAccount
 {
-    public bool isAnonymous;
-    public string? inAppIdentifier; // Can only be null if it's an anonymous caller.
+    public bool isAnonymous { get; init; }
+    public string? inAppIdentifier { get; init; } // Can only be null if it's an anonymous caller.
     
-    public bool? isContact;
-    public Note? note;
+    public bool? isContact { get; init; }
+    public ImmutableNote? note { get; init; }
 
-    public static CallerAccount MakeComplete(IncompleteCallerAccount incomplete)
+    public static ImmutableCallerAccount MakeComplete(ImmutableIncompleteCallerAccount incomplete)
     {
-        return new CallerAccount
+        return new ImmutableCallerAccount
         {
             inAppIdentifier = incomplete.inAppIdentifier,
             isAnonymous = incomplete.isAnonymous,
             isContact = incomplete.isContact ?? false,
-            note = incomplete.note ?? new Note
+            note = incomplete.note ?? new ImmutableNote
             {
                 status = NoteState.NeverHad,
                 text = null

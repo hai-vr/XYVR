@@ -1,6 +1,5 @@
 ﻿using XYVR.API.VRChat;
 using XYVR.Core;
-using XYVR.Data.Collection;
 
 namespace XYVR.AccountAuthority.VRChat;
 
@@ -20,7 +19,7 @@ internal class VRChatCommunicator
         _credentialsStorage = credentialsStorage;
     }
 
-    public async Task<NonIndexedAccount> CallerAccount()
+    public async Task<ImmutableNonIndexedAccount> CallerAccount()
     {
         _api ??= await InitializeAPI();
 
@@ -32,7 +31,7 @@ internal class VRChatCommunicator
     
     /// This lists the friends and then the notes. Some notes may refer to friends that have already been returned, so there may be multiple references to the same account.
     /// The caller of this method needs to take that into consideration.
-    public async IAsyncEnumerable<IncompleteAccount> FindIncompleteAccountsMayIncludeDuplicateReferences()
+    public async IAsyncEnumerable<ImmutableIncompleteAccount> FindIncompleteAccountsMayIncludeDuplicateReferences()
     {
         _api ??= await InitializeAPI();
 
@@ -40,7 +39,7 @@ internal class VRChatCommunicator
             .Concat(_api.ListFriends(ListFriendsRequestType.OnlyOffline, DataCollectionReason.FindUndiscoveredAccounts));
         await foreach (var friend in contactsAsyncEnum)
         {
-            var acc = new IncompleteAccount
+            var acc = new ImmutableIncompleteAccount
             {
                 namedApp = NamedApp.VRChat,
                 qualifiedAppName = VRChatQualifiedAppName,
@@ -48,7 +47,7 @@ internal class VRChatCommunicator
                 inAppDisplayName = friend.displayName,
                 callers =
                 [
-                    new IncompleteCallerAccount
+                    new ImmutableIncompleteCallerAccount
                     {
                         isAnonymous = false,
                         inAppIdentifier = _callerUserId,
@@ -63,7 +62,7 @@ internal class VRChatCommunicator
         await foreach (var note in _api.ListUserNotes(DataCollectionReason.FindUndiscoveredAccounts))
         {
             var hasNote = !string.IsNullOrWhiteSpace(note.note);
-            var acc = new IncompleteAccount
+            var acc = new ImmutableIncompleteAccount
             {
                 namedApp = NamedApp.VRChat,
                 qualifiedAppName = VRChatQualifiedAppName,
@@ -71,12 +70,12 @@ internal class VRChatCommunicator
                 inAppDisplayName = note.targetUser.displayName,
                 callers =
                 [
-                    new IncompleteCallerAccount
+                    new ImmutableIncompleteCallerAccount
                     {
                         isAnonymous = false,
                         inAppIdentifier = _callerUserId,
                         isContact = null, // We don't know if it's a contact.
-                        note = new Note
+                        note = new ImmutableNote
                         {
                             status = hasNote ? NoteState.Exists : NoteState.NeverHad,
                             text = hasNote ? note.note : null
@@ -92,7 +91,7 @@ internal class VRChatCommunicator
     /// Given a list of user IDs that may or may not exist, return a list of accounts.<br/>
     /// The returned list may be smaller than the input list, especially if some accounts no longer exist.<br/>
     /// User IDs do not necessarily start with usr_ as this supports some oldschool accounts.
-    public async Task<List<NonIndexedAccount>> CollectAllLenient(List<string> notNecessarilyValidUserIds)
+    public async Task<List<ImmutableNonIndexedAccount>> CollectAllLenient(List<string> notNecessarilyValidUserIds)
     {
         var distinctNotNecessarilyValidUserIds = notNecessarilyValidUserIds
             .Distinct() // Get rid of duplicates
@@ -100,7 +99,7 @@ internal class VRChatCommunicator
         
         _api ??= await InitializeAPI();
 
-        var accounts = new List<NonIndexedAccount>();
+        var accounts = new List<ImmutableNonIndexedAccount>();
         foreach (var userId in distinctNotNecessarilyValidUserIds)
         {
             var user = await _api.GetUserLenient(userId, DataCollectionReason.CollectExistingAccount);
@@ -113,32 +112,32 @@ internal class VRChatCommunicator
         return accounts;
     }
 
-    public NonIndexedAccount ConvertUserAsAccount(VRChatUser user, string callerUserId)
+    public ImmutableNonIndexedAccount ConvertUserAsAccount(VRChatUser user, string callerUserId)
     {
         return UserAsAccount(user, callerUserId);
     }
 
-    private static NonIndexedAccount UserAsAccount(VRChatUser user, string callerUserId)
+    private static ImmutableNonIndexedAccount UserAsAccount(VRChatUser user, string callerUserId)
     {
-        return new NonIndexedAccount
+        return new ImmutableNonIndexedAccount
         {
             namedApp = NamedApp.VRChat,
             qualifiedAppName = VRChatQualifiedAppName,
             inAppIdentifier = user.id,
             inAppDisplayName = user.displayName,
-            specifics = new VRChatSpecifics
+            specifics = new ImmutableVRChatSpecifics
             {
-                urls = user.bioLinks == null ? [] : user.bioLinks.Where(s => s != null).Cast<string>().ToList(),
+                urls = user.bioLinks == null ? [] : [..user.bioLinks.Where(s => s != null).Cast<string>()],
                 bio = user.bio ?? "",
                 pronouns = user.pronouns ?? ""
             },
             callers = [
-                new CallerAccount
+                new ImmutableCallerAccount
                 {
                     isAnonymous = false,
                     inAppIdentifier = callerUserId,
                     isContact = user.isFriend,
-                    note = new Note
+                    note = new ImmutableNote
                     {
                         status = string.IsNullOrWhiteSpace(user.note) ? NoteState.NeverHad : NoteState.Exists,
                         text = string.IsNullOrWhiteSpace(user.note) ? null : user.note

@@ -4,9 +4,9 @@ public class CompoundDataCollection(IndividualRepository repository, List<IDataC
 {
     private readonly List<IDataCollection> _collectors = collectors.ToList();
 
-    public async Task<List<NonIndexedAccount>> RebuildFromDataCollectionStorage(List<ResponseCollectionTrail> trails)
+    public async Task<List<ImmutableNonIndexedAccount>> RebuildFromDataCollectionStorage(List<ResponseCollectionTrail> trails)
     {
-        var results = new List<NonIndexedAccount>();
+        var results = new List<ImmutableNonIndexedAccount>();
         
         foreach (var dataCollection in _collectors)
         {
@@ -16,9 +16,9 @@ public class CompoundDataCollection(IndividualRepository repository, List<IDataC
         return results;
     }
 
-    public async Task<List<AccountIdentification>> IncrementalUpdateRepository(IIncrementalDataCollectionJobHandler jobHandler)
+    public async Task<List<ImmutableAccountIdentification>> IncrementalUpdateRepository(IIncrementalDataCollectionJobHandler jobHandler)
     {
-        var updatedSoFar = new List<AccountIdentification>();
+        var updatedSoFar = new List<ImmutableAccountIdentification>();
 
         foreach (var dataCollection in _collectors)
         {
@@ -53,12 +53,12 @@ public class CompoundDataCollection(IndividualRepository repository, List<IDataC
         return updatedSoFar;
     }
 
-    public bool CanAttemptIncrementalUpdateOn(AccountIdentification identification)
+    public bool CanAttemptIncrementalUpdateOn(ImmutableAccountIdentification identification)
     {
         return _collectors.Any(collection => collection.CanAttemptIncrementalUpdateOn(identification));
     }
 
-    public async Task<NonIndexedAccount?> TryGetForIncrementalUpdate__Flawed__NonContactOnly(AccountIdentification notUpdatedIdentification)
+    public async Task<ImmutableNonIndexedAccount?> TryGetForIncrementalUpdate__Flawed__NonContactOnly(ImmutableAccountIdentification notUpdatedIdentification)
     {
         foreach (var collector in _collectors)
         {

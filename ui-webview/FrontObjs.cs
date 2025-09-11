@@ -15,7 +15,7 @@ internal class FrontIndividual
     public OnlineStatus? onlineStatus;
     public string? customStatus;
     
-    public static string? ToFrontNote(Note note)
+    public static string? ToFrontNote(ImmutableNote note)
     {
         return note.status == NoteState.Exists ? note.text : null;
     }
@@ -97,7 +97,7 @@ internal class FrontCallerAccount
     public string? note;
     public bool isContact;
 
-    public static FrontCallerAccount FromCore(CallerAccount callerAccount)
+    public static FrontCallerAccount FromCore(ImmutableCallerAccount callerAccount)
     {
         return new FrontCallerAccount
         {

@@ -105,7 +105,7 @@ internal class Program
 
 internal class JobHandler : IIncrementalDataCollectionJobHandler
 {
-    public Task NotifyAccountUpdated(List<AccountIdentification> increment)
+    public Task NotifyAccountUpdated(List<ImmutableAccountIdentification> increment)
     {
         Console.WriteLine($"Updated the following {increment.Count} accounts: {string.Join(", ", increment)}");
         return Task.CompletedTask;

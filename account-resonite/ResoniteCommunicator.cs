@@ -41,12 +41,12 @@ internal class ResoniteCommunicator
         await _credentialsStorage.StoreCookieOrToken(api.GetAllUserAndToken__Sensitive());
     }
 
-    public async Task<NonIndexedAccount> CallerAccount()
+    public async Task<ImmutableNonIndexedAccount> CallerAccount()
     {
         _api ??= await InitializeApi();
         // Initializing the API actually gets the caller account.
 
-        return new NonIndexedAccount
+        return new ImmutableNonIndexedAccount
         {
             namedApp = NamedApp.Resonite,
             qualifiedAppName = ResoniteQualifiedAppName,
@@ -55,20 +55,20 @@ internal class ResoniteCommunicator
         };
     }
 
-    public async IAsyncEnumerable<IncompleteAccount> FindIncompleteAccounts()
+    public async IAsyncEnumerable<ImmutableIncompleteAccount> FindIncompleteAccounts()
     {
         _api ??= await InitializeApi();
 
         var contacts = await _api.GetUserContacts(DataCollectionReason.FindUndiscoveredAccounts);
         foreach (var contact in contacts)
         {
-            yield return new IncompleteAccount
+            yield return new ImmutableIncompleteAccount
             {
                 namedApp = NamedApp.Resonite,
                 qualifiedAppName = ResoniteQualifiedAppName,
                 inAppIdentifier = contact.id,
                 inAppDisplayName = contact.contactUsername,
-                callers = [new IncompleteCallerAccount
+                callers = [new ImmutableIncompleteCallerAccount
                 {
                     isAnonymous = false,
                     inAppIdentifier = _callerUserId,
@@ -79,7 +79,7 @@ internal class ResoniteCommunicator
         }
     }
     
-    public async Task<NonIndexedAccount?> GetUser(string id, bool isContact)
+    public async Task<ImmutableNonIndexedAccount?> GetUser(string id, bool isContact)
     {
         _api ??= await InitializeApi();
 
@@ -87,7 +87,7 @@ internal class ResoniteCommunicator
         if (userN == null) return null;
         
         var user = (UserResponseJsonObject)userN;
-        return new NonIndexedAccount
+        return new ImmutableNonIndexedAccount
         {
             namedApp = NamedApp.Resonite,
             qualifiedAppName = ResoniteQualifiedAppName,
@@ -95,12 +95,12 @@ internal class ResoniteCommunicator
             inAppDisplayName = user.username,
             callers =
             [
-                new CallerAccount
+                new ImmutableCallerAccount
                 {
                     isAnonymous = false,
                     inAppIdentifier = _callerUserId,
                     isContact = isContact,
-                    note = new Note
+                    note = new ImmutableNote
                     {
                         status = NoteState.NeverHad,
                         text = null
@@ -110,7 +110,7 @@ internal class ResoniteCommunicator
         };
     }
 
-    public async Task<List<NonIndexedAccount>> CollectAllLenient(List<string> notNecessarilyValidUserIds, HashSet<string> resoniteContactIds)
+    public async Task<List<ImmutableNonIndexedAccount>> CollectAllLenient(List<string> notNecessarilyValidUserIds, HashSet<string> resoniteContactIds)
     {
         var distinctNotNecessarilyValidUserIds = notNecessarilyValidUserIds
             .Distinct() // Get rid of duplicates
@@ -118,7 +118,7 @@ internal class ResoniteCommunicator
 
         _api ??= await InitializeApi();
 
-        var accounts = new List<NonIndexedAccount>();
+        var accounts = new List<ImmutableNonIndexedAccount>();
         foreach (var userId in distinctNotNecessarilyValidUserIds)
         {
             var userN = await _api.GetUser(userId, DataCollectionReason.CollectExistingAccount);
@@ -131,14 +131,14 @@ internal class ResoniteCommunicator
         return accounts;
     }
 
-    public NonIndexedAccount ConvertUserAsAccount(UserResponseJsonObject user, string callerUserId, HashSet<string> resoniteContactIds)
+    public ImmutableNonIndexedAccount ConvertUserAsAccount(UserResponseJsonObject user, string callerUserId, HashSet<string> resoniteContactIds)
     {
         return UserAsAccount(user, callerUserId, resoniteContactIds);
     }
 
-    private static NonIndexedAccount UserAsAccount(UserResponseJsonObject user, string callerUserId, HashSet<string> resoniteContactIds)
+    private static ImmutableNonIndexedAccount UserAsAccount(UserResponseJsonObject user, string callerUserId, HashSet<string> resoniteContactIds)
     {
-        return new NonIndexedAccount
+        return new ImmutableNonIndexedAccount
         {
             namedApp = NamedApp.Resonite,
             qualifiedAppName = ResoniteQualifiedAppName,
@@ -146,12 +146,12 @@ internal class ResoniteCommunicator
             inAppDisplayName = user.username,
             callers =
             [
-                new CallerAccount
+                new ImmutableCallerAccount
                 {
                     isAnonymous = false,
                     inAppIdentifier = callerUserId,
                     isContact = resoniteContactIds.Contains(user.id),
-                    note = new Note
+                    note = new ImmutableNote
                     {
                         status = NoteState.NeverHad,
                         text = null

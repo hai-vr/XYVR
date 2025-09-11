@@ -9,7 +9,7 @@ public interface ILoginService
     Task<bool> IsLoggedInWithoutRequest(ICredentialsStorage copyOfCredentialsStorage);
     // Task<bool> IsLogginInWithRequest(Connector connector, ICredentialsStorage credentialsStorage, string guid);
     
-    public static ConnectorAccount AsConnectorAccount(NonIndexedAccount callerAccount)
+    public static ConnectorAccount AsConnectorAccount(ImmutableNonIndexedAccount callerAccount)
     {
         return new ConnectorAccount
         {

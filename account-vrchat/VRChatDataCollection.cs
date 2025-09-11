@@ -12,7 +12,7 @@ public class VRChatDataCollection(IndividualRepository repository, IResponseColl
         credentialsStorage
     );
     
-    public async Task<List<NonIndexedAccount>> RebuildFromDataCollectionStorage(List<ResponseCollectionTrail> trails)
+    public async Task<List<ImmutableNonIndexedAccount>> RebuildFromDataCollectionStorage(List<ResponseCollectionTrail> trails)
     {
         await Task.CompletedTask;
 
@@ -42,7 +42,7 @@ public class VRChatDataCollection(IndividualRepository repository, IResponseColl
         return vrchatAccounts;
     }
 
-    public async Task<List<AccountIdentification>> IncrementalUpdateRepository(IIncrementalDataCollectionJobHandler jobHandler)
+    public async Task<List<ImmutableAccountIdentification>> IncrementalUpdateRepository(IIncrementalDataCollectionJobHandler jobHandler)
     {
         var eTracker = await jobHandler.NewEnumerationTracker();
         
@@ -52,7 +52,7 @@ public class VRChatDataCollection(IndividualRepository repository, IResponseColl
         await jobHandler.NotifyProspective(eTracker);
         
         var undiscoveredUserIds = new HashSet<string>();
-        var incompleteAccounts = new HashSet<AccountIdentification>();
+        var incompleteAccounts = new HashSet<ImmutableAccountIdentification>();
         await foreach (var incompleteAccount in _vrChatCommunicator.FindIncompleteAccountsMayIncludeDuplicateReferences())
         {
             undiscoveredUserIds.Add(incompleteAccount.inAppIdentifier);
@@ -83,18 +83,18 @@ public class VRChatDataCollection(IndividualRepository repository, IResponseColl
             await jobHandler.NotifyEnumeration(eTracker, soFar, incompleteAccounts.Count);
         }
 
-        return new List<AccountIdentification> { vrcCaller.AsIdentification() }
+        return new List<ImmutableAccountIdentification> { vrcCaller.AsIdentification() }
             .Concat(incompleteAccounts)
             .Distinct()
             .ToList();
     }
 
-    public bool CanAttemptIncrementalUpdateOn(AccountIdentification identification)
+    public bool CanAttemptIncrementalUpdateOn(ImmutableAccountIdentification identification)
     {
         return identification.namedApp == NamedApp.VRChat;
     }
 
-    public async Task<NonIndexedAccount?> TryGetForIncrementalUpdate__Flawed__NonContactOnly(AccountIdentification toTryUpdate)
+    public async Task<ImmutableNonIndexedAccount?> TryGetForIncrementalUpdate__Flawed__NonContactOnly(ImmutableAccountIdentification toTryUpdate)
     {
         if (toTryUpdate.namedApp != NamedApp.VRChat) throw new ArgumentException("Cannot attempt incremental update on non-VRChat account, it is the responsibility of the caller to invoke CanAttemptIncrementalUpdateOn beforehand");
         
