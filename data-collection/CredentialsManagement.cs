@@ -65,7 +65,7 @@ public class CredentialsManagement
     {
         if (!_connectorGuidToCredentialsStorageState.TryGetValue(connector.guid, out var credentialsStorage)) return null;
 
-        return await AuthorityFor(connector).NewDataCollection(repository, storage, credentialsStorage);
+        return await AuthorityFor(connector).NewDataCollection(repository, credentialsStorage, storage);
     }
 
     public async Task<bool> IsLoggedInWithoutRequest(Connector connector)
@@ -121,7 +121,7 @@ public class CredentialsManagement
         if (connector.type == ConnectorType.Offline) return null;
         
         var authority = AuthorityFor(connector);
-        var liveMonitoring = await authority.NewLiveMonitoring(credentialsStorage, monitoring);
+        var liveMonitoring = await authority.NewLiveMonitoring(monitoring, credentialsStorage);
         
         var caller = await authority.ResolveCallerAccount(credentialsStorage);
         await liveMonitoring.DefineCaller(caller.inAppIdentifier);

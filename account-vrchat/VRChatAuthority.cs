@@ -22,12 +22,12 @@ public class VRChatAuthority : IAuthority
         return Task.FromResult<ILoginService>(new VRChatLoginService());
     }
 
-    public Task<IDataCollection> NewDataCollection(IndividualRepository repository, IResponseCollector storage, ICredentialsStorage credentialsStorage)
+    public Task<IDataCollection> NewDataCollection(IndividualRepository repository, ICredentialsStorage credentialsStorage, IResponseCollector storage)
     {
         return Task.FromResult<IDataCollection>(new VRChatDataCollection(repository, storage, credentialsStorage));
     }
 
-    public Task<ILiveMonitoring> NewLiveMonitoring(ICredentialsStorage credentialsStorage, LiveStatusMonitoring monitoring)
+    public Task<ILiveMonitoring> NewLiveMonitoring(LiveStatusMonitoring monitoring, ICredentialsStorage credentialsStorage)
     {
         return Task.FromResult<ILiveMonitoring>(new VRChatLiveMonitoring(credentialsStorage, monitoring, _worldNameCache));
     }

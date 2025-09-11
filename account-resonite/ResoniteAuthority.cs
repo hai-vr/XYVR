@@ -23,12 +23,12 @@ public class ResoniteAuthority : IAuthority
         return Task.FromResult<ILoginService>(new ResoniteLoginService(_resoniteUidProviderFn));
     }
 
-    public async Task<IDataCollection> NewDataCollection(IndividualRepository repository, IResponseCollector storage, ICredentialsStorage credentialsStorage)
+    public async Task<IDataCollection> NewDataCollection(IndividualRepository repository, ICredentialsStorage credentialsStorage, IResponseCollector storage)
     {
         return new ResoniteDataCollection(repository, storage, await _resoniteUidProviderFn(), credentialsStorage);
     }
 
-    public async Task<ILiveMonitoring> NewLiveMonitoring(ICredentialsStorage credentialsStorage, LiveStatusMonitoring monitoring)
+    public async Task<ILiveMonitoring> NewLiveMonitoring(LiveStatusMonitoring monitoring, ICredentialsStorage credentialsStorage)
     {
         return new ResoniteLiveMonitoring(credentialsStorage, monitoring, await _resoniteUidProviderFn());
     }
