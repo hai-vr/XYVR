@@ -65,7 +65,7 @@ internal class FrontAccount
     public string? customStatus;
     public FrontLiveUserSessionState? mainSession;
 
-    public static FrontAccount ToFrontAccount(Account account, ImmutableLiveUserUpdate? liveSessionState)
+    public static FrontAccount ToFrontAccount(ImmutableAccount account, ImmutableLiveUserUpdate? liveSessionState)
     {
         return new FrontAccount
         {
@@ -79,7 +79,7 @@ internal class FrontAccount
             isTechnical = account.isTechnical,
             isAnyCallerContact = account.callers.Any(caller => caller.isContact),
             isAnyCallerNote = account.callers.Any(caller => caller.note.status == NoteState.Exists),
-            allDisplayNames = account.allDisplayNames,
+            allDisplayNames = account.allDisplayNames.ToList(),
             isPendingUpdate = account.isPendingUpdate,
 
             onlineStatus = liveSessionState?.onlineStatus,

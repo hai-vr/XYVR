@@ -8,12 +8,12 @@ namespace XYVR.Core;
 public record ImmutableNonIndexedAccount
 {
     public NamedApp namedApp { get; init; }
-    public string qualifiedAppName { get; init; }
-    public string inAppIdentifier { get; init; }
-    public string inAppDisplayName { get; init; }
+    public required string qualifiedAppName { get; init; }
+    public required string inAppIdentifier { get; init; }
+    public required string inAppDisplayName { get; init; }
     [JsonConverter(typeof(SpecificsConverter))]
     public object? specifics { get; init; }
-    public ImmutableArray<ImmutableCallerAccount> callers { get; init; }
+    public ImmutableArray<ImmutableCallerAccount> callers { get; init; } = ImmutableArray<ImmutableCallerAccount>.Empty;
 
     public ImmutableAccountIdentification AsIdentification()
     {
@@ -25,9 +25,9 @@ public record ImmutableNonIndexedAccount
         };
     }
 
-    public static Account MakeIndexed(ImmutableNonIndexedAccount nonIndexedAccount)
+    public static ImmutableAccount MakeIndexed(ImmutableNonIndexedAccount nonIndexedAccount)
     {
-        return new Account
+        return new ImmutableAccount
         {
             guid = XYVRGuids.ForAccount(),
             namedApp = nonIndexedAccount.namedApp,
@@ -35,7 +35,7 @@ public record ImmutableNonIndexedAccount
             inAppIdentifier = nonIndexedAccount.inAppIdentifier,
             inAppDisplayName = nonIndexedAccount.inAppDisplayName,
             specifics = nonIndexedAccount.specifics,
-            callers = nonIndexedAccount.callers.ToList(),
+            callers = nonIndexedAccount.callers,
         };
     }
 }
@@ -48,12 +48,12 @@ public record ImmutableNonIndexedAccount
 public class ImmutableIncompleteAccount
 {
     public NamedApp namedApp { get; init; }
-    public string qualifiedAppName { get; init; }
+    public required string qualifiedAppName { get; init; }
     
-    public string inAppIdentifier { get; init; }
-    public string inAppDisplayName { get; init; }
+    public required string inAppIdentifier { get; init; }
+    public required string inAppDisplayName { get; init; }
     
-    public ImmutableArray<ImmutableIncompleteCallerAccount> callers { get; init; }
+    public ImmutableArray<ImmutableIncompleteCallerAccount> callers { get; init; } = ImmutableArray<ImmutableIncompleteCallerAccount>.Empty;
     
     public ImmutableAccountIdentification AsIdentification()
     {
@@ -65,16 +65,16 @@ public class ImmutableIncompleteAccount
         };
     }
 
-    public static Account MakeIndexed(ImmutableIncompleteAccount incompleteAccount)
+    public static ImmutableAccount MakeIndexed(ImmutableIncompleteAccount incompleteAccount)
     {
-        return new Account
+        return new ImmutableAccount
         {
             guid = XYVRGuids.ForAccount(),
             namedApp = incompleteAccount.namedApp,
             qualifiedAppName = incompleteAccount.qualifiedAppName,
             inAppIdentifier = incompleteAccount.inAppIdentifier,
             inAppDisplayName = incompleteAccount.inAppDisplayName,
-            callers = incompleteAccount.callers.Select(ImmutableIncompleteCallerAccount.MakeComplete).ToList(),
+            callers = [..incompleteAccount.callers.Select(ImmutableIncompleteCallerAccount.MakeComplete)],
             allDisplayNames = [incompleteAccount.inAppDisplayName],
             isTechnical = false,
             

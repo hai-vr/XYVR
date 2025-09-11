@@ -62,6 +62,11 @@ public class DataCollectionBFF : IDataCollectionBFF
             }));
             await Scaffolding.SaveRepository(repository);
         }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
         finally
         {
             _isRunningDataCollection = false;

@@ -108,7 +108,7 @@ public class NonIndexedLiveSession
 public class Participant
 {
     public bool isKnown;
-    public Account? knownAccount;
+    public ImmutableAccount? knownAccount;
     public UnknownAccount? unknownAccount;
 
     public bool isHost;

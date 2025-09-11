@@ -11,9 +11,9 @@ namespace XYVR.Core;
 
 public class Individual
 {
-    public string guid;
-    public List<Account> accounts = new();
-    public string displayName;
+    public required string guid;
+    public List<ImmutableAccount> accounts = new();
+    public required string displayName;
     
     public bool isAnyContact;
     
@@ -33,25 +33,25 @@ public class Individual
     public ImmutableNote note = new();
 }
 
-public class Account
+public record ImmutableAccount
 {
     // These fields are not supposed to change.
-    public string guid;
-    public NamedApp namedApp;
-    public string qualifiedAppName;
-    public string inAppIdentifier;
+    public required string guid { get; init; }
+    public NamedApp namedApp { get; init; }
+    public required string qualifiedAppName { get; init; }
+    public required string inAppIdentifier { get; init; }
     
-    public string inAppDisplayName;
+    public required string inAppDisplayName { get; init; }
 
     [JsonConverter(typeof(SpecificsConverter))]
-    public object? specifics;
+    public object? specifics { get; init; }
     
     // As the account can be retrieved by different connections, we need to keep track of which connection caused this account
     // to be retrieved: That's the caller account.
     // In addition, there is information specific to that caller account, such as notes, or whether it's a contact.
-    public List<ImmutableCallerAccount> callers = new();
+    public ImmutableArray<ImmutableCallerAccount> callers { get; init; } = ImmutableArray<ImmutableCallerAccount>.Empty;
     
-    public List<string> allDisplayNames = new();
+    public ImmutableArray<string> allDisplayNames { get; init; } = ImmutableArray<string>.Empty;
     
     // Maintenance fields
     public bool isPendingUpdate;
@@ -59,7 +59,11 @@ public class Account
     // This field is up to the app users' judgement
     public bool isTechnical;
 
-    public bool IsAnyCallerContact() => callers.Any(caller => caller.isContact);
+    public bool IsAnyCallerContact()
+    {
+        return callers.Any(caller => caller.isContact);
+    }
+
     public bool HasAnyCallerNote() => callers.Any(caller => caller.note.status == NoteState.Exists);
 
     public ImmutableAccountIdentification AsIdentification()
@@ -76,9 +80,9 @@ public class Account
 public record ImmutableAccountIdentification
 {
     public NamedApp namedApp { get; init; }
-    public string qualifiedAppName { get; init; }
+    public required string qualifiedAppName { get; init; }
 
-    public string inAppIdentifier { get; init; }
+    public required string inAppIdentifier { get; init; }
     
     public override string ToString()
     {
@@ -91,15 +95,15 @@ public record ImmutableCallerAccount
     public bool isAnonymous { get; init; }
     public string? inAppIdentifier { get; init; } // Can only be null if it's an anonymous caller.
     
-    public ImmutableNote note { get; init; }
+    public required ImmutableNote note { get; init; }
     public bool isContact { get; init; }
 }
 
-public class ImmutableVRChatSpecifics
+public record ImmutableVRChatSpecifics
 {
-    public ImmutableArray<string> urls { get; init; }
-    public string bio { get; init; }
-    public string pronouns { get; init; }
+    public ImmutableArray<string> urls { get; init; } = ImmutableArray<string>.Empty;
+    public required string bio { get; init; }
+    public required string pronouns { get; init; }
 }
 
 public record ImmutableNote

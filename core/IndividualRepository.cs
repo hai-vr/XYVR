@@ -1,4 +1,6 @@
-﻿namespace XYVR.Core;
+﻿using System.Collections.Immutable;
+
+namespace XYVR.Core;
 
 public class IndividualRepository
 {
@@ -41,16 +43,24 @@ public class IndividualRepository
                 };
             }
 
-            foreach (var account in individual.accounts)
+            // Fix anomalies
+            for (var index = 0; index < individual.accounts.Count; index++)
             {
-                if (string.IsNullOrWhiteSpace(account.guid))
+                var originalAccount = individual.accounts[index];
+                
+                var modifiedAccount = originalAccount;
+                if (string.IsNullOrWhiteSpace(modifiedAccount.guid))
                 {
-                    account.guid = XYVRGuids.ForAccount();
+                    modifiedAccount = modifiedAccount with { guid = XYVRGuids.ForAccount() };
+                }
+                if (modifiedAccount.allDisplayNames == null || modifiedAccount.allDisplayNames.Length == 0)
+                {
+                    modifiedAccount = modifiedAccount with { allDisplayNames = [individual.displayName] };
                 }
 
-                if (account.allDisplayNames == null || account.allDisplayNames.Count == 0)
+                if (originalAccount != modifiedAccount)
                 {
-                    account.allDisplayNames = [individual.displayName];
+                    individual.accounts[index] = modifiedAccount;
                 }
             }
         }
@@ -130,9 +140,14 @@ public class IndividualRepository
         {
             if (_namedAppToInAppIdToIndividual[inputAccount.namedApp].TryGetValue(inputAccount.inAppIdentifier, out var existingIndividual))
             {
-                foreach (var existingAccount in existingIndividual.accounts)
+                for (var index = 0; index < existingIndividual.accounts.Count; index++)
                 {
-                    if (SynchronizeIncompleteAccount(existingAccount, inputAccount)) break;
+                    var existingAccount = existingIndividual.accounts[index];
+                    if (TrySynchronizeIncompleteAccount(existingAccount, inputAccount, out var modifiedAccount))
+                    {
+                        existingIndividual.accounts[index] = modifiedAccount!;
+                        break;
+                    }
                 }
 
                 UpdateIndividualBasedOnAccounts(existingIndividual);
@@ -154,9 +169,14 @@ public class IndividualRepository
         {
             if (_namedAppToInAppIdToIndividual[inputAccount.namedApp].TryGetValue(inputAccount.inAppIdentifier, out var existingIndividual))
             {
-                foreach (var existingAccount in existingIndividual.accounts)
+                for (var index = 0; index < existingIndividual.accounts.Count; index++)
                 {
-                    if (SynchronizeAccount(existingAccount, inputAccount)) break;
+                    var existingAccount = existingIndividual.accounts[index];
+                    if (TrySynchronizeAccount(existingAccount, inputAccount, out var modifiedAccount))
+                    {
+                        existingIndividual.accounts[index] = modifiedAccount!;
+                        break;
+                    }
                 }
 
                 UpdateIndividualBasedOnAccounts(existingIndividual);
@@ -192,28 +212,24 @@ public class IndividualRepository
         }
     }
 
-    private static bool SynchronizeAccount(Account existingAccount, ImmutableNonIndexedAccount inputAccount)
+    private static bool TrySynchronizeAccount(ImmutableAccount existingAccount, ImmutableNonIndexedAccount inputAccount, out ImmutableAccount? result)
     {
         var isSameAppAndIdentifier = IsSameApp(existingAccount, inputAccount) && existingAccount.inAppIdentifier == inputAccount.inAppIdentifier;
         if (isSameAppAndIdentifier)
         {
-            existingAccount.inAppDisplayName = inputAccount.inAppDisplayName;
-            
-            // Specifics are always replaced entirely
-            existingAccount.specifics = inputAccount.specifics;
-            
+            var modifiedCallers = existingAccount.callers.ToList();
             foreach (var inputCaller in inputAccount.callers)
             {
                 var callerExists = false;
-                for (var index = 0; index < existingAccount.callers.Count; index++)
+                for (var index = 0; index < existingAccount.callers.Length; index++)
                 {
-                    var existingCaller = existingAccount.callers[index];
+                    var existingCaller = modifiedCallers[index];
                     if (inputCaller.isAnonymous && existingCaller.isAnonymous
                         || !inputCaller.isAnonymous && !existingCaller.isAnonymous && existingCaller.inAppIdentifier == inputCaller.inAppIdentifier)
                     {
                         callerExists = true;
                         
-                        existingAccount.callers[index] = existingCaller with
+                        modifiedCallers[index] = existingCaller with
                         {
                             isContact = inputCaller.isContact,
                             note = UpdateExistingNote(existingCaller.note, inputCaller.note)
@@ -225,38 +241,38 @@ public class IndividualRepository
 
                 if (!callerExists)
                 {
-                    existingAccount.callers.Add(inputCaller);
+                    modifiedCallers.Add(inputCaller);
                 }
             }
 
-            var workingDisplayNames = existingAccount.allDisplayNames.ToList();
-            if (!workingDisplayNames.Contains(inputAccount.inAppDisplayName))
+            result = existingAccount with
             {
-                workingDisplayNames.Add(inputAccount.inAppDisplayName);
-            }
-            existingAccount.allDisplayNames = workingDisplayNames.Distinct().ToList();
-
-            existingAccount.isPendingUpdate = false; // Merging a complete inputAccount means it's no longer pending update.
+                inAppDisplayName = inputAccount.inAppDisplayName,
+                specifics = inputAccount.specifics, // Specifics are always replaced entirely
+                callers = [..modifiedCallers],
+                allDisplayNames = BuildDisplayNames(existingAccount, inputAccount.inAppDisplayName),
+                isPendingUpdate = false // Merging a complete inputAccount means it's no longer pending update.
+            };
             
             return true;
         }
 
+        result = null;
         return false;
     }
 
-    private static bool SynchronizeIncompleteAccount(Account existingAccount, ImmutableIncompleteAccount inputAccount)
+    private static bool TrySynchronizeIncompleteAccount(ImmutableAccount existingAccount, ImmutableIncompleteAccount inputAccount, out ImmutableAccount? result)
     {
         var isSameAppAndIdentifier = IsSameApp(existingAccount, inputAccount) && existingAccount.inAppIdentifier == inputAccount.inAppIdentifier;
         if (isSameAppAndIdentifier)
         {
-            existingAccount.inAppDisplayName = inputAccount.inAppDisplayName;
-            
+            var modifiedCallers = existingAccount.callers.ToList();
             foreach (var inputCaller in inputAccount.callers)
             {
                 var callerExists = false;
-                for (var index = 0; index < existingAccount.callers.Count; index++)
+                for (var index = 0; index < existingAccount.callers.Length; index++)
                 {
-                    var existingCaller = existingAccount.callers[index];
+                    var existingCaller = modifiedCallers[index];
                     if (inputCaller.isAnonymous && existingCaller.isAnonymous
                         || !inputCaller.isAnonymous && !existingCaller.isAnonymous && existingCaller.inAppIdentifier == inputCaller.inAppIdentifier)
                     {
@@ -267,7 +283,7 @@ public class IndividualRepository
                         if (inputCaller.isContact != null) { modifiedCaller = modifiedCaller with { isContact = (bool)inputCaller.isContact }; }
                         if (inputCaller.note != null) { modifiedCaller = modifiedCaller with { note = UpdateExistingNote(existingCaller.note, inputCaller.note) }; }
 
-                        existingAccount.callers[index] = modifiedCaller;
+                        modifiedCallers[index] = modifiedCaller;
 
                         break;
                     }
@@ -275,23 +291,33 @@ public class IndividualRepository
 
                 if (!callerExists)
                 {
-                    existingAccount.callers.Add(ImmutableIncompleteCallerAccount.MakeComplete(inputCaller));
+                    modifiedCallers.Add(ImmutableIncompleteCallerAccount.MakeComplete(inputCaller));
                 }
             }
-
-            var workingDisplayNames = existingAccount.allDisplayNames.ToList();
-            if (!workingDisplayNames.Contains(inputAccount.inAppDisplayName))
+            
+            result = existingAccount with
             {
-                workingDisplayNames.Add(inputAccount.inAppDisplayName);
-            }
-            existingAccount.allDisplayNames = workingDisplayNames.Distinct().ToList();
-            
-            // Notice how we don't set account.isPendingUpdate to true here, it just stays default previous value.
-            
+                inAppDisplayName = inputAccount.inAppDisplayName,
+                allDisplayNames = BuildDisplayNames(existingAccount, inputAccount.inAppDisplayName),
+                callers = [..modifiedCallers],
+                // Notice how we don't set account.isPendingUpdate to true here, it just stays default previous value.
+            };
             return true;
         }
 
+        result = null;
         return false;
+    }
+
+    private static ImmutableArray<string> BuildDisplayNames(ImmutableAccount existingAccount, string inputAccountDisplayName)
+    {
+        var workingDisplayNames = existingAccount.allDisplayNames.ToList();
+        if (!workingDisplayNames.Contains(inputAccountDisplayName))
+        {
+            workingDisplayNames.Add(inputAccountDisplayName);
+        }
+
+        return [..workingDisplayNames.Distinct()];
     }
 
     private static ImmutableNote UpdateExistingNote(ImmutableNote existingNote, ImmutableNote inputNote)
@@ -324,7 +350,7 @@ public class IndividualRepository
         existingIndividual.displayName = existingIndividual.accounts.First().inAppDisplayName;
     }
 
-    private static bool IsSameApp(Account existingAccount, ImmutableNonIndexedAccount inputAccount)
+    private static bool IsSameApp(ImmutableAccount existingAccount, ImmutableNonIndexedAccount inputAccount)
     {
         var sameNamedApp = existingAccount.namedApp == inputAccount.namedApp;
         if (!sameNamedApp)
@@ -338,7 +364,7 @@ public class IndividualRepository
         return true;
     }
 
-    private static bool IsSameApp(Account existingAccount, ImmutableIncompleteAccount inputAccount)
+    private static bool IsSameApp(ImmutableAccount existingAccount, ImmutableIncompleteAccount inputAccount)
     {
         var sameNamedApp = existingAccount.namedApp == inputAccount.namedApp;
         if (!sameNamedApp)
@@ -353,12 +379,12 @@ public class IndividualRepository
     }
 
     // It is the responsibility of the caller to never call this when that account is already owned by an Individual.
-    private Individual CreateNewIndividualFromAccount(Account account)
+    private Individual CreateNewIndividualFromAccount(ImmutableAccount account)
     {
         return InternalCreateFromAccount(account);
     }
 
-    private Individual InternalCreateFromAccount(Account account)
+    private Individual InternalCreateFromAccount(ImmutableAccount account)
     {
         var isAnyContact = account.IsAnyCallerContact();
         var individual = new Individual
