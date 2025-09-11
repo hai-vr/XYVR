@@ -1,8 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 using Newtonsoft.Json;
-using XYVR.AccountAuthority.Resonite;
 using XYVR.Core;
-using XYVR.Data.Collection.monitoring;
 
 namespace XYVR.UI.WebviewUI;
 

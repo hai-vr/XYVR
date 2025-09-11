@@ -1,9 +1,8 @@
-﻿using XYVR.AccountAuthority.VRChat;
-using XYVR.API.VRChat;
+﻿using XYVR.API.VRChat;
 using XYVR.Core;
 using XYVR.Login;
 
-namespace XYVR.Data.Collection;
+namespace XYVR.AccountAuthority.VRChat;
 
 public class VRChatLoginService : ILoginService
 {

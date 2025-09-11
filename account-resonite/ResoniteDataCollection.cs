@@ -1,9 +1,9 @@
 ﻿using Newtonsoft.Json;
-using XYVR.AccountAuthority.Resonite;
 using XYVR.API.Resonite;
 using XYVR.Core;
+using XYVR.Data.Collection;
 
-namespace XYVR.Data.Collection;
+namespace XYVR.AccountAuthority.Resonite;
 
 public class ResoniteDataCollection(IndividualRepository repository, IResponseCollector responseCollectionStorage, string resoniteUid, ICredentialsStorage credentialsStorage) : IDataCollection
 {

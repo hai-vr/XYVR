@@ -1,9 +1,8 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using XYVR.AccountAuthority.VRChat;
 using XYVR.Core;
 
-namespace XYVR.Data.Collection.monitoring;
+namespace XYVR.AccountAuthority.VRChat;
 
 public class VRChatLiveMonitoring : ILiveMonitoring
 {
@@ -25,7 +24,7 @@ public class VRChatLiveMonitoring : ILiveMonitoring
 
     public async Task StartMonitoring()
     {
-        if (_callerInAppIdentifier == null) throw new InvalidOperationException("Caller must be defined to start monitoring");
+        if (_callerInAppIdentifier == null) throw new InvalidOperationException("Caller must be define_d to start monitoring");
         await _operationLock.WaitAsync();
         try
         {

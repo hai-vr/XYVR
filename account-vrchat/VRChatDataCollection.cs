@@ -1,9 +1,9 @@
 ﻿using Newtonsoft.Json;
-using XYVR.AccountAuthority.VRChat;
 using XYVR.API.VRChat;
 using XYVR.Core;
+using XYVR.Data.Collection;
 
-namespace XYVR.Data.Collection;
+namespace XYVR.AccountAuthority.VRChat;
 
 public class VRChatDataCollection(IndividualRepository repository, IResponseCollector responseCollectionStorage, ICredentialsStorage credentialsStorage) : IDataCollection
 {

@@ -1,9 +1,8 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using XYVR.AccountAuthority.Resonite;
 using XYVR.Core;
 
-namespace XYVR.Data.Collection.monitoring;
+namespace XYVR.AccountAuthority.Resonite;
 
 public class ResoniteLiveMonitoring : ILiveMonitoring, IDisposable
 {

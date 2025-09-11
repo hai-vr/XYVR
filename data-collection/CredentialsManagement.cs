@@ -1,10 +1,8 @@
 ﻿using System.Collections.Concurrent;
 using XYVR.AccountAuthority.Resonite;
 using XYVR.AccountAuthority.VRChat;
-using XYVR.API.VRChat;
 using XYVR.Core;
 using XYVR.Login;
-using XYVR.Data.Collection.monitoring;
 using XYVR.Scaffold;
 
 namespace XYVR.Data.Collection;
@@ -16,7 +14,8 @@ public class CredentialsManagement
     private readonly ConcurrentDictionary<string, InMemoryCredentialsStorage> _connectorGuidToCredentialsStorageState = new();
     private readonly ConcurrentDictionary<string, bool> _isPersistent = new();
     
-    private readonly ILoginService _temp_vrc_login_service;
+    private readonly ILoginService _vrcLoginService;
+    private readonly ResoniteLoginService _resoniteLoginService;
 
     public CredentialsManagement(SerializedCredentials serializedCredentials, Func<Task<string>> resoniteUidProviderFn, WorldNameCache worldNameCache)
     {
@@ -33,7 +32,8 @@ public class CredentialsManagement
             }
         }
 
-        _temp_vrc_login_service = new VRChatLoginService();
+        _vrcLoginService = new VRChatLoginService();
+        _resoniteLoginService = new ResoniteLoginService(_resoniteUidProviderFn);
     }
 
     public async Task<SerializedCredentials> SerializeCredentials()
@@ -94,22 +94,12 @@ public class CredentialsManagement
         // (there was an undesired side effect, maybe because it was overwriting the cookie?)
         var copyOfCredentialsStorage = new InMemoryCredentialsStorage(cookieOrToken);
         
-        return await _temp_vrc_login_service.IsLoggedInWithoutRequest(copyOfCredentialsStorage);
+        return await _vrcLoginService.IsLoggedInWithoutRequest(copyOfCredentialsStorage);
     }
 
     private async Task<bool> ResoniteCheckIsLoggedIn(string cookieOrToken)
     {
-        var communicator = new ResoniteCommunicator(
-            new DoNotStoreAnythingStorage(), false, await _resoniteUidProviderFn(),
-            new InMemoryCredentialsStorage(cookieOrToken)
-        );
-        
-        // TODO: implement resonite
-        // communicator.isloggedin?????????????????????????
-        await Task.CompletedTask;
-
-        // FIXME: this is completely wrong
-        return true;
+        return await _resoniteLoginService.IsLoggedInWithoutRequest(new InMemoryCredentialsStorage(cookieOrToken));
     }
 
     public async Task<ConnectionAttemptResult> TryConnect(Connector connector, ConnectionAttempt connectionAttempt)
@@ -132,41 +122,15 @@ public class CredentialsManagement
     {
         var guid = connectionAttempt.connector.guid;
         var credentialsStorage = _connectorGuidToCredentialsStorageState.GetOrAdd(guid, _ => new InMemoryCredentialsStorage(null));
-        return await _temp_vrc_login_service.Connect(credentialsStorage, guid, connectionAttempt);
+        return await _vrcLoginService.Connect(credentialsStorage, guid, connectionAttempt);
     }
 
     private async Task<ConnectionAttemptResult> ConnectToResonite(ConnectionAttempt connectionAttempt)
     {
         var guid = connectionAttempt.connector.guid;
-        
         var credentialsStorage = _connectorGuidToCredentialsStorageState.GetOrAdd(guid, _ => new InMemoryCredentialsStorage(null));
         
-        var communicator = new ResoniteCommunicator(
-            new DoNotStoreAnythingStorage(),
-            connectionAttempt.stayLoggedIn,
-            await _resoniteUidProviderFn(),
-            credentialsStorage
-        );
-        
-        Console.WriteLine("Connecting to Resonite...");
-        try
-        {
-            await communicator.ResoniteLogin(connectionAttempt.login__sensitive, connectionAttempt.password__sensitive);
-            
-            var callerAccount = await communicator.CallerAccount();
-            var connectorAccount = AsConnectorAccount(callerAccount);
-            
-            return new ConnectionAttemptResult
-            {
-                guid = guid,
-                type = ConnectionAttemptResultType.Success,
-                account = connectorAccount
-            };
-        }
-        catch (Exception _)
-        {
-            return new ConnectionAttemptResult { guid = guid, type = ConnectionAttemptResultType.Failure };
-        }
+        return await _resoniteLoginService.Connect(credentialsStorage, guid, connectionAttempt);
     }
     
     public async Task<ConnectionAttemptResult> TryLogout(Connector connector)
@@ -199,30 +163,12 @@ public class CredentialsManagement
 
     private async Task<ConnectionAttemptResult> VrcLogout(Connector connector, InMemoryCredentialsStorage credentialsStorage)
     {
-        return await _temp_vrc_login_service.Logout(credentialsStorage, connector.guid);
+        return await _vrcLoginService.Logout(credentialsStorage, connector.guid);
     }
 
     private async Task<ConnectionAttemptResult> ResoniteLogout(Connector connector, InMemoryCredentialsStorage credentialsStorage)
     {
-        // TODO: implement resonite
-        // throw new NotImplementedException();
-        return new ConnectionAttemptResult
-        {
-            guid = connector.guid,
-            account = connector.account,
-            type = ConnectionAttemptResultType.LoggedOut
-        };
-    }
-
-    private static ConnectorAccount AsConnectorAccount(NonIndexedAccount callerAccount)
-    {
-        return new ConnectorAccount
-        {
-            namedApp = callerAccount.namedApp,
-            qualifiedAppName = callerAccount.qualifiedAppName,
-            inAppIdentifier = callerAccount.inAppIdentifier,
-            inAppDisplayName = callerAccount.inAppDisplayName,
-        };
+        return await _resoniteLoginService.Logout(credentialsStorage, connector.guid);
     }
 
     public async Task<ILiveMonitoring?> GetConnectedLiveMonitoringOrNull(Connector connector, LiveStatusMonitoring monitoring)
