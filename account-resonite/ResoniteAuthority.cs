@@ -9,7 +9,13 @@ public class ResoniteAuthority : IAuthority
 
     public ResoniteAuthority(Func<Task<string>> resoniteUidProviderFn)
     {
+        // We need to call this as late as possible so that UID doesn't generate for users who never use Resonite.
         _resoniteUidProviderFn = resoniteUidProviderFn;
+    }
+
+    public ConnectorType GetConnectorType()
+    {
+        return ConnectorType.ResoniteAPI;
     }
 
     public Task<ILoginService> NewLoginService()

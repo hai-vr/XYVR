@@ -1,6 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using XYVR.AccountAuthority.Resonite;
-using XYVR.AccountAuthority.VRChat;
 using XYVR.Core;
 using XYVR.Login;
 using XYVR.Scaffold;
@@ -9,21 +7,13 @@ namespace XYVR.Data.Collection;
 
 public class CredentialsManagement
 {
-    private readonly Func<Task<string>> _resoniteUidProviderFn;
-    private readonly WorldNameCache _worldNameCache;
-    
     private readonly ConcurrentDictionary<string, InMemoryCredentialsStorage> _connectorGuidToCredentialsStorageState = new();
     private readonly ConcurrentDictionary<string, bool> _isPersistent = new();
     
-    private readonly ResoniteAuthority _resoniteAuthority;
-    private readonly VRChatAuthority _vrchatAuthority;
+    private readonly Dictionary<ConnectorType, IAuthority> _authorities = new();
 
-    public CredentialsManagement(SerializedCredentials serializedCredentials, Func<Task<string>> resoniteUidProviderFn, WorldNameCache worldNameCache)
+    public CredentialsManagement(SerializedCredentials serializedCredentials, List<IAuthority> inputAuthorities)
     {
-        // We need to call this as late as possible so that UID doesn't generate for users who never use Resonite.
-        _resoniteUidProviderFn = resoniteUidProviderFn;
-        _worldNameCache = worldNameCache;
-
         if (serializedCredentials.hasAnything)
         {
             foreach (var keyValuePair in serializedCredentials.guidToPayload)
@@ -33,18 +23,20 @@ public class CredentialsManagement
             }
         }
 
-        _resoniteAuthority = new ResoniteAuthority(_resoniteUidProviderFn);
-        _vrchatAuthority = new VRChatAuthority(_worldNameCache);
+        foreach (var authority in inputAuthorities)
+        {
+            _authorities[authority.GetConnectorType()] = authority;
+        }
     }
 
     private IAuthority AuthorityFor(Connector connector)
     {
-        return connector.type switch
+        if (_authorities.TryGetValue(connector.type, out var authority))
         {
-            ConnectorType.VRChatAPI => _vrchatAuthority,
-            ConnectorType.ResoniteAPI => _resoniteAuthority,
-            _ => throw new ArgumentOutOfRangeException($"Unknown connector type: {connector.type}")
-        };
+            return authority;
+        }
+
+        throw new ArgumentOutOfRangeException($"Unknown connector type: {connector.type}");
     }
 
     public async Task<SerializedCredentials> SerializeCredentials()

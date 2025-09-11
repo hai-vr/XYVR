@@ -12,6 +12,11 @@ public class VRChatAuthority : IAuthority
         _worldNameCache = worldNameCache;
     }
 
+    public ConnectorType GetConnectorType()
+    {
+        return ConnectorType.VRChatAPI;
+    }
+
     public Task<ILoginService> NewLoginService()
     {
         return Task.FromResult<ILoginService>(new VRChatLoginService());

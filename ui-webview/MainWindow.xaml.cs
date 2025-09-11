@@ -80,7 +80,7 @@ public partial class MainWindow : Window
         _openWorldNameCache = await Scaffolding.OpenWorldNameCache();
         IndividualRepository = new IndividualRepository(await Scaffolding.OpenRepository());
         ConnectorsMgt = new ConnectorManagement(await Scaffolding.OpenConnectors());
-        CredentialsMgt = new CredentialsManagement(await Scaffolding.OpenCredentials(), Scaffolding.ResoniteUIDLateInitializerFn(), _openWorldNameCache);
+        CredentialsMgt = new CredentialsManagement(await Scaffolding.OpenCredentials(), await IAuthorityScaffolder.FindAll());
         LiveStatusMonitoring = new LiveStatusMonitoring();
 
         _ = Task.Run(() => _liveBff.StartMonitoring()); // don't wait this;
