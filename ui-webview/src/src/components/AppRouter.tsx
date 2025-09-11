@@ -5,6 +5,7 @@ import DataCollectionPage from '../pages/DataCollectionPage.tsx'
 import './AppRouter.css'
 import {Toaster} from "react-hot-toast";
 import type {ReactAppPreferences} from "../types/APITypes.ts";
+import {type DebugFlags, DemonstrationMode} from "../types/DebugFlags.ts";
 
 // @ts-ignore
 const AppRouter = ({ appVersion }: { appVersion: string }) => {
@@ -14,7 +15,7 @@ const AppRouter = ({ appVersion }: { appVersion: string }) => {
     const [showNotes, setShowNotes] = useState(true)
     const [preferences, setPreferences] = useState<ReactAppPreferences>({isDark: true, showOnlyContacts: false})
     const [isPreferencesObtained, setIsPreferencesObtained] = useState(false)
-    const [debugMode, setDebugMode] = useState(false)
+    const [debugMode, setDebugMode] = useState<DebugFlags>({debugMode: false, demoMode: DemonstrationMode.Disabled})
 
     // Apply theme and persist
     useEffect(() => {
@@ -67,7 +68,23 @@ const AppRouter = ({ appVersion }: { appVersion: string }) => {
         const handleKeyDown = (event: any) => {
             if (event.ctrlKey && event.shiftKey && event.key === 'D') {
                 event.preventDefault()
-                setDebugMode(prevMode => !prevMode)
+                setDebugMode(prevMode => {
+                    let prevDemoMode = prevMode.demoMode;
+                    return ({
+                        ...prevMode,
+                        demoMode: prevDemoMode === DemonstrationMode.Everything ? DemonstrationMode.Disabled : DemonstrationMode.Everything
+                    });
+                })
+            }
+            if (event.ctrlKey && event.shiftKey && event.key === 'E') {
+                event.preventDefault()
+                setDebugMode(prevMode => {
+                    let prevDemoMode = prevMode.demoMode;
+                    return ({
+                        ...prevMode,
+                        demoMode: prevDemoMode === DemonstrationMode.EverythingButSessionNames ? DemonstrationMode.Disabled : DemonstrationMode.EverythingButSessionNames
+                    });
+                })
             }
         }
 
@@ -92,11 +109,11 @@ const AppRouter = ({ appVersion }: { appVersion: string }) => {
                                                                               setCompactMode={setCompactMode}
                                                                               showNotes={showNotes}
                                                                               setShowNotes={setShowNotes}
-                                                                              demoMode={debugMode}
+                                                                              debugMode={debugMode}
                         />}/>
                         <Route path="/data-collection"
                                element={<DataCollectionPage isDark={isDark} setIsDark={setIsDark}
-                                                            demoMode={debugMode}/>}/>
+                                                            debugMode={debugMode}/>}/>
                     </Routes>
                 </main>
                 <Toaster

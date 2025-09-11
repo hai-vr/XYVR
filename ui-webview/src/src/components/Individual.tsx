@@ -5,6 +5,7 @@ import {Clipboard, Phone} from "lucide-react";
 import {accountMatchesFromRegularTerms, anyAccountMatchesSpecialTerms, parseSearchField} from "../pages/searchUtils.ts";
 import {_D, _D2} from "../haiUtils.ts";
 import type {FrontAccount, FrontIndividual} from "../types/CoreTypes.ts";
+import {type DebugFlags, DemonstrationMode} from "../types/DebugFlags.ts";
 
 interface IndividualProps {
     individual: FrontIndividual;
@@ -19,7 +20,7 @@ interface IndividualProps {
     compactMode: boolean;
     searchField: string;
     showNotes: boolean;
-    demoMode: boolean;
+    debugMode: DebugFlags;
 }
 
 function Individual({
@@ -35,7 +36,7 @@ function Individual({
                         compactMode,
                         searchField,
                         showNotes,
-                        demoMode
+                        debugMode
                     }: IndividualProps) {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [filteredAccounts, setFilteredAccounts] = useState<FrontAccount[]>([]);
@@ -156,10 +157,10 @@ function Individual({
             {!compactMode && (<>
                 <div className="individual-header">
                     <div className="individual-avatar">
-                        {demoMode ? '?' : getFirstNonPunctuationChar(individual.displayName)}
+                        {debugMode.demoMode !== DemonstrationMode.Disabled ? '?' : getFirstNonPunctuationChar(individual.displayName)}
                     </div>
                     <h3 className="individual-name">
-                        {_D(individual.displayName, demoMode)}
+                        {_D(individual.displayName, debugMode)}
                     </h3>
                     {individual.isAnyContact && (
                         <span className="contact-badge">
@@ -184,7 +185,7 @@ function Individual({
                                     className="dropdown-item"
                                     onClick={(e) => handleMenuAction('confirmMerge', e)}
                                 >
-                                    Merge {_D(displayNameOfOtherBeingMergedOrUnd, demoMode)} into this
+                                    Merge {_D(displayNameOfOtherBeingMergedOrUnd, debugMode)} into this
                                 </button>)}
                                 {displayNameOfOtherBeingMergedOrUnd === undefined && <button
                                     className="dropdown-item"
@@ -220,7 +221,7 @@ function Individual({
                 {filteredAccounts && filteredAccounts.length > 0 ? (
                     <div className="accounts-grid">
                         {filteredAccounts.map((account) => (
-                            <Account key={account.guid} account={account} showAlias={showAlias} showNotes={showNotes} demoMode={demoMode} imposter={false} showSession={true} />
+                            <Account key={account.guid} account={account} showAlias={showAlias} showNotes={showNotes} debugMode={debugMode} imposter={false} showSession={true} />
                         ))}
                     </div>
                 ) : (
@@ -235,11 +236,11 @@ function Individual({
                     {vrChatLinks.map((url, linkIndex) => (
                         <div key={linkIndex} className="vrchat-link-item">
                             <a
-                                href={demoMode ? 'https://example.com' : url}
+                                href={debugMode.demoMode !== DemonstrationMode.Disabled ? 'https://example.com' : url}
                                 rel="noopener noreferrer"
                                 className="vrchat-link"
                             >
-                                {demoMode ? 'https://' + _D2(url.replace('http://', '').replace('https://', ''), demoMode, '/') : _D2(url, demoMode, '/')}
+                                {debugMode.demoMode !== DemonstrationMode.Disabled ? 'https://' + _D2(url.replace('http://', '').replace('https://', ''), debugMode, '/') : _D2(url, debugMode, '/')}
                             </a>
                             <button
                                 onClick={(e) => copyToClipboard(url, e)}
@@ -260,7 +261,7 @@ function Individual({
                             <div key={bioIndex} className="vrchat-bio-item">
                                 {bio.split('\n').map((line, lineIndex) => (
                                     <span key={lineIndex}>
-                                        {_D(line, demoMode)}
+                                        {_D(line, debugMode)}
                                         {lineIndex < bio.split('\n').length - 1 && <br/>}
                                     </span>
                                 ))}

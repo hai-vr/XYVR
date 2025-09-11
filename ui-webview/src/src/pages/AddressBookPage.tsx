@@ -26,6 +26,7 @@ import DarkModeToggleButton from "../components/DarkModeToggleButton.tsx";
 import {_D2} from "../haiUtils.ts";
 import {type FrontIndividual, OnlineStatus} from "../types/CoreTypes.ts";
 import type {FrontLiveSession, FrontLiveUserUpdate} from "../types/LiveUpdateTypes.ts";
+import {type DebugFlags, DemonstrationMode} from "../types/DebugFlags.ts";
 
 const sortIndividuals = (individuals: FrontIndividual[], unparsedSearchField: string) => {
     if (!unparsedSearchField) {
@@ -80,10 +81,10 @@ interface AddressBookPageProps {
     setCompactMode: (compactMode: boolean) => void;
     showNotes: boolean;
     setShowNotes: (showNotes: boolean) => void;
-    demoMode: boolean;
+    debugMode: DebugFlags;
 }
 
-function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyContacts, compactMode, setCompactMode, showNotes, setShowNotes, demoMode }: AddressBookPageProps) {
+function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyContacts, compactMode, setCompactMode, showNotes, setShowNotes, debugMode }: AddressBookPageProps) {
     const navigate = useNavigate()
     const searchInputRef = useRef<HTMLInputElement>(null)
     const [initialized, setInitialized] = useState(false);
@@ -378,7 +379,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                 <div className="search-container">
                     <input
                         ref={searchInputRef}
-                        type={demoMode ? 'password' : 'text'}
+                        type={debugMode.demoMode !== DemonstrationMode.Disabled ? 'password' : 'text'}
                         placeholder="Search by name or note..."
                         value={searchField}
                         onChange={(e) => setSearchField(e.target.value)}
@@ -402,7 +403,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                         <div className="no-results-icon"><Search size={48}/></div>
                         {!showHelp && <>
                             <div className="no-results-text">No individuals found matching
-                                "<strong>{_D2(debouncedSearchField, demoMode)}</strong>"
+                                "<strong>{_D2(debouncedSearchField, debugMode)}</strong>"
                             </div>
                         </>}
                         <div className="no-results-hint">
@@ -457,7 +458,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                             compactMode={compactMode}
                             searchField={debouncedSearchField}
                             showNotes={showNotes}
-                            demoMode={demoMode}
+                            debugMode={debugMode}
                         />
                     ))}
                 </div>

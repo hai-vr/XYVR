@@ -9,17 +9,18 @@ import {
     OnlineStatus,
     type OnlineStatusType
 } from "../types/CoreTypes.ts";
+import {type DebugFlags, DemonstrationMode} from "../types/DebugFlags.ts";
 
 interface AccountProps {
     account: FrontAccount;
     imposter: boolean;
     showAlias: boolean;
     showNotes: boolean;
-    demoMode: boolean;
+    debugMode: DebugFlags;
     showSession?: boolean;
 }
 
-const Account = ({ account, imposter, showAlias, showNotes, demoMode, showSession }: AccountProps) => {
+const Account = ({ account, imposter, showAlias, showNotes, debugMode, showSession }: AccountProps) => {
     const hasNote = account.isAnyCallerNote;
 
     const copyInAppIdentifier = async () => {
@@ -124,22 +125,22 @@ const Account = ({ account, imposter, showAlias, showNotes, demoMode, showSessio
                         {getAppIcon(account.namedApp)}
                     </div>
                     <div>
-                        <div className="account-display-name" title={!imposter && account.allDisplayNames?.map(it => _D(it, demoMode)).join('\n') || ``}>
-                            {_D(account.inAppDisplayName, demoMode)} {getOnlineStatusEmoji(account.onlineStatus || OnlineStatus.Offline)} {getOnlineStatusText(account.onlineStatus || OnlineStatus.Offline)}
+                        <div className="account-display-name" title={!imposter && account.allDisplayNames?.map(it => _D(it, debugMode)).join('\n') || ``}>
+                            {_D(account.inAppDisplayName, debugMode)} {getOnlineStatusEmoji(account.onlineStatus || OnlineStatus.Offline)} {getOnlineStatusText(account.onlineStatus || OnlineStatus.Offline)}
                         </div>
                         {!imposter && showAlias && account.allDisplayNames && account.allDisplayNames
                             .slice().reverse()
                             .filter((displayName: string) => displayName !== account.inAppDisplayName)
                             .map((displayName: string, index: number) => (
                             <div key={index} className="account-display-name">
-                                {_D(displayName, demoMode)}
+                                {_D(displayName, debugMode)}
                             </div>
                         ))}
                         <div className="account-app-name">
-                            {!account.customStatus && getAppDisplayName(account)} {_D2(account.customStatus || '', demoMode)}
+                            {!account.customStatus && getAppDisplayName(account)} {_D2(account.customStatus || '', debugMode)}
                         </div>
                         {showSession && worldName && <div className="account-app-name">
-                            <i>{_D2(worldName, demoMode)}</i>
+                            <i>{_D2(worldName, debugMode, undefined, DemonstrationMode.EverythingButSessionNames)}</i>
                         </div>}
                     </div>
                 </div>
@@ -172,7 +173,7 @@ const Account = ({ account, imposter, showAlias, showNotes, demoMode, showSessio
                     <button
                         onClick={copyInAppIdentifier}
                         className="icon-button"
-                        title={`Copy ID: ${_D(account.inAppIdentifier, demoMode)}`}
+                        title={`Copy ID: ${_D(account.inAppIdentifier, debugMode)}`}
                     >
                         <Clipboard size={16} />
                     </button>
@@ -189,7 +190,7 @@ const Account = ({ account, imposter, showAlias, showNotes, demoMode, showSessio
             {showNotes && account.callers && account.callers.filter(caller => caller.note).map((caller, index) => (
                 <div key={index} className="note-container">
                     <div className="note-text">
-                        {caller.note!.startsWith('mt ') ? (_D2('Met through ' + caller.note!.substring(3), demoMode)) : _D2(caller.note!, demoMode)}
+                        {caller.note!.startsWith('mt ') ? (_D2('Met through ' + caller.note!.substring(3), debugMode)) : _D2(caller.note!, debugMode)}
                     </div>
                 </div>
             ))}

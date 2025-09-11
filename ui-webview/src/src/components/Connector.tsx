@@ -5,6 +5,7 @@ import '../InputFields.css';
 import {TriangleAlert, X} from "lucide-react";
 import {type FrontAccount, NamedApp} from "../types/CoreTypes.ts";
 import type {FrontConnector, FrontConnectorAccount} from "../types/ConnectorTypes.ts";
+import {type DebugFlags, DemonstrationMode, DISABLED_DEBUG_FLAGS} from "../types/DebugFlags.ts";
 
 interface DeleteState {
     confirming: boolean;
@@ -16,10 +17,10 @@ interface ConnectorProps {
     onDeleteClick: (guid: string) => void;
     deleteState?: DeleteState;
     onConnectorUpdated: () => void;
-    demoMode: boolean;
+    debugMode: DebugFlags;
 }
 
-const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated, demoMode } : ConnectorProps) => {
+const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated, debugMode } : ConnectorProps) => {
     const [login, setLogin] = useState('');
     const [password, setPassword] = useState('');
     const [twoFactorCode, setTwoFactorCode] = useState('');
@@ -90,10 +91,10 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated, 
     return (
         <div className="connector-card">
             {connector.account && (
-                <Account account={connector.account as FrontAccount} demoMode={demoMode} imposter={false} showAlias={false} showNotes={false} />
+                <Account account={connector.account as FrontAccount} debugMode={debugMode} imposter={false} showAlias={false} showNotes={false} />
             )}
             {!connector.account && (
-                <Account account={tempAccount as FrontAccount} demoMode={false} imposter={true} showAlias={false} showNotes={false} />
+                <Account account={tempAccount as FrontAccount} debugMode={DISABLED_DEBUG_FLAGS} imposter={true} showAlias={false} showNotes={false} />
             )}
 
             {!connector.isLoggedIn && (
@@ -102,7 +103,7 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated, 
                         <>
                             <h3 className="input-title">Connect to your {virtualApp} account</h3>
                             <input
-                                type={demoMode && 'password' || 'text'}
+                                type={debugMode.demoMode !== DemonstrationMode.Disabled && 'password' || 'text'}
                                 placeholder={connector.type === 'VRChatAPI' && "Username/Email" || "Username"}
                                 value={login}
                                 onChange={(e) => setLogin(e.target.value)}
@@ -153,7 +154,7 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated, 
                         <>
                             <h3 className="input-title">Enter your {virtualApp} 2FA code ({isTwoFactorEmail && `Email` || `Authenticator`})</h3>
                             <input
-                                type={demoMode && 'password' || 'text'}
+                                type={debugMode.demoMode !== DemonstrationMode.Disabled && 'password' || 'text'}
                                 placeholder={`2FA Code (${isTwoFactorEmail ? 'Email' : 'Authenticator'})`}
                                 value={twoFactorCode}
                                 onChange={(e) => setTwoFactorCode(e.target.value)}

@@ -5,11 +5,12 @@ import '../Header.css'
 import Connector from "../components/Connector.tsx";
 import DarkModeToggleButton from "../components/DarkModeToggleButton.tsx";
 import type {FrontConnector} from "../types/ConnectorTypes.ts";
+import type {DebugFlags} from "../types/DebugFlags.ts";
 
 interface DataCollectionPageProps {
     isDark: boolean;
     setIsDark: (isDark: boolean) => void;
-    demoMode: boolean;
+    debugMode: DebugFlags;
 }
 
 interface DeleteStateType {
@@ -17,7 +18,7 @@ interface DeleteStateType {
     firstClick: number;
 }
 
-function DataCollectionPage({ isDark, setIsDark, demoMode }: DataCollectionPageProps) {
+function DataCollectionPage({ isDark, setIsDark, debugMode }: DataCollectionPageProps) {
     const navigate = useNavigate()
     const [initialized, setInitialized] = useState(false);
     const [connectors, setConnectors] = useState<FrontConnector[]>([]);
@@ -126,7 +127,7 @@ function DataCollectionPage({ isDark, setIsDark, demoMode }: DataCollectionPageP
                                     onDeleteClick={handleDeleteClick}
                                     deleteState={deleteStates[connector.guid]}
                                     onConnectorUpdated={refreshConnectors}
-                                    demoMode={demoMode}
+                                    debugMode={debugMode}
                                 />
                             ))}
                         </div>
