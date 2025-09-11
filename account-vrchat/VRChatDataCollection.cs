@@ -5,7 +5,7 @@ using XYVR.Core;
 
 namespace XYVR.Data.Collection;
 
-public class VRChatDataCollection(IndividualRepository repository, ResponseCollectionStorage responseCollectionStorage, ICredentialsStorage credentialsStorage) : IDataCollection
+public class VRChatDataCollection(IndividualRepository repository, IResponseCollector responseCollectionStorage, ICredentialsStorage credentialsStorage) : IDataCollection
 {
     private readonly VRChatCommunicator _vrChatCommunicator = new(
         responseCollectionStorage,

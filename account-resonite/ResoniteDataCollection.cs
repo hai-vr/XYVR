@@ -5,7 +5,7 @@ using XYVR.Core;
 
 namespace XYVR.Data.Collection;
 
-public class ResoniteDataCollection(IndividualRepository repository, ResponseCollectionStorage responseCollectionStorage, string resoniteUid, ICredentialsStorage credentialsStorage) : IDataCollection
+public class ResoniteDataCollection(IndividualRepository repository, IResponseCollector responseCollectionStorage, string resoniteUid, ICredentialsStorage credentialsStorage) : IDataCollection
 {
     private readonly ResoniteCommunicator _resoniteCommunicator = new(responseCollectionStorage, false, resoniteUid, credentialsStorage);
     
