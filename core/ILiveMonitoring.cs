@@ -1,4 +1,4 @@
-namespace XYVR.Data.Collection.monitoring;
+namespace XYVR.Core;
 
 public interface ILiveMonitoring
 {
