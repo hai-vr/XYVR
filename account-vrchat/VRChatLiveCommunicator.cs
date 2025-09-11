@@ -212,7 +212,7 @@ public class VRChatLiveCommunicator
         else if (type == "friend-location")
         {
             // Order matters. "private" check comes before checking for location.
-            if (content.worldId == "private")
+            if (content.worldId == "private" || content.location == "private")
             {
                 return new LiveUserSessionState
                 {
