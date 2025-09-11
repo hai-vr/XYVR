@@ -61,4 +61,28 @@ public class VRChatLoginService : ILoginService
             type = ConnectionAttemptResultType.Failure
         };
     }
+
+    public async Task<ConnectionAttemptResult> Logout(Connector connector, ICredentialsStorage credentialsStorage)
+    {
+        var vrcApi = new VRChatAPI(new DoNotStoreAnythingStorage());
+        var userinput_cookies__sensitive = await credentialsStorage.RequireCookieOrToken();
+        if (userinput_cookies__sensitive != null)
+        {
+            vrcApi.ProvideCookies(userinput_cookies__sensitive);
+        }
+        
+        var logoutResponse = await vrcApi.Logout();
+        switch (logoutResponse)
+        {
+            case LogoutResponseStatus.Unresolved:
+            case LogoutResponseStatus.OutsideProtocol:
+                return new ConnectionAttemptResult { guid = connector.guid, type = ConnectionAttemptResultType.Failure };
+            case LogoutResponseStatus.Success:
+            case LogoutResponseStatus.Unauthorized:
+            case LogoutResponseStatus.NotLoggedIn:
+                return new ConnectionAttemptResult { guid = connector.guid, type = ConnectionAttemptResultType.LoggedOut };
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+    }
 }

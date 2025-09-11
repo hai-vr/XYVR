@@ -184,43 +184,28 @@ public class CredentialsManagement
             return new ConnectionAttemptResult { guid = connector.guid, type = ConnectionAttemptResultType.LoggedOut };
         }
 
-        return connector.type switch
+        var result = connector.type switch
         {
             ConnectorType.VRChatAPI => await VrcLogout(connector, credentialsStorage),
             ConnectorType.ResoniteAPI => await ResoniteLogout(connector, credentialsStorage),
             ConnectorType.Offline => throw new ArgumentException("Cannot connect to offline connector"),
             _ => throw new ArgumentOutOfRangeException()
         };
+        if (result.type == ConnectionAttemptResultType.LoggedOut)
+        {
+            _connectorGuidToCredentialsStorageState.Remove(connector.guid, out _);
+        }
+        
+        return result;
     }
 
     private async Task<ConnectionAttemptResult> VrcLogout(Connector connector, InMemoryCredentialsStorage credentialsStorage)
     {
-        var vrcApi = new VRChatAPI(new DoNotStoreAnythingStorage());
-        var userinput_cookies__sensitive = await credentialsStorage.RequireCookieOrToken();
-        if (userinput_cookies__sensitive != null)
-        {
-            vrcApi.ProvideCookies(userinput_cookies__sensitive);
-        }
-        
-        var logoutResponse = await vrcApi.Logout();
-        switch (logoutResponse)
-        {
-            case LogoutResponseStatus.Unresolved:
-            case LogoutResponseStatus.OutsideProtocol:
-                return new ConnectionAttemptResult { guid = connector.guid, type = ConnectionAttemptResultType.Failure };
-            case LogoutResponseStatus.Success:
-            case LogoutResponseStatus.Unauthorized:
-            case LogoutResponseStatus.NotLoggedIn:
-                _connectorGuidToCredentialsStorageState.Remove(connector.guid, out _);
-                return new ConnectionAttemptResult { guid = connector.guid, type = ConnectionAttemptResultType.LoggedOut };
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
+        return await _temp_vrc_login_service.Logout(connector, credentialsStorage);
     }
 
     private async Task<ConnectionAttemptResult> ResoniteLogout(Connector connector, InMemoryCredentialsStorage credentialsStorage)
     {
-        _connectorGuidToCredentialsStorageState.Remove(connector.guid, out _);
         // TODO: implement resonite
         // throw new NotImplementedException();
         return new ConnectionAttemptResult
