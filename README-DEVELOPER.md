@@ -115,8 +115,6 @@ Core projects:
 
 External system projects:
 
-- **account-resonite** communicates with **api-resonite** and returns core objects.
-- **account-vrchat** communicates with **api-vrchat** and returns core objects.
-- **api-resonite** makes HTTP requests (*and in the future, will receive SignalR*) with the [Resonite API](https://wiki.resonite.com/API).
-- **api-vrchat** makes HTTP requests to the [VRChat API](https://vrchat.community).
+- **account-resonite** uses HTTP and SignalR to communicate with the [Resonite API](https://wiki.resonite.com/API), and returns core objects.
+- **account-vrchat** uses HTTP and WebSockets to communicate with the [VRChat API](https://vrchat.community), and returns core objects.
 - **audit-urls** contains all the URLs that are used to perform requests to external systems (currently: the Resonite API and the VRChat API).
