@@ -8,9 +8,7 @@ namespace XYVR.Data.Collection;
 public class ResoniteDataCollection(IndividualRepository repository, IResponseCollector responseCollectionStorage, string resoniteUid, ICredentialsStorage credentialsStorage) : IDataCollection
 {
     private readonly ResoniteCommunicator _resoniteCommunicator = new(responseCollectionStorage, false, resoniteUid, credentialsStorage);
-    
-    public ResoniteCommunicator Temp__GetCommunicator() => _resoniteCommunicator;
-    
+
     public async Task<List<NonIndexedAccount>> RebuildFromDataCollectionStorage(List<ResponseCollectionTrail> trails)
     {
         await Task.CompletedTask;

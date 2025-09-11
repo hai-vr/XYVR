@@ -12,7 +12,6 @@ public enum Mode
     RebuildFromStorage,
     MigrateAndSave,
     Incremental,
-    SignalRTesting,
     Test
 }
 
@@ -61,39 +60,6 @@ internal class Program
                 }
                 await live.StopMonitoring();
 
-                break;
-            }
-            case Mode.SignalRTesting:
-            {
-                var firstResoniteConnector = connectors.Connectors.First(connector => connector.type == ConnectorType.ResoniteAPI);
-                var resoniteDataCollector = await credentials.GetConnectedDataCollectionOrNull(firstResoniteConnector, repository, storage) as ResoniteDataCollection;
-
-                var memoizerUserIdToUsername = new Dictionary<string, NonIndexedAccount?>();
-                
-                var srClient = new ResoniteSignalRClient();
-                srClient.OnStatusUpdate += async status =>
-                {
-                    if (!memoizerUserIdToUsername.TryGetValue(status.userId, out var account))
-                    {
-                        account = await resoniteDataCollector.Temp__GetCommunicator().GetUser(status.userId, false);
-                        memoizerUserIdToUsername[status.userId] = account;
-                    }
-
-                    if (account != null)
-                    {
-                        Console.WriteLine($"{account.inAppDisplayName} is {status.onlineStatus} (in session {status.userSessionId})");
-                    }
-                };
-                
-                var extractCredentials__sensitive = credentials.Temp__ExtractCredentials__sensitive(firstResoniteConnector.guid);
-                var resAuth__sensitive = JsonConvert.DeserializeObject<ResAuthenticationStorage>(await extractCredentials__sensitive.RequireCookieOrToken())!;
-                await srClient.StartAsync(resAuth__sensitive);
-                
-                await Task.Delay(TimeSpan.FromSeconds(1));
-                await srClient.SubmitRequestStatus();
-                await Task.Delay(TimeSpan.FromMinutes(100));
-                
-                await srClient.StopAsync();
                 break;
             }
             case Mode.MigrateAndSave:
