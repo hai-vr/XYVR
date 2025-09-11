@@ -8,7 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\development-scaffold\development-scaffold.csproj" />
+      <ProjectReference Include="..\core\core.csproj" />
     </ItemGroup>
 
 </Project>

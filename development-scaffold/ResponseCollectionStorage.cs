@@ -1,7 +1,7 @@
 ﻿using XYVR.Core;
-using XYVR.Scaffold;
+using XYVR.Data.Collection;
 
-namespace XYVR.Data.Collection;
+namespace XYVR.Scaffold;
 
 // Caution: Can be called by different threads.
 public class ResponseCollectionStorage : IResponseCollector

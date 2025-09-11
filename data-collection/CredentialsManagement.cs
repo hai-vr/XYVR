@@ -1,7 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using XYVR.Core;
 using XYVR.Login;
-using XYVR.Scaffold;
 
 namespace XYVR.Data.Collection;
 
@@ -62,7 +61,7 @@ public class CredentialsManagement
         };
     }
 
-    public async Task<IDataCollection?> GetConnectedDataCollectionOrNull(Connector connector, IndividualRepository repository, ResponseCollectionStorage storage)
+    public async Task<IDataCollection?> GetConnectedDataCollectionOrNull(Connector connector, IndividualRepository repository, IResponseCollector storage)
     {
         if (!_connectorGuidToCredentialsStorageState.TryGetValue(connector.guid, out var credentialsStorage)) return null;
 
