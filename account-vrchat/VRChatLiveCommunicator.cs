@@ -168,16 +168,17 @@ public class VRChatLiveCommunicator
                 var content = JsonConvert.DeserializeObject<VRChatWebsocketContentContainingUser>(rootObj["content"].Value<string>())!;
 
                 // FIXME: This is a task???
+                OnlineStatus? onlineStatus = type is "user-update" ? null : ParseStatus(type, content.location, content.user.platform, content.user.status);
                 OnLiveUpdateReceived(new LiveUserUpdate
                 {
                     trigger = $"WS-{type}",
                     namedApp = NamedApp.VRChat,
                     qualifiedAppName = VRChatCommunicator.VRChatQualifiedAppName,
                     inAppIdentifier = content.userId,
-                    onlineStatus = type is "user-update" ? null : ParseStatus(type, content.location, content.user.platform, content.user.status),
+                    onlineStatus = onlineStatus,
                     callerInAppIdentifier = _callerInAppIdentifier,
                     customStatus = content.user.statusDescription,
-                    mainSession = FigureOutSessionStateOrNull(type, content)
+                    mainSession = FigureOutSessionStateOrNull(type, onlineStatus, content)
                 });
             }
             else
@@ -192,50 +193,67 @@ public class VRChatLiveCommunicator
         }
     }
 
-    private LiveUserSessionState? FigureOutSessionStateOrNull(string type, VRChatWebsocketContentContainingUser content)
+    private LiveUserSessionState? FigureOutSessionStateOrNull(string type, OnlineStatus? onlineStatus, VRChatWebsocketContentContainingUser content)
     {
-        if (type != "friend-location") return null;
-        
-        // Order matters. "private" check comes first.
-        if (content.worldId == "private")
+        // Order matters. This checks acts on non-friend-location types.
+        if (onlineStatus == OnlineStatus.Offline)
         {
             return new LiveUserSessionState
             {
-                knowledge = LiveUserSessionKnowledge.PrivateWorld,
+                knowledge = LiveUserSessionKnowledge.KnownButNoData,
                 knownSession = null
             };
         }
-
-        var location = content.location;
-        
-        if (location == "traveling")
+        else if (type == "friend-location")
         {
-            return new LiveUserSessionState
+            // Order matters. "private" check comes before checking for location.
+            if (content.worldId == "private")
             {
-                knowledge = LiveUserSessionKnowledge.VRCTraveling,
-                knownSession = new LiveUserKnownSession
+                return new LiveUserSessionState
                 {
-                    inAppSessionIdentifier = content.travelingToLocation,
-                    inAppHost = null,
-                    inAppSessionName = null,
-                    inAppVirtualSpaceName = null,
-                }
-            };
-        }
-
-        var virtualSpaceName = GetVirtualSpaceNameOrQueueFetchIfApplicable(location);
-
-        return new LiveUserSessionState
-        {
-            knowledge = LiveUserSessionKnowledge.Known,
-            knownSession = new LiveUserKnownSession
-            {
-                inAppSessionIdentifier = location,
-                inAppHost = null,
-                inAppSessionName = null,
-                inAppVirtualSpaceName = virtualSpaceName,
+                    knowledge = LiveUserSessionKnowledge.PrivateWorld,
+                    knownSession = null
+                };
             }
-        };
+            else
+            {
+                var location = content.location;
+                if (location == "traveling")
+                {
+                    return new LiveUserSessionState
+                    {
+                        knowledge = LiveUserSessionKnowledge.VRCTraveling,
+                        knownSession = new LiveUserKnownSession
+                        {
+                            inAppSessionIdentifier = content.travelingToLocation,
+                            inAppHost = null,
+                            inAppSessionName = null,
+                            inAppVirtualSpaceName = null,
+                        }
+                    };
+                }
+                else
+                {
+                    var virtualSpaceName = GetVirtualSpaceNameOrQueueFetchIfApplicable(location);
+
+                    return new LiveUserSessionState
+                    {
+                        knowledge = LiveUserSessionKnowledge.Known,
+                        knownSession = new LiveUserKnownSession
+                        {
+                            inAppSessionIdentifier = location,
+                            inAppHost = null,
+                            inAppSessionName = null,
+                            inAppVirtualSpaceName = virtualSpaceName,
+                        }
+                    };
+                }
+            }
+        }
+        else
+        {
+            return null;
+        }
     }
 
     private string? GetVirtualSpaceNameOrQueueFetchIfApplicable(string location)
