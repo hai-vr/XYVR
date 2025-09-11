@@ -2,6 +2,7 @@
 
 namespace XYVR.Core;
 
+/// Authorities may be used for different connectors (different accounts), so the objects shouldn't be reused across connectors.
 public interface IAuthority
 {
     public ConnectorType GetConnectorType(); 

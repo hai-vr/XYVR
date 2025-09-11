@@ -34,6 +34,8 @@ public class VRChatAuthority : IAuthority
 
     public async Task<NonIndexedAccount> ResolveCallerAccount(ICredentialsStorage credentialsStorage)
     {
+        // Reminder: The same authority may be used for multiple connectors (different caller accounts).
+        
         var res = new VRChatCommunicator(new DoNotStoreAnythingStorage(), credentialsStorage);
         return await res.CallerAccount();
     }

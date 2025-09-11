@@ -35,6 +35,8 @@ public class ResoniteAuthority : IAuthority
 
     public async Task<NonIndexedAccount> ResolveCallerAccount(ICredentialsStorage credentialsStorage)
     {
+        // Reminder: The same authority may be used for multiple connectors (different caller accounts).
+        
         var res = new ResoniteCommunicator(
             new DoNotStoreAnythingStorage(), false, await _resoniteUidProviderFn(),
             credentialsStorage
