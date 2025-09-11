@@ -9,16 +9,18 @@ public class VRChatLiveMonitoring : ILiveMonitoring
 {
     private readonly ICredentialsStorage _credentialsStorage;
     private readonly LiveStatusMonitoring _monitoring;
+    private readonly WorldNameCache _worldNameCache;
     private readonly SemaphoreSlim _operationLock = new(1, 1);
 
     private string _callerInAppIdentifier;
     private bool _isConnected;
     private VRChatLiveCommunicator _liveComms;
 
-    public VRChatLiveMonitoring(ICredentialsStorage credentialsStorage, LiveStatusMonitoring monitoring)
+    public VRChatLiveMonitoring(ICredentialsStorage credentialsStorage, LiveStatusMonitoring monitoring, WorldNameCache worldNameCache)
     {
         _credentialsStorage = credentialsStorage;
         _monitoring = monitoring;
+        _worldNameCache = worldNameCache;
     }
 
     public async Task StartMonitoring()
@@ -34,29 +36,27 @@ public class VRChatLiveMonitoring : ILiveMonitoring
                 Converters = { new StringEnumConverter() }
             };
             
-            _liveComms = new VRChatLiveCommunicator(_credentialsStorage, _callerInAppIdentifier, new DoNotStoreAnythingStorage());
+            _liveComms = new VRChatLiveCommunicator(_credentialsStorage, _callerInAppIdentifier, new DoNotStoreAnythingStorage(), _worldNameCache);
             _liveComms.OnLiveUpdateReceived += async update =>
             {
                 Console.WriteLine($"OnLiveUpdateReceived: {JsonConvert.SerializeObject(update, serializer)}");
                 await _monitoring.MergeUser(update);
             };
-            _liveComms.OnWorldResolved += async resolution =>
+            _liveComms.OnWorldCached += async world =>
             {
-                Console.WriteLine($"OnWorldResolved: {JsonConvert.SerializeObject(resolution, serializer)}");
-                if (resolution.wasFound)
+                Console.WriteLine($"OnWorldCached: {JsonConvert.SerializeObject(world, serializer)}");
+                
+                var vrcLiveUpdates = _monitoring.GetAll(NamedApp.VRChat)
+                    // FIXME: We need the world identifier here
+                    .Where(update => update.mainSession?.knownSession?.inAppSessionIdentifier.StartsWith(world.worldId) == true)
+                    .ToList();
+                foreach (var liveUpdate in vrcLiveUpdates)
                 {
-                    var vrcLiveUpdates = _monitoring.GetAll(NamedApp.VRChat)
-                        // FIXME: We need the world identifier here
-                        .Where(update => update.mainSession?.knownSession?.inAppSessionIdentifier.StartsWith(resolution.worldId) == true)
-                        .ToList();
-                    foreach (var liveUpdate in vrcLiveUpdates)
-                    {
-                        // Re-emit events
-                        // TODO: Don't mutate the original objects..?
-                        liveUpdate.trigger = "Queue-WorldResolved";
-                        liveUpdate.mainSession!.knownSession!.inAppVirtualSpaceName = resolution.world!.name;
-                        await _monitoring.MergeUser(liveUpdate);
-                    }
+                    // Re-emit events
+                    // TODO: Don't mutate the original objects..?
+                    liveUpdate.trigger = "Queue-WorldResolved";
+                    liveUpdate.mainSession!.knownSession!.inAppVirtualSpaceName = world.name;
+                    await _monitoring.MergeUser(liveUpdate);
                 }
             };
             await _liveComms.Connect();

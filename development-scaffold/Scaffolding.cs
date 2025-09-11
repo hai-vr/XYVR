@@ -22,6 +22,7 @@ public static class Scaffolding
         internal const string ResponseCollectionFileName = "response-collection.jsonl";
         internal const string ResoniteUidFileName = "resonite.uid";
         internal const string ReactAppJsonFileName = "ui-preferences.json";
+        internal const string WorldNameCacheFileName = ".cache_world-names.json";
     }
     
     private static string IndividualsJsonFilePath => Path.Combine(SavePath(), ScaffoldingFileNames.IndividualsJsonFileName);
@@ -30,6 +31,7 @@ public static class Scaffolding
     private static string ResponseCollectionFilePath => Path.Combine(SavePath(), ScaffoldingFileNames.ResponseCollectionFileName);
     private static string ResoniteUidFilePath => Path.Combine(SavePath(), ScaffoldingFileNames.ResoniteUidFileName);
     private static string ReactAppJsonFilePath => Path.Combine(SavePath(), ScaffoldingFileNames.ReactAppJsonFileName);
+    private static string WorldNameCacheJsonFilePath => Path.Combine(SavePath(), ScaffoldingFileNames.WorldNameCacheFileName);
     
     private static readonly Encoding Encoding = Encoding.UTF8;
     private static readonly JsonSerializerSettings Serializer = new()
@@ -124,6 +126,15 @@ public static class Scaffolding
     
     public static async Task<ReactAppPreferences> OpenReactAppPreferences() => await OpenIfExists<ReactAppPreferences>(ReactAppJsonFilePath, () => new ReactAppPreferences());
     public static async Task SaveReactAppPreferences(ReactAppPreferences serialized) => await SaveTo(serialized, ReactAppJsonFilePath);
+    
+    public static async Task<WorldNameCache> OpenWorldNameCache()
+    {
+        var result = await OpenIfExists<WorldNameCache>(WorldNameCacheJsonFilePath, () => new WorldNameCache());
+        result.PreProcess();
+        return result;
+    }
+
+    public static async Task SaveWorldNameCache(WorldNameCache serialized) => await SaveTo(serialized, WorldNameCacheJsonFilePath);
 
     public static async Task<List<ResponseCollectionTrail>> RebuildTrail()
     {

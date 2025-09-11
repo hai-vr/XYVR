@@ -33,7 +33,7 @@ internal class Program
 
         var repository = new IndividualRepository(await Scaffolding.OpenRepository());
         var connectors = new ConnectorManagement(await Scaffolding.OpenConnectors());
-        var credentials = new CredentialsManagement(await Scaffolding.OpenCredentials(), Scaffolding.ResoniteUIDLateInitializerFn());
+        var credentials = new CredentialsManagement(await Scaffolding.OpenCredentials(), Scaffolding.ResoniteUIDLateInitializerFn(), await Scaffolding.OpenWorldNameCache());
         var liveStatusMonitoring = new LiveStatusMonitoring();
 
         var dataCollection = new CompoundDataCollection(repository, (await Task.WhenAll(connectors.Connectors

@@ -11,13 +11,15 @@ namespace XYVR.Data.Collection;
 public class CredentialsManagement
 {
     private readonly Func<Task<string>> _resoniteUidProviderFn;
+    private readonly WorldNameCache _worldNameCache;
     private readonly ConcurrentDictionary<string, InMemoryCredentialsStorage> _connectorGuidToCredentialsStorageState = new();
     private readonly ConcurrentDictionary<string, bool> _isPersistent = new();
 
-    public CredentialsManagement(SerializedCredentials serializedCredentials, Func<Task<string>> resoniteUidProviderFn)
+    public CredentialsManagement(SerializedCredentials serializedCredentials, Func<Task<string>> resoniteUidProviderFn, WorldNameCache worldNameCache)
     {
         // We need to call this as late as possible so that UID doesn't generate for users who never use Resonite.
         _resoniteUidProviderFn = resoniteUidProviderFn;
+        _worldNameCache = worldNameCache;
 
         if (serializedCredentials.hasAnything)
         {
@@ -323,7 +325,7 @@ public class CredentialsManagement
             }
             case ConnectorType.VRChatAPI:
             {
-                ILiveMonitoring liveMonitoring = new VRChatLiveMonitoring(credentialsStorage, monitoring);
+                ILiveMonitoring liveMonitoring = new VRChatLiveMonitoring(credentialsStorage, monitoring, _worldNameCache);
                 var res = new VRChatCommunicator(new DoNotStoreAnythingStorage(), credentialsStorage);
                 var caller = await res.CallerAccount();
 

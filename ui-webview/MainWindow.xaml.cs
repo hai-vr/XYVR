@@ -17,6 +17,7 @@ public partial class MainWindow : Window
     private readonly PreferencesBFF _preferencesBff;
     private readonly LiveBFF _liveBff;
     private readonly JsonSerializerSettings _serializer;
+    private WorldNameCache? _openWorldNameCache;
 
     public App AppHandle { get; private set; }
     public IndividualRepository IndividualRepository { get; private set; }
@@ -35,16 +36,20 @@ public partial class MainWindow : Window
 
         Title = XYVRValues.ApplicationTitle;
         
-        Loaded += (sender, evt) => _ = MainWindow_Loaded(sender, evt);
-        Closed += OnClosed;
+        Loaded += (sender, evt) => _ = MWL(sender, evt);
+        Closed += async (sender, evt) => await OnClosed(sender, evt);
     }
 
-    private void OnClosed(object? sender, EventArgs e)
+    private async Task OnClosed(object? sender, EventArgs e)
     {
         try
         {
             _preferencesBff.OnClosed();
             _liveBff.OnClosed();
+            if (_openWorldNameCache != null)
+            {
+                await Scaffolding.SaveWorldNameCache(_openWorldNameCache);
+            }
         }
         catch (Exception exception)
         {
@@ -53,15 +58,29 @@ public partial class MainWindow : Window
         }
     }
 
-    private async Task MainWindow_Loaded(object sender, RoutedEventArgs evt)
+    private async Task MWL(object sender, RoutedEventArgs evt)
+    {
+        try
+        {
+            await MainWindow_Loaded();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
+    private async Task MainWindow_Loaded()
     {
         Console.WriteLine("WebView: Main window loaded.");
         
         AppHandle = (App)Application.Current;
-        
+
+        _openWorldNameCache = await Scaffolding.OpenWorldNameCache();
         IndividualRepository = new IndividualRepository(await Scaffolding.OpenRepository());
         ConnectorsMgt = new ConnectorManagement(await Scaffolding.OpenConnectors());
-        CredentialsMgt = new CredentialsManagement(await Scaffolding.OpenCredentials(), Scaffolding.ResoniteUIDLateInitializerFn());
+        CredentialsMgt = new CredentialsManagement(await Scaffolding.OpenCredentials(), Scaffolding.ResoniteUIDLateInitializerFn(), _openWorldNameCache);
         LiveStatusMonitoring = new LiveStatusMonitoring();
 
         _ = Task.Run(() => _liveBff.StartMonitoring()); // don't wait this;

@@ -11,7 +11,7 @@ public class VRChatLiveCommunicator
     private readonly ICredentialsStorage _credentialsStorage;
     private readonly string _callerInAppIdentifier;
     private readonly IResponseCollector _responseCollector;
-    private readonly VRChatWorldMemoizer _worldMemoizer;
+    private readonly WorldNameCache _worldNameCache;
 
     private readonly Lock _queueLock = new();
     private readonly HashSet<string> _allQueued = new();
@@ -25,15 +25,15 @@ public class VRChatLiveCommunicator
     public event LiveUpdateReceived? OnLiveUpdateReceived;
     public delegate Task LiveUpdateReceived(LiveUserUpdate liveUpdate);
 
-    public event WorldResolved? OnWorldResolved;
-    public delegate Task WorldResolved(MemoizedWorld world);
+    public event WorldResolved? OnWorldCached;
+    public delegate Task WorldResolved(CachedWorld world);
 
-    public VRChatLiveCommunicator(ICredentialsStorage credentialsStorage, string callerInAppIdentifier, IResponseCollector responseCollector)
+    public VRChatLiveCommunicator(ICredentialsStorage credentialsStorage, string callerInAppIdentifier, IResponseCollector responseCollector, WorldNameCache worldNameCache)
     {
         _credentialsStorage = credentialsStorage;
         _callerInAppIdentifier = callerInAppIdentifier;
         _responseCollector = responseCollector;
-        _worldMemoizer = new VRChatWorldMemoizer();
+        _worldNameCache = worldNameCache;
     }
 
     private void WakeUpQueue()
@@ -58,16 +58,23 @@ public class VRChatLiveCommunicator
             var worldLenient = await _api.GetWorldLenient(DataCollectionReason.CollectSessionLocationInformation, worldId);
             if (worldLenient != null)
             {
-                _worldMemoizer.Found(worldId, worldLenient);
-            }
-            else
-            {
-                _worldMemoizer.NotFound(worldId);
-            }
+                var cache = new CachedWorld
+                {
+                    cachedAt = DateTime.Now,
+                    name = worldLenient.name,
+                    worldId = worldId,
+                    author = worldLenient.authorId,
+                    authorName = worldLenient.authorName,
+                    releaseStatus = worldLenient.releaseStatus,
+                    description = worldLenient.description,
+                    thumbnailUrl = worldLenient.thumbnailImageUrl,
+                };
+                _worldNameCache.VRCWorlds[worldId] = cache;
 
-            if (OnWorldResolved != null)
-            {
-                await OnWorldResolved.Invoke(_worldMemoizer.Get(worldId));
+                if (OnWorldCached != null)
+                {
+                    await OnWorldCached.Invoke(cache);
+                }
             }
         }
     }
@@ -240,10 +247,10 @@ public class VRChatLiveCommunicator
             if (separator != -1)
             {
                 var worldId = location.Substring(0, separator);
-                var memoizedWorld = GetOrQueueWorldFetch(worldId);
-                if (memoizedWorld != null && memoizedWorld.wasFound)
+                var cachedWorld = GetOrQueueWorldFetch(worldId);
+                if (cachedWorld != null)
                 {
-                    virtualSpaceName = memoizedWorld.world!.name;
+                    virtualSpaceName = cachedWorld.name;
                 }
                 else
                 {
@@ -265,12 +272,10 @@ public class VRChatLiveCommunicator
         return virtualSpaceName;
     }
 
-    private MemoizedWorld? GetOrQueueWorldFetch(string worldId)
+    private CachedWorld? GetOrQueueWorldFetch(string worldId)
     {
-        if (_worldMemoizer.HasMemoized(worldId))
-        {
-            return _worldMemoizer.Get(worldId);
-        }
+        var cachedWorld = _worldNameCache.GetValidOrNull(worldId);
+        if (cachedWorld != null) return cachedWorld;
 
         if (!_allQueued.Contains(worldId))
         {
