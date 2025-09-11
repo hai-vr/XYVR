@@ -27,7 +27,7 @@ If you are a developer, feel free to read below.
 
 # Privacy and Data considerations
 
-- **We do not store your email and password.**
+- **This application does not store your email and password.**
 - We store a cookie file and session tokens upon login, if requested.
 - We store your address book in the `%APPDATA%/XYVR/` folder.
 - We only perform requests to the following URLs:
