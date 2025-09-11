@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using XYVR.API.Resonite;
 using XYVR.Core;
+using XYVR.Data.Collection;
 
 namespace XYVR.AccountAuthority.Resonite;
 
@@ -13,8 +14,10 @@ public partial class ResoniteLiveCommunicator
     private readonly IResponseCollector _responseCollector;
     private readonly ResoniteSignalRClient _srClient;
     private readonly Dictionary<string, SessionUpdateJsonObject> _sessionIdToSessionUpdate = new();
-    
-    private ResoniteAPI _api;
+    private readonly Dictionary<string, string> _resolvedMixedHashToSessionId = new();
+    private readonly HashSet<string> _sessionIdsToWatch = new();
+
+    private ResoniteAPI? _api;
 
     public event LiveUpdateReceived? OnLiveUpdateReceived;
     public delegate Task LiveUpdateReceived(LiveUserUpdate liveUpdate);
@@ -42,6 +45,10 @@ public partial class ResoniteLiveCommunicator
     {
         await _srClient.StartAsync((await GetToken__sensitive())!);
         await _srClient.SubmitRequestStatus();
+        
+        _api ??= await InitializeApi();
+        var sessionsTemp = await _api.GetSessions__Temp(DataCollectionReason.CollectSessionLocationInformation);
+        Console.WriteLine(sessionsTemp);
     }
     
     public async Task Disconnect()
@@ -71,12 +78,33 @@ public partial class ResoniteLiveCommunicator
 
     private Task WhenSessionUpdate(SessionUpdateJsonObject sessionUpdate)
     {
+        var anySessionUpdated = false;
+        
         // FIXME: Resonite sends a massive amount of session updates objects per second. This needs to be restricted further
-        _sessionIdToSessionUpdate.TryAdd(sessionUpdate.hostUserSessionId, sessionUpdate);
+        if (_sessionIdToSessionUpdate.TryAdd(sessionUpdate.sessionId, sessionUpdate))
+        {
+            Console.WriteLine($"Storing for the first time information about {sessionUpdate.sessionId}, which is {sessionUpdate.name}");
+            anySessionUpdated = true;
+        }
+        else
+        {
+            if (_sessionIdsToWatch.Contains(sessionUpdate.sessionId))
+            {
+                Console.WriteLine($"Updating information about a session we actually care about: {sessionUpdate.sessionId}, which is {sessionUpdate.name}");
+                _sessionIdToSessionUpdate[sessionUpdate.sessionId] = sessionUpdate;
+                anySessionUpdated = true;
+            }
+        }
+
+        if (anySessionUpdated)
+        {
+            // TODO: Reemit information about the users that pertains to this session.
+        }
+
         return Task.CompletedTask;
     }
 
-    private async Task<LiveUserSessionState> DeriveSessionState(UserStatusUpdate statusUpdate, OnlineStatus status)
+    private async Task<LiveUserSessionState> DeriveSessionState(UserStatusUpdate userStatusUpdate, OnlineStatus status)
     {
         if (status == OnlineStatus.Offline)
         {
@@ -87,6 +115,75 @@ public partial class ResoniteLiveCommunicator
             };
         }
 
+        var session = SessionOrNull(userStatusUpdate);
+
+        string? worldName;
+        if (session != null && userStatusUpdate.hashSalt != null && !session.sessionHidden && session.accessLevel != "Private")
+        {
+            SessionUpdateJsonObject? sessionUpdate;
+            
+            var existingSessionId = _resolvedMixedHashToSessionId.GetValueOrDefault(session.sessionHash);
+            if (existingSessionId != null)
+            {
+                sessionUpdate = _sessionIdToSessionUpdate.GetValueOrDefault(existingSessionId);
+            }
+            else
+            {
+                sessionUpdate = await FindSessionOrNull(session.sessionHash, userStatusUpdate.hashSalt);
+                if (sessionUpdate != null)
+                {
+                    _resolvedMixedHashToSessionId[session.sessionHash] = sessionUpdate.sessionId;
+                    _sessionIdsToWatch.Add(sessionUpdate.sessionId);
+                }
+            }
+            worldName = sessionUpdate != null ? ExtractTextFromColorTags(sessionUpdate.name) : null;
+        }
+        else
+        {
+            worldName = null;
+        }
+
+        return session != null
+            ? new LiveUserSessionState
+            {
+                knowledge = session.accessLevel == "Private" ? LiveUserSessionKnowledge.PrivateSession : LiveUserSessionKnowledge.Known,
+                knownSession = new LiveUserKnownSession
+                {
+                    inAppSessionIdentifier = session.sessionHash,
+                    inAppHost = session is { isHost: true }
+                        ? new LiveSessionHost
+                        {
+                            inAppHostIdentifier = userStatusUpdate.userId,
+                        }
+                        : null,
+                    inAppVirtualSpaceName = worldName
+                }
+            }
+            : new LiveUserSessionState
+            {
+                knowledge = LiveUserSessionKnowledge.KnownButNoData,
+                knownSession = null
+            };
+    }
+
+    private async Task<SessionUpdateJsonObject?> FindSessionOrNull(string wantedHash, string hashSalt)
+    {
+        foreach (var sessionUpdateJsonObject in _sessionIdToSessionUpdate)
+        {
+            var sessionId = sessionUpdateJsonObject.Key;
+            var possibleHash = await ResoniteHash.Rehash(sessionId, hashSalt);
+            if (wantedHash == possibleHash)
+            {
+                Console.WriteLine($"We FOUND the hash.");
+                return sessionUpdateJsonObject.Value;
+            }
+        }
+
+        return null;
+    }
+
+    private static Session? SessionOrNull(UserStatusUpdate statusUpdate)
+    {
         Session? session;
         var index = statusUpdate.currentSessionIndex;
         if (index >= 0 && index < statusUpdate.sessions.Count)
@@ -98,29 +195,7 @@ public partial class ResoniteLiveCommunicator
             session = null;
         }
 
-        string? worldName;
-        if (_sessionIdToSessionUpdate.TryGetValue(statusUpdate.userSessionId, out var sessionUpdate))
-        {
-            worldName = ExtractTextFromColorTags(sessionUpdate.name);
-        }
-        else
-        {
-            worldName = null;
-        }
-        
-        return new LiveUserSessionState
-        {
-            knowledge = LiveUserSessionKnowledge.Known,
-            knownSession = new LiveUserKnownSession
-            {
-                inAppSessionIdentifier = statusUpdate.userSessionId,
-                inAppHost = session is { isHost: true } ? new LiveSessionHost
-                {
-                    inAppHostIdentifier = statusUpdate.userId,
-                } : null,
-                inAppVirtualSpaceName = worldName
-            }
-        };
+        return session;
     }
 
     private static string ExtractTextFromColorTags(string input)

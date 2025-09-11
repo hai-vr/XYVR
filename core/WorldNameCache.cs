@@ -2,8 +2,9 @@
 
 public class WorldNameCache
 {
-    public int cacheVersion = 3;
-
+    private const int LatestVersion = 3;
+    
+    public int cacheVersion = LatestVersion;
     public string warning = "THE CONTENTS OF THIS FILE CAN BE DELETED AT ANY TIME. You must NOT use this file as a world data archival source; it is not the purpose of this file.";
     public string purpose = "The purpose of this file is to prevent repetitive requests to the VRChat API to show the world name of active sessions when restarting the application.";
     
@@ -11,13 +12,13 @@ public class WorldNameCache
 
     public void PreProcess()
     {
-        if (cacheVersion != 1)
+        if (cacheVersion != LatestVersion)
         {
             foreach (var value in VRCWorlds.Values)
             {
                 value.isObsolete = true;
             }
-            cacheVersion = 1;
+            cacheVersion = LatestVersion;
         }
 
         var now = DateTime.Now;

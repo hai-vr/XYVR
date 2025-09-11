@@ -26,8 +26,15 @@ public class ResoniteSignalRClient
             })
             .WithAutomaticReconnect()
             .Build();
-
+        
+        // FIXME: Enabling this causes our app to get blasted in the face with 50KB worth
+        // of JSON data per second (0.4Mbps). This can't possibly be right
+        // This traffic even happens when not subscribed to it. Let's not make it worse by 
+        // having to deserialize its contents.
+        // FIXME: Replace this with on-demand requests to the Resonite API whenever we have
+        // a hash we can't resolve with the currently known session.
         _connection.On<object>("ReceiveSessionUpdate", OnReceiveSessionUpdate);
+        
         _connection.On<object>("ReceiveStatusUpdate", OnReceiveStatusUpdate);
         
         _connection.Closed += WhenConnectionClosed;
@@ -58,6 +65,13 @@ public class ResoniteSignalRClient
         EnsureConnected();
 
         await _connection!.SendAsync("ListenOnContact", userId);
+    }
+
+    public async Task ListenOnKey(string key)
+    {
+        EnsureConnected();
+
+        await _connection!.SendAsync("ListenOnKey", key);
     }
 
     private void EnsureConnected()

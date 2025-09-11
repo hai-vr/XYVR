@@ -164,6 +164,32 @@ public class ResoniteAPI
             throw;
         }
     }
+
+    public async Task<string> GetSessions__Temp(DataCollectionReason dataCollectionReason)
+    {
+        var url = $"{AuditUrls.ResoniteApiUrl}/sessions";
+        var requestGuid = XYVRGuids.ForRequest();
+        try
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, url);
+            request.Headers.Add("Authorization", $"res {_myUserId}:{_token__sensitive}");
+
+            var response = await _client.SendAsync(request);
+            await EnsureRateLimiting(url);
+            
+            EnsureSuccessOrThrowVerbose(response);
+
+            var responseStr = await response.Content.ReadAsStringAsync();
+            DataCollectSuccess(url, requestGuid, responseStr, dataCollectionReason);
+            return responseStr;
+            // return JsonConvert.DeserializeObject<UserResponseJsonObject>(responseStr);
+        }
+        catch (Exception _)
+        {
+            DataCollectFailure(url, requestGuid, dataCollectionReason);
+            throw;
+        }
+    }
     
     private void DataCollectSuccess(string url, string requestGuid, string responseStr, DataCollectionReason dataCollectionReason)
     {
