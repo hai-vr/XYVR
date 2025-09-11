@@ -1,6 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using Newtonsoft.Json;
 using XYVR.Core;
+using XYVR.Login;
 using XYVR.Data.Collection;
 using XYVR.Scaffold;
 

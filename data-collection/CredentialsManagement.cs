@@ -3,6 +3,7 @@ using XYVR.AccountAuthority.Resonite;
 using XYVR.AccountAuthority.VRChat;
 using XYVR.API.VRChat;
 using XYVR.Core;
+using XYVR.Login;
 using XYVR.Data.Collection.monitoring;
 using XYVR.Scaffold;
 
@@ -14,6 +15,8 @@ public class CredentialsManagement
     private readonly WorldNameCache _worldNameCache;
     private readonly ConcurrentDictionary<string, InMemoryCredentialsStorage> _connectorGuidToCredentialsStorageState = new();
     private readonly ConcurrentDictionary<string, bool> _isPersistent = new();
+    
+    private readonly ILoginService _temp_vrc_login_service;
 
     public CredentialsManagement(SerializedCredentials serializedCredentials, Func<Task<string>> resoniteUidProviderFn, WorldNameCache worldNameCache)
     {
@@ -29,6 +32,8 @@ public class CredentialsManagement
                 _isPersistent[keyValuePair.Key] = true;
             }
         }
+
+        _temp_vrc_login_service = new VRChatLoginService();
     }
 
     public async Task<SerializedCredentials> SerializeCredentials()
@@ -111,80 +116,25 @@ public class CredentialsManagement
 
     public async Task<ConnectionAttemptResult> TryConnect(Connector connector, ConnectionAttempt connectionAttempt)
     {
-        return connector.type switch
+        var result = connector.type switch
         {
             ConnectorType.VRChatAPI => await ConnectToVRChat(connectionAttempt),
             ConnectorType.ResoniteAPI => await ConnectToResonite(connectionAttempt),
             ConnectorType.Offline => throw new ArgumentException("Cannot connect to offline connector"),
             _ => throw new ArgumentOutOfRangeException()
         };
+        if (result.type == ConnectionAttemptResultType.Success && connectionAttempt.stayLoggedIn)
+        {
+            _isPersistent[connectionAttempt.connector.guid] = true;
+        }
+        return result;
     }
 
     private async Task<ConnectionAttemptResult> ConnectToVRChat(ConnectionAttempt connectionAttempt)
     {
         var guid = connectionAttempt.connector.guid;
-        
         var credentialsStorage = _connectorGuidToCredentialsStorageState.GetOrAdd(guid, _ => new InMemoryCredentialsStorage(null));
-
-        var vrcApi = new VRChatAPI(new DoNotStoreAnythingStorage());
-        var userinput_cookies__sensitive = await credentialsStorage.RequireCookieOrToken();
-        if (userinput_cookies__sensitive != null)
-        {
-            vrcApi.ProvideCookies(userinput_cookies__sensitive);
-        }
-        
-        LoginResponse result;
-        if (connectionAttempt.twoFactorCode__sensitive == null)
-        {
-            Console.WriteLine("Connecting to VRChat...");
-            result = await vrcApi.Login(connectionAttempt.login__sensitive, connectionAttempt.password__sensitive);
-            Console.WriteLine($"The result was {result.Status}");
-        }
-        else
-        {
-            var twoferMethod = connectionAttempt.isTwoFactorEmail ? TwoferMethod.Email : TwoferMethod.Other;
-            Console.WriteLine($"Verifying 2FA for VRChat ({twoferMethod})...");
-            result = await vrcApi.VerifyTwofer(connectionAttempt.twoFactorCode__sensitive, twoferMethod);
-            Console.WriteLine($"The result was {result.Status}");
-        }
-        
-        if (result.Status == LoginResponseStatus.Success)
-        {
-            await credentialsStorage.StoreCookieOrToken(vrcApi.GetAllCookies__Sensitive());
-            
-            var callerAccount = await new VRChatCommunicator(new DoNotStoreAnythingStorage(), credentialsStorage).CallerAccount();
-            var connectorAccount = AsConnectorAccount(callerAccount);
-                
-            if (connectionAttempt.stayLoggedIn)
-            {
-                _isPersistent[guid] = true;
-            }
-
-            return new ConnectionAttemptResult
-            {
-                guid = guid,
-                type = ConnectionAttemptResultType.Success,
-                account = connectorAccount
-            };
-        }
-
-        if (result.Status == LoginResponseStatus.RequiresTwofer)
-        {
-            await credentialsStorage.StoreCookieOrToken(vrcApi.GetAllCookies__Sensitive());
-            
-            return new ConnectionAttemptResult
-            {
-                guid = guid,
-                type = ConnectionAttemptResultType.NeedsTwoFactorCode,
-                isTwoFactorEmail = result.TwoferMethod == TwoferMethod.Email
-            };
-        }
-
-        return new ConnectionAttemptResult
-        {
-            guid = guid,
-            type = ConnectionAttemptResultType.Failure
-        };
+        return await _temp_vrc_login_service.Connect(connectionAttempt, credentialsStorage, guid);
     }
 
     private async Task<ConnectionAttemptResult> ConnectToResonite(ConnectionAttempt connectionAttempt)
@@ -207,11 +157,6 @@ public class CredentialsManagement
             
             var callerAccount = await communicator.CallerAccount();
             var connectorAccount = AsConnectorAccount(callerAccount);
-            
-            if (connectionAttempt.stayLoggedIn)
-            {
-                _isPersistent[guid] = true;
-            }
             
             return new ConnectionAttemptResult
             {

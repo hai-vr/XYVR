@@ -1,7 +1,7 @@
 ﻿using JetBrains.Annotations;
 using XYVR.Core;
 
-namespace XYVR.Data.Collection;
+namespace XYVR.Login;
 
 public class ConnectionAttempt
 {

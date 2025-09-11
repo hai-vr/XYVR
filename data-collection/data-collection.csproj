@@ -10,11 +10,11 @@
     <ItemGroup>
       <ProjectReference Include="..\account-resonite\account-resonite.csproj" />
       <ProjectReference Include="..\account-vrchat\account-vrchat.csproj" />
+      <ProjectReference Include="..\c-login\c-login.csproj" />
       <ProjectReference Include="..\development-scaffold\development-scaffold.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="JetBrains.Annotations" Version="2025.2.2" />
     </ItemGroup>
 
 </Project>
