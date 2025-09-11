@@ -1,6 +1,4 @@
-﻿using XYVR.Data.Collection;
-
-namespace XYVR.Core;
+﻿namespace XYVR.Core;
 
 public interface IDataCollection
 {

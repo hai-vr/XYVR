@@ -1,6 +1,4 @@
-﻿using XYVR.Core;
-
-namespace XYVR.Data.Collection;
+﻿namespace XYVR.Core;
 
 public class InMemoryCredentialsStorage : ICredentialsStorage
 {

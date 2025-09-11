@@ -1,5 +1,4 @@
 ﻿using XYVR.Core;
-using XYVR.Data.Collection;
 using XYVR.Scaffold;
 
 namespace XYVR.UI.WebviewUI;

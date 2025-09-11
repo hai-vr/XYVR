@@ -12,8 +12,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ui-webview", "ui-webview\ui
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "development-scaffold", "development-scaffold\development-scaffold.csproj", "{628B322F-0B16-4CE4-B846-19E8E16DB91D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "data-collection", "data-collection\data-collection.csproj", "{E5AA510D-19E2-437B-856F-57A9F5233822}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "audit-urls", "audit-urls\audit-urls.csproj", "{F25CEC2E-58FA-457F-AFEA-7A59EFF330B8}"
 EndProject
 Global
@@ -46,10 +44,6 @@ Global
 		{628B322F-0B16-4CE4-B846-19E8E16DB91D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{628B322F-0B16-4CE4-B846-19E8E16DB91D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{628B322F-0B16-4CE4-B846-19E8E16DB91D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E5AA510D-19E2-437B-856F-57A9F5233822}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E5AA510D-19E2-437B-856F-57A9F5233822}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E5AA510D-19E2-437B-856F-57A9F5233822}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E5AA510D-19E2-437B-856F-57A9F5233822}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F25CEC2E-58FA-457F-AFEA-7A59EFF330B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F25CEC2E-58FA-457F-AFEA-7A59EFF330B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F25CEC2E-58FA-457F-AFEA-7A59EFF330B8}.Release|Any CPU.ActiveCfg = Release|Any CPU

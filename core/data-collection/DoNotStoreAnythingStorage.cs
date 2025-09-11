@@ -1,5 +1,3 @@
-using XYVR.Data.Collection;
-
 namespace XYVR.Core;
 
 public class DoNotStoreAnythingStorage : IResponseCollector

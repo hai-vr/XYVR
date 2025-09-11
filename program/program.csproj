@@ -11,7 +11,6 @@
       <ProjectReference Include="..\account-resonite\account-resonite.csproj" />
       <ProjectReference Include="..\account-vrchat\account-vrchat.csproj" />
       <ProjectReference Include="..\core\core.csproj" />
-      <ProjectReference Include="..\data-collection\data-collection.csproj" />
       <ProjectReference Include="..\development-scaffold\development-scaffold.csproj" />
     </ItemGroup>
 
