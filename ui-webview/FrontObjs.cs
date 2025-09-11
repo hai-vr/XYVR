@@ -65,7 +65,7 @@ internal class FrontAccount
     public string? customStatus;
     public FrontLiveUserSessionState? mainSession;
 
-    public static FrontAccount ToFrontAccount(Account account, LiveUserUpdate? liveSessionState)
+    public static FrontAccount ToFrontAccount(Account account, ImmutableLiveUserUpdate? liveSessionState)
     {
         return new FrontAccount
         {
@@ -169,7 +169,7 @@ internal class FrontLiveUserUpdate
 
     public string callerInAppIdentifier;
     
-    public static FrontLiveUserUpdate FromCore(LiveUserUpdate liveUserUpdate)
+    public static FrontLiveUserUpdate FromCore(ImmutableLiveUserUpdate liveUserUpdate)
     {
         return new FrontLiveUserUpdate
         {
@@ -190,7 +190,7 @@ internal class FrontLiveUserSessionState
     public FrontLiveUserKnownSession? knownSession;
     public LiveUserSessionKnowledge knowledge;
     
-    public static FrontLiveUserSessionState FromCore(LiveUserSessionState liveUserSessionState)
+    public static FrontLiveUserSessionState FromCore(ImmutableLiveUserSessionState liveUserSessionState)
     {
         return new FrontLiveUserSessionState
         {
@@ -209,7 +209,7 @@ internal class FrontLiveUserKnownSession
     
     public FrontLiveSessionHost? inAppHost;
     
-    public static FrontLiveUserKnownSession FromCore(LiveUserKnownSession liveUserKnownSession)
+    public static FrontLiveUserKnownSession FromCore(ImmutableLiveUserKnownSession liveUserKnownSession)
     {
         return new FrontLiveUserKnownSession
         {
@@ -247,7 +247,7 @@ internal class FrontLiveSession
             inAppSessionIdentifier = liveSession.inAppSessionIdentifier,
             inAppSessionName = liveSession.inAppSessionName,
             inAppVirtualSpaceName = liveSession.inAppVirtualSpaceName,
-            inAppHost = liveSession.inAppHost != null ? FrontLiveSessionHost.FromCore(liveSession.inAppHost) : null,
+            inAppHost = liveSession.inAppHost != null ? FrontLiveSessionHost.FromCore(liveSession.inAppHost.ToImmutable()) : null,
             participants = liveSession.participants.Select(participant =>
             {
                 var sessionState = participant.isKnown
@@ -268,7 +268,7 @@ internal class FrontParticipant
 
     public bool isHost;
     
-    public static FrontParticipant FromCore(Participant participant, LiveUserUpdate? liveSessionState)
+    public static FrontParticipant FromCore(Participant participant, ImmutableLiveUserUpdate? liveSessionState)
     {
         return new FrontParticipant
         {
@@ -300,7 +300,7 @@ internal class FrontLiveSessionHost
     public string inAppHostIdentifier;
     public string? inAppHostDisplayName;
     
-    public static FrontLiveSessionHost FromCore(LiveSessionHost liveSessionHost)
+    public static FrontLiveSessionHost FromCore(ImmutableLiveSessionHost liveSessionHost)
     {
         return new FrontLiveSessionHost
         {

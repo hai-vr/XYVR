@@ -12,6 +12,21 @@ public class LiveUserUpdate
     public string? customStatus;
 
     public string callerInAppIdentifier;
+
+    public ImmutableLiveUserUpdate ToImmutable()
+    {
+        return new ImmutableLiveUserUpdate
+        {
+            namedApp = namedApp,
+            trigger = trigger,
+            qualifiedAppName = qualifiedAppName,
+            inAppIdentifier = inAppIdentifier,
+            onlineStatus = onlineStatus,
+            mainSession = mainSession?.ToImmutable(),
+            customStatus = customStatus,
+            callerInAppIdentifier = callerInAppIdentifier
+        };
+    }
 }
 
 public enum OnlineStatus
@@ -34,6 +49,15 @@ public class LiveUserSessionState
 {
     public LiveUserKnownSession? knownSession;
     public LiveUserSessionKnowledge knowledge;
+
+    public ImmutableLiveUserSessionState ToImmutable()
+    {
+        return new ImmutableLiveUserSessionState
+        {
+            knownSession = knownSession?.ToImmutable(),
+            knowledge = knowledge
+        };
+    }
 }
 
 public class LiveSession
@@ -116,8 +140,22 @@ public class LiveUserKnownSession
     
     public string? inAppSessionName;
     public string? inAppVirtualSpaceName;
+
+    public bool? isJoinable;
     
     public LiveSessionHost? inAppHost;
+
+    public ImmutableLiveUserKnownSession ToImmutable()
+    {
+        return new ImmutableLiveUserKnownSession
+        {
+            inAppSessionIdentifier = inAppSessionIdentifier,
+            inAppSessionName = inAppSessionName,
+            inAppVirtualSpaceName = inAppVirtualSpaceName,
+            isJoinable = isJoinable,
+            inAppHost = inAppHost?.ToImmutable()
+        };
+    }
 }
 
 public class LiveSessionHost
@@ -128,5 +166,14 @@ public class LiveSessionHost
     public LiveSessionHost ShallowCopy()
     {
         return (LiveSessionHost)this.MemberwiseClone();
+    }
+
+    public ImmutableLiveSessionHost ToImmutable()
+    {
+        return new ImmutableLiveSessionHost
+        {
+            inAppHostIdentifier = inAppHostIdentifier,
+            inAppHostDisplayName = inAppHostDisplayName
+        };
     }
 }

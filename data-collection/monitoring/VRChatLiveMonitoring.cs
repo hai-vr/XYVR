@@ -40,7 +40,7 @@ public class VRChatLiveMonitoring : ILiveMonitoring
             _liveComms.OnLiveUpdateReceived += async update =>
             {
                 Console.WriteLine($"OnLiveUpdateReceived: {JsonConvert.SerializeObject(update, serializer)}");
-                await _monitoring.MergeUser(update);
+                await _monitoring.MergeUser(update.ToImmutable());
             };
             _liveComms.OnWorldCached += async world =>
             {
@@ -50,13 +50,21 @@ public class VRChatLiveMonitoring : ILiveMonitoring
                     // FIXME: We need the world identifier here
                     .Where(update => update.mainSession?.knownSession?.inAppSessionIdentifier.StartsWith(world.worldId) == true)
                     .ToList();
-                foreach (var liveUpdate in vrcLiveUpdates)
+                foreach (ImmutableLiveUserUpdate liveUpdate in vrcLiveUpdates)
                 {
                     // Re-emit events
-                    // TODO: Don't mutate the original objects..?
-                    liveUpdate.trigger = "Queue-WorldResolved";
-                    liveUpdate.mainSession!.knownSession!.inAppVirtualSpaceName = world.name;
-                    await _monitoring.MergeUser(liveUpdate);
+                    var modifiedLiveUpdate = liveUpdate with
+                    {
+                        trigger = "Queue-WorldResolved",
+                        mainSession = liveUpdate.mainSession! with
+                        {
+                            knownSession = liveUpdate.mainSession!.knownSession! with
+                            {
+                                inAppVirtualSpaceName = world.name,
+                            }
+                        }
+                    };
+                    await _monitoring.MergeUser(modifiedLiveUpdate);
                 }
             };
             await _liveComms.Connect();

@@ -2,13 +2,13 @@
 
 public class LiveStatusMonitoring
 {
-    private readonly Dictionary<NamedApp, Dictionary<string, LiveUserUpdate>> _liveUpdatesByAppByUser = new();
+    private readonly Dictionary<NamedApp, Dictionary<string, ImmutableLiveUserUpdate>> _liveUpdatesByAppByUser = new();
     private readonly List<LiveSession> _sessions = new();
     private readonly Dictionary<string, LiveSession> _guidToSession = new();
     private readonly Dictionary<NamedApp, Dictionary<string, LiveSession>> _namedAppToInAppIdToSession = new();
 
     private event LiveUserUpdateMerged? OnLiveUserUpdateMerged;
-    public delegate Task LiveUserUpdateMerged(LiveUserUpdate liveUpdate);
+    public delegate Task LiveUserUpdateMerged(ImmutableLiveUserUpdate liveUpdate);
 
     private event LiveSessionUpdated? OnLiveSessionUpdated;
     public delegate Task LiveSessionUpdated(LiveSession session);
@@ -17,23 +17,25 @@ public class LiveStatusMonitoring
     {
         foreach (var namedApp in Enum.GetValues<NamedApp>())
         {
-            _liveUpdatesByAppByUser[namedApp] = new Dictionary<string, LiveUserUpdate>();
+            _liveUpdatesByAppByUser[namedApp] = new Dictionary<string, ImmutableLiveUserUpdate>();
             _namedAppToInAppIdToSession[namedApp] = new Dictionary<string, LiveSession>();
         }
     }
 
-    public List<LiveUserUpdate> GetAll(NamedApp namedApp)
+    public List<ImmutableLiveUserUpdate> GetAll(NamedApp namedApp)
     {
         return _liveUpdatesByAppByUser[namedApp].Values.ToList();
     }
 
-    public List<LiveUserUpdate> GetAll()
+    public List<ImmutableLiveUserUpdate> GetAll()
     {
         return _liveUpdatesByAppByUser.Values.SelectMany(it => it.Values).ToList();
     }
     
-    public async Task MergeUser(LiveUserUpdate liveUpdate)
+    public async Task MergeUser(ImmutableLiveUserUpdate liveUpdate)
     {
+        bool liveUpdateWasChanged;
+        
         // TODO:
         // It is possible to have the same inAppIdentifier being updated with a different status,
         // if the caller has multiple connections on the same app.
@@ -44,15 +46,31 @@ public class LiveStatusMonitoring
         // The UI side or BFF would have to decide what status to associate with that account.
         if (_liveUpdatesByAppByUser[liveUpdate.namedApp].TryGetValue(liveUpdate.inAppIdentifier, out var existingLiveUpdate))
         {
-            liveUpdate.trigger = existingLiveUpdate.trigger;
+            var modifiedRecord = liveUpdate;
             
-            if (liveUpdate.onlineStatus != null) existingLiveUpdate.onlineStatus = liveUpdate.onlineStatus;
-            if (liveUpdate.customStatus != null) existingLiveUpdate.customStatus = liveUpdate.customStatus;
-            if (liveUpdate.mainSession != null) existingLiveUpdate.mainSession = liveUpdate.mainSession;
+            if (liveUpdate.onlineStatus != null) modifiedRecord = modifiedRecord with { onlineStatus = liveUpdate.onlineStatus };
+            if (liveUpdate.customStatus != null) modifiedRecord = modifiedRecord with { customStatus = liveUpdate.customStatus };
+            if (liveUpdate.mainSession != null) modifiedRecord = modifiedRecord with { mainSession = liveUpdate.mainSession };
+
+            // Did anything actually change?
+            if (modifiedRecord != liveUpdate)
+            {
+                // The trigger is only relevant if an event actually causes any content to change
+                modifiedRecord = modifiedRecord with { trigger = existingLiveUpdate.trigger };
+                
+                _liveUpdatesByAppByUser[liveUpdate.namedApp][liveUpdate.inAppIdentifier] = modifiedRecord;
+                liveUpdateWasChanged = true;
+            }
+            else
+            {
+                Console.WriteLine($"A LiveUpdate on {liveUpdate.inAppIdentifier} has resulted in no change (triggered by {existingLiveUpdate.trigger}, there will be no OnLiveUserUpdateMerged emitted.");
+                liveUpdateWasChanged = false;
+            }
         }
         else
         {
             _liveUpdatesByAppByUser[liveUpdate.namedApp][liveUpdate.inAppIdentifier] = liveUpdate;
+            liveUpdateWasChanged = true;
         }
 
         LiveSession? liveSession = null;
@@ -85,7 +103,7 @@ public class LiveStatusMonitoring
         {
             await OnLiveSessionUpdated.Invoke(liveSession);
         }
-        if (OnLiveUserUpdateMerged != null)
+        if (liveUpdateWasChanged && OnLiveUserUpdateMerged != null)
         {
             await OnLiveUserUpdateMerged.Invoke(liveUpdate);
         }
@@ -143,7 +161,7 @@ public class LiveStatusMonitoring
         OnLiveSessionUpdated -= listener;
     }
 
-    public LiveUserUpdate? GetLiveSessionStateOrNull(NamedApp accountNamedApp, string accountInAppIdentifier)
+    public ImmutableLiveUserUpdate? GetLiveSessionStateOrNull(NamedApp accountNamedApp, string accountInAppIdentifier)
     {
         return _liveUpdatesByAppByUser[accountNamedApp].GetValueOrDefault(accountInAppIdentifier);
     }

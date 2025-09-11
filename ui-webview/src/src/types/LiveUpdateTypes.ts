@@ -33,6 +33,7 @@ export interface FrontLiveUserKnownSession {
     inAppSessionName?: string;
     inAppVirtualSpaceName?: string;
     inAppHost?: FrontLiveSessionHost;
+    isJoinable?: boolean;
 }
 
 export interface FrontLiveSession {

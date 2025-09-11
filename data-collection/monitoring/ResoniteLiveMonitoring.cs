@@ -52,7 +52,7 @@ public class ResoniteLiveMonitoring : ILiveMonitoring, IDisposable
             _liveComms.OnLiveUpdateReceived += async update =>
             {
                 Console.WriteLine($"OnLiveUpdateReceived: {JsonConvert.SerializeObject(update, serializer)}");
-                await _monitoring.MergeUser(update);
+                await _monitoring.MergeUser(update.ToImmutable());
 
                 if (!alreadyListeningTo.Contains(update.inAppIdentifier))
                 {
