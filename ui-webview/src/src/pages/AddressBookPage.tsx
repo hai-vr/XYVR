@@ -10,7 +10,8 @@ import {
     shouldShowAlias,
     shouldShowBio,
     shouldShowHelp,
-    getOnlineStatusPriority, parseSearchField
+    getOnlineStatusPriority,
+    parseSearchField
 } from './searchUtils.ts'
 import {
     Glasses,
@@ -25,20 +26,23 @@ import {
 import DarkModeToggleButton from "../components/DarkModeToggleButton.tsx";
 import {_D2} from "../haiUtils.ts";
 import {type FrontIndividual, OnlineStatus} from "../types/CoreTypes.ts";
-import type {FrontLiveSession, FrontLiveUserUpdate} from "../types/LiveUpdateTypes.ts";
+import {type FrontLiveSession, type FrontLiveUserUpdate, LiveSessionKnowledge} from "../types/LiveUpdateTypes.ts";
 import {type DebugFlags, DemonstrationMode} from "../types/DebugFlags.ts";
 
 const sortIndividuals = (individuals: FrontIndividual[], unparsedSearchField: string) => {
     if (!unparsedSearchField) {
         // Sort by online status first, even when there's no search term
         return [...individuals].sort((a, b) => {
-            const aPriority = getOnlineStatusPriority(a.onlineStatus || OnlineStatus.Offline);
-            const bPriority = getOnlineStatusPriority(b.onlineStatus || OnlineStatus.Offline);
+            let aHasAnyKnownSession = a.accounts.some(it => it.mainSession?.knowledge === LiveSessionKnowledge.Known);
+            let bHasAnyKnownSession = b.accounts.some(it => it.mainSession?.knowledge === LiveSessionKnowledge.Known);
+            if (aHasAnyKnownSession && !bHasAnyKnownSession) return -1;
+            if (!aHasAnyKnownSession && bHasAnyKnownSession) return 1;
 
             // First priority: online status (lower number = higher priority)
+            const aPriority = getOnlineStatusPriority(a.onlineStatus || OnlineStatus.Offline);
+            const bPriority = getOnlineStatusPriority(b.onlineStatus || OnlineStatus.Offline);
             if (aPriority !== bPriority) return aPriority - bPriority;
 
-            // If both have same online status, maintain original order
             return 0;
         });
     }
@@ -47,16 +51,15 @@ const sortIndividuals = (individuals: FrontIndividual[], unparsedSearchField: st
 
     // Sort by priority: online status first, then display name matches, then identifier matches, then original order
     return [...individuals].sort((a, b) => {
-        const aPriority = getOnlineStatusPriority(a.onlineStatus || OnlineStatus.Offline);
-        const bPriority = getOnlineStatusPriority(b.onlineStatus || OnlineStatus.Offline);
         const aHasDisplayNameMatch = hasDisplayNameMatch(a, regularTerms);
         const bHasDisplayNameMatch = hasDisplayNameMatch(b, regularTerms);
-        const aHasIdentifierMatch = hasIdentifierMatch(a, regularTerms);
-        const bHasIdentifierMatch = hasIdentifierMatch(b, regularTerms);
 
         // display name matches
         if (aHasDisplayNameMatch && !bHasDisplayNameMatch) return -1;
         if (!aHasDisplayNameMatch && bHasDisplayNameMatch) return 1;
+
+        const aHasIdentifierMatch = hasIdentifierMatch(a, regularTerms);
+        const bHasIdentifierMatch = hasIdentifierMatch(b, regularTerms);
 
         // identifier matches (only if both don't have display name matches and same online status)
         if (!aHasDisplayNameMatch && !bHasDisplayNameMatch) {
@@ -64,7 +67,14 @@ const sortIndividuals = (individuals: FrontIndividual[], unparsedSearchField: st
             if (!aHasIdentifierMatch && bHasIdentifierMatch) return 1;
         }
 
+        let aHasAnyKnownSession = a.accounts.some(it => it.mainSession?.knowledge === LiveSessionKnowledge.Known);
+        let bHasAnyKnownSession = b.accounts.some(it => it.mainSession?.knowledge === LiveSessionKnowledge.Known);
+        if (aHasAnyKnownSession && !bHasAnyKnownSession) return -1;
+        if (!aHasAnyKnownSession && bHasAnyKnownSession) return 1;
+
         // online status (lower number = higher priority)
+        const aPriority = getOnlineStatusPriority(a.onlineStatus || OnlineStatus.Offline);
+        const bPriority = getOnlineStatusPriority(b.onlineStatus || OnlineStatus.Offline);
         if (aPriority !== bPriority) return aPriority - bPriority;
 
         // If both have the same priority level, maintain original order

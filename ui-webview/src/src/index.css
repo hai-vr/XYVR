@@ -351,6 +351,10 @@ button:disabled:hover {
     color: greenyellow;
 }
 
+.status-online-conflicting {
+    color: #efed5c;
+}
+
 .status-away {
     color: yellow;
 }
@@ -370,8 +374,17 @@ button:disabled:hover {
 .status-joinme {
     color: #00e1ff;
 }
+
+.status-joinme-conflicting {
+    color: #be6bf4;
+}
+
 :root[data-theme="light"] .status-online {
     color: #22c55e;
+}
+
+:root[data-theme="light"] .status-online-conflicting {
+    color: #ccec95;
 }
 
 :root[data-theme="light"] .status-away {
@@ -390,3 +403,6 @@ button:disabled:hover {
     color: #0ea5e9;
 }
 
+:root[data-theme="light"] .status-joinme-conflicting {
+    color: #9333ea;
+}

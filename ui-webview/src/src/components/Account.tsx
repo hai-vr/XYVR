@@ -10,6 +10,7 @@ import {
     type OnlineStatusType
 } from "../types/CoreTypes.ts";
 import {type DebugFlags, DemonstrationMode} from "../types/DebugFlags.ts";
+import {LiveSessionKnowledge} from "../types/LiveUpdateTypes.ts";
 
 interface AccountProps {
     account: FrontAccount;
@@ -72,10 +73,11 @@ const Account = ({ account, imposter, showAlias, showNotes, debugMode, showSessi
         }
     };
     
-    const getOnlineStatusEmoji = (onlineStatus: OnlineStatusType) => {
+    const getOnlineStatusEmoji = (onlineStatus: OnlineStatusType, isKnownSession: boolean) => {
         switch (onlineStatus) {
             case OnlineStatus.Online:
-                return <span className="status-char status-online">⬤</span>;
+                if (isKnownSession) return <span className="status-char status-online">⬤</span>;
+                else return <span className="status-char status-online-conflicting">⬤</span>;
             case OnlineStatus.ResoniteBusy:
             case OnlineStatus.VRChatDND:
                 return <CircleOff className="status-icon status-busy" />;
@@ -85,7 +87,8 @@ const Account = ({ account, imposter, showAlias, showNotes, debugMode, showSessi
                 return <DiamondMinus className="status-icon status-askme" />;
             case OnlineStatus.ResoniteSociable:
             case OnlineStatus.VRChatJoinMe:
-                return <span className="status-char status-joinme">■</span>;
+                if (isKnownSession) return <span className="status-char status-joinme">■</span>;
+                else return <span className="status-char status-joinme-conflicting">■</span>;
             case OnlineStatus.Offline:
                 return '';
             default:
@@ -93,22 +96,25 @@ const Account = ({ account, imposter, showAlias, showNotes, debugMode, showSessi
         }
     };
     
-    const getOnlineStatusText = (onlineStatus: OnlineStatusType) => {
+    const getOnlineStatusText = (onlineStatus: OnlineStatusType, isKnownSession: boolean) => {
         switch (onlineStatus) {
             case OnlineStatus.Online:
-                return 'Online';
+                if (isKnownSession) return 'Online';
+                else return 'Online (Private)';
             case OnlineStatus.ResoniteBusy:
                 return 'Busy';
             case OnlineStatus.VRChatDND:
                 return 'Do Not Disturb';
             case OnlineStatus.ResoniteAway:
-                return 'Away';
+                if (isKnownSession) return 'Away';
+                return 'Away (Private)';
             case OnlineStatus.VRChatAskMe:
                 return 'Ask Me';
             case OnlineStatus.ResoniteSociable:
                 return 'Sociable';
             case OnlineStatus.VRChatJoinMe:
-                return 'Join Me';
+                if (isKnownSession) return 'Join Me';
+                else return 'Join Me (Private)';
             case OnlineStatus.Offline:
                 return '';
             default:
@@ -116,7 +122,9 @@ const Account = ({ account, imposter, showAlias, showNotes, debugMode, showSessi
         }
     };
 
-    const worldName = account.mainSession && (account.mainSession.knownSession && (account.mainSession.knownSession.inAppVirtualSpaceName || '???')) || undefined;
+    const isOffline = account.onlineStatus === OnlineStatus.Offline;
+    const isKnownSession = account.mainSession && account.mainSession.knowledge === LiveSessionKnowledge.Known && true || false;
+    const worldName = isKnownSession && account.mainSession && (account.mainSession.knownSession && (account.mainSession.knownSession.inAppVirtualSpaceName || 'Loading...')) || undefined;
     return (
         <div className="account-container">
             <div className="account-header">
@@ -126,7 +134,7 @@ const Account = ({ account, imposter, showAlias, showNotes, debugMode, showSessi
                     </div>
                     <div>
                         <div className="account-display-name" title={!imposter && account.allDisplayNames?.map(it => _D(it, debugMode)).join('\n') || ``}>
-                            {_D(account.inAppDisplayName, debugMode)} {getOnlineStatusEmoji(account.onlineStatus || OnlineStatus.Offline)} {getOnlineStatusText(account.onlineStatus || OnlineStatus.Offline)}
+                            {_D(account.inAppDisplayName, debugMode)} {getOnlineStatusEmoji(account.onlineStatus || OnlineStatus.Offline, isKnownSession)} {getOnlineStatusText(account.onlineStatus || OnlineStatus.Offline, isKnownSession)}
                         </div>
                         {!imposter && showAlias && account.allDisplayNames && account.allDisplayNames
                             .slice().reverse()
@@ -139,8 +147,13 @@ const Account = ({ account, imposter, showAlias, showNotes, debugMode, showSessi
                         <div className="account-app-name">
                             {!account.customStatus && getAppDisplayName(account)} {_D2(account.customStatus || '', debugMode)}
                         </div>
-                        {showSession && worldName && <div className="account-app-name">
-                            <i>{_D2(worldName, debugMode, undefined, DemonstrationMode.EverythingButSessionNames)}</i>
+                        {showSession && !isOffline && worldName && <div className="account-app-name">
+                            <span className="status-char status-online">⬤</span> <i>{_D2(worldName, debugMode, undefined, DemonstrationMode.EverythingButSessionNames)}</i>
+                        </div>}
+                        {showSession && !isOffline && !worldName && account.mainSession
+                            && account.mainSession.knowledge !== LiveSessionKnowledge.PrivateSession
+                            && account.mainSession.knowledge !== LiveSessionKnowledge.PrivateWorld && <div className="account-app-name">
+                            <CircleOff className="status-icon status-busy" /> {account.mainSession.knowledge}
                         </div>}
                     </div>
                 </div>
