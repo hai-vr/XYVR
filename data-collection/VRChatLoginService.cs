@@ -7,7 +7,7 @@ namespace XYVR.Data.Collection;
 
 public class VRChatLoginService : ILoginService
 {
-    public async Task<ConnectionAttemptResult> Connect(string guid, ConnectionAttempt connectionAttempt, ICredentialsStorage credentialsStorage)
+    public async Task<ConnectionAttemptResult> Connect(ICredentialsStorage credentialsStorage, string guid, ConnectionAttempt connectionAttempt)
     {
         var vrcApi = new VRChatAPI(new DoNotStoreAnythingStorage());
         var userinput_cookies__sensitive = await credentialsStorage.RequireCookieOrToken();
@@ -62,7 +62,7 @@ public class VRChatLoginService : ILoginService
         };
     }
 
-    public async Task<ConnectionAttemptResult> Logout(string guid, ICredentialsStorage credentialsStorage)
+    public async Task<ConnectionAttemptResult> Logout(ICredentialsStorage credentialsStorage, string guid)
     {
         var vrcApi = new VRChatAPI(new DoNotStoreAnythingStorage());
         var userinput_cookies__sensitive = await credentialsStorage.RequireCookieOrToken();

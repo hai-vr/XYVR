@@ -132,7 +132,7 @@ public class CredentialsManagement
     {
         var guid = connectionAttempt.connector.guid;
         var credentialsStorage = _connectorGuidToCredentialsStorageState.GetOrAdd(guid, _ => new InMemoryCredentialsStorage(null));
-        return await _temp_vrc_login_service.Connect(guid, connectionAttempt, credentialsStorage);
+        return await _temp_vrc_login_service.Connect(credentialsStorage, guid, connectionAttempt);
     }
 
     private async Task<ConnectionAttemptResult> ConnectToResonite(ConnectionAttempt connectionAttempt)
@@ -199,7 +199,7 @@ public class CredentialsManagement
 
     private async Task<ConnectionAttemptResult> VrcLogout(Connector connector, InMemoryCredentialsStorage credentialsStorage)
     {
-        return await _temp_vrc_login_service.Logout(connector.guid, credentialsStorage);
+        return await _temp_vrc_login_service.Logout(credentialsStorage, connector.guid);
     }
 
     private async Task<ConnectionAttemptResult> ResoniteLogout(Connector connector, InMemoryCredentialsStorage credentialsStorage)
