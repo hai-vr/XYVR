@@ -6,7 +6,7 @@ using XYVR.Data.Collection;
 
 namespace XYVR.AccountAuthority.Resonite;
 
-public partial class ResoniteLiveCommunicator
+internal partial class ResoniteLiveCommunicator
 {
     private readonly ICredentialsStorage _credentialsStorage;
     private readonly string _callerInAppIdentifier;

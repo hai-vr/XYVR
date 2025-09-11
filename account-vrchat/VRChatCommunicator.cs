@@ -4,7 +4,7 @@ using XYVR.Data.Collection;
 
 namespace XYVR.AccountAuthority.VRChat;
 
-public class VRChatCommunicator
+internal class VRChatCommunicator
 {
     public const string VRChatQualifiedAppName = "vrchat";
     

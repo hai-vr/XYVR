@@ -6,7 +6,7 @@ using XYVR.Data.Collection;
 
 namespace XYVR.AccountAuthority.VRChat;
 
-public class VRChatLiveCommunicator
+internal class VRChatLiveCommunicator
 {
     private readonly ICredentialsStorage _credentialsStorage;
     private readonly string _callerInAppIdentifier;

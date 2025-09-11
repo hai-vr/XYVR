@@ -4,7 +4,7 @@ using XYVR.Data.Collection;
 
 namespace XYVR.AccountAuthority.Resonite;
 
-public class ResoniteCommunicator
+internal class ResoniteCommunicator
 {
     public const string ResoniteQualifiedAppName = "resonite";
     

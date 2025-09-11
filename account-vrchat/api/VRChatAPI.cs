@@ -10,7 +10,7 @@ using XYVR.Data.Collection;
 
 namespace XYVR.API.VRChat;
 
-public class VRChatAPI
+internal class VRChatAPI
 {
     private const string VRChatApiSourceName = "vrchat_web_api";
     private const string AuthUrl = AuditUrls.VrcApiUrl + "/auth/user";

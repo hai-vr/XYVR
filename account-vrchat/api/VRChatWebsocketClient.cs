@@ -5,7 +5,7 @@ using XYVR.Core;
 
 namespace XYVR.API.VRChat;
 
-public class VRChatWebsocketClient : IDisposable
+internal class VRChatWebsocketClient : IDisposable
 {
     private readonly ClientWebSocket _webSocket;
     private readonly CancellationTokenSource _cancellationTokenSource;

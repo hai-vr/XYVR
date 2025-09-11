@@ -9,7 +9,7 @@ using XYVR.Data.Collection;
 namespace XYVR.API.Resonite;
 
 // Based on https://wiki.resonite.com/API
-public class ResoniteAPI
+internal class ResoniteAPI
 {
     private const string ResoniteApiSourceName = "resonite_web_api";
 

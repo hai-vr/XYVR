@@ -5,7 +5,7 @@ using XYVR.API.Audit;
 
 namespace XYVR.API.Resonite;
 
-public class ResoniteSignalRClient
+internal class ResoniteSignalRClient
 {
     private HubConnection? _connection;
     
