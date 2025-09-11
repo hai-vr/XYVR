@@ -110,7 +110,6 @@ Main application execution projects:
 Core projects:
 
 - **core** contains data structures shared by many projects in this solution and the repository of Individuals that handles the business logic of ingesting incoming data.
-- **c-login** contains data structures and interfaces specifically for logging into the services.
 - **development-scaffold** loads and saves the data into a JSON file.
 - **data-collection** orchestrates calls to the external systems and retrieves data from them.
 

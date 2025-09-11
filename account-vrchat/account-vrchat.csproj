@@ -9,7 +9,6 @@
 
     <ItemGroup>
         <ProjectReference Include="..\audit-urls\audit-urls.csproj"/>
-        <ProjectReference Include="..\c-login\c-login.csproj" />
         <ProjectReference Include="..\core\core.csproj"/>
     </ItemGroup>
 
