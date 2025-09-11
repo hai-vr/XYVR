@@ -62,7 +62,7 @@ public class VRChatCommunicator
         
         await foreach (var note in _api.ListUserNotes(DataCollectionReason.FindUndiscoveredAccounts))
         {
-            var hasNote = string.IsNullOrWhiteSpace(note.note);
+            var hasNote = !string.IsNullOrWhiteSpace(note.note);
             var acc = new IncompleteAccount
             {
                 namedApp = NamedApp.VRChat,
