@@ -7,7 +7,7 @@ namespace XYVR.Data.Collection;
 
 public class VRChatLoginService : ILoginService
 {
-    public async Task<ConnectionAttemptResult> Connect(ConnectionAttempt connectionAttempt, ICredentialsStorage credentialsStorage, string guid)
+    public async Task<ConnectionAttemptResult> Connect(string guid, ConnectionAttempt connectionAttempt, ICredentialsStorage credentialsStorage)
     {
         var vrcApi = new VRChatAPI(new DoNotStoreAnythingStorage());
         var userinput_cookies__sensitive = await credentialsStorage.RequireCookieOrToken();
@@ -62,7 +62,7 @@ public class VRChatLoginService : ILoginService
         };
     }
 
-    public async Task<ConnectionAttemptResult> Logout(Connector connector, ICredentialsStorage credentialsStorage)
+    public async Task<ConnectionAttemptResult> Logout(string guid, ICredentialsStorage credentialsStorage)
     {
         var vrcApi = new VRChatAPI(new DoNotStoreAnythingStorage());
         var userinput_cookies__sensitive = await credentialsStorage.RequireCookieOrToken();
@@ -76,13 +76,19 @@ public class VRChatLoginService : ILoginService
         {
             case LogoutResponseStatus.Unresolved:
             case LogoutResponseStatus.OutsideProtocol:
-                return new ConnectionAttemptResult { guid = connector.guid, type = ConnectionAttemptResultType.Failure };
+                return new ConnectionAttemptResult { guid = guid, type = ConnectionAttemptResultType.Failure };
             case LogoutResponseStatus.Success:
             case LogoutResponseStatus.Unauthorized:
             case LogoutResponseStatus.NotLoggedIn:
-                return new ConnectionAttemptResult { guid = connector.guid, type = ConnectionAttemptResultType.LoggedOut };
+                return new ConnectionAttemptResult { guid = guid, type = ConnectionAttemptResultType.LoggedOut };
             default:
                 throw new ArgumentOutOfRangeException();
         }
+    }
+
+    public async Task<bool> IsLoggedInWithoutRequest(ICredentialsStorage copyOfCredentialsStorage)
+    {
+        var communicator = new VRChatCommunicator(new DoNotStoreAnythingStorage(), copyOfCredentialsStorage);
+        return await communicator.SoftIsLoggedIn();
     }
 }

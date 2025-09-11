@@ -72,7 +72,7 @@ public class CredentialsManagement
         };
     }
 
-    public async Task<bool> IsLoggedIn(Connector connector)
+    public async Task<bool> IsLoggedInWithoutRequest(Connector connector)
     {
         if (!_connectorGuidToCredentialsStorageState.TryGetValue(connector.guid, out var credentialsStorage)) return false;
         
@@ -81,22 +81,20 @@ public class CredentialsManagement
         
         return connector.type switch
         {
-            ConnectorType.VRChatAPI => await VrcCheckIsLoggedIn(cookieOrToken),
+            ConnectorType.VRChatAPI => await SOFT_VrcCheckIsLoggedIn(cookieOrToken),
             ConnectorType.ResoniteAPI => await ResoniteCheckIsLoggedIn(cookieOrToken),
             ConnectorType.Offline => throw new ArgumentException("Cannot connect to offline connector"),
             _ => throw new ArgumentOutOfRangeException()
         };
     }
 
-    private async Task<bool> VrcCheckIsLoggedIn(string cookieOrToken)
+    private async Task<bool> SOFT_VrcCheckIsLoggedIn(string cookieOrToken)
     {
-        var communicator = new VRChatCommunicator(
-            new DoNotStoreAnythingStorage(),
-            new InMemoryCredentialsStorage(cookieOrToken)
-        );
+        // FIXME: I don't remember why we are copying this. Maybe it's so that the communicator doesn't try to delete the cookie from the storage or something
+        // (there was an undesired side effect, maybe because it was overwriting the cookie?)
+        var copyOfCredentialsStorage = new InMemoryCredentialsStorage(cookieOrToken);
         
-        // FIXME: This does not handle disconnections
-        return await communicator.SoftIsLoggedIn();
+        return await _temp_vrc_login_service.IsLoggedInWithoutRequest(copyOfCredentialsStorage);
     }
 
     private async Task<bool> ResoniteCheckIsLoggedIn(string cookieOrToken)
@@ -134,7 +132,7 @@ public class CredentialsManagement
     {
         var guid = connectionAttempt.connector.guid;
         var credentialsStorage = _connectorGuidToCredentialsStorageState.GetOrAdd(guid, _ => new InMemoryCredentialsStorage(null));
-        return await _temp_vrc_login_service.Connect(connectionAttempt, credentialsStorage, guid);
+        return await _temp_vrc_login_service.Connect(guid, connectionAttempt, credentialsStorage);
     }
 
     private async Task<ConnectionAttemptResult> ConnectToResonite(ConnectionAttempt connectionAttempt)
@@ -201,7 +199,7 @@ public class CredentialsManagement
 
     private async Task<ConnectionAttemptResult> VrcLogout(Connector connector, InMemoryCredentialsStorage credentialsStorage)
     {
-        return await _temp_vrc_login_service.Logout(connector, credentialsStorage);
+        return await _temp_vrc_login_service.Logout(connector.guid, credentialsStorage);
     }
 
     private async Task<ConnectionAttemptResult> ResoniteLogout(Connector connector, InMemoryCredentialsStorage credentialsStorage)

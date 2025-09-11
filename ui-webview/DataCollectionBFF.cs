@@ -75,7 +75,7 @@ public class DataCollectionBFF : IDataCollectionBFF
         var connectors = _mainWindow.ConnectorsMgt.Connectors;
         
         var connectorF = (await Task.WhenAll(connectors
-            .Select(async connector => FrontConnector.FromCore(connector, await _mainWindow.CredentialsMgt.IsLoggedIn(connector)))
+            .Select(async connector => FrontConnector.FromCore(connector, await _mainWindow.CredentialsMgt.IsLoggedInWithoutRequest(connector)))
             .ToList())).ToList();
         
         return ToJSON(connectorF);
