@@ -110,13 +110,18 @@ public class VRChatLiveCommunicator
             {
                 try
                 {
+                    var worldId = LocationAsWorldIdOrNull(friend.location);
+                    CachedWorld? cachedWorld = worldId != null ? GetOrQueueWorldFetch(worldId) : null;
+                    
                     var session = friend.location != "private" && friend.location != "offline" && friend.location != "traveling" ? new LiveUserKnownSession
                     {
                         inAppSessionIdentifier = friend.location,
                         inAppHost = null,
                         inAppSessionName = null,
-                        inAppVirtualSpaceName = GetVirtualSpaceNameOrQueueFetchIfApplicable(friend.location),
+                        inAppVirtualSpaceName = cachedWorld?.name,
+                        isJoinable = null
                     } : null;
+                    
                     await OnLiveUpdateReceived(new LiveUserUpdate
                     {
                         trigger = "API-ListFriends",
@@ -229,24 +234,44 @@ public class VRChatLiveCommunicator
                             inAppHost = null,
                             inAppSessionName = null,
                             inAppVirtualSpaceName = null,
+                            isJoinable = false
                         }
                     };
                 }
                 else
                 {
-                    var virtualSpaceName = GetVirtualSpaceNameOrQueueFetchIfApplicable(location);
-
-                    return new LiveUserSessionState
+                    var worldId = LocationAsWorldIdOrNull(location);
+                    if (worldId != null)
                     {
-                        knowledge = LiveUserSessionKnowledge.Known,
-                        knownSession = new LiveUserKnownSession
+                        CachedWorld? cachedWorld = GetOrQueueWorldFetch(worldId);
+                        return new LiveUserSessionState
                         {
-                            inAppSessionIdentifier = location,
-                            inAppHost = null,
-                            inAppSessionName = null,
-                            inAppVirtualSpaceName = virtualSpaceName,
-                        }
-                    };
+                            knowledge = LiveUserSessionKnowledge.Known,
+                            knownSession = new LiveUserKnownSession
+                            {
+                                inAppSessionIdentifier = location,
+                                inAppHost = null,
+                                inAppSessionName = null,
+                                inAppVirtualSpaceName = cachedWorld?.name,
+                                isJoinable = true // FIXME
+                            }
+                        };
+                    }
+                    else
+                    {
+                        return new LiveUserSessionState
+                        {
+                            knowledge = LiveUserSessionKnowledge.Known,
+                            knownSession = new LiveUserKnownSession
+                            {
+                                inAppSessionIdentifier = location,
+                                inAppHost = null,
+                                inAppSessionName = null,
+                                inAppVirtualSpaceName = null,
+                                isJoinable = null
+                            }
+                        };
+                    }
                 }
             }
         }
@@ -256,55 +281,45 @@ public class VRChatLiveCommunicator
         }
     }
 
-    private string? GetVirtualSpaceNameOrQueueFetchIfApplicable(string location)
+    public string? LocationAsWorldIdOrNull(string location)
     {
-        string? virtualSpaceName;
         if (location.StartsWith("wrld_"))
         {
             var separator = location.IndexOf(':');
             if (separator != -1)
             {
                 var worldId = location.Substring(0, separator);
-                var cachedWorld = GetOrQueueWorldFetch(worldId);
-                if (cachedWorld != null)
-                {
-                    virtualSpaceName = cachedWorld.name;
-                }
-                else
-                {
-                    virtualSpaceName = null;
-                }
+                return worldId;
             }
             else
             {
-                virtualSpaceName = null;
                 Console.WriteLine($"Location is not parseable as a world: {location}");
             }
         }
         else
         {
-            virtualSpaceName = null;
             Console.WriteLine($"Unknown location: {location}");
         }
 
-        return virtualSpaceName;
+        return null;
     }
 
     private CachedWorld? GetOrQueueWorldFetch(string worldId)
     {
-        var cachedWorld = _worldNameCache.GetValidOrNull(worldId);
-        if (cachedWorld != null) return cachedWorld;
+        var cachedWorldNullable = _worldNameCache.GetValidOrNull(worldId);
 
-        if (!_allQueued.Contains(worldId))
+        var shouldAttemptQueueing = cachedWorldNullable == null || cachedWorldNullable.needsRefresh;
+        if (shouldAttemptQueueing && !_allQueued.Contains(worldId))
         {
-            Console.WriteLine($"We don't know world id {worldId}, will queue fetch...");
+            if (cachedWorldNullable != null) Console.WriteLine($"We don't know world id {worldId}, will queue fetch...");
+            else Console.WriteLine($"We need to refresh our knowledge of world id {worldId}, will queue fetch...");
 
             _allQueued.Add(worldId);
             _queue.Enqueue(worldId);
             WakeUpQueue();
         }
             
-        return null;
+        return cachedWorldNullable;
     }
 
     private OnlineStatus ParseStatus(string type, string contentLocation, string platform, string userStatus)

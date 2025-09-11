@@ -17,7 +17,9 @@ public class WorldNameCache
             foreach (var value in VRCWorlds.Values)
             {
                 value.isObsolete = true;
+                value.needsRefresh = true;
             }
+            Console.WriteLine($"Cache data is now marked as obsolete. Cache version was {cacheVersion} and it is now {LatestVersion}.");
             cacheVersion = LatestVersion;
         }
 
@@ -26,10 +28,9 @@ public class WorldNameCache
         {
             if (!value.isObsolete)
             {
-                if ((now - value.cachedAt).Duration().TotalDays > 3)
+                if ((now - value.cachedAt).Duration().TotalHours > 1)
                 {
-                    Console.WriteLine($"Cache data about world {value.worldId} ({value.name} by {value.authorName}) has now been marked as obsolete.");
-                    value.isObsolete = true;
+                    value.needsRefresh = true;
                 }
             }
         }
@@ -52,6 +53,7 @@ public class CachedWorld
     public bool isObsolete;
     
     public DateTime cachedAt;
+    [NonSerialized] public bool needsRefresh;
     
     public string worldId;
     public string name;
