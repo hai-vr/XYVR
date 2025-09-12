@@ -1,6 +1,8 @@
 ﻿import {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import {useNavigate} from 'react-router-dom'
 import './AddressBookPage.css'
+import './LiveSessions.css'
+import '../components/Individual.css'
 import '../Header.css'
 import Individual from "../components/Individual.tsx"
 import {
@@ -28,6 +30,7 @@ import {_D2} from "../haiUtils.ts";
 import {type FrontIndividual, OnlineStatus} from "../types/CoreTypes.ts";
 import {type FrontLiveSession, type FrontLiveUserUpdate, LiveSessionKnowledge} from "../types/LiveUpdateTypes.ts";
 import {type DebugFlags, DemonstrationMode} from "../types/DebugFlags.ts";
+import Account from "../components/Account.tsx";
 
 const sortIndividuals = (individuals: FrontIndividual[], unparsedSearchField: string) => {
     if (!unparsedSearchField) {
@@ -107,6 +110,8 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
     const mergeAccountGuidOrUndRef = useRef(mergeAccountGuidOrUnd);
     const [displayNameOfOtherBeingMergedOrUnd, setDisplayNameOfOtherBeingMergedOrUnd] = useState<string | undefined>(undefined);
 
+    const [liveSessionArray, setLiveSessionArray] = useState<FrontLiveSession[]>([]);
+
     // Infinite scrolling state
     const [displayedCount, setDisplayedCount] = useState(50); // Start with 50 items
     const [isLoading, setIsLoading] = useState(false);
@@ -137,7 +142,12 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
             // Load individuals when the component loads
             const allIndividuals = await window.chrome.webview.hostObjects.appApi.GetAllExposedIndividualsOrderedByContact();
             const individualsArray = JSON.parse(allIndividuals);
+
+            const allLiveSessionData = await window.chrome.webview.hostObjects.liveApi.GetAllExistingLiveSessionData();
+            const liveSessionArray = JSON.parse(allLiveSessionData);
+
             setIndividuals(individualsArray);
+            setLiveSessionArray(liveSessionArray);
             setInitialized(true);
         };
 
@@ -216,8 +226,19 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
         };
         const liveSessionUpdated = (event: any) => {
             console.log('Live session updated event:', event.detail);
-            // @ts-ignore
             const liveSession: FrontLiveSession = event.detail;
+
+            setLiveSessionArray(prevSessions => {
+                const existingIndex = prevSessions.findIndex(session => session.guid === liveSession.guid);
+
+                if (existingIndex !== -1) {
+                    const newSessions = [...prevSessions];
+                    newSessions[existingIndex] = liveSession;
+                    return newSessions;
+                } else {
+                    return [...prevSessions, liveSession];
+                }
+            });
         }
 
         window.addEventListener('individualUpdated', individualUpdated);
@@ -451,6 +472,69 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                         </div>
                     )}
                 </div>
+
+                {liveSessionArray.length > 0 && (
+                    <div className="live-sessions-section">
+                        <div className="live-sessions-grid">
+                            {liveSessionArray
+                                .filter(liveSession => liveSession.participants.some(p => p.isKnown &&
+                                    displayedIndividuals.some(ind =>
+                                        ind.accounts?.some(acc =>
+                                            acc.qualifiedAppName === liveSession.qualifiedAppName &&
+                                            acc.inAppIdentifier === p.knownAccount!.inAppIdentifier
+                                        )
+                                    )
+                                ))
+                                .sort((a, b) => {
+                                    const aKnownCount = a.participants.filter(p => p.isKnown).length;
+                                    const bKnownCount = b.participants.filter(p => p.isKnown).length;
+                                    return bKnownCount - aKnownCount; // Descending order (most participants first)
+                                })
+                                .map((liveSession, index) => (
+                                    <div key={liveSession.guid || index} className="live-session-card">
+                                        <div className="live-session-header">
+                                            <div className="live-session-world">
+                                                {liveSession.inAppVirtualSpaceName || 'Unknown World'} ({liveSession.participants.filter(p => p.isKnown).length} / ?)
+                                            </div>
+                                        </div>
+                                        <div className="live-session-participants">
+                                            <div className="accounts-container">
+                                                <div className="accounts-grid">
+                                                    {liveSession.participants.filter(value => value.isKnown).map((participant, pIndex) => {
+                                                        const matchingIndividual = individuals.find(ind =>
+                                                            ind.accounts?.some(acc =>
+                                                                acc.qualifiedAppName === liveSession.qualifiedAppName &&
+                                                                acc.inAppIdentifier === participant.knownAccount!.inAppIdentifier
+                                                            )
+                                                        );
+
+                                                        const matchingAccount = matchingIndividual?.accounts?.find(acc =>
+                                                            acc.qualifiedAppName === liveSession.qualifiedAppName &&
+                                                            acc.inAppIdentifier === participant.knownAccount!.inAppIdentifier
+                                                        );
+
+                                                        if (matchingAccount) {
+                                                            return (
+                                                                <Account
+                                                                    key={participant.knownAccount!.inAppIdentifier || pIndex}
+                                                                    account={matchingAccount}
+                                                                    imposter={true}
+                                                                    showAlias={false}
+                                                                    showNotes={false}
+                                                                    debugMode={debugMode}
+                                                                    showSession={false}
+                                                                />
+                                                            );
+                                                        }
+                                                    })}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                        </div>
+                    </div>
+                )}
 
                 <div className={`individuals-grid ${compactMode ? 'compact-mode' : ''}`}>
                     {displayedIndividuals.map((individual, index) => (

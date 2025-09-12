@@ -7,7 +7,8 @@ namespace XYVR.UI.WebviewUI;
 [ComVisible(true)]
 public interface ILiveBFF
 {
-    string GetAllExistingLiveData();
+    string GetAllExistingLiveUserData();
+    string GetAllExistingLiveSessionData();
 }
 
 [ComVisible(true)]
@@ -19,17 +20,38 @@ public class LiveBFF : ILiveBFF
 
     private List<ILiveMonitoring>? _liveMonitoringAgents;
 
-
     public LiveBFF(MainWindow mainWindow)
     {
         _mainWindow = mainWindow;
         _serializer = BFFUtils.NewSerializer();
     }
     
-    public string GetAllExistingLiveData()
+    public string GetAllExistingLiveUserData()
     {
-        var liveData = _mainWindow.LiveStatusMonitoring.GetAll();
-        return JsonConvert.SerializeObject(liveData, _serializer);
+        try
+        {
+            var liveData = _mainWindow.LiveStatusMonitoring.GetAllUserData();
+            return JsonConvert.SerializeObject(liveData, _serializer);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
+    public string GetAllExistingLiveSessionData()
+    {
+        try
+        {
+            var liveData = _mainWindow.LiveStatusMonitoring.GetAllSessions();
+            return JsonConvert.SerializeObject(liveData, _serializer);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
     }
 
     public async Task StartMonitoring()

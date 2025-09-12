@@ -23,6 +23,10 @@
                         TryTwoFactor(guid: string, isTwoFactorEmail: boolean, twoFactorCode: string, stayLoggedIn: boolean): Promise<string>;
                         TryLogout(guid: string): Promise<string>;
                     };
+                    liveApi: {
+                        GetAllExistingLiveUserData(): Promise<string>;
+                        GetAllExistingLiveSessionData(): Promise<string>;
+                    }
                 };
             };
         };

@@ -30,14 +30,19 @@ public class LiveStatusMonitoring
         }
     }
 
-    public List<ImmutableLiveUserUpdate> GetAll(NamedApp namedApp)
+    public List<ImmutableLiveUserUpdate> GetAllUserData(NamedApp namedApp)
     {
         return _liveUpdatesByAppByUser[namedApp].Values.ToList();
     }
 
-    public List<ImmutableLiveUserUpdate> GetAll()
+    public List<ImmutableLiveUserUpdate> GetAllUserData()
     {
         return _liveUpdatesByAppByUser.Values.SelectMany(it => it.Values).ToList();
+    }
+
+    public List<ImmutableLiveSession> GetAllSessions()
+    {
+        return _sessions.Select(it => it.value).ToList();
     }
     
     public async Task MergeUser(ImmutableLiveUserUpdate inputUpdate)
@@ -200,6 +205,7 @@ public class LiveStatusMonitoring
                             .Where(participant => !participant.isKnown || participant.knownAccount!.inAppIdentifier != usingParticipant.knownAccount!.inAppIdentifier)
                     ]
                 };
+                _guidToSession[existingParticipationGuid].value = participantRemoval;
             }
 
             _namedAppToAccountGuidToSessionParticipationGuid[inputSession.namedApp][usingParticipant.knownAccount!.inAppIdentifier]

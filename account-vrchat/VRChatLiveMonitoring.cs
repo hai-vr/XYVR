@@ -45,7 +45,7 @@ public class VRChatLiveMonitoring : ILiveMonitoring
             {
                 Console.WriteLine($"OnWorldCached: {JsonConvert.SerializeObject(world, serializer)}");
                 
-                var vrcLiveUpdates = _monitoring.GetAll(NamedApp.VRChat)
+                var vrcLiveUpdates = _monitoring.GetAllUserData(NamedApp.VRChat)
                     // FIXME: We need the world identifier here
                     .Where(update => update.mainSession?.knownSession?.inAppSessionIdentifier.StartsWith(world.worldId) == true)
                     .ToList();
