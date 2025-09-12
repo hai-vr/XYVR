@@ -31,6 +31,28 @@ public record ImmutableIndividual
     // This field is up to the app users' judgement
     public string? customName { get; init; }
     public ImmutableNote note { get; init; } = new();
+
+    public virtual bool Equals(ImmutableIndividual? other)
+    {
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return guid == other.guid && accounts.SequenceEqual(other.accounts) && displayName == other.displayName && isAnyContact == other.isAnyContact && isExposed == other.isExposed && customName == other.customName && note.Equals(other.note);
+    }
+
+    public override int GetHashCode()
+    {
+        unchecked
+        {
+            var hashCode = guid.GetHashCode();
+            hashCode = (hashCode * 397) ^ accounts.Aggregate(0, (h, a) => h ^ a.GetHashCode());
+            hashCode = (hashCode * 397) ^ displayName.GetHashCode();
+            hashCode = (hashCode * 397) ^ isAnyContact.GetHashCode();
+            hashCode = (hashCode * 397) ^ isExposed.GetHashCode();
+            hashCode = (hashCode * 397) ^ (customName != null ? customName.GetHashCode() : 0);
+            hashCode = (hashCode * 397) ^ note.GetHashCode();
+            return hashCode;
+        }
+    }
 }
 
 public record ImmutableAccount
@@ -75,6 +97,40 @@ public record ImmutableAccount
             qualifiedAppName = qualifiedAppName,
         };
     }
+
+    public virtual bool Equals(ImmutableAccount? other)
+    {
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return isPendingUpdate == other.isPendingUpdate &&
+               isTechnical == other.isTechnical &&
+               guid == other.guid &&
+               namedApp == other.namedApp &&
+               qualifiedAppName == other.qualifiedAppName &&
+               inAppIdentifier == other.inAppIdentifier &&
+               inAppDisplayName == other.inAppDisplayName &&
+               Equals(specifics, other.specifics) &&
+               callers.SequenceEqual(other.callers) &&
+               allDisplayNames.SequenceEqual(other.allDisplayNames);
+    }
+
+    public override int GetHashCode()
+    {
+        unchecked
+        {
+            var hashCode = isPendingUpdate.GetHashCode();
+            hashCode = (hashCode * 397) ^ isTechnical.GetHashCode();
+            hashCode = (hashCode * 397) ^ guid.GetHashCode();
+            hashCode = (hashCode * 397) ^ (int)namedApp;
+            hashCode = (hashCode * 397) ^ qualifiedAppName.GetHashCode();
+            hashCode = (hashCode * 397) ^ inAppIdentifier.GetHashCode();
+            hashCode = (hashCode * 397) ^ inAppDisplayName.GetHashCode();
+            hashCode = (hashCode * 397) ^ (specifics != null ? specifics.GetHashCode() : 0);
+            hashCode = (hashCode * 397) ^ callers.Aggregate(0, (h, a) => h ^ a.GetHashCode());
+            hashCode = (hashCode * 397) ^ allDisplayNames.Aggregate(0, (h, a) => h ^ a.GetHashCode());
+            return hashCode;
+        }
+    }
 }
 
 public record ImmutableAccountIdentification
@@ -104,6 +160,24 @@ public record ImmutableVRChatSpecifics
     public ImmutableArray<string> urls { get; init; } = ImmutableArray<string>.Empty;
     public required string bio { get; init; }
     public required string pronouns { get; init; }
+
+    public virtual bool Equals(ImmutableVRChatSpecifics? other)
+    {
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return urls.SequenceEqual(other.urls) && bio == other.bio && pronouns == other.pronouns;
+    }
+
+    public override int GetHashCode()
+    {
+        unchecked
+        {
+            var hashCode = urls.Aggregate(0, (h, a) => h ^ a.GetHashCode());
+            hashCode = (hashCode * 397) ^ bio.GetHashCode();
+            hashCode = (hashCode * 397) ^ pronouns.GetHashCode();
+            return hashCode;
+        }
+    }
 }
 
 public record ImmutableNote
