@@ -149,7 +149,7 @@ public class LiveStatusMonitoring
 
     private (ImmutableLiveSession, bool, ImmutableLiveSession?) InternalMergeSessionAndGet(ImmutableNonIndexedLiveSession inputSession, ImmutableParticipant? usingParticipant = null)
     {
-        ImmutableLiveSession actualSession = null;
+        ImmutableLiveSession actualSession;
         bool outChanged;
         ImmutableLiveSession participantRemoval = null;
         
@@ -181,12 +181,6 @@ public class LiveStatusMonitoring
             _sessions.Add(sessionRef);
             _guidToSession[liveSession.guid] = sessionRef;
             _namedAppToInAppIdToSession[liveSession.namedApp][liveSession.inAppSessionIdentifier] = sessionRef;
-
-            if (usingParticipant != null && usingParticipant.isKnown)
-            {
-                _namedAppToAccountGuidToSessionParticipationGuid[inputSession.namedApp][usingParticipant.knownAccount!.inAppIdentifier]
-                    = liveSession.guid;
-            }
             
             (actualSession, outChanged) = (liveSession, true);
         }

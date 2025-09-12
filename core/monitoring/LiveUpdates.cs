@@ -107,6 +107,18 @@ public record ImmutableLiveSession
             return hashCode;
         }
     }
+
+    public override string ToString()
+    {
+        var participantsStr = participants.IsEmpty 
+            ? "[]" 
+            : $"[{string.Join(", ", participants)}]";
+            
+        return $"ImmutableLiveSession {{ guid: {guid}, namedApp: {namedApp}, qualifiedAppName: {qualifiedAppName}, " +
+               $"inAppSessionIdentifier: {inAppSessionIdentifier}, inAppSessionName: {inAppSessionName}, " +
+               $"inAppVirtualSpaceName: {inAppVirtualSpaceName}, inAppHost: {inAppHost}, " +
+               $"participants: {participantsStr} }}";
+    }
 }
 
 public record ImmutableNonIndexedLiveSession

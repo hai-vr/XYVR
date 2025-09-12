@@ -14,6 +14,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "development-scaffold", "dev
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "audit-urls", "audit-urls\audit-urls.csproj", "{F25CEC2E-58FA-457F-AFEA-7A59EFF330B8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "core-tests", "core-tests\core-tests.csproj", "{2901301F-DD38-4F95-91C9-08E86A2A8D6B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,5 +50,9 @@ Global
 		{F25CEC2E-58FA-457F-AFEA-7A59EFF330B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F25CEC2E-58FA-457F-AFEA-7A59EFF330B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F25CEC2E-58FA-457F-AFEA-7A59EFF330B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2901301F-DD38-4F95-91C9-08E86A2A8D6B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2901301F-DD38-4F95-91C9-08E86A2A8D6B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2901301F-DD38-4F95-91C9-08E86A2A8D6B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2901301F-DD38-4F95-91C9-08E86A2A8D6B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
