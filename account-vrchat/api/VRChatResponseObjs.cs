@@ -43,6 +43,7 @@ public struct VRChatAuthUser
 {
     public string id;
     public string displayName;
+    public string[] friends;
 }
 
 public struct VRChatUser

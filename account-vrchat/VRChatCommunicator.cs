@@ -35,6 +35,10 @@ internal class VRChatCommunicator
     {
         _api ??= await InitializeAPI();
 
+        var contactsAsyncAll = await _api.GetAuthUser(DataCollectionReason.FindUndiscoveredAccounts);
+        
+        var missingFriends = contactsAsyncAll.friends.ToHashSet();
+
         var contactsAsyncEnum = _api.ListFriends(ListFriendsRequestType.OnlyOnline, DataCollectionReason.FindUndiscoveredAccounts)
             .Concat(_api.ListFriends(ListFriendsRequestType.OnlyOffline, DataCollectionReason.FindUndiscoveredAccounts));
         await foreach (var friend in contactsAsyncEnum)
@@ -57,6 +61,8 @@ internal class VRChatCommunicator
                 ]
             };
             yield return acc;
+            
+            missingFriends.Remove(acc.inAppIdentifier);
         }
         
         await foreach (var note in _api.ListUserNotes(DataCollectionReason.FindUndiscoveredAccounts))
@@ -85,6 +91,38 @@ internal class VRChatCommunicator
             };
 
             yield return acc;
+            
+            missingFriends.Remove(acc.inAppIdentifier);
+        }
+
+        if (missingFriends.Count > 0)
+        {
+            Console.WriteLine($"Listing all friends caused a few misses ({missingFriends.Count}), we'll get them now {string.Join(", ", missingFriends)}");
+        }
+        
+        foreach (var userId in missingFriends)
+        {
+            var userN = await _api.GetUserLenient(userId, DataCollectionReason.CollectExistingAccount);
+            if (userN is { } user)
+            {
+                yield return new ImmutableIncompleteAccount
+                {
+                    namedApp = NamedApp.VRChat,
+                    qualifiedAppName = VRChatQualifiedAppName,
+                    inAppIdentifier = user.id,
+                    inAppDisplayName = user.displayName,
+                    callers =
+                    [
+                        new ImmutableIncompleteCallerAccount
+                        {
+                            isAnonymous = false,
+                            inAppIdentifier = _callerUserId,
+                            isContact = user.isFriend,
+                            note = ExtractNoteFromUser(user)
+                        }
+                    ]
+                };
+            }
         }
     }
 
@@ -137,13 +175,18 @@ internal class VRChatCommunicator
                     isAnonymous = false,
                     inAppIdentifier = callerUserId,
                     isContact = user.isFriend,
-                    note = new ImmutableNote
-                    {
-                        status = string.IsNullOrWhiteSpace(user.note) ? NoteState.NeverHad : NoteState.Exists,
-                        text = string.IsNullOrWhiteSpace(user.note) ? null : user.note
-                    }
+                    note = ExtractNoteFromUser(user)
                 }
             ]
+        };
+    }
+
+    private static ImmutableNote ExtractNoteFromUser(VRChatUser user)
+    {
+        return new ImmutableNote
+        {
+            status = string.IsNullOrWhiteSpace(user.note) ? NoteState.NeverHad : NoteState.Exists,
+            text = string.IsNullOrWhiteSpace(user.note) ? null : user.note
         };
     }
 
