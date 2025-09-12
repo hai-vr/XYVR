@@ -116,11 +116,11 @@ internal partial class ResoniteLiveCommunicator
         }
 
         var session = SessionOrNull(userStatusUpdate);
+        SessionUpdateJsonObject? sessionUpdate = null;
 
         string? worldName;
         if (session != null && userStatusUpdate.hashSalt != null && !session.sessionHidden && session.accessLevel != "Private")
         {
-            SessionUpdateJsonObject? sessionUpdate;
             
             var existingSessionId = _resolvedMixedHashToSessionId.GetValueOrDefault(session.sessionHash);
             if (existingSessionId != null)
@@ -143,13 +143,16 @@ internal partial class ResoniteLiveCommunicator
             worldName = null;
         }
 
+        var knowledge = session?.accessLevel == "Private" ?
+            LiveUserSessionKnowledge.PrivateSession :
+            sessionUpdate != null ? LiveUserSessionKnowledge.Known : LiveUserSessionKnowledge.KnownButNoData;
         return session != null
             ? new LiveUserSessionState
             {
-                knowledge = session.accessLevel == "Private" ? LiveUserSessionKnowledge.PrivateSession : LiveUserSessionKnowledge.Known,
-                knownSession = new LiveUserKnownSession
+                knowledge = knowledge,
+                knownSession = knowledge == LiveUserSessionKnowledge.Known ? new LiveUserKnownSession
                 {
-                    inAppSessionIdentifier = session.sessionHash,
+                    inAppSessionIdentifier = sessionUpdate!.sessionId,
                     inAppHost = session is { isHost: true }
                         ? new ImmutableLiveSessionHost
                         {
@@ -158,7 +161,7 @@ internal partial class ResoniteLiveCommunicator
                         }
                         : null,
                     inAppVirtualSpaceName = worldName
-                }
+                } : null
             }
             : new LiveUserSessionState
             {
