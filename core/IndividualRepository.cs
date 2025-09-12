@@ -4,14 +4,21 @@ namespace XYVR.Core;
 
 public class IndividualRepository
 {
-    public List<ImmutableIndividual> Individuals { get; }
-    
-    private readonly Dictionary<NamedApp, Dictionary<string, ImmutableIndividual>> _namedAppToInAppIdToIndividual = new();
+    public IEnumerable<ImmutableIndividual> Individuals => _individualRefs.Select(individual => individual.value).ToList();
+
+    private readonly Dictionary<NamedApp, Dictionary<string, IndividualRef>> _namedAppToInAppIdToIndividual = new();
+    private readonly List<IndividualRef> _individualRefs;
+
+    private class IndividualRef(ImmutableIndividual value)
+    {
+        internal string guid => value.guid;
+        internal ImmutableIndividual value = value;
+    }
 
     public IndividualRepository(ImmutableIndividual[] individuals)
     {
-        Individuals = individuals.ToList();
-        EvaluateDataMigrations(Individuals);
+        _individualRefs = individuals.Select(individual => new IndividualRef(individual)).ToList();
+        EvaluateDataMigrations();
 
         RebuildAccountDictionary();
     }
@@ -26,21 +33,21 @@ public class IndividualRepository
 
     // This can change the data of an individual when we have data migrations
     // (i.e. when isExposed was added, none of the individuals had that info)
-    private void EvaluateDataMigrations(List<ImmutableIndividual> individuals)
+    private void EvaluateDataMigrations()
     {
-        for (var index = 0; index < individuals.Count; index++)
+        for (var index = 0; index < _individualRefs.Count; index++)
         {
-            var existingIndividual = individuals[index];
+            var existingIndividual = _individualRefs[index].value;
             var modifiedIndividual = ModifyIndividualBasedOnAccounts(existingIndividual);
             if (existingIndividual != modifiedIndividual)
             {
-                individuals[index] = modifiedIndividual;
+                _individualRefs[index].value = modifiedIndividual;
             }
         }
 
-        for (var i = 0; i < individuals.Count; i++)
+        for (var i = 0; i < _individualRefs.Count; i++)
         {
-            var originalIndividual = individuals[i];
+            var originalIndividual = _individualRefs[i].value;
             
             var modifiedIndividual = originalIndividual;
             
@@ -81,11 +88,11 @@ public class IndividualRepository
 
             if (originalIndividual != modifiedIndividual)
             {
-                individuals[i] = modifiedIndividual;
+                _individualRefs[i].value = modifiedIndividual;
             }
         }
 
-        var duplicateRecords = individuals.SelectMany(individual => individual.accounts)
+        var duplicateRecords = _individualRefs.SelectMany(individual => individual.value.accounts)
             .Select(account => new DiscriminatorRecord(account.qualifiedAppName, account.inAppIdentifier))
             .GroupBy(record => record)
             .Select(records => records.ToList())
@@ -104,7 +111,8 @@ public class IndividualRepository
             // Detect problematic duplicates
             foreach (var discriminatorRecord in duplicateRecords)
             {
-                var problematics = individuals
+                var problematics = _individualRefs
+                    .Select(ind => ind.value)
                     .Where(individual => individual.accounts.Any(account => account.qualifiedAppName == discriminatorRecord.AccountQualifiedAppName && account.inAppIdentifier == discriminatorRecord.AccountInAppIdentifier))
                     .ToList();
                 Console.WriteLine($"Problematic ({problematics.Count}): {string.Join(",", problematics.Select(individual => individual.accounts.Length).ToList())}");
@@ -127,24 +135,24 @@ public class IndividualRepository
 
     public HashSet<string> CollectAllInAppIdentifiers(NamedApp namedApp)
     {
-        return Individuals
-            .SelectMany(individual => individual.accounts)
+        return _individualRefs
+            .SelectMany(individual => individual.value.accounts)
             .Where(account => account.namedApp == namedApp)
             .Select(account => account.inAppIdentifier)
             .ToHashSet();
     }
 
-    private Dictionary<string, ImmutableIndividual> CreateAccountDictionary(NamedApp namedApp)
+    private Dictionary<string, IndividualRef> CreateAccountDictionary(NamedApp namedApp)
     {
-        var results = new Dictionary<string, ImmutableIndividual>();
+        var results = new Dictionary<string, IndividualRef>();
         
-        foreach (var individual in Individuals)
+        foreach (var individualRef in _individualRefs)
         {
-            foreach (var account in individual.accounts)
+            foreach (var account in individualRef.value.accounts)
             {
                 if (account.namedApp == namedApp)
                 {
-                    results[account.inAppIdentifier] = individual;
+                    results[account.inAppIdentifier] = individualRef;
                 }
             }
         }
@@ -154,12 +162,15 @@ public class IndividualRepository
 
     /// The list of accounts may contain references to the same account but with different data.
     /// It needs to be applied sequentially without deduplication.
-    public void MergeIncompleteAccounts(List<ImmutableIncompleteAccount> incompleteAccounts)
+    public HashSet<ImmutableAccountIdentification> MergeIncompleteAccounts(List<ImmutableIncompleteAccount> incompleteAccounts)
     {
+        var actuallyModified = new HashSet<ImmutableAccountIdentification>();
+
         foreach (var inputAccount in incompleteAccounts)
         {
-            if (_namedAppToInAppIdToIndividual[inputAccount.namedApp].TryGetValue(inputAccount.inAppIdentifier, out var existingIndividual))
+            if (_namedAppToInAppIdToIndividual[inputAccount.namedApp].TryGetValue(inputAccount.inAppIdentifier, out var existingIndividualRef))
             {
+                var existingIndividual = existingIndividualRef.value;
                 var modifiedAccounts = existingIndividual.accounts.ToList();
                 for (var index = 0; index < modifiedAccounts.Count; index++)
                 {
@@ -174,26 +185,39 @@ public class IndividualRepository
                 var modifiedIndividual = ModifyIndividualBasedOnAccounts(existingIndividual with { accounts = [..modifiedAccounts] });
                 if (existingIndividual != modifiedIndividual)
                 {
-                    _namedAppToInAppIdToIndividual[inputAccount.namedApp][inputAccount.inAppIdentifier] = modifiedIndividual;
-                } 
+                    Console.WriteLine($"Something about {inputAccount.inAppDisplayName} changed.");
+                    existingIndividualRef.value = modifiedIndividual;
+                    
+                    actuallyModified.Add(inputAccount.AsIdentification());
+                }
+                else
+                {
+                    Console.WriteLine($"Merging account of {inputAccount.inAppDisplayName} resulted in no change.");
+                }
             }
             else
             {
                 Console.WriteLine($"Creating new individual from incomplete account: {inputAccount.namedApp} {inputAccount.inAppIdentifier} {inputAccount.inAppDisplayName}");
-                var newIndividual = CreateNewIndividualFromIncompleteAccount(inputAccount);
-                _namedAppToInAppIdToIndividual[inputAccount.namedApp].Add(inputAccount.inAppIdentifier, newIndividual);
+                _ = CreateNewIndividualFromIncompleteAccount(inputAccount);
+                    
+                actuallyModified.Add(inputAccount.AsIdentification());
             }
         }
+
+        return actuallyModified;
     }
 
     /// The list of accounts may contain references to the same account but with different data.
     /// It needs to be applied sequentially without deduplication.
-    public void MergeAccounts(List<ImmutableNonIndexedAccount> accounts)
+    public HashSet<ImmutableAccountIdentification> MergeAccounts(List<ImmutableNonIndexedAccount> accounts)
     {
+        var actuallyModified = new HashSet<ImmutableAccountIdentification>();
+        
         foreach (var inputAccount in accounts)
         {
-            if (_namedAppToInAppIdToIndividual[inputAccount.namedApp].TryGetValue(inputAccount.inAppIdentifier, out var existingIndividual))
+            if (_namedAppToInAppIdToIndividual[inputAccount.namedApp].TryGetValue(inputAccount.inAppIdentifier, out var existingIndividualRef))
             {
+                var existingIndividual = existingIndividualRef.value;
                 var modifiedAccounts = existingIndividual.accounts.ToList();
                 for (var index = 0; index < modifiedAccounts.Count; index++)
                 {
@@ -208,28 +232,38 @@ public class IndividualRepository
                 var modifiedIndividual = ModifyIndividualBasedOnAccounts(existingIndividual with { accounts = [..modifiedAccounts] });
                 if (existingIndividual != modifiedIndividual)
                 {
-                    _namedAppToInAppIdToIndividual[inputAccount.namedApp][inputAccount.inAppIdentifier] = modifiedIndividual;
+                    Console.WriteLine($"Something about {inputAccount.inAppDisplayName} changed.");
+                    existingIndividualRef.value = modifiedIndividual;
+                    
+                    actuallyModified.Add(inputAccount.AsIdentification());
+                }
+                else
+                {
+                    Console.WriteLine($"Merging account of {inputAccount.inAppDisplayName} resulted in no change.");
                 }
             }
             else
             {
                 Console.WriteLine($"Creating new individual: {inputAccount.namedApp} {inputAccount.inAppIdentifier} {inputAccount.inAppDisplayName}");
-                var newIndividual = CreateNewIndividualFromNonIndexedAccount(inputAccount);
-                _namedAppToInAppIdToIndividual[inputAccount.namedApp].Add(inputAccount.inAppIdentifier, newIndividual);
+                _ = CreateNewIndividualFromNonIndexedAccount(inputAccount);
+                
+                actuallyModified.Add(inputAccount.AsIdentification());
             }
         }
+
+        return actuallyModified;
     }
 
     public void DesolidarizeIndividualAccounts(ImmutableIndividual toDesolidarize)
     {
-        var indexOfIndividualToDesolidarize = Individuals.IndexOf(toDesolidarize);
+        var indexOfIndividualToDesolidarize = IndexOfGuid(toDesolidarize.guid);
         if (indexOfIndividualToDesolidarize == -1) throw new InvalidOperationException("Individual not found in this repository");
         
         if (toDesolidarize.accounts.Length <= 1) return;
 
         var originalAccounts = toDesolidarize.accounts;
 
-        Individuals[indexOfIndividualToDesolidarize] = toDesolidarize with
+        _individualRefs[indexOfIndividualToDesolidarize].value = toDesolidarize with
         {
             accounts = [toDesolidarize.accounts[0]]
         };
@@ -240,7 +274,7 @@ public class IndividualRepository
         {
             var account = originalAccounts[index];
             var newInd = CreateNewIndividualFromAccount(account);
-            var newIndIndex = Individuals.IndexOf(newInd);
+            var newIndIndex = IndexOfGuid(newInd.guid);
             if (newIndIndex == -1) throw new InvalidOperationException("Individual we just created wasn't found. This is not normal");
             
             var newIndividual = newInd with
@@ -253,7 +287,7 @@ public class IndividualRepository
                 }
             };
             
-            Individuals[newIndIndex] = newIndividual;
+            _individualRefs[newIndIndex].value = newIndividual;
         }
     }
 
@@ -442,7 +476,9 @@ public class IndividualRepository
             isAnyContact = isAnyContact,
             isExposed = isAnyContact || account.HasAnyCallerNote()
         };
-        Individuals.Add(individual);
+        var individualRef = new IndividualRef(individual);
+        _individualRefs.Add(individualRef);
+        _namedAppToInAppIdToIndividual[account.namedApp][account.inAppIdentifier] = individualRef;
         return individual;
     }
 
@@ -464,10 +500,10 @@ public class IndividualRepository
     {
         if (toAugment == toDestroy || toAugment.guid == toDestroy.guid) throw new ArgumentException("Cannot fusion an Individual with itself");
         
-        var indexToDestroy = Individuals.IndexOf(toDestroy);
+        var indexToDestroy = IndexOfGuid(toDestroy.guid);
         if (indexToDestroy == -1) throw new ArgumentException("Individual to destroy not found in this repository");
         
-        var indexToAugment = Individuals.IndexOf(toAugment);
+        var indexToAugment = IndexOfGuid(toAugment.guid);
         if (indexToAugment == -1) throw new ArgumentException("Individual to augment not found in this repository");
 
         var isAnyContact = toAugment.accounts.Any(account => account.IsAnyCallerContact());
@@ -489,23 +525,30 @@ public class IndividualRepository
                 ? toDestroy.customName
                 : toAugment.customName
         };
-        Individuals[indexToAugment] = augmented;
+        
+        var toAugmentRef = _individualRefs[indexToAugment];
+        toAugmentRef.value = augmented;
         
         foreach (var accountFromDestroyed in toDestroy.accounts)
         {
-            _namedAppToInAppIdToIndividual[accountFromDestroyed.namedApp][accountFromDestroyed.inAppIdentifier] = toAugment;
+            _namedAppToInAppIdToIndividual[accountFromDestroyed.namedApp][accountFromDestroyed.inAppIdentifier] = toAugmentRef;
         }
         
-        Individuals.RemoveAt(indexToDestroy);
+        _individualRefs.RemoveAt(indexToDestroy);
     }
 
     public ImmutableIndividual GetIndividualByAccount(ImmutableAccountIdentification accountIdentification)
     {
-        return _namedAppToInAppIdToIndividual[accountIdentification.namedApp][accountIdentification.inAppIdentifier];
+        return _namedAppToInAppIdToIndividual[accountIdentification.namedApp][accountIdentification.inAppIdentifier].value;
     }
 
     public ImmutableIndividual GetByGuid(string guid)
     {
-        return Individuals.First(individual => individual.guid == guid);
+        return _individualRefs.First(individual => individual.guid == guid).value;
+    }
+
+    private int IndexOfGuid(string guid)
+    {
+        return _individualRefs.FindIndex(it => it.guid == guid);
     }
 }

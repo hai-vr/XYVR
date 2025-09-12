@@ -62,8 +62,8 @@ public class ResoniteDataCollection(IndividualRepository repository, IResponseCo
         await jobHandler.NotifyProspective(eTracker);
 
         var incAccs = await _resoniteCommunicator.FindIncompleteAccounts().ToListAsync();
-        repository.MergeIncompleteAccounts(incAccs);
-        await jobHandler.NotifyAccountUpdated(incAccs.Select(account => account.AsIdentification()).ToList());
+        var whichIncompleteUpdated = repository.MergeIncompleteAccounts(incAccs);
+        if (whichIncompleteUpdated.Count > 0) await jobHandler.NotifyAccountUpdated(whichIncompleteUpdated.ToList());
 
         var incompleteAccountsIds = new List<ImmutableAccountIdentification>();
         foreach (var incompleteAccount in incAccs)
@@ -72,8 +72,8 @@ public class ResoniteDataCollection(IndividualRepository repository, IResponseCo
             if (account != null)
             {
                 incompleteAccountsIds.Add(account.AsIdentification());
-                repository.MergeAccounts([account]);
-                await jobHandler.NotifyAccountUpdated([account.AsIdentification()]);
+                var whichUpdated = repository.MergeAccounts([account]);
+                if (whichUpdated.Count > 0) await jobHandler.NotifyAccountUpdated(whichUpdated.ToList());
                 await jobHandler.NotifyEnumeration(eTracker, incompleteAccountsIds.Count, incAccs.Count);
             }
         }

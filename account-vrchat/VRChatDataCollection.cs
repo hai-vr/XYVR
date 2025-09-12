@@ -58,8 +58,8 @@ public class VRChatDataCollection(IndividualRepository repository, IResponseColl
             undiscoveredUserIds.Add(incompleteAccount.inAppIdentifier);
             incompleteAccounts.Add(incompleteAccount.AsIdentification());
             
-            repository.MergeIncompleteAccounts([incompleteAccount]);
-            await jobHandler.NotifyAccountUpdated([incompleteAccount.AsIdentification()]);
+            var whichIncompleteUpdated = repository.MergeIncompleteAccounts([incompleteAccount]);
+            if (whichIncompleteUpdated.Count > 0) await jobHandler.NotifyAccountUpdated(whichIncompleteUpdated.ToList());
             await jobHandler.NotifyEnumeration(eTracker, 0, incompleteAccounts.Count);
         }
 
@@ -76,8 +76,8 @@ public class VRChatDataCollection(IndividualRepository repository, IResponseColl
         foreach (var undiscoveredUserId in undiscoveredUserIdsPrioritized)
         {
             var collectUndiscoveredLenient = await _vrChatCommunicator.CollectAllLenient([undiscoveredUserId]);
-            repository.MergeAccounts(collectUndiscoveredLenient);
-            await jobHandler.NotifyAccountUpdated(collectUndiscoveredLenient.Select(account => account.AsIdentification()).ToList());
+            var whichUpdated = repository.MergeAccounts(collectUndiscoveredLenient);
+            if (whichUpdated.Count > 0) await jobHandler.NotifyAccountUpdated(whichUpdated.ToList());
 
             soFar++;
             await jobHandler.NotifyEnumeration(eTracker, soFar, incompleteAccounts.Count);

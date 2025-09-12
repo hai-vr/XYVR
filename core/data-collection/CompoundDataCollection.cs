@@ -39,8 +39,8 @@ public class CompoundDataCollection(IndividualRepository repository, List<IDataC
                     var result = await collector.TryGetForIncrementalUpdate__Flawed__NonContactOnly(toTryUpdate);
                     if (result != null)
                     {
-                        repository.MergeAccounts([result]);
-                        await jobHandler.NotifyAccountUpdated([toTryUpdate]);
+                        var whichUpdated = repository.MergeAccounts([result]);
+                        if (whichUpdated.Count > 0) await jobHandler.NotifyAccountUpdated(whichUpdated.ToList());
                         
                         updatedSoFar.Add(toTryUpdate);
                         
