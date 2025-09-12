@@ -46,24 +46,24 @@ public class LiveStatusMonitoring
         // The UI side or BFF would have to decide what status to associate with that account.
         if (_liveUpdatesByAppByUser[liveUpdate.namedApp].TryGetValue(liveUpdate.inAppIdentifier, out var existingLiveUpdate))
         {
-            var modifiedRecord = liveUpdate;
+            var modifiedRecord = existingLiveUpdate;
             
             if (liveUpdate.onlineStatus != null) modifiedRecord = modifiedRecord with { onlineStatus = liveUpdate.onlineStatus };
             if (liveUpdate.customStatus != null) modifiedRecord = modifiedRecord with { customStatus = liveUpdate.customStatus };
             if (liveUpdate.mainSession != null) modifiedRecord = modifiedRecord with { mainSession = liveUpdate.mainSession };
 
             // Did anything actually change?
-            if (modifiedRecord != liveUpdate)
+            if (modifiedRecord != existingLiveUpdate)
             {
                 // The trigger is only relevant if an event actually causes any content to change
-                modifiedRecord = modifiedRecord with { trigger = existingLiveUpdate.trigger };
+                modifiedRecord = modifiedRecord with { trigger = liveUpdate.trigger };
                 
                 _liveUpdatesByAppByUser[liveUpdate.namedApp][liveUpdate.inAppIdentifier] = modifiedRecord;
                 liveUpdateWasChanged = true;
             }
             else
             {
-                Console.WriteLine($"A LiveUpdate on {liveUpdate.inAppIdentifier} has resulted in no change (triggered by {existingLiveUpdate.trigger}, there will be no OnLiveUserUpdateMerged emitted.");
+                Console.WriteLine($"A LiveUpdate on {existingLiveUpdate.inAppIdentifier} has resulted in no change (triggered by {liveUpdate.trigger}, there will be no OnLiveUserUpdateMerged emitted.");
                 liveUpdateWasChanged = false;
             }
         }
