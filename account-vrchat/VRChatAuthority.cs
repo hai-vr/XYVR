@@ -6,10 +6,17 @@ namespace XYVR.AccountAuthority.VRChat;
 public class VRChatAuthority : IAuthority
 {
     private readonly WorldNameCache _worldNameCache;
+    private readonly Func<Task> _saveFn;
 
-    public VRChatAuthority(WorldNameCache worldNameCache)
+    public VRChatAuthority(WorldNameCache worldNameCache, Func<Task> saveFn)
     {
         _worldNameCache = worldNameCache;
+        _saveFn = saveFn;
+    }
+
+    public async Task SaveWhateverNecessary()
+    {
+        await _saveFn();
     }
 
     public ConnectorType GetConnectorType()

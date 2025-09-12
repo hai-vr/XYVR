@@ -18,6 +18,7 @@ public partial class MainWindow : Window
     private readonly LiveBFF _liveBff;
     private readonly JsonSerializerSettings _serializer;
     private WorldNameCache? _openWorldNameCache;
+    private List<IAuthority> Authorities;
 
     public App AppHandle { get; private set; }
     public IndividualRepository IndividualRepository { get; private set; }
@@ -46,9 +47,9 @@ public partial class MainWindow : Window
         {
             _preferencesBff.OnClosed();
             _liveBff.OnClosed();
-            if (_openWorldNameCache != null)
+            foreach (var authority in Authorities)
             {
-                await Scaffolding.SaveWorldNameCache(_openWorldNameCache);
+                await authority.SaveWhateverNecessary();
             }
         }
         catch (Exception exception)
@@ -77,10 +78,10 @@ public partial class MainWindow : Window
         
         AppHandle = (App)Application.Current;
 
-        _openWorldNameCache = await Scaffolding.OpenWorldNameCache();
+        Authorities = await IAuthorityScaffolder.FindAll();
         IndividualRepository = new IndividualRepository(await Scaffolding.OpenRepository());
         ConnectorsMgt = new ConnectorManagement(await Scaffolding.OpenConnectors());
-        CredentialsMgt = new CredentialsManagement(await Scaffolding.OpenCredentials(), await IAuthorityScaffolder.FindAll());
+        CredentialsMgt = new CredentialsManagement(await Scaffolding.OpenCredentials(), Authorities);
         LiveStatusMonitoring = new LiveStatusMonitoring();
 
         _ = Task.Run(() => _liveBff.StartMonitoring()); // don't wait this;

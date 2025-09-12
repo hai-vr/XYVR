@@ -12,4 +12,5 @@ public interface IAuthority
     public Task<ILiveMonitoring> NewLiveMonitoring(LiveStatusMonitoring monitoring, ICredentialsStorage credentialsStorage);
 
     public Task<ImmutableNonIndexedAccount> ResolveCallerAccount(ICredentialsStorage credentialsStorage);
+    public Task SaveWhateverNecessary();
 }

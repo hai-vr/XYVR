@@ -7,6 +7,7 @@ public class VRChatAuthorityScaffolder : IAuthorityScaffolder
 {
     public async Task<IAuthority> CreateAuthority()
     {
-        return new VRChatAuthority(await Scaffolding.OpenWorldNameCache());
+        var worldNameCache = await Scaffolding.OpenWorldNameCache();
+        return new VRChatAuthority(worldNameCache, async () => await Scaffolding.SaveWorldNameCache(worldNameCache));
     }
 }

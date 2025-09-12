@@ -13,6 +13,12 @@ public class ResoniteAuthority : IAuthority
         _resoniteUidProviderFn = resoniteUidProviderFn;
     }
 
+    public Task SaveWhateverNecessary()
+    {
+        // Do nothing
+        return Task.CompletedTask;
+    }
+
     public ConnectorType GetConnectorType()
     {
         return ConnectorType.ResoniteAPI;
