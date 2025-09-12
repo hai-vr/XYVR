@@ -1,4 +1,4 @@
-﻿import type {FrontAccount, NamedAppType, OnlineStatusType} from "./CoreTypes.ts";
+﻿import type {NamedAppType, OnlineStatusType} from "./CoreTypes.ts";
 
 export const LiveSessionKnowledge = {
     Indeterminate: "Indeterminate",
@@ -49,12 +49,16 @@ export interface FrontLiveSession {
 
 export interface FrontParticipant {
     isKnown: boolean;
-    knownAccount?: FrontAccount;
-    unknownAccount?: FrontUnknownAccount;
+    knownAccount?: FrontKnownParticipantAccount;
+    unknownAccount?: FrontUnknownParticipantAccount;
     isHost: boolean;
 }
 
-export interface FrontUnknownAccount {
+export interface FrontKnownParticipantAccount {
+    inAppIdentifier: string;
+}
+
+export interface FrontUnknownParticipantAccount {
     inAppIdentifier?: string;
     inAppDisplayName?: string;
 }

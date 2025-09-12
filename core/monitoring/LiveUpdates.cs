@@ -1,4 +1,6 @@
-﻿namespace XYVR.Core;
+﻿using System.Collections.Immutable;
+
+namespace XYVR.Core;
 
 public class LiveUserUpdate
 {
@@ -60,38 +62,68 @@ public class LiveUserSessionState
     }
 }
 
-public class LiveSession
+public record ImmutableLiveSession
 {
-    public string guid;
+    public string guid { get; init; }
 
-    public NamedApp namedApp;
-    public string qualifiedAppName;
+    public NamedApp namedApp { get; init; }
+    public string qualifiedAppName { get; init; }
     
-    public string inAppSessionIdentifier;
+    public string inAppSessionIdentifier { get; init; }
     
-    public string? inAppSessionName;
-    public string? inAppVirtualSpaceName;
+    public string? inAppSessionName { get; init; }
+    public string? inAppVirtualSpaceName { get; init; }
     
-    public LiveSessionHost? inAppHost;
+    public ImmutableLiveSessionHost? inAppHost { get; init; }
 
-    public List<Participant> participants = new();
+    public ImmutableArray<ImmutableParticipant> participants { get; init; } = ImmutableArray<ImmutableParticipant>.Empty;
+
+    public virtual bool Equals(ImmutableLiveSession? other)
+    {
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return guid == other.guid &&
+               namedApp == other.namedApp &&
+               qualifiedAppName == other.qualifiedAppName &&
+               inAppSessionIdentifier == other.inAppSessionIdentifier &&
+               inAppSessionName == other.inAppSessionName &&
+               inAppVirtualSpaceName == other.inAppVirtualSpaceName &&
+               Equals(inAppHost, other.inAppHost) &&
+               participants.SequenceEqual(other.participants);
+    }
+
+    public override int GetHashCode()
+    {
+        unchecked
+        {
+            var hashCode = guid.GetHashCode();
+            hashCode = (hashCode * 397) ^ (int)namedApp;
+            hashCode = (hashCode * 397) ^ qualifiedAppName.GetHashCode();
+            hashCode = (hashCode * 397) ^ inAppSessionIdentifier.GetHashCode();
+            hashCode = (hashCode * 397) ^ (inAppSessionName != null ? inAppSessionName.GetHashCode() : 0);
+            hashCode = (hashCode * 397) ^ (inAppVirtualSpaceName != null ? inAppVirtualSpaceName.GetHashCode() : 0);
+            hashCode = (hashCode * 397) ^ (inAppHost != null ? inAppHost.GetHashCode() : 0);
+            hashCode = (hashCode * 397) ^ participants.Aggregate(0, (h, a) => h ^ a.GetHashCode());
+            return hashCode;
+        }
+    }
 }
 
-public class NonIndexedLiveSession
+public record ImmutableNonIndexedLiveSession
 {
-    public NamedApp namedApp;
-    public string qualifiedAppName;
+    public NamedApp namedApp { get; init; }
+    public required string qualifiedAppName { get; init; }
     
-    public string inAppSessionIdentifier;
+    public required string inAppSessionIdentifier { get; init; }
     
-    public string? inAppSessionName;
-    public string? inAppVirtualSpaceName;
+    public string? inAppSessionName { get; init; }
+    public string? inAppVirtualSpaceName { get; init; }
     
-    public LiveSessionHost? inAppHost;
+    public ImmutableLiveSessionHost? inAppHost { get; init; }
 
-    public static LiveSession MakeIndexed(NonIndexedLiveSession inputSession)
+    public static ImmutableLiveSession MakeIndexed(ImmutableNonIndexedLiveSession inputSession)
     {
-        return new LiveSession
+        return new ImmutableLiveSession
         {
             guid = XYVRGuids.ForSession(),
             namedApp = inputSession.namedApp,
@@ -99,25 +131,30 @@ public class NonIndexedLiveSession
             inAppSessionIdentifier = inputSession.inAppSessionIdentifier,
             inAppSessionName = inputSession.inAppSessionName,
             inAppVirtualSpaceName = inputSession.inAppVirtualSpaceName,
-            inAppHost = inputSession.inAppHost?.ShallowCopy(),
-            participants = new()
+            inAppHost = inputSession.inAppHost,
+            participants = ImmutableArray<ImmutableParticipant>.Empty
         };
     }
 }
 
-public class Participant
+public record ImmutableParticipant
 {
-    public bool isKnown;
-    public ImmutableAccount? knownAccount;
-    public UnknownAccount? unknownAccount;
+    public bool isKnown { get; init; }
+    public ImmutableKnownParticipantAccount? knownAccount { get; init; }
+    public ImmutableUnknownParticipantAccount? unknownAccount { get; init; }
 
-    public bool isHost;
+    public bool isHost { get; init; }
 }
 
-public class UnknownAccount
+public record ImmutableKnownParticipantAccount
 {
-    public string? inAppIdentifier;
-    public string? inAppDisplayName;
+    public string inAppIdentifier { get; init; }
+}
+
+public record ImmutableUnknownParticipantAccount
+{
+    public string? inAppIdentifier { get; init; }
+    public string? inAppDisplayName { get; init; }
 }
 
 public enum LiveUserSessionKnowledge
@@ -143,7 +180,7 @@ public class LiveUserKnownSession
 
     public bool? isJoinable;
     
-    public LiveSessionHost? inAppHost;
+    public ImmutableLiveSessionHost? inAppHost;
 
     public ImmutableLiveUserKnownSession ToImmutable()
     {
@@ -153,27 +190,7 @@ public class LiveUserKnownSession
             inAppSessionName = inAppSessionName,
             inAppVirtualSpaceName = inAppVirtualSpaceName,
             isJoinable = isJoinable,
-            inAppHost = inAppHost?.ToImmutable()
-        };
-    }
-}
-
-public class LiveSessionHost
-{
-    public string inAppHostIdentifier;
-    public string? inAppHostDisplayName;
-
-    public LiveSessionHost ShallowCopy()
-    {
-        return (LiveSessionHost)this.MemberwiseClone();
-    }
-
-    public ImmutableLiveSessionHost ToImmutable()
-    {
-        return new ImmutableLiveSessionHost
-        {
-            inAppHostIdentifier = inAppHostIdentifier,
-            inAppHostDisplayName = inAppHostDisplayName
+            inAppHost = inAppHost
         };
     }
 }

@@ -151,9 +151,10 @@ internal partial class ResoniteLiveCommunicator
                 {
                     inAppSessionIdentifier = session.sessionHash,
                     inAppHost = session is { isHost: true }
-                        ? new LiveSessionHost
+                        ? new ImmutableLiveSessionHost
                         {
                             inAppHostIdentifier = userStatusUpdate.userId,
+                            inAppHostDisplayName = null
                         }
                         : null,
                     inAppVirtualSpaceName = worldName

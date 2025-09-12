@@ -237,7 +237,7 @@ internal class FrontLiveSession
 
     public List<FrontParticipant> participants = new();
     
-    public static FrontLiveSession FromCore(LiveSession liveSession, LiveStatusMonitoring monitoring)
+    public static FrontLiveSession FromCore(ImmutableLiveSession liveSession, LiveStatusMonitoring monitoring)
     {
         return new FrontLiveSession
         {
@@ -247,7 +247,7 @@ internal class FrontLiveSession
             inAppSessionIdentifier = liveSession.inAppSessionIdentifier,
             inAppSessionName = liveSession.inAppSessionName,
             inAppVirtualSpaceName = liveSession.inAppVirtualSpaceName,
-            inAppHost = liveSession.inAppHost != null ? FrontLiveSessionHost.FromCore(liveSession.inAppHost.ToImmutable()) : null,
+            inAppHost = liveSession.inAppHost != null ? FrontLiveSessionHost.FromCore(liveSession.inAppHost) : null,
             participants = liveSession.participants.Select(participant =>
             {
                 var sessionState = participant.isKnown
@@ -263,34 +263,47 @@ internal class FrontLiveSession
 internal class FrontParticipant
 {
     public bool isKnown;
-    public FrontAccount? knownAccount;
-    public FrontUnknownAccount? unknownAccount;
+    public FrontImmutableKnownParticipantAccount? knownAccount;
+    public FrontImmutableUnknownParticipantAccount? unknownAccount;
 
     public bool isHost;
     
-    public static FrontParticipant FromCore(Participant participant, ImmutableLiveUserUpdate? liveSessionState)
+    public static FrontParticipant FromCore(ImmutableParticipant participant, ImmutableLiveUserUpdate? liveSessionState)
     {
         return new FrontParticipant
         {
             isKnown = participant.isKnown,
-            knownAccount = participant.knownAccount != null ? FrontAccount.ToFrontAccount(participant.knownAccount, liveSessionState) : null,
-            unknownAccount = participant.unknownAccount != null ? FrontUnknownAccount.FromCore(participant.unknownAccount) : null,
+            knownAccount = participant.knownAccount != null ? FrontImmutableKnownParticipantAccount.FromCore(participant.knownAccount) : null,
+            unknownAccount = participant.unknownAccount != null ? FrontImmutableUnknownParticipantAccount.FromCore(participant.unknownAccount) : null,
             isHost = participant.isHost
         };
     }
 }
 
-internal class FrontUnknownAccount
+public record FrontImmutableKnownParticipantAccount
 {
-    public string? inAppIdentifier;
-    public string? inAppDisplayName;
-    
-    public static FrontUnknownAccount FromCore(UnknownAccount unknownAccount)
+    public string inAppIdentifier { get; init; }
+
+    public static FrontImmutableKnownParticipantAccount FromCore(ImmutableKnownParticipantAccount participantKnownAccount)
     {
-        return new FrontUnknownAccount
+        return new FrontImmutableKnownParticipantAccount
         {
-            inAppIdentifier = unknownAccount.inAppIdentifier,
-            inAppDisplayName = unknownAccount.inAppDisplayName
+            inAppIdentifier = participantKnownAccount.inAppIdentifier
+        };
+    }
+}
+
+public record FrontImmutableUnknownParticipantAccount
+{
+    public string? inAppIdentifier { get; init; }
+    public string? inAppDisplayName { get; init; }
+
+    public static FrontImmutableUnknownParticipantAccount FromCore(ImmutableUnknownParticipantAccount participantUnknownAccount)
+    {
+        return new FrontImmutableUnknownParticipantAccount
+        {
+            inAppIdentifier = participantUnknownAccount.inAppIdentifier,
+            inAppDisplayName = participantUnknownAccount.inAppDisplayName,
         };
     }
 }

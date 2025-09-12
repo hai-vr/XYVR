@@ -95,7 +95,7 @@ public class LiveBFF : ILiveBFF
         await _mainWindow.SendEventToReact(FrontEvents.EventForLiveUpdateMerged, FrontLiveUserUpdate.FromCore(update));
     }
 
-    private async Task WhenSessionUpdated(LiveSession session)
+    private async Task WhenSessionUpdated(ImmutableLiveSession session)
     {
         await _mainWindow.SendEventToReact(FrontEvents.EventForLiveSessionUpdated, FrontLiveSession.FromCore(session, _mainWindow.LiveStatusMonitoring));
     }

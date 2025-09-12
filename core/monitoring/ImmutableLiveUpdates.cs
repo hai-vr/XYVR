@@ -12,6 +12,22 @@ public record ImmutableLiveUserUpdate
     public string? customStatus { get; init; }
 
     public string callerInAppIdentifier { get; init; }
+
+    public ImmutableParticipant AsParticipant()
+    {
+        var isHost = mainSession != null
+                     && mainSession.knowledge == LiveUserSessionKnowledge.Known
+                     && mainSession.knownSession?.inAppHost?.inAppHostIdentifier == inAppIdentifier;
+        return new ImmutableParticipant
+        {
+            isHost = isHost,
+            isKnown = true,
+            knownAccount = new ImmutableKnownParticipantAccount
+            {
+                inAppIdentifier = inAppIdentifier
+            }
+        };
+    }
 }
 
 public record ImmutableLiveUserSessionState
