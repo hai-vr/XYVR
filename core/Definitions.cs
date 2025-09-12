@@ -76,10 +76,10 @@ public record ImmutableAccount
     public ImmutableArray<string> allDisplayNames { get; init; } = ImmutableArray<string>.Empty;
     
     // Maintenance fields
-    public bool isPendingUpdate;
+    public bool isPendingUpdate { get; init; }
 
     // This field is up to the app users' judgement
-    public bool isTechnical;
+    public bool isTechnical { get; init; }
 
     public bool IsAnyCallerContact()
     {
