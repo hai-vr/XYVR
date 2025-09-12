@@ -478,7 +478,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                         <div className="live-sessions-grid">
                             {liveSessionArray
                                 .filter(liveSession => liveSession.participants.some(p => p.isKnown &&
-                                    displayedIndividuals.some(ind =>
+                                    sortedIndividuals.some(ind =>
                                         ind.accounts?.some(acc =>
                                             acc.qualifiedAppName === liveSession.qualifiedAppName &&
                                             acc.inAppIdentifier === p.knownAccount!.inAppIdentifier
