@@ -32,9 +32,9 @@ public class LiveStatusMonitoring
         return _liveUpdatesByAppByUser.Values.SelectMany(it => it.Values).ToList();
     }
     
-    public async Task MergeUser(ImmutableLiveUserUpdate liveUpdate)
+    public async Task MergeUser(ImmutableLiveUserUpdate inputUpdate)
     {
-        bool liveUpdateWasChanged;
+        bool updateWasModified;
         
         // TODO:
         // It is possible to have the same inAppIdentifier being updated with a different status,
@@ -44,43 +44,43 @@ public class LiveStatusMonitoring
         // In that case, we may need to avoid deduplicating status by inAppIdentifier alone,
         // and also use the callerInAppIdentifier, to know where we got the status from.
         // The UI side or BFF would have to decide what status to associate with that account.
-        if (_liveUpdatesByAppByUser[liveUpdate.namedApp].TryGetValue(liveUpdate.inAppIdentifier, out var existingLiveUpdate))
+        if (_liveUpdatesByAppByUser[inputUpdate.namedApp].TryGetValue(inputUpdate.inAppIdentifier, out var existingUpdate))
         {
-            var modifiedRecord = existingLiveUpdate;
+            var modifiedUpdate = existingUpdate;
             
-            if (liveUpdate.onlineStatus != null) modifiedRecord = modifiedRecord with { onlineStatus = liveUpdate.onlineStatus };
-            if (liveUpdate.customStatus != null) modifiedRecord = modifiedRecord with { customStatus = liveUpdate.customStatus };
-            if (liveUpdate.mainSession != null) modifiedRecord = modifiedRecord with { mainSession = liveUpdate.mainSession };
+            if (inputUpdate.onlineStatus != null) modifiedUpdate = modifiedUpdate with { onlineStatus = inputUpdate.onlineStatus };
+            if (inputUpdate.customStatus != null) modifiedUpdate = modifiedUpdate with { customStatus = inputUpdate.customStatus };
+            if (inputUpdate.mainSession != null) modifiedUpdate = modifiedUpdate with { mainSession = inputUpdate.mainSession };
 
             // Did anything actually change?
-            if (modifiedRecord != existingLiveUpdate)
+            if (modifiedUpdate != existingUpdate)
             {
                 // The trigger is only relevant if an event actually causes any content to change
-                modifiedRecord = modifiedRecord with { trigger = liveUpdate.trigger };
+                modifiedUpdate = modifiedUpdate with { trigger = inputUpdate.trigger };
                 
-                _liveUpdatesByAppByUser[liveUpdate.namedApp][liveUpdate.inAppIdentifier] = modifiedRecord;
-                liveUpdateWasChanged = true;
+                _liveUpdatesByAppByUser[inputUpdate.namedApp][inputUpdate.inAppIdentifier] = modifiedUpdate;
+                updateWasModified = true;
             }
             else
             {
-                Console.WriteLine($"A LiveUpdate on {existingLiveUpdate.inAppIdentifier} has resulted in no change (triggered by {liveUpdate.trigger}, there will be no OnLiveUserUpdateMerged emitted.");
-                liveUpdateWasChanged = false;
+                Console.WriteLine($"A LiveUpdate on {existingUpdate.inAppIdentifier} has resulted in no change (triggered by {inputUpdate.trigger}, there will be no OnLiveUserUpdateMerged emitted.");
+                updateWasModified = false;
             }
         }
         else
         {
-            _liveUpdatesByAppByUser[liveUpdate.namedApp][liveUpdate.inAppIdentifier] = liveUpdate;
-            liveUpdateWasChanged = true;
+            _liveUpdatesByAppByUser[inputUpdate.namedApp][inputUpdate.inAppIdentifier] = inputUpdate;
+            updateWasModified = true;
         }
 
         LiveSession? liveSession = null;
-        if (liveUpdate.mainSession is { knowledge: LiveUserSessionKnowledge.Known })
+        if (inputUpdate.mainSession is { knowledge: LiveUserSessionKnowledge.Known })
         {
-            var userKnownSession = liveUpdate.mainSession.knownSession!;
+            var userKnownSession = inputUpdate.mainSession.knownSession!;
             var nonIndexedSession = new NonIndexedLiveSession
             {
-                namedApp = liveUpdate.namedApp,
-                qualifiedAppName = liveUpdate.qualifiedAppName,
+                namedApp = inputUpdate.namedApp,
+                qualifiedAppName = inputUpdate.qualifiedAppName,
                 inAppSessionIdentifier = userKnownSession.inAppSessionIdentifier,
                 inAppSessionName = userKnownSession.inAppSessionName,
                 inAppVirtualSpaceName = userKnownSession.inAppVirtualSpaceName,
@@ -103,9 +103,9 @@ public class LiveStatusMonitoring
         {
             await OnLiveSessionUpdated.Invoke(liveSession);
         }
-        if (liveUpdateWasChanged && OnLiveUserUpdateMerged != null)
+        if (updateWasModified && OnLiveUserUpdateMerged != null)
         {
-            await OnLiveUserUpdateMerged.Invoke(liveUpdate);
+            await OnLiveUserUpdateMerged.Invoke(inputUpdate);
         }
     }
 
