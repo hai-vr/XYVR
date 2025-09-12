@@ -116,7 +116,8 @@ public class LiveStatusMonitoring
         {
             liveSession = null;
             liveSessionChanged = false;
-            previousSession = null;
+            
+            previousSession = InternalRemoveParticipant(inputUpdate.namedApp, participant);
         }
 
         // We want to send the updates in a preferred order:
@@ -137,6 +138,32 @@ public class LiveStatusMonitoring
         }
     }
 
+    private ImmutableLiveSession? InternalRemoveParticipant(NamedApp namedApp, ImmutableParticipant usingParticipant)
+    {
+        ImmutableLiveSession participantRemoval = null;
+        if (usingParticipant is { isKnown: true })
+        {
+            if (_namedAppToAccountGuidToSessionParticipationGuid[namedApp]
+                    .TryGetValue(usingParticipant.knownAccount!.inAppIdentifier, out var existingParticipationGuid))
+            {
+                var previous = _guidToSession[existingParticipationGuid].value;
+                participantRemoval = previous with
+                {
+                    participants = [
+                        ..previous.participants
+                            .Where(participant => !participant.isKnown || participant.knownAccount!.inAppIdentifier != usingParticipant.knownAccount!.inAppIdentifier)
+                    ]
+                };
+                _guidToSession[existingParticipationGuid].value = participantRemoval;
+
+
+                _namedAppToAccountGuidToSessionParticipationGuid[namedApp].Remove(usingParticipant.knownAccount!.inAppIdentifier);
+            }
+        }
+
+        return participantRemoval;
+    }
+
     public async Task MergeSession(ImmutableNonIndexedLiveSession inputSession)
     {
         var (liveSession, changed, _) = InternalMergeSessionAndGet(inputSession);
@@ -147,7 +174,7 @@ public class LiveStatusMonitoring
         }
     }
 
-    private (ImmutableLiveSession, bool, ImmutableLiveSession?) InternalMergeSessionAndGet(ImmutableNonIndexedLiveSession inputSession, ImmutableParticipant? usingParticipant = null)
+    private (ImmutableLiveSession? liveSession, bool liveSessionChanged, ImmutableLiveSession? previousSession) InternalMergeSessionAndGet(ImmutableNonIndexedLiveSession inputSession, ImmutableParticipant? usingParticipant = null)
     {
         ImmutableLiveSession actualSession;
         bool outChanged;
