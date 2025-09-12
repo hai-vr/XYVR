@@ -10,7 +10,10 @@ public partial class App : Application
     {
         base.OnStartup(e);
 
+        // Order matters
         Scaffolding.DefineSavePathFromArgsOrUseDefault(e.Args);
+        var lockfile = new FileLock(Scaffolding.LockfileFilePath);
+        lockfile.AcquireLock();
 
         Console.WriteLine("Application startup");
         Console.WriteLine($"Version is {VERSION.version}");

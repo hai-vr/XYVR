@@ -24,6 +24,7 @@ public static class Scaffolding
         internal const string WorldNameCacheFileName = ".cache_world-names.json";
     }
     
+    public static string LockfileFilePath => Path.Combine(SavePath(), "XYVRLockfile");
     private static string IndividualsJsonFilePath => Path.Combine(SavePath(), ScaffoldingFileNames.IndividualsJsonFileName);
     private static string ConnectorsJsonFilePath => Path.Combine(SavePath(), ScaffoldingFileNames.ConnectorsJsonFileName);
     private static string CredentialsJsonFilePath => Path.Combine(SavePath(), ScaffoldingFileNames.CredentialsJsonFileName);
