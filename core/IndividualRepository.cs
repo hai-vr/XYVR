@@ -4,11 +4,11 @@ namespace XYVR.Core;
 
 public class IndividualRepository
 {
-    public List<Individual> Individuals { get; }
+    public List<ImmutableIndividual> Individuals { get; }
     
-    private readonly Dictionary<NamedApp, Dictionary<string, Individual>> _namedAppToInAppIdToIndividual = new();
+    private readonly Dictionary<NamedApp, Dictionary<string, ImmutableIndividual>> _namedAppToInAppIdToIndividual = new();
 
-    public IndividualRepository(Individual[] individuals)
+    public IndividualRepository(ImmutableIndividual[] individuals)
     {
         Individuals = individuals.ToList();
         EvaluateDataMigrations(Individuals);
@@ -26,42 +26,62 @@ public class IndividualRepository
 
     // This can change the data of an individual when we have data migrations
     // (i.e. when isExposed was added, none of the individuals had that info)
-    private void EvaluateDataMigrations(List<Individual> individuals)
+    private void EvaluateDataMigrations(List<ImmutableIndividual> individuals)
     {
-        foreach (var individual in individuals)
+        for (var index = 0; index < individuals.Count; index++)
         {
-            UpdateIndividualBasedOnAccounts(individual);
-        }
-        
-        foreach (var individual in individuals)
-        {
-            if (individual.note.status == 0)
+            var existingIndividual = individuals[index];
+            var modifiedIndividual = ModifyIndividualBasedOnAccounts(existingIndividual);
+            if (existingIndividual != modifiedIndividual)
             {
-                individual.note = individual.note with
+                individuals[index] = modifiedIndividual;
+            }
+        }
+
+        for (var i = 0; i < individuals.Count; i++)
+        {
+            var originalIndividual = individuals[i];
+            
+            var modifiedIndividual = originalIndividual;
+            
+            if (modifiedIndividual.note.status == 0)
+            {
+                modifiedIndividual = modifiedIndividual with
                 {
-                    status = NoteState.NeverHad
+                    note = modifiedIndividual.note with
+                    {
+                        status = NoteState.NeverHad
+                    }
                 };
             }
 
             // Fix anomalies
-            for (var index = 0; index < individual.accounts.Count; index++)
+            var modifiedAccounts = modifiedIndividual.accounts.ToList();
+            for (var index = 0; index < modifiedAccounts.Count; index++)
             {
-                var originalAccount = individual.accounts[index];
-                
+                var originalAccount = modifiedAccounts[index];
+
                 var modifiedAccount = originalAccount;
                 if (string.IsNullOrWhiteSpace(modifiedAccount.guid))
                 {
                     modifiedAccount = modifiedAccount with { guid = XYVRGuids.ForAccount() };
                 }
+
                 if (modifiedAccount.allDisplayNames == null || modifiedAccount.allDisplayNames.Length == 0)
                 {
-                    modifiedAccount = modifiedAccount with { allDisplayNames = [individual.displayName] };
+                    modifiedAccount = modifiedAccount with { allDisplayNames = [modifiedIndividual.displayName] };
                 }
 
                 if (originalAccount != modifiedAccount)
                 {
-                    individual.accounts[index] = modifiedAccount;
+                    modifiedAccounts[index] = modifiedAccount;
                 }
+            }
+            modifiedIndividual = modifiedIndividual with { accounts = [..modifiedAccounts] };
+
+            if (originalIndividual != modifiedIndividual)
+            {
+                individuals[i] = modifiedIndividual;
             }
         }
 
@@ -87,11 +107,11 @@ public class IndividualRepository
                 var problematics = individuals
                     .Where(individual => individual.accounts.Any(account => account.qualifiedAppName == discriminatorRecord.AccountQualifiedAppName && account.inAppIdentifier == discriminatorRecord.AccountInAppIdentifier))
                     .ToList();
-                Console.WriteLine($"Problematic ({problematics.Count}): {string.Join(",", problematics.Select(individual => individual.accounts.Count).ToList())}");
-                if (problematics.Any(individual => individual.accounts.Count > 1))
+                Console.WriteLine($"Problematic ({problematics.Count}): {string.Join(",", problematics.Select(individual => individual.accounts.Length).ToList())}");
+                if (problematics.Any(individual => individual.accounts.Length > 1))
                 {
-                    var max = problematics.Max(individual => individual.accounts.Count);
-                    var maximumInd = problematics.First(individual => individual.accounts.Count == max);
+                    var max = problematics.Max(individual => individual.accounts.Length);
+                    var maximumInd = problematics.First(individual => individual.accounts.Length == max);
                     problematics.Remove(maximumInd);
                     
                     // foreach (var problematic in problematics)
@@ -114,9 +134,9 @@ public class IndividualRepository
             .ToHashSet();
     }
 
-    private Dictionary<string, Individual> CreateAccountDictionary(NamedApp namedApp)
+    private Dictionary<string, ImmutableIndividual> CreateAccountDictionary(NamedApp namedApp)
     {
-        var results = new Dictionary<string, Individual>();
+        var results = new Dictionary<string, ImmutableIndividual>();
         
         foreach (var individual in Individuals)
         {
@@ -140,17 +160,22 @@ public class IndividualRepository
         {
             if (_namedAppToInAppIdToIndividual[inputAccount.namedApp].TryGetValue(inputAccount.inAppIdentifier, out var existingIndividual))
             {
-                for (var index = 0; index < existingIndividual.accounts.Count; index++)
+                var modifiedAccounts = existingIndividual.accounts.ToList();
+                for (var index = 0; index < modifiedAccounts.Count; index++)
                 {
-                    var existingAccount = existingIndividual.accounts[index];
+                    var existingAccount = modifiedAccounts[index];
                     if (TrySynchronizeIncompleteAccount(existingAccount, inputAccount, out var modifiedAccount))
                     {
-                        existingIndividual.accounts[index] = modifiedAccount!;
+                        modifiedAccounts[index] = modifiedAccount!;
                         break;
                     }
                 }
-
-                UpdateIndividualBasedOnAccounts(existingIndividual);
+                
+                var modifiedIndividual = ModifyIndividualBasedOnAccounts(existingIndividual with { accounts = [..modifiedAccounts] });
+                if (existingIndividual != modifiedIndividual)
+                {
+                    _namedAppToInAppIdToIndividual[inputAccount.namedApp][inputAccount.inAppIdentifier] = modifiedIndividual;
+                } 
             }
             else
             {
@@ -169,17 +194,22 @@ public class IndividualRepository
         {
             if (_namedAppToInAppIdToIndividual[inputAccount.namedApp].TryGetValue(inputAccount.inAppIdentifier, out var existingIndividual))
             {
-                for (var index = 0; index < existingIndividual.accounts.Count; index++)
+                var modifiedAccounts = existingIndividual.accounts.ToList();
+                for (var index = 0; index < modifiedAccounts.Count; index++)
                 {
-                    var existingAccount = existingIndividual.accounts[index];
+                    var existingAccount = modifiedAccounts[index];
                     if (TrySynchronizeAccount(existingAccount, inputAccount, out var modifiedAccount))
                     {
-                        existingIndividual.accounts[index] = modifiedAccount!;
+                        modifiedAccounts[index] = modifiedAccount!;
                         break;
                     }
                 }
 
-                UpdateIndividualBasedOnAccounts(existingIndividual);
+                var modifiedIndividual = ModifyIndividualBasedOnAccounts(existingIndividual with { accounts = [..modifiedAccounts] });
+                if (existingIndividual != modifiedIndividual)
+                {
+                    _namedAppToInAppIdToIndividual[inputAccount.namedApp][inputAccount.inAppIdentifier] = modifiedIndividual;
+                }
             }
             else
             {
@@ -190,25 +220,40 @@ public class IndividualRepository
         }
     }
 
-    public void DesolidarizeIndividualAccounts(Individual toDesolidarize)
+    public void DesolidarizeIndividualAccounts(ImmutableIndividual toDesolidarize)
     {
-        if (toDesolidarize.accounts.Count <= 1) return;
-
-        var originalAccounts = toDesolidarize.accounts.ToList();
+        var indexOfIndividualToDesolidarize = Individuals.IndexOf(toDesolidarize);
+        if (indexOfIndividualToDesolidarize == -1) throw new InvalidOperationException("Individual not found in this repository");
         
-        toDesolidarize.accounts = [originalAccounts[0]];
+        if (toDesolidarize.accounts.Length <= 1) return;
+
+        var originalAccounts = toDesolidarize.accounts;
+
+        Individuals[indexOfIndividualToDesolidarize] = toDesolidarize with
+        {
+            accounts = [toDesolidarize.accounts[0]]
+        };
+
         RebuildAccountDictionary();
 
-        for (var index = 1; index < originalAccounts.Count; index++)
+        for (var index = 1; index < originalAccounts.Length; index++)
         {
             var account = originalAccounts[index];
-            var newIndividual = CreateNewIndividualFromAccount(account);
-            newIndividual.customName = toDesolidarize.customName;
-            newIndividual.note = new ImmutableNote
+            var newInd = CreateNewIndividualFromAccount(account);
+            var newIndIndex = Individuals.IndexOf(newInd);
+            if (newIndIndex == -1) throw new InvalidOperationException("Individual we just created wasn't found. This is not normal");
+            
+            var newIndividual = newInd with
             {
-                status = toDesolidarize.note.status,
-                text = toDesolidarize.note.text
+                customName = toDesolidarize.customName,
+                note = new ImmutableNote
+                {
+                    status = toDesolidarize.note.status,
+                    text = toDesolidarize.note.text
+                }
             };
+            
+            Individuals[newIndIndex] = newIndividual;
         }
     }
 
@@ -340,14 +385,16 @@ public class IndividualRepository
         };
     }
 
-    private static void UpdateIndividualBasedOnAccounts(Individual existingIndividual)
+    private static ImmutableIndividual ModifyIndividualBasedOnAccounts(ImmutableIndividual existingIndividual)
     {
-        existingIndividual.isAnyContact = existingIndividual.accounts.Any(account => account.IsAnyCallerContact());
-        existingIndividual.isExposed = existingIndividual.isAnyContact
-                                       || existingIndividual.note.status == NoteState.Exists
-                                       || existingIndividual.accounts.Any(account => account.HasAnyCallerNote());
-        
-        existingIndividual.displayName = existingIndividual.accounts.First().inAppDisplayName;
+        return existingIndividual with
+        {
+            isAnyContact = existingIndividual.accounts.Any(account => account.IsAnyCallerContact()),
+            isExposed = existingIndividual.isAnyContact
+                        || existingIndividual.note.status == NoteState.Exists
+                        || existingIndividual.accounts.Any(account => account.HasAnyCallerNote()),
+            displayName = existingIndividual.accounts.First().inAppDisplayName
+        };
     }
 
     private static bool IsSameApp(ImmutableAccount existingAccount, ImmutableNonIndexedAccount inputAccount)
@@ -379,15 +426,15 @@ public class IndividualRepository
     }
 
     // It is the responsibility of the caller to never call this when that account is already owned by an Individual.
-    private Individual CreateNewIndividualFromAccount(ImmutableAccount account)
+    private ImmutableIndividual CreateNewIndividualFromAccount(ImmutableAccount account)
     {
         return InternalCreateFromAccount(account);
     }
 
-    private Individual InternalCreateFromAccount(ImmutableAccount account)
+    private ImmutableIndividual InternalCreateFromAccount(ImmutableAccount account)
     {
         var isAnyContact = account.IsAnyCallerContact();
-        var individual = new Individual
+        var individual = new ImmutableIndividual
         {
             guid = XYVRGuids.ForIndividual(),
             accounts = [account],
@@ -400,48 +447,49 @@ public class IndividualRepository
     }
 
     // It is the responsibility of the caller to never call this when that account is already owned by an Individual.
-    private Individual CreateNewIndividualFromNonIndexedAccount(ImmutableNonIndexedAccount nonIndexedAccount)
+    private ImmutableIndividual CreateNewIndividualFromNonIndexedAccount(ImmutableNonIndexedAccount nonIndexedAccount)
     {
         var account = ImmutableNonIndexedAccount.MakeIndexed(nonIndexedAccount);
         return InternalCreateFromAccount(account);
     }
 
     // It is the responsibility of the caller to never call this when that account is already owned by an Individual.
-    private Individual CreateNewIndividualFromIncompleteAccount(ImmutableIncompleteAccount incompleteAccount)
+    private ImmutableIndividual CreateNewIndividualFromIncompleteAccount(ImmutableIncompleteAccount incompleteAccount)
     {
         var account = ImmutableIncompleteAccount.MakeIndexed(incompleteAccount);
         return InternalCreateFromAccount(account);
     }
 
-    public void FusionIndividuals(Individual toAugment, Individual toDestroy)
+    public void FusionIndividuals(ImmutableIndividual toAugment, ImmutableIndividual toDestroy)
     {
         if (toAugment == toDestroy || toAugment.guid == toDestroy.guid) throw new ArgumentException("Cannot fusion an Individual with itself");
         
         var indexToDestroy = Individuals.IndexOf(toDestroy);
-        if (indexToDestroy == -1) throw new ArgumentException("Individual not found in this repository");
+        if (indexToDestroy == -1) throw new ArgumentException("Individual to destroy not found in this repository");
+        
+        var indexToAugment = Individuals.IndexOf(toAugment);
+        if (indexToAugment == -1) throw new ArgumentException("Individual to augment not found in this repository");
 
-        toAugment.accounts.AddRange(toDestroy.accounts);
-        toAugment.isAnyContact = toAugment.accounts.Any(account => account.IsAnyCallerContact());
-        if (toAugment.note.status == NoteState.NeverHad)
+        var isAnyContact = toAugment.accounts.Any(account => account.IsAnyCallerContact());
+        var augmented = toAugment with
         {
-            if (toDestroy.note.status is NoteState.Exists or NoteState.WasRemoved)
-            {
-                toAugment.note = toAugment.note with
+            accounts = [..toAugment.accounts.Concat(toDestroy.accounts)],
+            isAnyContact = isAnyContact,
+            note = toAugment.note.status == NoteState.NeverHad && toDestroy.note.status is NoteState.Exists or NoteState.WasRemoved
+                ? toAugment.note with
                 {
                     status = toDestroy.note.status,
                     text = toDestroy.note.text
-                };
-            }
-        }
-        // Order matters
-        toAugment.isExposed = toAugment.isAnyContact
-                              || toAugment.note.status == NoteState.Exists
-                              || toAugment.accounts.Any(account => account.HasAnyCallerNote());
-
-        if (toAugment.customName == null && toDestroy.customName != null)
-        {
-            toAugment.customName = toDestroy.customName;
-        }
+                }
+                : toAugment.note,
+            isExposed = isAnyContact
+                        || toAugment.note.status == NoteState.Exists
+                        || toAugment.accounts.Any(account => account.HasAnyCallerNote()),
+            customName = toAugment.customName == null && toDestroy.customName != null
+                ? toDestroy.customName
+                : toAugment.customName
+        };
+        Individuals[indexToAugment] = augmented;
         
         foreach (var accountFromDestroyed in toDestroy.accounts)
         {
@@ -451,12 +499,12 @@ public class IndividualRepository
         Individuals.RemoveAt(indexToDestroy);
     }
 
-    public Individual GetIndividualByAccount(ImmutableAccountIdentification accountIdentification)
+    public ImmutableIndividual GetIndividualByAccount(ImmutableAccountIdentification accountIdentification)
     {
         return _namedAppToInAppIdToIndividual[accountIdentification.namedApp][accountIdentification.inAppIdentifier];
     }
 
-    public Individual GetByGuid(string guid)
+    public ImmutableIndividual GetByGuid(string guid)
     {
         return Individuals.First(individual => individual.guid == guid);
     }

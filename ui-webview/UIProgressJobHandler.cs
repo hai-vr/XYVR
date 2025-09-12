@@ -3,7 +3,7 @@ using XYVR.Scaffold;
 
 namespace XYVR.UI.WebviewUI;
 
-public class UIProgressJobHandler(IndividualRepository repository, Func<Individual, Task> individualUpdatedEventFn) : IIncrementalDataCollectionJobHandler
+public class UIProgressJobHandler(IndividualRepository repository, Func<ImmutableIndividual, Task> individualUpdatedEventFn) : IIncrementalDataCollectionJobHandler
 {
     private int _prevEnumTotalCount;
 

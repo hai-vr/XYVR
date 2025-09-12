@@ -9,13 +9,13 @@ namespace XYVR.Core;
 // - An individual may have multiple accounts on the same app.
 // - Two different individuals must not have the same account.
 
-public class Individual
+public record ImmutableIndividual
 {
-    public required string guid;
-    public List<ImmutableAccount> accounts = new();
-    public required string displayName;
+    public required string guid { get; init; }
+    public ImmutableArray<ImmutableAccount> accounts { get; init; } = ImmutableArray<ImmutableAccount>.Empty;
+    public required string displayName { get; init; }
     
-    public bool isAnyContact;
+    public bool isAnyContact { get; init; }
     
     /// An Individual is exposed when at least one of the following is true:<br/>
     /// - That Individual is a Contact on any app, or<br/>
@@ -26,11 +26,11 @@ public class Individual
     /// The only reason we need to keep track of non-Exposed Individuals is so that we can
     /// use the API to fetch updates and find out whether any of that Individual's Account has a new Note on them:
     /// Notes are not specific to Contacts and can be attached to anyone.
-    public bool isExposed;
+    public bool isExposed { get; init; }
     
     // This field is up to the app users' judgement
-    public string? customName;
-    public ImmutableNote note = new();
+    public string? customName { get; init; }
+    public ImmutableNote note { get; init; } = new();
 }
 
 public record ImmutableAccount
@@ -94,8 +94,8 @@ public record ImmutableCallerAccount
 {
     public bool isAnonymous { get; init; }
     public string? inAppIdentifier { get; init; } // Can only be null if it's an anonymous caller.
-    
-    public required ImmutableNote note { get; init; }
+
+    public required ImmutableNote note { get; init; } = new();
     public bool isContact { get; init; }
 }
 

@@ -63,7 +63,7 @@ public class AppBFF : IAppBFF
         Console.WriteLine($"Desolidarize was called: {toDesolidarize}");
         
         var individual = _mainWindow.IndividualRepository.GetByGuid(toDesolidarize);
-        if (individual.accounts.Count <= 1) return;
+        if (individual.accounts.Length <= 1) return;
         
         _mainWindow.IndividualRepository.DesolidarizeIndividualAccounts(individual);
         await Scaffolding.SaveRepository(_mainWindow.IndividualRepository);

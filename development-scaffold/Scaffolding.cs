@@ -90,7 +90,7 @@ public static class Scaffolding
         _pathLateInit = savePath;
     }
 
-    public static async Task<Individual[]> OpenRepository() => await OpenIfExists<Individual[]>(IndividualsJsonFilePath, () => []);
+    public static async Task<ImmutableIndividual[]> OpenRepository() => await OpenIfExists<ImmutableIndividual[]>(IndividualsJsonFilePath, () => []);
     public static async Task SaveRepository(IndividualRepository repository) => await SaveTo(repository.Individuals, IndividualsJsonFilePath);
     
     public static async Task<Connector[]> OpenConnectors() => await OpenIfExists<Connector[]>(ConnectorsJsonFilePath, () => []);

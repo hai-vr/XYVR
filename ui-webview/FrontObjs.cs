@@ -20,7 +20,7 @@ internal class FrontIndividual
         return note.status == NoteState.Exists ? note.text : null;
     }
 
-    internal static FrontIndividual FromCore(Individual individual, LiveStatusMonitoring live)
+    internal static FrontIndividual FromCore(ImmutableIndividual individual, LiveStatusMonitoring live)
     {
         var accounts = individual.accounts
             .Select(account =>
