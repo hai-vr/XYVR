@@ -26,6 +26,7 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated, 
     const [twoFactorCode, setTwoFactorCode] = useState('');
     const [isTwoFactorEmail, setIsTwoFactorEmail] = useState(false);
     const [stayLoggedIn, setStayLoggedIn] = useState(true);
+    const [useAccessKey, setUseAccessKey] = useState(false);
     const [isInTwoFactorMode, setIsInTwoFactorMode] = useState(false);
     const [isRequestInProgress, setIsRequestInProgress] = useState(false);
 
@@ -103,9 +104,27 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated, 
                     {(connector.type !== 'Offline' && !isInTwoFactorMode) && (
                         <>
                             <h3 className="input-title">Connect to your {virtualApp} account</h3>
+                            {connector.type === ConnectorType.ChilloutVRAPI && (<div className="pill-toggle">
+                                <button
+                                    type="button"
+                                    className={`pill-option ${!useAccessKey ? 'active' : ''}`}
+                                    onClick={() => setUseAccessKey(false)}
+                                    disabled={isRequestInProgress}
+                                >
+                                    Email
+                                </button>
+                                <button
+                                    type="button"
+                                    className={`pill-option ${useAccessKey ? 'active' : ''}`}
+                                    onClick={() => setUseAccessKey(true)}
+                                    disabled={isRequestInProgress}
+                                >
+                                    Access Key
+                                </button>
+                            </div>)}
                             <input
                                 type={debugMode.demoMode !== DemonstrationMode.Disabled && 'password' || 'text'}
-                                placeholder={connector.type === ConnectorType.VRChatAPI && "Username/Email" || "Username"}
+                                placeholder={connector.type === ConnectorType.VRChatAPI && "Username/Email" || connector.type === ConnectorType.ChilloutVRAPI && "Email" || "Username"}
                                 value={login}
                                 onChange={(e) => setLogin(e.target.value)}
                                 className="login-input"
@@ -145,10 +164,10 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated, 
                             <p className="info-message">
                                 {stayLoggedIn && connector.type === ConnectorType.ResoniteAPI && 'This application does not store your email and password, only a connection token that expires in 30 days. '}
                                 {stayLoggedIn && connector.type === ConnectorType.VRChatAPI && 'This application does not store your password, only a cookie. '}
-                                {stayLoggedIn && connector.type === ConnectorType.ChilloutVRAPI && 'This application does not store your email and password, only a cookie. '}
-                                {connector.type === ConnectorType.ResoniteAPI && <>All data is stored locally. Requests are sent directly to the Resonite API from your machine.</>}
-                                {connector.type === ConnectorType.VRChatAPI && <>All data is stored locally. Requests are sent directly to the VRChat API from your machine.</>}
-                                {connector.type === ConnectorType.ChilloutVRAPI && <>All data is stored locally. Requests are sent directly to the ChilloutVR API from your machine.</>}
+                                {stayLoggedIn && connector.type === ConnectorType.ChilloutVRAPI && 'This application does not store your email and password, only an authentication key. '}
+                                {connector.type === ConnectorType.ResoniteAPI && <>All data is stored locally. Requests are sent directly to the Resonite API from your machine. </>}
+                                {connector.type === ConnectorType.VRChatAPI && <>All data is stored locally. Requests are sent directly to the VRChat API from your machine. </>}
+                                {connector.type === ConnectorType.ChilloutVRAPI && <>All data is stored locally. Requests are sent directly to the ChilloutVR API from your machine. </>}
                                 <a title="Open privacy and data considerations docs in your browser" href="https://docs.hai-vr.dev/docs/products/xyvr/privacy">Learn more</a>.
                             </p>
 

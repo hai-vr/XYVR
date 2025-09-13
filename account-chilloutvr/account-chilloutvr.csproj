@@ -8,7 +8,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\core\core.csproj" />
+        <ProjectReference Include="..\audit-urls\audit-urls.csproj"/>
+        <ProjectReference Include="..\core\core.csproj"/>
     </ItemGroup>
 
+    <ItemGroup>
+        <PackageReference Include="System.Linq.Async" Version="6.0.3"/>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
+    </ItemGroup>
 </Project>

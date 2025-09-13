@@ -29,3 +29,62 @@
         gap: 0.5rem;
     }
 }
+
+
+.pill-toggle {
+    display: flex;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    padding: 2px;
+    width: fit-content;
+    margin: 0 auto;
+}
+
+.pill-option {
+    padding: 6px 16px;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    min-width: 80px;
+}
+
+.pill-option:hover:not(:disabled) {
+    color: var(--text-primary);
+    background: var(--bg-primary);
+}
+
+.pill-option.active {
+    background: var(--accent-primary);
+    color: white;
+}
+
+.pill-option:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pill-option:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+@media (max-width: 768px) {
+    .input-fields {
+        min-width: auto;
+        width: 100%;
+    }
+
+    .pill-toggle {
+        width: 100%;
+        align-self: stretch;
+    }
+
+    .pill-option {
+        flex: 1;
+    }
+}
