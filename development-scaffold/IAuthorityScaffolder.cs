@@ -11,7 +11,8 @@ public interface IAuthorityScaffolder
         // TODO: Use namespace attributes or something to declare authority scaffolders and collect them.
         List<IAuthorityScaffolder> scaffolders = [
             new ResoniteAuthorityScaffolder(),
-            new VRChatAuthorityScaffolder()
+            new VRChatAuthorityScaffolder(),
+            new ChilloutVRAuthorityScaffolder()
         ];
         return (await Task.WhenAll(scaffolders.Select(x => x.CreateAuthority()))).ToList();
     }
