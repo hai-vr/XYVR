@@ -57,3 +57,11 @@ For more details regarding privacy and data considerations, please refer to the 
 
 If you are a developer looking to modify or audit this software, the developer documentation can be found
 in the [README-DEVELOPER.md](README-DEVELOPER.md) file.
+
+# Third-party acknowledgements
+
+The communication with the APIs is a custom implementation, with the requests based on the following reference documents:
+- The API page on the official [Resonite wiki](https://wiki.resonite.com/API).
+- The community-maintained VRChat API documentation at [vrchat.community](https://vrchat.community/) maintained by [github.com/vrchatapi](https://github.com/vrchatapi).
+- Due to the absence of documentation, the [CVRX](https://github.com/AstroDogeDX/CVRX/blob/472cceec651abbeff9c76ae8412522d27015bfd9/server/api_cvr_http.js) app ([MIT License](https://github.com/AstroDogeDX/CVRX/blob/472cceec651abbeff9c76ae8412522d27015bfd9/LICENSE))
+  maintained by [github.com/AstroDogeDX](https://github.com/AstroDogeDX/CVRX) was used as a reference for the API endpoints.
