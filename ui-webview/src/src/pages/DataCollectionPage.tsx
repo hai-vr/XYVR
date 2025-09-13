@@ -4,7 +4,7 @@ import './DataCollectionPage.css'
 import '../Header.css'
 import Connector from "../components/Connector.tsx";
 import DarkModeToggleButton from "../components/DarkModeToggleButton.tsx";
-import type {FrontConnector} from "../types/ConnectorTypes.ts";
+import {ConnectorType, type ConnectorTypeType, type FrontConnector} from "../types/ConnectorTypes.ts";
 import type {DebugFlags} from "../types/DebugFlags.ts";
 
 interface DataCollectionPageProps {
@@ -35,7 +35,7 @@ function DataCollectionPage({ isDark, setIsDark, debugMode }: DataCollectionPage
         initializeApi();
     }, []);
 
-    const createNewConnector = async (connectorType: string) => {
+    const createNewConnector = async (connectorType: ConnectorTypeType) => {
         await window.chrome.webview.hostObjects.dataCollectionApi.CreateConnector(connectorType);
 
         const json = await window.chrome.webview.hostObjects.dataCollectionApi.GetConnectors();
@@ -134,19 +134,25 @@ function DataCollectionPage({ isDark, setIsDark, debugMode }: DataCollectionPage
                     </div>
                     <div className="connector-actions">
                         <button
-                            onClick={() => createNewConnector('ResoniteAPI')}
+                            onClick={() => createNewConnector(ConnectorType.ResoniteAPI)}
                             title="Create new Resonite connection"
                         >
                             + Add Resonite connection
                         </button>
                         <button
-                            onClick={() => createNewConnector('VRChatAPI')}
+                            onClick={() => createNewConnector(ConnectorType.VRChatAPI)}
                             title="Create new VRChat connection"
                         >
                             + Add VRChat connection
                         </button>
                         <button
-                            onClick={() => createNewConnector('Offline')}
+                            onClick={() => createNewConnector(ConnectorType.ChilloutVRAPI)}
+                            title="Create new ChilloutVR connection"
+                        >
+                            + Add ChilloutVR connection
+                        </button>
+                        <button
+                            onClick={() => createNewConnector(ConnectorType.Offline)}
                             title="Create offline connection"
                         >
                             + Import offline data
