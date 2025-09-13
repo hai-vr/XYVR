@@ -2,6 +2,7 @@
 import {CircleDot, CircleOff, Clipboard, DiamondMinus, Globe, TriangleAlert} from "lucide-react";
 import {_D, _D2} from "../haiUtils.ts";
 import resoniteIcon from "../assets/Resonite_Wiki-Icon.png";
+import cvrIcon from "../assets/cvr_logo_small.png";
 import {
     type FrontAccount,
     NamedApp,
@@ -52,7 +53,7 @@ const Account = ({ account, imposter, showAlias, showNotes, debugMode, showSessi
             case NamedApp.Cluster:
                 return '☁️';
             case NamedApp.ChilloutVR:
-                return '🌆';
+                return <img src={cvrIcon} alt="ChilloutVR" className="app-icon-img" title="ChilloutVR" />;
             default:
                 return '❓';
         }

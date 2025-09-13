@@ -5,6 +5,7 @@ export const ConnectorType =
     Offline: 'Offline',
     ResoniteAPI: 'ResoniteAPI',
     VRChatAPI: 'VRChatAPI',
+    ChilloutVRAPI: 'ChilloutVRAPI',
 } as const;
 
 export type ConnectorTypeType = typeof ConnectorType[keyof typeof ConnectorType];

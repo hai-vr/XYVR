@@ -4,7 +4,7 @@ import './Connector.css';
 import '../InputFields.css';
 import {TriangleAlert, X} from "lucide-react";
 import {type FrontAccount, NamedApp} from "../types/CoreTypes.ts";
-import type {FrontConnector, FrontConnectorAccount} from "../types/ConnectorTypes.ts";
+import {ConnectorType, type FrontConnector, type FrontConnectorAccount} from "../types/ConnectorTypes.ts";
 import {type DebugFlags, DemonstrationMode, DISABLED_DEBUG_FLAGS} from "../types/DebugFlags.ts";
 
 interface DeleteState {
@@ -29,8 +29,9 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated, 
     const [isInTwoFactorMode, setIsInTwoFactorMode] = useState(false);
     const [isRequestInProgress, setIsRequestInProgress] = useState(false);
 
-    let virtualApp = connector.type === 'VRChatAPI' && NamedApp.VRChat
-        || connector.type === 'ResoniteAPI' && NamedApp.Resonite
+    let virtualApp = connector.type === ConnectorType.VRChatAPI && NamedApp.VRChat
+        || connector.type === ConnectorType.ResoniteAPI && NamedApp.Resonite
+        || connector.type === ConnectorType.ChilloutVRAPI && NamedApp.ChilloutVR
         || NamedApp.NotNamed;
 
     const tempAccount: FrontConnectorAccount = {
@@ -104,7 +105,7 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated, 
                             <h3 className="input-title">Connect to your {virtualApp} account</h3>
                             <input
                                 type={debugMode.demoMode !== DemonstrationMode.Disabled && 'password' || 'text'}
-                                placeholder={connector.type === 'VRChatAPI' && "Username/Email" || "Username"}
+                                placeholder={connector.type === ConnectorType.VRChatAPI && "Username/Email" || "Username"}
                                 value={login}
                                 onChange={(e) => setLogin(e.target.value)}
                                 className="login-input"
@@ -133,7 +134,7 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated, 
                                     Please enter your username; not your user ID.
                                 </p>
                             }
-                            {connector.type === 'ResoniteAPI' && /.@./.test(login)
+                            {connector.type === ConnectorType.ResoniteAPI && /.@./.test(login)
                                 && <p className="warning-message">
                                     <span className="warning-icon">⚠️</span>
                                     Please enter your username; not your email address.<br/>
@@ -142,10 +143,13 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated, 
                             }
                             <button title={`Login to ${virtualApp}`} onClick={() => tryLogin()} disabled={!login || !password || isRequestInProgress}>Login to {virtualApp}</button>
                             <p className="info-message">
-                                {stayLoggedIn && connector.type === 'ResoniteAPI' && 'This application does not store your email and password, only a connection token that expires in 30 days. '
-                                    || stayLoggedIn && connector.type === 'VRChatAPI' && 'This application does not store your password, only a cookie. '}
-                                {connector.type === 'ResoniteAPI' && <>All data is stored locally. Requests are sent directly to the Resonite API from your machine. <a title="Open privacy and data considerations docs in your browser" href="https://docs.hai-vr.dev/docs/products/xyvr/privacy">Learn more</a>.</>
-                                || <>All data is stored locally. Requests are sent directly to the VRChat API from your machine. <a title="Open privacy and data considerations docs in your browser" href="https://docs.hai-vr.dev/docs/products/xyvr/privacy">Learn more</a>.</>}
+                                {stayLoggedIn && connector.type === ConnectorType.ResoniteAPI && 'This application does not store your email and password, only a connection token that expires in 30 days. '}
+                                {stayLoggedIn && connector.type === ConnectorType.VRChatAPI && 'This application does not store your password, only a cookie. '}
+                                {stayLoggedIn && connector.type === ConnectorType.ChilloutVRAPI && 'This application does not store your email and password, only a cookie. '}
+                                {connector.type === ConnectorType.ResoniteAPI && <>All data is stored locally. Requests are sent directly to the Resonite API from your machine.</>}
+                                {connector.type === ConnectorType.VRChatAPI && <>All data is stored locally. Requests are sent directly to the VRChat API from your machine.</>}
+                                {connector.type === ConnectorType.ChilloutVRAPI && <>All data is stored locally. Requests are sent directly to the ChilloutVR API from your machine.</>}
+                                <a title="Open privacy and data considerations docs in your browser" href="https://docs.hai-vr.dev/docs/products/xyvr/privacy">Learn more</a>.
                             </p>
 
                         </>
