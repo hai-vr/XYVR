@@ -39,4 +39,6 @@ public class ChilloutVRAuthority : IAuthority
     {
         return Task.CompletedTask;
     }
+
+    public const string QualifiedAppName = "chilloutvr";
 }

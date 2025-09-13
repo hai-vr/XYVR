@@ -28,4 +28,6 @@ https://discord.com/channels/418093857394262020/418512124529344523/1413288167846
     public const string ResoniteApiUrl = "https://api.resonite.com";
     // https://wiki.resonite.com/API#:~:text=be%20easily%20emulated.-,The%20hub%20address%20is,-https%3A//api.resonite
     public const string ResoniteHubUrl = "https://api.resonite.com/hub";
+
+    public const string ChilloutVrApiUrlV1 = "https://api.abinteractive.net/1";
 }

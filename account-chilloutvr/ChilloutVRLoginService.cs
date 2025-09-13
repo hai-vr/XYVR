@@ -1,13 +1,51 @@
-﻿using XYVR.Core;
+﻿using Newtonsoft.Json;
+using XYVR.Core;
 using XYVR.Login;
 
 namespace XYVR.AccountAuthority.ChilloutVR;
 
 public class ChilloutVRLoginService : ILoginService
 {
-    public Task<ConnectionAttemptResult> Connect(ICredentialsStorage credentialsStorage, string guid, ConnectionAttempt connectionAttempt)
+    public async Task<ConnectionAttemptResult> Connect(ICredentialsStorage credentialsStorage, string guid, ConnectionAttempt connectionAttempt)
     {
-        throw new NotImplementedException();
+        var api = new ChilloutVRAPI();
+        
+        Console.WriteLine("Connecting to ChilloutVR...");
+        var result = await api.Login(connectionAttempt.login__sensitive, connectionAttempt.password__sensitive);
+        Console.WriteLine($"The result was {result.Status}");
+        
+        if (result.Status == CvrLoginResponseStatus.Success)
+        {
+            var auth__sensitive = result.Auth!;
+
+            var authCredentialsStorage__sensitive = new CvrAuthCredentialsStorage
+            {
+                username = auth__sensitive.data.username,
+                accessKey = auth__sensitive.data.accessKey,
+            };
+
+            await credentialsStorage.StoreCookieOrToken(JsonConvert.SerializeObject(authCredentialsStorage__sensitive));
+            
+            return new ConnectionAttemptResult
+            {
+                guid = guid,
+                type = ConnectionAttemptResultType.Success,
+                account = new ConnectorAccount
+                {
+                    namedApp = NamedApp.ChilloutVR,
+                    qualifiedAppName = ChilloutVRAuthority.QualifiedAppName,
+                    inAppDisplayName = auth__sensitive.data.username,
+                    inAppIdentifier = auth__sensitive.data.userId,
+                }
+            };
+        }
+        else
+        {
+            return new ConnectionAttemptResult
+            {
+                type = ConnectionAttemptResultType.Failure
+            };
+        }
     }
 
     public Task<ConnectionAttemptResult> Logout(ICredentialsStorage credentialsStorage, string guid)
@@ -15,8 +53,8 @@ public class ChilloutVRLoginService : ILoginService
         throw new NotImplementedException();
     }
 
-    public Task<bool> IsLoggedInWithoutRequest(ICredentialsStorage copyOfCredentialsStorage)
+    public async Task<bool> IsLoggedInWithoutRequest(ICredentialsStorage copyOfCredentialsStorage)
     {
-        throw new NotImplementedException();
+        return await copyOfCredentialsStorage.RequireCookieOrToken() != null;
     }
 }
