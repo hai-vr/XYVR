@@ -494,7 +494,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                                     <div key={liveSession.guid || index} className="live-session-card">
                                         <div className="live-session-header">
                                             <div className="live-session-world">
-                                                {liveSession.inAppVirtualSpaceName || 'Unknown World'} ({liveSession.participants.filter(p => p.isKnown).length} / ?)
+                                                {liveSession.inAppVirtualSpaceName || 'Unknown World'} ({liveSession.currentAttendance || '?'}&nbsp;/&nbsp;{liveSession.sessionCapacity || liveSession.virtualSpaceDefaultCapacity || '?'})
                                             </div>
                                         </div>
                                         <div className="live-session-participants">

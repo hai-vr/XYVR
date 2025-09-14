@@ -45,7 +45,7 @@ public record ImmutableNonIndexedAccount
 /// show up in the UI as early as possible without actually needing to make calls and retrieve additional information about them.<br/>
 /// The consequence of this is that when we convert this incomplete account to an indexed account, it is marked in the UI as pending,
 /// so that the user knows the information about that account is incomplete.
-public class ImmutableIncompleteAccount
+public record ImmutableIncompleteAccount
 {
     public NamedApp namedApp { get; init; }
     public required string qualifiedAppName { get; init; }

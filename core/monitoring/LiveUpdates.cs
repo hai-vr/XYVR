@@ -2,31 +2,31 @@
 
 namespace XYVR.Core;
 
-public class LiveUserUpdate
+public record ImmutableLiveUserUpdate
 {
-    public NamedApp namedApp;
-    public string trigger;
-    public string qualifiedAppName;
-    public string inAppIdentifier;
+    public NamedApp namedApp { get; init; }
+    public string trigger { get; init; }
+    public string qualifiedAppName { get; init; }
+    public string inAppIdentifier { get; init; }
 
-    public OnlineStatus? onlineStatus;
-    public LiveUserSessionState? mainSession;
-    public string? customStatus;
+    public OnlineStatus? onlineStatus { get; init; }
+    public ImmutableLiveUserSessionState? mainSession { get; init; }
+    public string? customStatus { get; init; }
 
-    public string callerInAppIdentifier;
+    public string callerInAppIdentifier { get; init; }
+    
+    public object? sessionSpecifics { get; init; }
 
-    public ImmutableLiveUserUpdate ToImmutable()
+    public ImmutableParticipant AsNonHostParticipant()
     {
-        return new ImmutableLiveUserUpdate
+        return new ImmutableParticipant
         {
-            namedApp = namedApp,
-            trigger = trigger,
-            qualifiedAppName = qualifiedAppName,
-            inAppIdentifier = inAppIdentifier,
-            onlineStatus = onlineStatus,
-            mainSession = mainSession?.ToImmutable(),
-            customStatus = customStatus,
-            callerInAppIdentifier = callerInAppIdentifier
+            isHost = false,
+            isKnown = true,
+            knownAccount = new ImmutableKnownParticipantAccount
+            {
+                inAppIdentifier = inAppIdentifier
+            }
         };
     }
 }
@@ -47,19 +47,10 @@ public enum OnlineStatus
     VRChatDND,
 }
 
-public class LiveUserSessionState
+public record ImmutableLiveUserSessionState
 {
-    public LiveUserKnownSession? knownSession;
-    public LiveUserSessionKnowledge knowledge;
-
-    public ImmutableLiveUserSessionState ToImmutable()
-    {
-        return new ImmutableLiveUserSessionState
-        {
-            knownSession = knownSession?.ToImmutable(),
-            knowledge = knowledge
-        };
-    }
+    public LiveUserSessionKnowledge knowledge { get; init; }
+    public string? sessionGuid { get; init; } // Non-null if knowledge is set to Known
 }
 
 public record ImmutableLiveSession
@@ -77,6 +68,10 @@ public record ImmutableLiveSession
     public ImmutableLiveSessionHost? inAppHost { get; init; }
 
     public ImmutableArray<ImmutableParticipant> participants { get; init; } = ImmutableArray<ImmutableParticipant>.Empty;
+    
+    public int? virtualSpaceDefaultCapacity { get; init; }
+    public int? sessionCapacity { get; init; }
+    public int? currentAttendance { get; init; }
 
     public virtual bool Equals(ImmutableLiveSession? other)
     {
@@ -89,7 +84,10 @@ public record ImmutableLiveSession
                inAppSessionName == other.inAppSessionName &&
                inAppVirtualSpaceName == other.inAppVirtualSpaceName &&
                Equals(inAppHost, other.inAppHost) &&
-               participants.SequenceEqual(other.participants);
+               participants.SequenceEqual(other.participants) && 
+               virtualSpaceDefaultCapacity == other.virtualSpaceDefaultCapacity &&
+               sessionCapacity == other.sessionCapacity &&
+               currentAttendance == other.currentAttendance;
     }
 
     public override int GetHashCode()
@@ -104,6 +102,9 @@ public record ImmutableLiveSession
             hashCode = (hashCode * 397) ^ (inAppVirtualSpaceName != null ? inAppVirtualSpaceName.GetHashCode() : 0);
             hashCode = (hashCode * 397) ^ (inAppHost != null ? inAppHost.GetHashCode() : 0);
             hashCode = (hashCode * 397) ^ participants.Aggregate(0, (h, a) => h ^ a.GetHashCode());
+            hashCode = (hashCode * 397) ^ virtualSpaceDefaultCapacity.GetHashCode();
+            hashCode = (hashCode * 397) ^ sessionCapacity.GetHashCode();
+            hashCode = (hashCode * 397) ^ currentAttendance.GetHashCode();
             return hashCode;
         }
     }
@@ -117,7 +118,8 @@ public record ImmutableLiveSession
         return $"ImmutableLiveSession {{ guid: {guid}, namedApp: {namedApp}, qualifiedAppName: {qualifiedAppName}, " +
                $"inAppSessionIdentifier: {inAppSessionIdentifier}, inAppSessionName: {inAppSessionName}, " +
                $"inAppVirtualSpaceName: {inAppVirtualSpaceName}, inAppHost: {inAppHost}, " +
-               $"participants: {participantsStr} }}";
+               $"participants: {participantsStr}, virtualSpaceDefaultCapacity: {virtualSpaceDefaultCapacity}, " +
+               $"sessionCapacity: {sessionCapacity}, currentAttendance: {currentAttendance} }}";
     }
 }
 
@@ -132,6 +134,10 @@ public record ImmutableNonIndexedLiveSession
     public string? inAppVirtualSpaceName { get; init; }
     
     public ImmutableLiveSessionHost? inAppHost { get; init; }
+    
+    public int? virtualSpaceDefaultCapacity { get; init; }
+    public int? sessionCapacity { get; init; }
+    public int? currentAttendance { get; init; }
 
     public static ImmutableLiveSession MakeIndexed(ImmutableNonIndexedLiveSession inputSession)
     {
@@ -144,7 +150,10 @@ public record ImmutableNonIndexedLiveSession
             inAppSessionName = inputSession.inAppSessionName,
             inAppVirtualSpaceName = inputSession.inAppVirtualSpaceName,
             inAppHost = inputSession.inAppHost,
-            participants = ImmutableArray<ImmutableParticipant>.Empty
+            participants = ImmutableArray<ImmutableParticipant>.Empty,
+            virtualSpaceDefaultCapacity = inputSession.virtualSpaceDefaultCapacity,
+            sessionCapacity = inputSession.sessionCapacity,
+            currentAttendance = inputSession.currentAttendance,
         };
     }
 }
@@ -174,6 +183,7 @@ public enum LiveUserSessionKnowledge
     Indeterminate,
     Known,
     KnownButNoData,
+    Offline,
     // Resonite
     ContactsOnlyWorld,
     PrivateSession,
@@ -183,26 +193,8 @@ public enum LiveUserSessionKnowledge
     VRCTraveling
 }
 
-public class LiveUserKnownSession
+public record ImmutableLiveSessionHost
 {
-    public string inAppSessionIdentifier;
-    
-    public string? inAppSessionName;
-    public string? inAppVirtualSpaceName;
-
-    public bool? isJoinable;
-    
-    public ImmutableLiveSessionHost? inAppHost;
-
-    public ImmutableLiveUserKnownSession ToImmutable()
-    {
-        return new ImmutableLiveUserKnownSession
-        {
-            inAppSessionIdentifier = inAppSessionIdentifier,
-            inAppSessionName = inAppSessionName,
-            inAppVirtualSpaceName = inAppVirtualSpaceName,
-            isJoinable = isJoinable,
-            inAppHost = inAppHost
-        };
-    }
+    public string inAppHostIdentifier { get; init; }
+    public string? inAppHostDisplayName { get; init; }
 }

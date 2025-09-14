@@ -12,6 +12,7 @@ internal partial class ResoniteLiveCommunicator
     private readonly string _callerInAppIdentifier;
     private readonly string _uid;
     private readonly IResponseCollector _responseCollector;
+    private readonly Func<string, string?> _trySessionIdToSessionGuidFn;
     private readonly ResoniteSignalRClient _srClient;
     private readonly Dictionary<string, SessionUpdateJsonObject> _sessionIdToSessionUpdate = new();
     private readonly Dictionary<string, string> _resolvedMixedHashToSessionId = new();
@@ -20,16 +21,19 @@ internal partial class ResoniteLiveCommunicator
     private ResoniteAPI? _api;
 
     public event LiveUpdateReceived? OnLiveUpdateReceived;
-    public delegate Task LiveUpdateReceived(LiveUserUpdate liveUpdate);
+    public delegate Task LiveUpdateReceived(ImmutableLiveUserUpdate liveUpdate);
     
-    public event Action OnReconnected;
+    public event Action? OnReconnected;
+    
+    public event Action<SessionUpdateJsonObject>? OnSessionUpdated;
 
-    public ResoniteLiveCommunicator(ICredentialsStorage credentialsStorage, string callerInAppIdentifier, string uid__sensitive, IResponseCollector responseCollector)
+    public ResoniteLiveCommunicator(ICredentialsStorage credentialsStorage, string callerInAppIdentifier, string uid__sensitive, IResponseCollector responseCollector, Func<string, string?> trySessionIdToSessionGuidFn)
     {
         _credentialsStorage = credentialsStorage;
         _callerInAppIdentifier = callerInAppIdentifier;
         _uid = uid__sensitive;
         _responseCollector = responseCollector;
+        _trySessionIdToSessionGuidFn = trySessionIdToSessionGuidFn;
 
         _srClient = new ResoniteSignalRClient();
         _srClient.OnStatusUpdate += WhenStatusUpdate;
@@ -60,10 +64,12 @@ internal partial class ResoniteLiveCommunicator
     {
         var status = ParseOnlineStatus(statusUpdate.onlineStatus);
         var liveSessionState = await DeriveSessionState(statusUpdate, status);
+        
+        var session = SessionOrNull(statusUpdate);
 
         if (OnLiveUpdateReceived != null)
         {
-            await OnLiveUpdateReceived(new LiveUserUpdate
+            await OnLiveUpdateReceived(new ImmutableLiveUserUpdate
             {
                 trigger = "SignalR-OnStatusUpdate",
                 namedApp = NamedApp.Resonite,
@@ -71,6 +77,11 @@ internal partial class ResoniteLiveCommunicator
                 inAppIdentifier = statusUpdate.userId,
                 onlineStatus = status,
                 mainSession = liveSessionState,
+                sessionSpecifics = new ImmutableResoniteLiveSessionSpecifics
+                {
+                    sessionHash = session?.sessionHash,
+                    userHashSalt = statusUpdate.hashSalt
+                },
                 callerInAppIdentifier = _callerInAppIdentifier
             });
         }
@@ -98,30 +109,28 @@ internal partial class ResoniteLiveCommunicator
 
         if (anySessionUpdated)
         {
+            OnSessionUpdated?.Invoke(sessionUpdate);
             // TODO: Reemit information about the users that pertains to this session.
         }
 
         return Task.CompletedTask;
     }
 
-    private async Task<LiveUserSessionState> DeriveSessionState(UserStatusUpdate userStatusUpdate, OnlineStatus status)
+    private async Task<ImmutableLiveUserSessionState> DeriveSessionState(UserStatusUpdate userStatusUpdate, OnlineStatus status)
     {
         if (status == OnlineStatus.Offline)
         {
-            return new LiveUserSessionState
+            return new ImmutableLiveUserSessionState
             {
                 knowledge = LiveUserSessionKnowledge.Indeterminate,
-                knownSession = null
             };
         }
 
         var session = SessionOrNull(userStatusUpdate);
         SessionUpdateJsonObject? sessionUpdate = null;
 
-        string? worldName;
         if (session != null && userStatusUpdate.hashSalt != null && !session.sessionHidden && session.accessLevel != "Private")
         {
-            
             var existingSessionId = _resolvedMixedHashToSessionId.GetValueOrDefault(session.sessionHash);
             if (existingSessionId != null)
             {
@@ -136,38 +145,45 @@ internal partial class ResoniteLiveCommunicator
                     _sessionIdsToWatch.Add(sessionUpdate.sessionId);
                 }
             }
-            worldName = sessionUpdate != null ? ExtractTextFromColorTags(sessionUpdate.name) : null;
+        }
+        
+        if (session != null)
+        {
+            if (session.accessLevel == "Private")
+            {
+                return new ImmutableLiveUserSessionState
+                {
+                    knowledge = LiveUserSessionKnowledge.PrivateSession
+                };
+            }
+            else
+            {
+                var sessionGuid = _trySessionIdToSessionGuidFn(sessionUpdate!.sessionId);
+                if (sessionGuid != null)
+                {
+                    return new ImmutableLiveUserSessionState
+                    {
+                        knowledge = LiveUserSessionKnowledge.Known,
+                        sessionGuid = sessionGuid
+                    };
+                }
+                else
+                {
+                    Console.WriteLine($"We don't know the session GUID for {sessionUpdate.sessionId}");
+                    return new ImmutableLiveUserSessionState
+                    {
+                        knowledge = LiveUserSessionKnowledge.KnownButNoData
+                    };
+                }
+            }
         }
         else
         {
-            worldName = null;
-        }
-
-        var knowledge = session?.accessLevel == "Private" ?
-            LiveUserSessionKnowledge.PrivateSession :
-            sessionUpdate != null ? LiveUserSessionKnowledge.Known : LiveUserSessionKnowledge.KnownButNoData;
-        return session != null
-            ? new LiveUserSessionState
+            return new ImmutableLiveUserSessionState
             {
-                knowledge = knowledge,
-                knownSession = knowledge == LiveUserSessionKnowledge.Known ? new LiveUserKnownSession
-                {
-                    inAppSessionIdentifier = sessionUpdate!.sessionId,
-                    inAppHost = session is { isHost: true }
-                        ? new ImmutableLiveSessionHost
-                        {
-                            inAppHostIdentifier = userStatusUpdate.userId,
-                            inAppHostDisplayName = null
-                        }
-                        : null,
-                    inAppVirtualSpaceName = worldName
-                } : null
-            }
-            : new LiveUserSessionState
-            {
-                knowledge = LiveUserSessionKnowledge.KnownButNoData,
-                knownSession = null
+                knowledge = LiveUserSessionKnowledge.Indeterminate
             };
+        }
     }
 
     private async Task<SessionUpdateJsonObject?> FindSessionOrNull(string wantedHash, string hashSalt)
@@ -202,7 +218,7 @@ internal partial class ResoniteLiveCommunicator
         return session;
     }
 
-    private static string ExtractTextFromColorTags(string input)
+    public static string ExtractTextFromColorTags(string input)
     {
         if (string.IsNullOrEmpty(input))
             return input;

@@ -19,6 +19,7 @@ public class LiveBFF : ILiveBFF
     private readonly JsonSerializerSettings _serializer;
 
     private List<ILiveMonitoring>? _liveMonitoringAgents;
+    private HashSet<string> _doWeCareAboutThisSessionGuid = new();
 
     public LiveBFF(MainWindow mainWindow)
     {
@@ -114,12 +115,35 @@ public class LiveBFF : ILiveBFF
 
     private async Task WhenUserUpdateMerged(ImmutableLiveUserUpdate update)
     {
-        await _mainWindow.SendEventToReact(FrontEvents.EventForLiveUpdateMerged, FrontLiveUserUpdate.FromCore(update));
+        var live = _mainWindow.LiveStatusMonitoring;
+        await _mainWindow.SendEventToReact(FrontEvents.EventForLiveUpdateMerged, FrontLiveUserUpdate.FromCore(update, live));
     }
 
     private async Task WhenSessionUpdated(ImmutableLiveSession session)
     {
-        await _mainWindow.SendEventToReact(FrontEvents.EventForLiveSessionUpdated, FrontLiveSession.FromCore(session, _mainWindow.LiveStatusMonitoring));
+        if (session.participants.Length == 0)
+        {
+            if (_doWeCareAboutThisSessionGuid.Contains(session.guid))
+            {
+                Console.WriteLine($"We no longer care about session: {session.inAppVirtualSpaceName}");
+                _doWeCareAboutThisSessionGuid.Remove(session.guid);
+            }
+            else
+            {
+                Console.WriteLine($"We do not care about session: {session.inAppVirtualSpaceName}");
+                return;
+            }
+        }
+        _doWeCareAboutThisSessionGuid.Add(session.guid);
+        
+        await _mainWindow.SendEventToReact(FrontEvents.EventForLiveSessionUpdated, FrontLiveSession.FromCore(session));
+
+        var live = _mainWindow.LiveStatusMonitoring;
+        foreach (var userOfThatSession in live.GetAllUserData(session.namedApp)
+                     .Where(update => update?.mainSession?.sessionGuid == session.guid))
+        {
+            await _mainWindow.SendEventToReact(FrontEvents.EventForLiveUpdateMerged, FrontLiveUserUpdate.FromCore(userOfThatSession, live));
+        }
     }
 
     public void OnClosed()

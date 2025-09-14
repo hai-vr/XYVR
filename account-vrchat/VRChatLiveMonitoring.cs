@@ -35,35 +35,35 @@ public class VRChatLiveMonitoring : ILiveMonitoring
                 Converters = { new StringEnumConverter() }
             };
             
-            _liveComms = new VRChatLiveCommunicator(_credentialsStorage, _callerInAppIdentifier, new DoNotStoreAnythingStorage(), _worldNameCache);
+            _liveComms = new VRChatLiveCommunicator(_credentialsStorage, _callerInAppIdentifier, new DoNotStoreAnythingStorage(), _worldNameCache, location => TryLocationToSessionGuid(location));
             _liveComms.OnLiveUpdateReceived += async update =>
             {
                 Console.WriteLine($"OnLiveUpdateReceived: {JsonConvert.SerializeObject(update, serializer)}");
-                await _monitoring.MergeUser(update.ToImmutable());
+                await _monitoring.MergeUser(update);
+            };
+            _liveComms.OnLiveSessionReceived += async session =>
+            {
+                Console.WriteLine($"OnLiveSessionReceived: {JsonConvert.SerializeObject(session, serializer)}");
+                return await _monitoring.MergeSession(session);
             };
             _liveComms.OnWorldCached += async world =>
             {
                 Console.WriteLine($"OnWorldCached: {JsonConvert.SerializeObject(world, serializer)}");
-                
-                var vrcLiveUpdates = _monitoring.GetAllUserData(NamedApp.VRChat)
-                    // FIXME: We need the world identifier here
-                    .Where(update => update.mainSession?.knownSession?.inAppSessionIdentifier.StartsWith(world.worldId) == true)
+
+                var allSessionsOnThisWorld = _monitoring.GetAllSessions(NamedApp.VRChat)
+                    .Where(session => session.inAppSessionIdentifier.StartsWith(world.worldId))
                     .ToList();
-                foreach (ImmutableLiveUserUpdate liveUpdate in vrcLiveUpdates)
+                
+                foreach (var sessionOnThisWorld in allSessionsOnThisWorld)
                 {
-                    // Re-emit events
-                    var modifiedLiveUpdate = liveUpdate with
+                    await _monitoring.MergeSession(new ImmutableNonIndexedLiveSession
                     {
-                        trigger = "Queue-WorldResolved",
-                        mainSession = liveUpdate.mainSession! with
-                        {
-                            knownSession = liveUpdate.mainSession!.knownSession! with
-                            {
-                                inAppVirtualSpaceName = world.name,
-                            }
-                        }
-                    };
-                    await _monitoring.MergeUser(modifiedLiveUpdate);
+                        namedApp = NamedApp.VRChat,
+                        qualifiedAppName = VRChatCommunicator.VRChatQualifiedAppName,
+                        inAppSessionIdentifier = sessionOnThisWorld.inAppSessionIdentifier,
+                        inAppVirtualSpaceName = world.name,
+                        virtualSpaceDefaultCapacity = world.capacity,
+                    });
                 }
             };
             await _liveComms.Connect();
@@ -74,6 +74,12 @@ public class VRChatLiveMonitoring : ILiveMonitoring
         {
             _operationLock.Release();
         }
+    }
+
+    private string? TryLocationToSessionGuid(string location)
+    {
+        return _monitoring.GetAllSessions(NamedApp.VRChat)
+            .FirstOrDefault(session => session.inAppSessionIdentifier == location)?.guid;
     }
 
     public async Task StopMonitoring()

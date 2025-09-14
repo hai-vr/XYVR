@@ -247,7 +247,7 @@ export const anyAccountMatchesSpecialTerms = (accounts: FrontAccount[], specialT
             const searchString = term.substring(8);
 
             return accounts?.some(account => account.mainSession?.knowledge === LiveSessionKnowledge.Known
-                && (!searchString || account.mainSession?.knownSession?.inAppVirtualSpaceName?.toLowerCase().includes(searchString))) || false;
+                && (!searchString || account.mainSession?.liveSession?.inAppVirtualSpaceName?.toLowerCase().includes(searchString))) || false;
         }
 
         switch (term) {

@@ -62,4 +62,5 @@ public class CachedWorld
     public string thumbnailUrl;
     public string releaseStatus;
     public string description;
+    public int capacity;
 }

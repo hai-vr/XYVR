@@ -40,6 +40,11 @@ public class LiveStatusMonitoring
         return _liveUpdatesByAppByUser.Values.SelectMany(it => it.Values).ToList();
     }
 
+    public List<ImmutableLiveSession> GetAllSessions(NamedApp namedApp)
+    {
+        return _sessions.Select(it => it.value).Where(session => session.namedApp == namedApp).ToList();
+    }
+
     public List<ImmutableLiveSession> GetAllSessions()
     {
         return _sessions.Select(it => it.value).ToList();
@@ -93,88 +98,94 @@ public class LiveStatusMonitoring
             updateWasModified = true;
         }
 
-        var participant = actualUpdate.AsParticipant();
-        
-        ImmutableLiveSession? liveSession;
-        bool liveSessionChanged;
-        ImmutableLiveSession? previousSession;
-        if (inputUpdate.mainSession is { knowledge: LiveUserSessionKnowledge.Known })
+        var participant = actualUpdate.AsNonHostParticipant();
+
+        ImmutableLiveSession? previousSession = null;
+        ImmutableLiveSession? targetedSession = null;
+        if (actualUpdate.mainSession is { knowledge: LiveUserSessionKnowledge.Known } mainSession)
         {
-            var userKnownSession = inputUpdate.mainSession.knownSession!;
-            var nonIndexedSession = new ImmutableNonIndexedLiveSession
+            if (_namedAppToAccountGuidToSessionParticipationGuid[actualUpdate.namedApp].TryGetValue(actualUpdate.inAppIdentifier, out var existingParticipationGuid))
             {
-                namedApp = inputUpdate.namedApp,
-                qualifiedAppName = inputUpdate.qualifiedAppName,
-                inAppSessionIdentifier = userKnownSession.inAppSessionIdentifier,
-                inAppSessionName = userKnownSession.inAppSessionName,
-                inAppVirtualSpaceName = userKnownSession.inAppVirtualSpaceName,
-                inAppHost = userKnownSession.inAppHost,
-            };
-            (liveSession, liveSessionChanged, previousSession) = InternalMergeSessionAndGet(nonIndexedSession, participant);
+                if (existingParticipationGuid != mainSession.sessionGuid)
+                {
+                    previousSession = InternalRemoveParticipant(inputUpdate.namedApp, participant);
+                }
+            }
+
+            if (mainSession.sessionGuid != null)
+            {
+                var currentSession = _guidToSession[mainSession.sessionGuid].value;
+                if (!currentSession.participants.Contains(participant))
+                {
+                    targetedSession = currentSession with
+                    {
+                        participants = [.._guidToSession[mainSession.sessionGuid].value.participants.Append(participant)]
+                    };
+                    _guidToSession[mainSession.sessionGuid].value = targetedSession;
+                    _namedAppToAccountGuidToSessionParticipationGuid[actualUpdate.namedApp][actualUpdate.inAppIdentifier] = mainSession.sessionGuid;
+                }
+            }
         }
         else
         {
-            liveSession = null;
-            liveSessionChanged = false;
-            
             previousSession = InternalRemoveParticipant(inputUpdate.namedApp, participant);
         }
 
-        // We want to send the updates in a preferred order:
-        // - Session first, so that the receiver side may register that session.
-        // - User next, so that the receiver side may have a better luck associating the user with that session.
-        // This isn't required.
+        if (updateWasModified && OnLiveUserUpdateMerged != null)
+        {
+            await OnLiveUserUpdateMerged.Invoke(inputUpdate);
+        }
+
         if (previousSession != null && OnLiveSessionUpdated != null)
         {
             await OnLiveSessionUpdated.Invoke(previousSession);
         }
-        if (liveSession != null && liveSessionChanged && OnLiveSessionUpdated != null)
+        if (targetedSession != null && OnLiveSessionUpdated != null)
         {
-            await OnLiveSessionUpdated.Invoke(liveSession);
-        }
-        if (updateWasModified && OnLiveUserUpdateMerged != null)
-        {
-            await OnLiveUserUpdateMerged.Invoke(inputUpdate);
+            await OnLiveSessionUpdated.Invoke(targetedSession);
         }
     }
 
     private ImmutableLiveSession? InternalRemoveParticipant(NamedApp namedApp, ImmutableParticipant usingParticipant)
     {
-        ImmutableLiveSession participantRemoval = null;
-        if (usingParticipant is { isKnown: true })
+        if (usingParticipant is not { isKnown: true }) return null;
+
+        if (!_namedAppToAccountGuidToSessionParticipationGuid[namedApp]
+                .TryGetValue(usingParticipant.knownAccount!.inAppIdentifier, out var existingParticipationGuid)) return null;
+        
+        var previous = _guidToSession[existingParticipationGuid].value;
+        var participantRemoval = previous with
         {
-            if (_namedAppToAccountGuidToSessionParticipationGuid[namedApp]
-                    .TryGetValue(usingParticipant.knownAccount!.inAppIdentifier, out var existingParticipationGuid))
-            {
-                var previous = _guidToSession[existingParticipationGuid].value;
-                participantRemoval = previous with
-                {
-                    participants = [
-                        ..previous.participants
-                            .Where(participant => !participant.isKnown || participant.knownAccount!.inAppIdentifier != usingParticipant.knownAccount!.inAppIdentifier)
-                    ]
-                };
-                _guidToSession[existingParticipationGuid].value = participantRemoval;
+            participants =
+            [
+                ..previous.participants
+                    .Where(participant => !participant.isKnown || participant.knownAccount!.inAppIdentifier != usingParticipant.knownAccount!.inAppIdentifier)
+            ]
+        };
+        _guidToSession[existingParticipationGuid].value = participantRemoval;
 
-
-                _namedAppToAccountGuidToSessionParticipationGuid[namedApp].Remove(usingParticipant.knownAccount!.inAppIdentifier);
-            }
-        }
+        _namedAppToAccountGuidToSessionParticipationGuid[namedApp].Remove(usingParticipant.knownAccount!.inAppIdentifier);
 
         return participantRemoval;
     }
 
-    public async Task MergeSession(ImmutableNonIndexedLiveSession inputSession)
+    public async Task<ImmutableLiveSession> MergeSession(ImmutableNonIndexedLiveSession inputSession)
     {
-        var (liveSession, changed, _) = InternalMergeSessionAndGet(inputSession);
+        var (liveSession, changed, previousSession) = InternalMergeSessionAndGet(inputSession);
         
+        if (previousSession != null && OnLiveSessionUpdated != null)
+        {
+            await OnLiveSessionUpdated.Invoke(previousSession);
+        }
         if (changed && OnLiveSessionUpdated != null)
         {
             await OnLiveSessionUpdated.Invoke(liveSession);
         }
+
+        return liveSession;
     }
 
-    private (ImmutableLiveSession? liveSession, bool liveSessionChanged, ImmutableLiveSession? previousSession) InternalMergeSessionAndGet(ImmutableNonIndexedLiveSession inputSession, ImmutableParticipant? usingParticipant = null)
+    private (ImmutableLiveSession liveSession, bool liveSessionChanged, ImmutableLiveSession? previousSession) InternalMergeSessionAndGet(ImmutableNonIndexedLiveSession inputSession, ImmutableParticipant? usingParticipant = null)
     {
         ImmutableLiveSession actualSession;
         bool outChanged;
@@ -186,6 +197,9 @@ public class LiveStatusMonitoring
             
             if (inputSession.inAppSessionName != null) modifiedSession = modifiedSession with { inAppSessionName = inputSession.inAppSessionName };
             if (inputSession.inAppVirtualSpaceName != null) modifiedSession = modifiedSession with { inAppVirtualSpaceName = inputSession.inAppVirtualSpaceName };
+            if (inputSession.virtualSpaceDefaultCapacity != null) modifiedSession = modifiedSession with { virtualSpaceDefaultCapacity = inputSession.virtualSpaceDefaultCapacity };
+            if (inputSession.sessionCapacity != null) modifiedSession = modifiedSession with { sessionCapacity = inputSession.sessionCapacity };
+            if (inputSession.currentAttendance != null) modifiedSession = modifiedSession with { currentAttendance = inputSession.currentAttendance };
             
             if (usingParticipant != null && !modifiedSession.participants.Contains(usingParticipant))
                 modifiedSession = modifiedSession with { participants = [..modifiedSession.participants.Append(usingParticipant)] };
@@ -261,5 +275,10 @@ public class LiveStatusMonitoring
     public ImmutableLiveUserUpdate? GetLiveSessionStateOrNull(NamedApp accountNamedApp, string accountInAppIdentifier)
     {
         return _liveUpdatesByAppByUser[accountNamedApp].GetValueOrDefault(accountInAppIdentifier);
+    }
+
+    public ImmutableLiveSession? GetSessionByGuid(string sessionGuid)
+    {
+        return _guidToSession.GetValueOrDefault(sessionGuid)?.value;
     }
 }

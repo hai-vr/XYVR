@@ -17,16 +17,7 @@ public class LiveStatusMonitoringTest
         mainSession = new ImmutableLiveUserSessionState
         {
             knowledge = LiveUserSessionKnowledge.Known,
-            knownSession = new ImmutableLiveUserKnownSession
-            {
-                inAppSessionIdentifier = "S-someSessionId",
-                inAppHost = new ImmutableLiveSessionHost
-                {
-                    inAppHostIdentifier = "U-someHostId"
-                },
-                inAppSessionName = "My Cool World",
-                inAppVirtualSpaceName = "The Grassy Meadow",
-            }
+            sessionGuid = "sessionGuid"
         },
         callerInAppIdentifier = "U-callerUserId"
     };
@@ -102,10 +93,7 @@ public class LiveStatusMonitoringTest
         {
             mainSession = BaseImmutableLiveUserUpdate.mainSession! with
             {
-                knownSession = BaseImmutableLiveUserUpdate.mainSession!.knownSession! with
-                {
-                    inAppSessionIdentifier = "S-someOtherSessionId"
-                }
+                sessionGuid = "otherSessionGuid"
             }
         });
         var result = sut.GetAllSessions();

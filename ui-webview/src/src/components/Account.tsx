@@ -124,7 +124,7 @@ const Account = ({ account, imposter, showAlias, showNotes, debugMode, showSessi
 
     const isOffline = account.onlineStatus === OnlineStatus.Offline;
     const isKnownSession = account.mainSession && account.mainSession.knowledge === LiveSessionKnowledge.Known && true || false;
-    const worldName = isKnownSession && account.mainSession && (account.mainSession.knownSession && (account.mainSession.knownSession.inAppVirtualSpaceName || 'Loading...')) || undefined;
+    const worldName = isKnownSession && account.mainSession && (account.mainSession.liveSession && (account.mainSession.liveSession.inAppVirtualSpaceName || 'Loading...')) || undefined;
     return (
         <div className="account-container">
             <div className="account-header">

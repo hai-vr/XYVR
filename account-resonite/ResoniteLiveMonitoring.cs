@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using XYVR.API.Resonite;
 using XYVR.Core;
 
 namespace XYVR.AccountAuthority.Resonite;
@@ -40,7 +41,7 @@ public class ResoniteLiveMonitoring : ILiveMonitoring, IDisposable
             if (_isConnected) return;
             _cancellationTokenSource = new CancellationTokenSource();
             
-            _liveComms = new ResoniteLiveCommunicator(_credentialsStorage, _callerInAppIdentifier, _uid__sensitive, new DoNotStoreAnythingStorage());
+            _liveComms = new ResoniteLiveCommunicator(_credentialsStorage, _callerInAppIdentifier, _uid__sensitive, new DoNotStoreAnythingStorage(), TryGetSessionIdToSessionGuid);
             
             var serializer = new JsonSerializerSettings()
             {
@@ -51,7 +52,7 @@ public class ResoniteLiveMonitoring : ILiveMonitoring, IDisposable
             _liveComms.OnLiveUpdateReceived += async update =>
             {
                 Console.WriteLine($"OnLiveUpdateReceived: {JsonConvert.SerializeObject(update, serializer)}");
-                await _monitoring.MergeUser(update.ToImmutable());
+                await _monitoring.MergeUser(update);
 
                 if (!alreadyListeningTo.Contains(update.inAppIdentifier))
                 {
@@ -66,6 +67,47 @@ public class ResoniteLiveMonitoring : ILiveMonitoring, IDisposable
                     await _liveComms.ListenOnContact(inAppIdentifier);
                 }
             };
+            _liveComms.OnSessionUpdated += async sessionUpdate =>
+            {
+                var sessionId = sessionUpdate.sessionId;
+                var correspondingSession = await _monitoring.MergeSession(new ImmutableNonIndexedLiveSession
+                {
+                    namedApp = NamedApp.Resonite,
+                    qualifiedAppName = ResoniteCommunicator.ResoniteQualifiedAppName,
+                    inAppVirtualSpaceName = ResoniteLiveCommunicator.ExtractTextFromColorTags(sessionUpdate.name),
+                    inAppSessionIdentifier = sessionId,
+                    inAppHost = new ImmutableLiveSessionHost
+                    {
+                        inAppHostIdentifier = sessionUpdate.hostUserId,
+                        inAppHostDisplayName = sessionUpdate.hostUsername
+                    },
+                    currentAttendance = sessionUpdate.joinedUsers,
+                    sessionCapacity = sessionUpdate.maxUsers,
+                    virtualSpaceDefaultCapacity = sessionUpdate.maxUsers,
+                });
+                
+                foreach (var userUpdate in _monitoring.GetAllUserData(NamedApp.Resonite))
+                {
+                    if (userUpdate.mainSession?.knowledge == LiveUserSessionKnowledge.KnownButNoData)
+                    {
+                        var resoniteSession = (ImmutableResoniteLiveSessionSpecifics)userUpdate.sessionSpecifics!;
+                        if (resoniteSession is { sessionHash: not null, userHashSalt: not null }
+                            && await ResoniteHash.Rehash(sessionId, resoniteSession.userHashSalt) == resoniteSession.sessionHash)
+                        {
+                            Console.WriteLine("Received a session for which a user had an unresolved hash for.");
+                            
+                            await _monitoring.MergeUser(userUpdate with
+                            {
+                                mainSession = new ImmutableLiveUserSessionState
+                                {
+                                    knowledge = LiveUserSessionKnowledge.Known,
+                                    sessionGuid = correspondingSession.guid
+                                }
+                            });
+                        }
+                    }
+                }
+            };
             
             await _liveComms.Connect();
             
@@ -76,6 +118,12 @@ public class ResoniteLiveMonitoring : ILiveMonitoring, IDisposable
         {
             _operationLock.Release();
         }
+    }
+
+    private string? TryGetSessionIdToSessionGuid(string sessionId)
+    {
+        return _monitoring.GetAllSessions(NamedApp.Resonite)
+            .FirstOrDefault(session => session.inAppSessionIdentifier == sessionId)?.guid;
     }
 
     private async Task BackgroundTask()

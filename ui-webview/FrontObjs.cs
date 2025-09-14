@@ -26,7 +26,9 @@ internal class FrontIndividual
             .Select(account =>
             {
                 var sessionState = live.GetLiveSessionStateOrNull(account.namedApp, account.inAppIdentifier);
-                return FrontAccount.ToFrontAccount(account, sessionState);
+                var sessionGuid = sessionState?.mainSession?.sessionGuid;
+                var session = sessionGuid != null ? live.GetSessionByGuid(sessionGuid) : null;
+                return FrontAccount.ToFrontAccount(account, sessionState, session);
             }).ToList();
 
         var nonNullStatus = accounts.Select(account => account.onlineStatus).Where(status => status != null).ToList();
@@ -65,7 +67,7 @@ internal class FrontAccount
     public string? customStatus;
     public FrontLiveUserSessionState? mainSession;
 
-    public static FrontAccount ToFrontAccount(ImmutableAccount account, ImmutableLiveUserUpdate? liveSessionState)
+    public static FrontAccount ToFrontAccount(ImmutableAccount account, ImmutableLiveUserUpdate? liveSessionState, ImmutableLiveSession? liveSession)
     {
         return new FrontAccount
         {
@@ -84,7 +86,7 @@ internal class FrontAccount
 
             onlineStatus = liveSessionState?.onlineStatus,
             customStatus = liveSessionState?.customStatus,
-            mainSession = liveSessionState?.mainSession != null ? FrontLiveUserSessionState.FromCore(liveSessionState.mainSession) : null,
+            mainSession = liveSessionState?.mainSession != null ? FrontLiveUserSessionState.FromCore(liveSessionState.mainSession, liveSession) : null,
         };
     }
 }
@@ -169,8 +171,10 @@ internal class FrontLiveUserUpdate
 
     public string callerInAppIdentifier;
     
-    public static FrontLiveUserUpdate FromCore(ImmutableLiveUserUpdate liveUserUpdate)
+    public static FrontLiveUserUpdate FromCore(ImmutableLiveUserUpdate liveUserUpdate, LiveStatusMonitoring live)
     {
+        var sessionGuid = liveUserUpdate.mainSession?.sessionGuid;
+        var session = sessionGuid != null ? live.GetSessionByGuid(sessionGuid) : null;
         return new FrontLiveUserUpdate
         {
             namedApp = liveUserUpdate.namedApp,
@@ -178,7 +182,7 @@ internal class FrontLiveUserUpdate
             qualifiedAppName = liveUserUpdate.qualifiedAppName,
             inAppIdentifier = liveUserUpdate.inAppIdentifier,
             onlineStatus = liveUserUpdate.onlineStatus,
-            mainSession = liveUserUpdate.mainSession != null ? FrontLiveUserSessionState.FromCore(liveUserUpdate.mainSession) : null,
+            mainSession = liveUserUpdate.mainSession != null ? FrontLiveUserSessionState.FromCore(liveUserUpdate.mainSession, session) : null,
             customStatus = liveUserUpdate.customStatus,
             callerInAppIdentifier = liveUserUpdate.callerInAppIdentifier
         };
@@ -187,36 +191,17 @@ internal class FrontLiveUserUpdate
 
 internal class FrontLiveUserSessionState
 {
-    public FrontLiveUserKnownSession? knownSession;
     public LiveUserSessionKnowledge knowledge;
+    public string? sessionGuid;
+    public FrontLiveSession? liveSession;
     
-    public static FrontLiveUserSessionState FromCore(ImmutableLiveUserSessionState liveUserSessionState)
+    public static FrontLiveUserSessionState FromCore(ImmutableLiveUserSessionState liveUserSessionState, ImmutableLiveSession? liveSession)
     {
         return new FrontLiveUserSessionState
         {
-            knownSession = liveUserSessionState.knownSession != null ? FrontLiveUserKnownSession.FromCore(liveUserSessionState.knownSession) : null,
-            knowledge = liveUserSessionState.knowledge
-        };
-    }
-}
-
-internal class FrontLiveUserKnownSession
-{
-    public string inAppSessionIdentifier;
-    
-    public string? inAppSessionName;
-    public string? inAppVirtualSpaceName;
-    
-    public FrontLiveSessionHost? inAppHost;
-    
-    public static FrontLiveUserKnownSession FromCore(ImmutableLiveUserKnownSession liveUserKnownSession)
-    {
-        return new FrontLiveUserKnownSession
-        {
-            inAppSessionIdentifier = liveUserKnownSession.inAppSessionIdentifier,
-            inAppSessionName = liveUserKnownSession.inAppSessionName,
-            inAppVirtualSpaceName = liveUserKnownSession.inAppVirtualSpaceName,
-            inAppHost = liveUserKnownSession.inAppHost != null ? FrontLiveSessionHost.FromCore(liveUserKnownSession.inAppHost) : null
+            knowledge = liveUserSessionState.knowledge,
+            sessionGuid = liveUserSessionState.sessionGuid,
+            liveSession = liveSession != null ? FrontLiveSession.FromCore(liveSession) : null
         };
     }
 }
@@ -236,8 +221,11 @@ internal class FrontLiveSession
     public FrontLiveSessionHost? inAppHost;
 
     public List<FrontParticipant> participants = new();
-    
-    public static FrontLiveSession FromCore(ImmutableLiveSession liveSession, LiveStatusMonitoring monitoring)
+    public int? virtualSpaceDefaultCapacity;
+    public int? sessionCapacity;
+    public int? currentAttendance;
+
+    public static FrontLiveSession FromCore(ImmutableLiveSession liveSession)
     {
         return new FrontLiveSession
         {
@@ -248,14 +236,10 @@ internal class FrontLiveSession
             inAppSessionName = liveSession.inAppSessionName,
             inAppVirtualSpaceName = liveSession.inAppVirtualSpaceName,
             inAppHost = liveSession.inAppHost != null ? FrontLiveSessionHost.FromCore(liveSession.inAppHost) : null,
-            participants = liveSession.participants.Select(participant =>
-            {
-                var sessionState = participant.isKnown
-                    ? monitoring.GetLiveSessionStateOrNull(liveSession.namedApp, participant.knownAccount!.inAppIdentifier)
-                    : null;
-
-                return FrontParticipant.FromCore(participant, sessionState);
-            }).ToList()
+            participants = liveSession.participants.Select(FrontParticipant.FromCore).ToList(),
+            virtualSpaceDefaultCapacity = liveSession.virtualSpaceDefaultCapacity,
+            sessionCapacity = liveSession.sessionCapacity,
+            currentAttendance = liveSession.currentAttendance,
         };
     }
 }
@@ -268,7 +252,7 @@ internal class FrontParticipant
 
     public bool isHost;
     
-    public static FrontParticipant FromCore(ImmutableParticipant participant, ImmutableLiveUserUpdate? liveSessionState)
+    public static FrontParticipant FromCore(ImmutableParticipant participant)
     {
         return new FrontParticipant
         {

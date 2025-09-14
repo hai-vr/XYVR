@@ -24,16 +24,9 @@ export interface FrontLiveUserUpdate {
 }
 
 export interface FrontLiveUserSessionState {
-    knownSession?: FrontLiveUserKnownSession;
     knowledge: LiveUserSessionKnowledgeType;
-}
-
-export interface FrontLiveUserKnownSession {
-    inAppSessionIdentifier: string;
-    inAppSessionName?: string;
-    inAppVirtualSpaceName?: string;
-    inAppHost?: FrontLiveSessionHost;
-    isJoinable?: boolean;
+    sessionGuid?: string;
+    liveSession?: FrontLiveSession;
 }
 
 export interface FrontLiveSession {
@@ -45,6 +38,9 @@ export interface FrontLiveSession {
     inAppVirtualSpaceName?: string;
     inAppHost?: FrontLiveSessionHost;
     participants: FrontParticipant[];
+    virtualSpaceDefaultCapacity?: number;
+    sessionCapacity?: number;
+    currentAttendance?: number;
 }
 
 export interface FrontParticipant {
