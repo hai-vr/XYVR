@@ -527,7 +527,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                                                                     showNotes={false}
                                                                     debugMode={debugMode}
                                                                     showSession={false}
-                                                                    showAppIcon={false}
+                                                                    isSessionView={false}
                                                                 />
                                                             );
                                                         }

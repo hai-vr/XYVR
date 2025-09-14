@@ -17,10 +17,10 @@ interface AccountProps {
     showNotes: boolean,
     debugMode: DebugFlags,
     showSession?: boolean,
-    showAppIcon: boolean
+    isSessionView: boolean
 }
 
-const Account = ({account, imposter, showAlias, showNotes, debugMode, showSession, showAppIcon}: AccountProps) => {
+const Account = ({account, imposter, showAlias, showNotes, debugMode, showSession, isSessionView}: AccountProps) => {
     const hasNote = account.isAnyCallerNote;
 
     const copyInAppIdentifier = async () => {
@@ -42,7 +42,7 @@ const Account = ({account, imposter, showAlias, showNotes, debugMode, showSessio
         }
     };
 
-    const getOnlineStatusEmoji = (onlineStatus: OnlineStatusType, isKnownSession: boolean) => {
+    const getOnlineStatusIcon = (onlineStatus: OnlineStatusType, isKnownSession: boolean) => {
         switch (onlineStatus) {
             case OnlineStatus.Online:
                 if (isKnownSession) return <span className="status-char status-online">⬤</span>;
@@ -98,11 +98,13 @@ const Account = ({account, imposter, showAlias, showNotes, debugMode, showSessio
         <div className="account-container">
             <div className="account-header">
                 <div className="account-info">
-                    {showAppIcon && <AppIcon namedApp={account.namedApp}/>}
+                    {isSessionView && <AppIcon namedApp={account.namedApp}/>}
                     <div>
                         <div className="account-display-name"
                              title={!imposter && account.allDisplayNames?.map(it => _D(it, debugMode)).join('\n') || ``}>
-                            {_D(account.inAppDisplayName, debugMode)} {getOnlineStatusEmoji(account.onlineStatus || OnlineStatus.Offline, isKnownSession)} {getOnlineStatusText(account.onlineStatus || OnlineStatus.Offline, isKnownSession)}
+                            {!isSessionView && (getOnlineStatusIcon(account.onlineStatus || OnlineStatus.Offline, isKnownSession))}
+                            {!isSessionView && ' '}
+                            {_D(account.inAppDisplayName, debugMode)} {isSessionView && getOnlineStatusIcon(account.onlineStatus || OnlineStatus.Offline, isKnownSession)} {isSessionView && getOnlineStatusText(account.onlineStatus || OnlineStatus.Offline, isKnownSession)}
                         </div>
                         {!imposter && showAlias && account.allDisplayNames && account.allDisplayNames
                             .slice().reverse()
