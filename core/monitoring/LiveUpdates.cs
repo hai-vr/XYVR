@@ -72,6 +72,8 @@ public record ImmutableLiveSession
     public int? virtualSpaceDefaultCapacity { get; init; }
     public int? sessionCapacity { get; init; }
     public int? currentAttendance { get; init; }
+    
+    public string? thumbnailUrl { get; init; }
 
     public virtual bool Equals(ImmutableLiveSession? other)
     {
@@ -138,6 +140,8 @@ public record ImmutableNonIndexedLiveSession
     public int? virtualSpaceDefaultCapacity { get; init; }
     public int? sessionCapacity { get; init; }
     public int? currentAttendance { get; init; }
+    
+    public string? thumbnailUrl { get; init; }
 
     public static ImmutableLiveSession MakeIndexed(ImmutableNonIndexedLiveSession inputSession)
     {
@@ -154,6 +158,7 @@ public record ImmutableNonIndexedLiveSession
             virtualSpaceDefaultCapacity = inputSession.virtualSpaceDefaultCapacity,
             sessionCapacity = inputSession.sessionCapacity,
             currentAttendance = inputSession.currentAttendance,
+            thumbnailUrl = inputSession.thumbnailUrl,
         };
     }
 }

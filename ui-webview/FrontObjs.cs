@@ -224,6 +224,7 @@ internal class FrontLiveSession
     public int? virtualSpaceDefaultCapacity;
     public int? sessionCapacity;
     public int? currentAttendance;
+    public string? thumbnailUrl;
 
     public static FrontLiveSession FromCore(ImmutableLiveSession liveSession)
     {
@@ -240,6 +241,7 @@ internal class FrontLiveSession
             virtualSpaceDefaultCapacity = liveSession.virtualSpaceDefaultCapacity,
             sessionCapacity = liveSession.sessionCapacity,
             currentAttendance = liveSession.currentAttendance,
+            thumbnailUrl = liveSession.thumbnailUrl,
         };
     }
 }

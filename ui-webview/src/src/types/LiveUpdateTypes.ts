@@ -41,6 +41,7 @@ export interface FrontLiveSession {
     virtualSpaceDefaultCapacity?: number;
     sessionCapacity?: number;
     currentAttendance?: number;
+    thumbnailUrl?: string;
 }
 
 export interface FrontParticipant {

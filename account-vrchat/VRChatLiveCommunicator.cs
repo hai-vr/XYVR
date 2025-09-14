@@ -124,14 +124,7 @@ internal class VRChatLiveCommunicator
                     ImmutableLiveUserSessionState sessionState;
                     if (knowledgePartial == null && cachedWorld != null)
                     {
-                        var actualSession = await OnLiveSessionReceived(new ImmutableNonIndexedLiveSession
-                        {
-                            namedApp = NamedApp.VRChat,
-                            qualifiedAppName = VRChatCommunicator.VRChatQualifiedAppName,
-                            inAppSessionIdentifier = friend.location,
-                            virtualSpaceDefaultCapacity = cachedWorld.capacity,
-                            inAppVirtualSpaceName = cachedWorld.name,
-                        });
+                        var actualSession = await OnLiveSessionReceived(MakeNonIndexedBasedOnWorld(friend.location, cachedWorld));
                         sessionState = new ImmutableLiveUserSessionState
                         {
                             knowledge = LiveUserSessionKnowledge.Known,
@@ -209,14 +202,7 @@ internal class VRChatLiveCommunicator
                 ImmutableLiveSession session = null;
                 if (content.location != null)
                 {
-                    session = await OnLiveSessionReceived(new ImmutableNonIndexedLiveSession
-                    {
-                        namedApp = NamedApp.VRChat,
-                        qualifiedAppName = VRChatCommunicator.VRChatQualifiedAppName,
-                        inAppSessionIdentifier = content.location,
-                        inAppVirtualSpaceName = cachedWorld?.name,
-                        virtualSpaceDefaultCapacity = cachedWorld?.capacity,
-                    });
+                    session = await OnLiveSessionReceived(MakeNonIndexedBasedOnWorld(content.location, cachedWorld));
                 }
                 
                 // FIXME: This is a task???
@@ -243,6 +229,19 @@ internal class VRChatLiveCommunicator
             Console.WriteLine(e);
             throw;
         }
+    }
+
+    public static ImmutableNonIndexedLiveSession MakeNonIndexedBasedOnWorld(string location, CachedWorld? cachedWorld)
+    {
+        return new ImmutableNonIndexedLiveSession
+        {
+            namedApp = NamedApp.VRChat,
+            qualifiedAppName = VRChatCommunicator.VRChatQualifiedAppName,
+            inAppSessionIdentifier = location,
+            inAppVirtualSpaceName = cachedWorld?.name,
+            virtualSpaceDefaultCapacity = cachedWorld?.capacity,
+            thumbnailUrl = cachedWorld?.thumbnailUrl,
+        };
     }
 
     private ImmutableLiveUserSessionState? FigureOutSessionStateOrNull(string type, OnlineStatus? onlineStatus, VRChatWebsocketContentContainingUser content, ImmutableLiveSession? session)

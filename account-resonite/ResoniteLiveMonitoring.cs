@@ -84,6 +84,7 @@ public class ResoniteLiveMonitoring : ILiveMonitoring, IDisposable
                     currentAttendance = sessionUpdate.joinedUsers,
                     sessionCapacity = sessionUpdate.maxUsers,
                     virtualSpaceDefaultCapacity = sessionUpdate.maxUsers,
+                    thumbnailUrl = sessionUpdate.thumbnailUrl,
                 });
                 
                 foreach (var userUpdate in _monitoring.GetAllUserData(NamedApp.Resonite))

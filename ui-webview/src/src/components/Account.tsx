@@ -98,13 +98,13 @@ const Account = ({account, imposter, showAlias, showNotes, debugMode, showSessio
         <div className="account-container">
             <div className="account-header">
                 <div className="account-info">
-                    {isSessionView && <AppIcon namedApp={account.namedApp}/>}
+                    {!isSessionView && <AppIcon namedApp={account.namedApp}/>}
                     <div>
                         <div className="account-display-name"
                              title={!imposter && account.allDisplayNames?.map(it => _D(it, debugMode)).join('\n') || ``}>
-                            {!isSessionView && (getOnlineStatusIcon(account.onlineStatus || OnlineStatus.Offline, isKnownSession))}
-                            {!isSessionView && ' '}
-                            {_D(account.inAppDisplayName, debugMode)} {isSessionView && getOnlineStatusIcon(account.onlineStatus || OnlineStatus.Offline, isKnownSession)} {isSessionView && getOnlineStatusText(account.onlineStatus || OnlineStatus.Offline, isKnownSession)}
+                            {isSessionView && (getOnlineStatusIcon(account.onlineStatus || OnlineStatus.Offline, isKnownSession))}
+                            {isSessionView && ' '}
+                            {_D(account.inAppDisplayName, debugMode)} {!isSessionView && getOnlineStatusIcon(account.onlineStatus || OnlineStatus.Offline, isKnownSession)} {!isSessionView && getOnlineStatusText(account.onlineStatus || OnlineStatus.Offline, isKnownSession)}
                         </div>
                         {!imposter && showAlias && account.allDisplayNames && account.allDisplayNames
                             .slice().reverse()
@@ -135,7 +135,7 @@ const Account = ({account, imposter, showAlias, showNotes, debugMode, showSessio
                             📝 Note
                         </span>
                     )}
-                    {account.isAnyCallerContact && (
+                    {!isSessionView && account.isAnyCallerContact && (
                         <span className="badge contact">
                             {account.namedApp === "VRChat" || account.namedApp === "ChilloutVR" ? 'Friend' : 'Contact'}
                         </span>

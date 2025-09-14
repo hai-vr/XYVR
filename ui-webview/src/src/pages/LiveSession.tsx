@@ -15,7 +15,14 @@ export class LiveSession extends Component<LiveSessionProps> {
     render() {
         const {liveSession, individuals, debugMode} = this.props;
 
-        return (<div key={liveSession.guid} className="live-session-card">
+        return (<div key={liveSession.guid} className="live-session-card live-session-thumbnail-bg"
+
+        style={{
+            background: `url(${liveSession.thumbnailUrl})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+        }}>
             <div className="live-session-header">
                 <div className="live-session-world">
                     <AppIcon namedApp={liveSession.namedApp}/>
@@ -45,12 +52,12 @@ export class LiveSession extends Component<LiveSessionProps> {
                                     <Account
                                         key={participant.knownAccount!.inAppIdentifier || pIndex}
                                         account={matchingAccount}
-                                        imposter={true}
+                                        imposter={false}
                                         showAlias={false}
                                         showNotes={false}
                                         debugMode={debugMode}
                                         showSession={false}
-                                        isSessionView={false}
+                                        isSessionView={true}
                                     />
                                 );
                             }

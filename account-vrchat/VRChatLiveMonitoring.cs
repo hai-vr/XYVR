@@ -56,14 +56,8 @@ public class VRChatLiveMonitoring : ILiveMonitoring
                 
                 foreach (var sessionOnThisWorld in allSessionsOnThisWorld)
                 {
-                    await _monitoring.MergeSession(new ImmutableNonIndexedLiveSession
-                    {
-                        namedApp = NamedApp.VRChat,
-                        qualifiedAppName = VRChatCommunicator.VRChatQualifiedAppName,
-                        inAppSessionIdentifier = sessionOnThisWorld.inAppSessionIdentifier,
-                        inAppVirtualSpaceName = world.name,
-                        virtualSpaceDefaultCapacity = world.capacity,
-                    });
+                    var nonIndexedUpdate = VRChatLiveCommunicator.MakeNonIndexedBasedOnWorld(sessionOnThisWorld.inAppSessionIdentifier, world);
+                    await _monitoring.MergeSession(nonIndexedUpdate);
                 }
             };
             await _liveComms.Connect();

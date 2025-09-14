@@ -200,6 +200,7 @@ public class LiveStatusMonitoring
             if (inputSession.virtualSpaceDefaultCapacity != null) modifiedSession = modifiedSession with { virtualSpaceDefaultCapacity = inputSession.virtualSpaceDefaultCapacity };
             if (inputSession.sessionCapacity != null) modifiedSession = modifiedSession with { sessionCapacity = inputSession.sessionCapacity };
             if (inputSession.currentAttendance != null) modifiedSession = modifiedSession with { currentAttendance = inputSession.currentAttendance };
+            if (inputSession.thumbnailUrl != null) modifiedSession = modifiedSession with { thumbnailUrl = inputSession.thumbnailUrl };
             
             if (usingParticipant != null && !modifiedSession.participants.Contains(usingParticipant))
                 modifiedSession = modifiedSession with { participants = [..modifiedSession.participants.Append(usingParticipant)] };
