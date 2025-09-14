@@ -11,7 +11,6 @@ internal class VRChatLiveCommunicator
     private readonly string _callerInAppIdentifier;
     private readonly IResponseCollector _responseCollector;
     private readonly WorldNameCache _worldNameCache;
-    private readonly Func<string, string?> _tryLocationToSessionGuidFn;
 
     private readonly Lock _queueLock = new();
     private readonly HashSet<string> _allQueued = new();
@@ -31,13 +30,12 @@ internal class VRChatLiveCommunicator
     public event WorldResolved? OnWorldCached;
     public delegate Task WorldResolved(CachedWorld world);
 
-    public VRChatLiveCommunicator(ICredentialsStorage credentialsStorage, string callerInAppIdentifier, IResponseCollector responseCollector, WorldNameCache worldNameCache, Func<string, string?> tryLocationToSessionGuidFn)
+    public VRChatLiveCommunicator(ICredentialsStorage credentialsStorage, string callerInAppIdentifier, IResponseCollector responseCollector, WorldNameCache worldNameCache)
     {
         _credentialsStorage = credentialsStorage;
         _callerInAppIdentifier = callerInAppIdentifier;
         _responseCollector = responseCollector;
         _worldNameCache = worldNameCache;
-        _tryLocationToSessionGuidFn = tryLocationToSessionGuidFn;
     }
 
     private void WakeUpQueue()
@@ -103,7 +101,7 @@ internal class VRChatLiveCommunicator
         
         _wsClient = new VRChatWebsocketClient();
         _wsClient.Connected += WhenConnected;
-        _wsClient.MessageReceived += WhenMessageReceived;
+        _wsClient.MessageReceived += msg => WhenMessageReceived(msg);
         _wsClient.Disconnected += WhenDisconnected;
         
         _api ??= await InitializeAPI();
@@ -181,9 +179,9 @@ internal class VRChatLiveCommunicator
         await _wsClient.Disconnect();
     }
 
-    private void WhenMessageReceived(string msg)
+    private async Task WhenMessageReceived(string msg)
     {
-        if (OnLiveUpdateReceived == null) return;
+        if (OnLiveUpdateReceived == null || OnLiveSessionReceived == null) return;
         
         try
         {
@@ -198,9 +196,27 @@ internal class VRChatLiveCommunicator
                 var content = JsonConvert.DeserializeObject<VRChatWebsocketContentContainingUser>(rootObj["content"].Value<string>())!;
 
                 var worldId = content.location != null ? LocationAsWorldIdOrNull(content.location) : null;
+                CachedWorld? cachedWorld;
                 if (worldId != null)
                 {
-                    _ = GetOrQueueWorldFetch(worldId);
+                    cachedWorld = GetOrQueueWorldFetch(worldId);
+                }
+                else
+                {
+                    cachedWorld = null;
+                }
+
+                ImmutableLiveSession session = null;
+                if (content.location != null)
+                {
+                    session = await OnLiveSessionReceived(new ImmutableNonIndexedLiveSession
+                    {
+                        namedApp = NamedApp.VRChat,
+                        qualifiedAppName = VRChatCommunicator.VRChatQualifiedAppName,
+                        inAppSessionIdentifier = content.location,
+                        inAppVirtualSpaceName = cachedWorld?.name,
+                        virtualSpaceDefaultCapacity = cachedWorld?.capacity,
+                    });
                 }
                 
                 // FIXME: This is a task???
@@ -214,7 +230,7 @@ internal class VRChatLiveCommunicator
                     onlineStatus = onlineStatus,
                     callerInAppIdentifier = _callerInAppIdentifier,
                     customStatus = content.user.statusDescription,
-                    mainSession = FigureOutSessionStateOrNull(type, onlineStatus, content)
+                    mainSession = FigureOutSessionStateOrNull(type, onlineStatus, content, session)
                 });
             }
             else
@@ -229,7 +245,7 @@ internal class VRChatLiveCommunicator
         }
     }
 
-    private ImmutableLiveUserSessionState? FigureOutSessionStateOrNull(string type, OnlineStatus? onlineStatus, VRChatWebsocketContentContainingUser content)
+    private ImmutableLiveUserSessionState? FigureOutSessionStateOrNull(string type, OnlineStatus? onlineStatus, VRChatWebsocketContentContainingUser content, ImmutableLiveSession? session)
     {
         // Order matters. This checks acts on non-friend-location types.
         if (onlineStatus == OnlineStatus.Offline)
@@ -261,7 +277,7 @@ internal class VRChatLiveCommunicator
                 }
                 else
                 {
-                    var sessionGuid = _tryLocationToSessionGuidFn(location);
+                    var sessionGuid = session?.guid;
                     if (sessionGuid == null)
                     {
                         return new ImmutableLiveUserSessionState
