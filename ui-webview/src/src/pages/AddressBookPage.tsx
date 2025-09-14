@@ -6,32 +6,22 @@ import '../components/Individual.css'
 import '../Header.css'
 import Individual from "../components/Individual.tsx"
 import {
+    getOnlineStatusPriority,
     hasDisplayNameMatch,
     hasIdentifierMatch,
     isIndividualVisible,
+    parseSearchField,
     shouldShowAlias,
     shouldShowBio,
-    shouldShowHelp,
-    getOnlineStatusPriority,
-    parseSearchField
+    shouldShowHelp
 } from './searchUtils.ts'
-import {
-    Glasses,
-    Search,
-    X,
-    Settings,
-    UserStar,
-    UserPen,
-    Binoculars,
-    NotebookText, Notebook
-} from 'lucide-react'
+import {Binoculars, Glasses, Notebook, NotebookText, Search, Settings, UserPen, UserStar, X} from 'lucide-react'
 import DarkModeToggleButton from "../components/DarkModeToggleButton.tsx";
 import {_D2} from "../haiUtils.ts";
 import {type FrontIndividual, OnlineStatus} from "../types/CoreTypes.ts";
 import {type FrontLiveSession, type FrontLiveUserUpdate, LiveSessionKnowledge} from "../types/LiveUpdateTypes.ts";
 import {type DebugFlags, DemonstrationMode} from "../types/DebugFlags.ts";
-import Account from "../components/Account.tsx";
-import {AppIcon} from "../components/AppIcon.tsx";
+import {LiveSession} from "./LiveSession.tsx";
 
 const sortIndividuals = (individuals: FrontIndividual[], unparsedSearchField: string) => {
     if (!unparsedSearchField) {
@@ -491,51 +481,8 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                                     const bKnownCount = b.participants.filter(p => p.isKnown).length;
                                     return bKnownCount - aKnownCount; // Descending order (most participants first)
                                 })
-                                .map((liveSession, index) => (
-                                    <div key={liveSession.guid || index} className="live-session-card">
-                                        <div className="live-session-header">
-                                            <div className="live-session-world">
-                                                <AppIcon namedApp={liveSession.namedApp} />
-                                                <div>
-                                                    {liveSession.inAppVirtualSpaceName || 'Unknown World'} ({liveSession.currentAttendance || '?'}&nbsp;/&nbsp;{liveSession.sessionCapacity || liveSession.virtualSpaceDefaultCapacity || '?'})
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="live-session-participants">
-                                            <div className="accounts-container">
-                                                <div className="accounts-grid">
-                                                    {liveSession.participants.filter(value => value.isKnown).map((participant, pIndex) => {
-                                                        const matchingIndividual = individuals.find(ind =>
-                                                            ind.accounts?.some(acc =>
-                                                                acc.qualifiedAppName === liveSession.qualifiedAppName &&
-                                                                acc.inAppIdentifier === participant.knownAccount!.inAppIdentifier
-                                                            )
-                                                        );
-
-                                                        const matchingAccount = matchingIndividual?.accounts?.find(acc =>
-                                                            acc.qualifiedAppName === liveSession.qualifiedAppName &&
-                                                            acc.inAppIdentifier === participant.knownAccount!.inAppIdentifier
-                                                        );
-
-                                                        if (matchingAccount) {
-                                                            return (
-                                                                <Account
-                                                                    key={participant.knownAccount!.inAppIdentifier || pIndex}
-                                                                    account={matchingAccount}
-                                                                    imposter={true}
-                                                                    showAlias={false}
-                                                                    showNotes={false}
-                                                                    debugMode={debugMode}
-                                                                    showSession={false}
-                                                                    isSessionView={false}
-                                                                />
-                                                            );
-                                                        }
-                                                    })}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                .map((liveSession) => (
+                                    <LiveSession liveSession={liveSession} individuals={individuals} debugMode={debugMode} />
                                 ))}
                         </div>
                     </div>
