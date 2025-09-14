@@ -221,7 +221,7 @@ function Individual({
                 {filteredAccounts && filteredAccounts.length > 0 ? (
                     <div className="accounts-grid">
                         {filteredAccounts.map((account) => (
-                            <Account key={account.guid} account={account} showAlias={showAlias} showNotes={showNotes} debugMode={debugMode} imposter={false} showSession={true} />
+                            <Account key={account.guid} account={account} showAlias={showAlias} showNotes={showNotes} debugMode={debugMode} imposter={false} showSession={true} showAppIcon={true} />
                         ))}
                     </div>
                 ) : (

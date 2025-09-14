@@ -31,6 +31,7 @@ import {type FrontIndividual, OnlineStatus} from "../types/CoreTypes.ts";
 import {type FrontLiveSession, type FrontLiveUserUpdate, LiveSessionKnowledge} from "../types/LiveUpdateTypes.ts";
 import {type DebugFlags, DemonstrationMode} from "../types/DebugFlags.ts";
 import Account from "../components/Account.tsx";
+import {AppIcon} from "../components/AppIcon.tsx";
 
 const sortIndividuals = (individuals: FrontIndividual[], unparsedSearchField: string) => {
     if (!unparsedSearchField) {
@@ -494,7 +495,10 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                                     <div key={liveSession.guid || index} className="live-session-card">
                                         <div className="live-session-header">
                                             <div className="live-session-world">
-                                                {liveSession.inAppVirtualSpaceName || 'Unknown World'} ({liveSession.currentAttendance || '?'}&nbsp;/&nbsp;{liveSession.sessionCapacity || liveSession.virtualSpaceDefaultCapacity || '?'})
+                                                <AppIcon namedApp={liveSession.namedApp} />
+                                                <div>
+                                                    {liveSession.inAppVirtualSpaceName || 'Unknown World'} ({liveSession.currentAttendance || '?'}&nbsp;/&nbsp;{liveSession.sessionCapacity || liveSession.virtualSpaceDefaultCapacity || '?'})
+                                                </div>
                                             </div>
                                         </div>
                                         <div className="live-session-participants">
@@ -523,6 +527,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                                                                     showNotes={false}
                                                                     debugMode={debugMode}
                                                                     showSession={false}
+                                                                    showAppIcon={false}
                                                                 />
                                                             );
                                                         }
