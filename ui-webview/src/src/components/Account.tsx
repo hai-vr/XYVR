@@ -92,6 +92,7 @@ const Account = ({account, imposter, showAlias, showNotes, debugMode, showSessio
         }
     };
 
+    const isConnector = !((account as any).multiSessions); // This is a hack, multiSessions can only be null because we're casting a FrontConnectorAccount to a FrontAccount.
     const isOffline = account.onlineStatus === OnlineStatus.Offline;
     const isKnownSession = account.mainSession && account.mainSession.knowledge === LiveSessionKnowledge.Known && true || false;
     const worldName = isKnownSession && account.mainSession && (account.mainSession.liveSession && (account.mainSession.liveSession.inAppVirtualSpaceName || 'Loading...')) || undefined;
@@ -181,9 +182,9 @@ const Account = ({account, imposter, showAlias, showNotes, debugMode, showSessio
                 </div>
             ))}
 
-            {!isSessionView && account.namedApp !== NamedApp.Resonite && account.mainSession?.liveSession
+            {!isConnector && !isSessionView && account.namedApp !== NamedApp.Resonite && account.mainSession?.liveSession
                 && <LiveSession liveSession={account.mainSession.liveSession} individuals={[]} debugMode={debugMode} mini={true} />}
-            {account.namedApp === NamedApp.Resonite && account.multiSessions
+            {!isConnector && account.namedApp === NamedApp.Resonite && account.multiSessions
                 .map((session) => (session.guid != account.mainSession?.sessionGuid && <LiveSession liveSession={session} individuals={[]} debugMode={debugMode} mini={true} />))}
         </div>
     );
