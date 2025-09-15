@@ -6,7 +6,7 @@
     "scripts": {
         "dev": "vite",
         "build": "tsc -b && vite build",
-        "build-and-copy": "npm run build && xcopy /E /I /Y dist\\* ..\\bin\\Debug\\net9.0-windows\\src\\dist\\",
+        "build-and-copy": "npm run build && xcopy /E /I /Y dist\\* ..\\bin\\Debug\\net9.0-windows\\src\\dist\\ && xcopy /E /I /Y dist\\* ..\\..\\ui-photino\\bin\\Debug\\net9.0\\wwwroot\\ && xcopy /E /I /Y dist\\* ..\\..\\ui-photino\\wwwroot\\",
         "lint": "eslint .",
         "preview": "vite preview"
     },

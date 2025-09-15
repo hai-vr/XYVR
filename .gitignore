@@ -2,6 +2,7 @@ bin/
 obj/
 ui-webview/src/node_modules/
 ui-webview/src/dist/
+ui-photino/wwwroot
 .idea
 *.DotSettings.user
 

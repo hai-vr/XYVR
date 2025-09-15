@@ -20,6 +20,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "account-chilloutvr", "accou
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ui-backend", "ui-backend\ui-backend.csproj", "{AF27FFBB-2E84-478A-B064-4C2DD44F840D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ui-photino", "ui-photino\ui-photino.csproj", "{3DAEA870-AE4B-46D9-81E0-A612DB05FFC8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -66,5 +68,9 @@ Global
 		{AF27FFBB-2E84-478A-B064-4C2DD44F840D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AF27FFBB-2E84-478A-B064-4C2DD44F840D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AF27FFBB-2E84-478A-B064-4C2DD44F840D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3DAEA870-AE4B-46D9-81E0-A612DB05FFC8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3DAEA870-AE4B-46D9-81E0-A612DB05FFC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3DAEA870-AE4B-46D9-81E0-A612DB05FFC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3DAEA870-AE4B-46D9-81E0-A612DB05FFC8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

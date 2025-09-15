@@ -1,0 +1,40 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net9.0</TargetFramework>
+        <Platforms>AnyCPU</Platforms>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>XYVR.UI.Photino</RootNamespace>
+        <GenerateEmbeddedFilesManifest>true</GenerateEmbeddedFilesManifest>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="6.0.9"/>
+        <PackageReference Include="Photino.NET" Version="3.2.3"/>
+        <PackageReference Include="Photino.NET.Server" Version="4.0.12"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Remove="wwwroot\**"/>
+        <None Update="wwwroot\**">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="favicon.ico">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+
+    <ItemGroup>
+        <EmbeddedResource Include="Resources\**"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Remove="Resources\wwwroot\.gitkeep"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\ui-backend\ui-backend.csproj"/>
+    </ItemGroup>
+</Project>

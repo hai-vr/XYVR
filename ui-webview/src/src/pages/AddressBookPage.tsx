@@ -22,6 +22,7 @@ import {type FrontIndividual, OnlineStatus} from "../types/CoreTypes.ts";
 import {type FrontLiveSession, type FrontLiveUserUpdate, LiveSessionKnowledge} from "../types/LiveUpdateTypes.ts";
 import {type DebugFlags, DemonstrationMode} from "../types/DebugFlags.ts";
 import {LiveSession} from "../components/LiveSession.tsx";
+import {DotNetApi} from "../DotNetApi.ts";
 
 const sortIndividuals = (individuals: FrontIndividual[], unparsedSearchField: string) => {
     if (!unparsedSearchField) {
@@ -89,6 +90,8 @@ interface AddressBookPageProps {
 }
 
 function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyContacts, compactMode, setCompactMode, showNotes, setShowNotes, debugMode }: AddressBookPageProps) {
+    const dotNetApi = new DotNetApi();
+    
     const navigate = useNavigate()
     const searchInputRef = useRef<HTMLInputElement>(null)
     const [initialized, setInitialized] = useState(false);
@@ -131,7 +134,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
     useEffect(() => {
         const initializeApi = async () => {
             // Load individuals when the component loads
-            const allIndividuals = await window.chrome.webview.hostObjects.appApi.GetAllExposedIndividualsOrderedByContact();
+            const allIndividuals = await dotNetApi.appApiGetAllExposedIndividualsOrderedByContact();
             const individualsArray = JSON.parse(allIndividuals);
 
             const allLiveSessionData = await window.chrome.webview.hostObjects.liveApi.GetAllExistingLiveSessionData();
