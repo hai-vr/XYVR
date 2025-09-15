@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Win32;
@@ -257,34 +258,71 @@ public static class Scaffolding
 
     private static string GetOrGenerateAndStoreEncryptionKeyInWindowsRegistry()
     {
-        const string registryKeyPath = @"SOFTWARE\XYVR";
-        const string registryValueName = "SessionDataEncryptionKey";
-
-        try
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            using (var key = Registry.CurrentUser.OpenSubKey(registryKeyPath, writable: false))
+            const string registryKeyPath = @"SOFTWARE\XYVR";
+            const string registryValueName = "SessionDataEncryptionKey";
+
+            try
             {
-                if (key?.GetValue(registryValueName) is string existingKey && !string.IsNullOrEmpty(existingKey))
+                using (var key = Registry.CurrentUser.OpenSubKey(registryKeyPath, writable: false))
                 {
-                    // Key exists, return it
-                    return existingKey;
+                    if (key?.GetValue(registryValueName) is string existingKey && !string.IsNullOrEmpty(existingKey))
+                    {
+                        // Key exists, return it
+                        return existingKey;
+                    }
                 }
+
+                // Key doesn't exist, generate a new one
+                var newEncryptionKey = EncryptionOfSessionData.GenerateEncryptionKey();
+
+                // Create/open the registry key for writing
+                using (var key = Registry.CurrentUser.CreateSubKey(registryKeyPath))
+                {
+                    key.SetValue(registryValueName, newEncryptionKey, RegistryValueKind.String);
+                }
+
+                return newEncryptionKey;
             }
-
-            // Key doesn't exist, generate a new one
-            var newEncryptionKey = EncryptionOfSessionData.GenerateEncryptionKey();
-
-            // Create/open the registry key for writing
-            using (var key = Registry.CurrentUser.CreateSubKey(registryKeyPath))
+            catch (Exception ex)
             {
-                key.SetValue(registryValueName, newEncryptionKey, RegistryValueKind.String);
+                throw new Exception($"Failed to access or create encryption key in registry: {ex.Message}", ex);
             }
-
-            return newEncryptionKey;
         }
-        catch (Exception ex)
+        else
         {
-            throw new Exception($"Failed to access or create encryption key in registry: {ex.Message}", ex);
+            var configDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config", "XYVR");
+            var keyFilePath = Path.Combine(configDir, "session-encryption.key");
+    
+            try
+            {
+                if (File.Exists(keyFilePath))
+                {
+                    var existingKey = File.ReadAllText(keyFilePath);
+                    if (!string.IsNullOrEmpty(existingKey))
+                    {
+                        return existingKey;
+                    }
+                }
+
+                var newEncryptionKey = EncryptionOfSessionData.GenerateEncryptionKey();
+        
+                Directory.CreateDirectory(configDir);
+        
+                File.WriteAllText(keyFilePath, newEncryptionKey);
+        
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    File.SetUnixFileMode(keyFilePath, UnixFileMode.UserRead | UnixFileMode.UserWrite);
+                }
+        
+                return newEncryptionKey;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Failed to access or create encryption key file: {ex.Message}", ex);
+            }
         }
     }
 }
