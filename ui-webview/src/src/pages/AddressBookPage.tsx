@@ -480,7 +480,20 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                                 .sort((a, b) => {
                                     const aKnownCount = a.participants.filter(p => p.isKnown).length;
                                     const bKnownCount = b.participants.filter(p => p.isKnown).length;
-                                    return bKnownCount - aKnownCount; // Descending order (most participants first)
+                                    const dKnownCount = bKnownCount - aKnownCount; // Descending order (most participants first)
+                                    if (dKnownCount !== 0) return dKnownCount;
+
+                                    const aAttendance = a.currentAttendance || a.participants.length;
+                                    const bAttendance = b.currentAttendance || b.participants.length;
+                                    const dAttendance = bAttendance - aAttendance;
+                                    if (dAttendance !== 0) return dAttendance;
+
+                                    const aCapacity = a.sessionCapacity || a.virtualSpaceDefaultCapacity || 0;
+                                    const bCapacity = b.sessionCapacity || b.virtualSpaceDefaultCapacity || 0;
+                                    const dCapacity = bCapacity - aCapacity;
+                                    if (dCapacity !== 0) return dCapacity;
+
+                                    return 0;
                                 })
                                 .map((liveSession) => (
                                     <LiveSession liveSession={liveSession} individuals={individuals} debugMode={debugMode} mini={false} />
