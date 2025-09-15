@@ -181,8 +181,10 @@ const Account = ({account, imposter, showAlias, showNotes, debugMode, showSessio
                 </div>
             ))}
 
-            {!isSessionView && account.namedApp !== NamedApp.Resonite && account.mainSession && account.mainSession.liveSession && <LiveSession liveSession={account.mainSession.liveSession} individuals={[]} debugMode={debugMode} mini={true} />}
-            {account.namedApp === NamedApp.Resonite && account.multiSessions.map((session) => (<LiveSession liveSession={session} individuals={[]} debugMode={debugMode} mini={true} />))}
+            {!isSessionView && account.namedApp !== NamedApp.Resonite && account.mainSession?.liveSession
+                && <LiveSession liveSession={account.mainSession.liveSession} individuals={[]} debugMode={debugMode} mini={true} />}
+            {account.namedApp === NamedApp.Resonite && account.multiSessions
+                .map((session) => (session.guid != account.mainSession?.sessionGuid && <LiveSession liveSession={session} individuals={[]} debugMode={debugMode} mini={true} />))}
         </div>
     );
 };

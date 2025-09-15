@@ -245,7 +245,6 @@ internal class VRChatAPI
         }
     }
 
-
     public async Task<VRChatUser?> GetUserLenient(string userId, DataCollectionReason dataCollectionReason)
     {
         ThrowIfNotLoggedIn();
@@ -303,7 +302,39 @@ internal class VRChatAPI
 
             await EnsureRateLimiting(url, response.StatusCode);
 
+            if (response.StatusCode == HttpStatusCode.NotFound)
+            {
+                DataCollectNotFound(url, requestGuid, await response.Content.ReadAsStringAsync(), dataCollectionReason);
+                return null;
+            }
+
             EnsureSuccessOrThrowVerbose(response);
+
+            var responseStr = await response.Content.ReadAsStringAsync();
+
+            DataCollectSuccess(url, requestGuid, responseStr, dataCollectionReason);
+
+            return JsonConvert.DeserializeObject<VRChatWorld>(responseStr)!;
+        }
+        catch (Exception _)
+        {
+            DataCollectFailure(url, requestGuid, dataCollectionReason);
+            throw;
+        }
+    }
+
+    public async Task<VRChatInstance?> GetInstanceLenient(DataCollectionReason dataCollectionReason, string worldIdAndInstanceId)
+    {
+        ThrowIfNotLoggedIn();
+        
+        var url = $"{AuditUrls.VrcApiUrl}/instances/{worldIdAndInstanceId}";
+        var requestGuid = XYVRGuids.ForRequest();
+
+        try
+        {
+            var response = await _client.GetAsync(url);
+
+            await EnsureRateLimiting(url, response.StatusCode);
 
             if (response.StatusCode == HttpStatusCode.NotFound)
             {
@@ -311,11 +342,13 @@ internal class VRChatAPI
                 return null;
             }
 
+            EnsureSuccessOrThrowVerbose(response);
+
             var responseStr = await response.Content.ReadAsStringAsync();
 
             DataCollectSuccess(url, requestGuid, responseStr, dataCollectionReason);
 
-            return JsonConvert.DeserializeObject<VRChatWorld>(responseStr)!;
+            return JsonConvert.DeserializeObject<VRChatInstance>(responseStr)!;
         }
         catch (Exception _)
         {

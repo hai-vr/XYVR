@@ -5,6 +5,20 @@ using XYVR.Core;
 
 namespace XYVR.AccountAuthority.VRChat;
 
+internal interface IQueueJob
+{
+}
+
+internal record WorldQueueJob : IQueueJob
+{
+    public string worldId { get; init; }
+}
+
+internal record InstanceQueueJob : IQueueJob
+{
+    public string worldIdAndInstanceId { get; init; }
+}
+
 internal class VRChatLiveCommunicator
 {
     private readonly ICredentialsStorage _credentialsStorage;
@@ -13,13 +27,14 @@ internal class VRChatLiveCommunicator
     private readonly WorldNameCache _worldNameCache;
 
     private readonly Lock _queueLock = new();
-    private readonly HashSet<string> _allQueued = new();
-    private readonly Queue<string> _queue = new();
+    private readonly HashSet<IQueueJob> _allQueued = new();
+    private readonly Queue<IQueueJob> _queue = new();
     private Task _queueTask = Task.CompletedTask;
 
     private VRChatWebsocketClient _wsClient;
     private VRChatAPI? _api;
     private bool _hasInitiatedDisconnect;
+    private readonly Dictionary<string, VRChatInstance> _locationToInstance = new Dictionary<string, VRChatInstance>();
 
     public event VrcLiveUpdateReceived? OnLiveUpdateReceived;
     public delegate Task VrcLiveUpdateReceived(ImmutableLiveUserUpdate liveUserUpdate);
@@ -29,6 +44,9 @@ internal class VRChatLiveCommunicator
 
     public event WorldResolved? OnWorldCached;
     public delegate Task WorldResolved(CachedWorld world);
+
+    public event SessionRetrieved? OnSessionRetrieved;
+    public delegate Task SessionRetrieved(VRChatInstance world);
 
     public VRChatLiveCommunicator(ICredentialsStorage credentialsStorage, string callerInAppIdentifier, IResponseCollector responseCollector, WorldNameCache worldNameCache)
     {
@@ -56,27 +74,52 @@ internal class VRChatLiveCommunicator
         
         while (_queue.Count > 0)
         {
-            var worldId = _queue.Dequeue();
-            var worldLenient = await _api.GetWorldLenient(DataCollectionReason.CollectSessionLocationInformation, worldId);
-            if (worldLenient != null)
+            var dequeued = _queue.Dequeue();
+            if (dequeued is WorldQueueJob worldQueueJob)
             {
-                var cache = new CachedWorld
+                var worldId = worldQueueJob.worldId;
+                var worldLenient = await _api.GetWorldLenient(DataCollectionReason.CollectSessionLocationInformation, worldId);
+                if (worldLenient != null)
                 {
-                    cachedAt = DateTime.Now,
-                    name = worldLenient.name,
-                    worldId = worldId,
-                    author = worldLenient.authorId,
-                    authorName = worldLenient.authorName,
-                    releaseStatus = worldLenient.releaseStatus,
-                    description = worldLenient.description,
-                    thumbnailUrl = worldLenient.thumbnailImageUrl,
-                    capacity = worldLenient.capacity,
-                };
-                _worldNameCache.VRCWorlds[worldId] = cache;
+                    var cache = new CachedWorld
+                    {
+                        cachedAt = DateTime.Now,
+                        name = worldLenient.name,
+                        worldId = worldId,
+                        author = worldLenient.authorId,
+                        authorName = worldLenient.authorName,
+                        releaseStatus = worldLenient.releaseStatus,
+                        description = worldLenient.description,
+                        thumbnailUrl = worldLenient.thumbnailImageUrl,
+                        capacity = worldLenient.capacity,
+                    };
+                    _worldNameCache.VRCWorlds[worldId] = cache;
 
-                if (OnWorldCached != null)
+                    if (OnWorldCached != null)
+                    {
+                        await OnWorldCached.Invoke(cache);
+                    }
+                }
+            }
+            else if (dequeued is InstanceQueueJob instanceQueueJob)
+            {
+                var worldIdAndInstanceId = instanceQueueJob.worldIdAndInstanceId;
+                var locationInformation = await _api.GetInstanceLenient(DataCollectionReason.CollectSessionLocationInformation, worldIdAndInstanceId);
+                if (locationInformation != null)
                 {
-                    await OnWorldCached.Invoke(cache);
+                    _locationToInstance.TryAdd(instanceQueueJob.worldIdAndInstanceId, locationInformation);
+
+                    if (OnLiveSessionReceived != null)
+                    {
+                        await OnLiveSessionReceived(new ImmutableNonIndexedLiveSession
+                        {
+                            namedApp = NamedApp.VRChat,
+                            qualifiedAppName = VRChatCommunicator.VRChatQualifiedAppName,
+                            inAppSessionIdentifier = instanceQueueJob.worldIdAndInstanceId,
+                            sessionCapacity = locationInformation.capacity,
+                            currentAttendance = locationInformation.n_users
+                        });
+                    }
                 }
             }
         }
@@ -138,6 +181,8 @@ internal class VRChatLiveCommunicator
                             knowledge = knowledgePartial ?? LiveUserSessionKnowledge.KnownButNoData,
                         };
                     }
+                    
+                    await QueueSessionFetchIfApplicable(friend.location);
 
                     await OnLiveUpdateReceived(new ImmutableLiveUserUpdate
                     {
@@ -203,6 +248,8 @@ internal class VRChatLiveCommunicator
                 if (content.location != null)
                 {
                     session = await OnLiveSessionReceived(MakeNonIndexedBasedOnWorld(content.location, cachedWorld));
+
+                    await QueueSessionFetchIfApplicable(content.location);
                 }
                 
                 // FIXME: This is a task???
@@ -229,6 +276,31 @@ internal class VRChatLiveCommunicator
             Console.WriteLine(e);
             throw;
         }
+    }
+
+    private async Task QueueSessionFetchIfApplicable(string location)
+    {
+        _api ??= await InitializeAPI();
+        
+        var worldIdAndInstanceId = WorldIdAndInstanceIdOrNull(location);
+        if (worldIdAndInstanceId != null && !_locationToInstance.TryGetValue(location, out var instance))
+        {
+            var queueJob = new InstanceQueueJob
+            {
+                worldIdAndInstanceId = worldIdAndInstanceId
+            };
+            if (!_allQueued.Contains(queueJob))
+            {
+                _queue.Enqueue(queueJob);
+                WakeUpQueue();
+            }
+        }
+    }
+
+    private string? WorldIdAndInstanceIdOrNull(string contentLocation)
+    {
+        if (!contentLocation.StartsWith("wrld_")) return null;
+        return contentLocation;
     }
 
     public static ImmutableNonIndexedLiveSession MakeNonIndexedBasedOnWorld(string location, CachedWorld? cachedWorld)
@@ -281,7 +353,7 @@ internal class VRChatLiveCommunicator
                     {
                         return new ImmutableLiveUserSessionState
                         {
-                            knowledge = LiveUserSessionKnowledge.KnownButNoData,
+                            knowledge = LiveUserSessionKnowledge.Indeterminate,
                         };
                     }
                     else
@@ -329,13 +401,15 @@ internal class VRChatLiveCommunicator
         var cachedWorldNullable = _worldNameCache.GetValidOrNull(worldId);
 
         var shouldAttemptQueueing = cachedWorldNullable == null || cachedWorldNullable.needsRefresh;
-        if (shouldAttemptQueueing && !_allQueued.Contains(worldId))
+
+        var job = new WorldQueueJob { worldId = worldId };
+        if (shouldAttemptQueueing && !_allQueued.Contains(job))
         {
             if (cachedWorldNullable != null) Console.WriteLine($"We don't know world id {worldId}, will queue fetch...");
             else Console.WriteLine($"We need to refresh our knowledge of world id {worldId}, will queue fetch...");
 
-            _allQueued.Add(worldId);
-            _queue.Enqueue(worldId);
+            _allQueued.Add(job);
+            _queue.Enqueue(job);
             WakeUpQueue();
         }
             
