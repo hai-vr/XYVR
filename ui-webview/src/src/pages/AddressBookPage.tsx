@@ -1,7 +1,7 @@
 ﻿import {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import {useNavigate} from 'react-router-dom'
 import './AddressBookPage.css'
-import './LiveSessions.css'
+import '../components/LiveSession.css'
 import '../components/Individual.css'
 import '../Header.css'
 import Individual from "../components/Individual.tsx"
@@ -21,7 +21,7 @@ import {_D2} from "../haiUtils.ts";
 import {type FrontIndividual, OnlineStatus} from "../types/CoreTypes.ts";
 import {type FrontLiveSession, type FrontLiveUserUpdate, LiveSessionKnowledge} from "../types/LiveUpdateTypes.ts";
 import {type DebugFlags, DemonstrationMode} from "../types/DebugFlags.ts";
-import {LiveSession} from "./LiveSession.tsx";
+import {LiveSession} from "../components/LiveSession.tsx";
 
 const sortIndividuals = (individuals: FrontIndividual[], unparsedSearchField: string) => {
     if (!unparsedSearchField) {

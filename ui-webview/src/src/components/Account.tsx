@@ -6,10 +6,11 @@ import {
     OnlineStatus,
     type OnlineStatusType
 } from "../types/CoreTypes.ts";
+// @ts-ignore
 import {type DebugFlags, DemonstrationMode} from "../types/DebugFlags.ts";
 import {LiveSessionKnowledge} from "../types/LiveUpdateTypes.ts";
 import {AppIcon} from "./AppIcon.tsx";
-import {LiveSession} from "../pages/LiveSession.tsx";
+import {LiveSession} from "./LiveSession.tsx";
 
 interface AccountProps {
     account: FrontAccount,
@@ -20,7 +21,7 @@ interface AccountProps {
     showSession?: boolean,
     isSessionView: boolean
 }
-
+// @ts-ignore
 const Account = ({account, imposter, showAlias, showNotes, debugMode, showSession, isSessionView}: AccountProps) => {
     const hasNote = account.isAnyCallerNote;
 
@@ -93,8 +94,10 @@ const Account = ({account, imposter, showAlias, showNotes, debugMode, showSessio
     };
 
     const isConnector = !((account as any).multiSessions); // This is a hack, multiSessions can only be null because we're casting a FrontConnectorAccount to a FrontAccount.
+    // @ts-ignore
     const isOffline = account.onlineStatus === OnlineStatus.Offline;
     const isKnownSession = account.mainSession && account.mainSession.knowledge === LiveSessionKnowledge.Known && true || false;
+    // @ts-ignore
     const worldName = isKnownSession && account.mainSession && (account.mainSession.liveSession && (account.mainSession.liveSession.inAppVirtualSpaceName || 'Loading...')) || undefined;
     return (
         <div className="account-container">
@@ -119,16 +122,16 @@ const Account = ({account, imposter, showAlias, showNotes, debugMode, showSessio
                         <div className="account-app-name">
                             {!account.customStatus && getAppDisplayName(account)} {_D2(account.customStatus || '', debugMode)}
                         </div>
-                        {showSession && !isOffline && worldName && <div className="account-app-name">
-                            <span className="status-char status-online">⬤</span>
-                            <i>{_D2(worldName, debugMode, undefined, DemonstrationMode.EverythingButSessionNames)}</i>
-                        </div>}
-                        {showSession && !isOffline && !worldName && account.mainSession
-                            && account.mainSession.knowledge !== LiveSessionKnowledge.PrivateSession
-                            && account.mainSession.knowledge !== LiveSessionKnowledge.PrivateWorld &&
-                            <div className="account-app-name">
-                                <CircleOff className="status-icon status-busy"/> {account.mainSession.knowledge}
-                            </div>}
+                        {/*{showSession && !isOffline && worldName && <div className="account-app-name">*/}
+                        {/*    <span className="status-char status-online">⬤</span>*/}
+                        {/*    <i>{_D2(worldName, debugMode, undefined, DemonstrationMode.EverythingButSessionNames)}</i>*/}
+                        {/*</div>}*/}
+                        {/*{showSession && !isOffline && !worldName && account.mainSession*/}
+                        {/*    && account.mainSession.knowledge !== LiveSessionKnowledge.PrivateSession*/}
+                        {/*    && account.mainSession.knowledge !== LiveSessionKnowledge.PrivateWorld &&*/}
+                        {/*    <div className="account-app-name">*/}
+                        {/*        <CircleOff className="status-icon status-busy"/> {account.mainSession.knowledge}*/}
+                        {/*    </div>}*/}
                     </div>
                 </div>
                 {!imposter && (<div className="account-badges">
@@ -182,7 +185,7 @@ const Account = ({account, imposter, showAlias, showNotes, debugMode, showSessio
                 </div>
             ))}
 
-            {!isConnector && !isSessionView && account.namedApp !== NamedApp.Resonite && account.mainSession?.liveSession
+            {!isConnector && !isSessionView && account.mainSession?.liveSession
                 && <LiveSession liveSession={account.mainSession.liveSession} individuals={[]} debugMode={debugMode} mini={true} />}
             {!isConnector && account.namedApp === NamedApp.Resonite && account.multiSessions
                 .map((session) => (session.guid != account.mainSession?.sessionGuid && <LiveSession liveSession={session} individuals={[]} debugMode={debugMode} mini={true} />))}

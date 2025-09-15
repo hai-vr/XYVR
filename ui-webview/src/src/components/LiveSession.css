@@ -1,4 +1,18 @@
 ﻿/* Live Sessions Section */
+:root {
+    /*--live-session-overlay: rgba(240, 240, 240, 0.95);*/
+    --live-session-overlay: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(240, 240, 240, 0.9) 100%);
+    --live-session-blend-mode: screen;
+    --live-session-grayscale: grayscale(40%);
+}
+
+[data-theme="dark"] {
+    /*--live-session-overlay: rgba(30, 30, 30, 0.7);*/
+    --live-session-overlay: linear-gradient(180deg, rgba(45, 45, 45, 1) 0%, rgba(30, 30, 30, 0.7) 100%);
+    --live-session-blend-mode: multiply;
+    --live-session-grayscale: grayscale(70%);
+}
+
 .live-sessions-section {
     margin-bottom: 2rem;
     padding: 1rem;
@@ -32,7 +46,6 @@
     background: var(--bg-primary);
     border: 1px solid var(--border-color);
     border-radius: 6px;
-    padding: 1rem;
 }
 
 .live-session-card:hover {

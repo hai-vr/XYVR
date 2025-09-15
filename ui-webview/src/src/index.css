@@ -71,6 +71,15 @@
     --status-warning-bg: #4a4232;
     --status-warning-text: #d4b86a;
 
+    /* Online status colors */
+    --status-online: greenyellow;
+    --status-online-conflicting: #efed5c;
+    --status-away: yellow;
+    --status-askme: orange;
+    --status-busy: red;
+    --status-joinme: #00e1ff;
+    --status-joinme-conflicting: #be6bf4;
+
     /* Badge border colors */
     --badge-note-border: #5a5d5f;
     --badge-contact-border: #5a5d5f;
@@ -169,6 +178,15 @@
     --status-bot-text: #00b300;
     --status-warning-bg: #fff3cd;
     --status-warning-text: #856404;
+
+    /* Online status colors for light theme */
+    --status-online: #22c55e;
+    --status-online-conflicting: #ccec95;
+    --status-away: #f59e0b;
+    --status-askme: #ea580c;
+    --status-busy: #dc2626;
+    --status-joinme: #0ea5e9;
+    --status-joinme-conflicting: #9333ea;
 
     /* Badge border colors for light theme */
     --badge-note-border: #bbdefb;
@@ -348,61 +366,57 @@ button:disabled:hover {
 }
 
 .status-online {
-    color: greenyellow;
+    color: var(--status-online);
 }
 
 .status-online-conflicting {
-    color: #efed5c;
+    color: var(--status-online-conflicting);
 }
 
 .status-away {
-    color: yellow;
+    color: var(--status-away);
 }
 
 .status-askme {
-    color: orange;
-}
-
-.status-askme {
-    color: orange;
+    color: var(--status-askme);
 }
 
 .status-busy {
-    color: red;
+    color: var(--status-busy);
 }
 
 .status-joinme {
-    color: #00e1ff;
+    color: var(--status-joinme);
 }
 
 .status-joinme-conflicting {
-    color: #be6bf4;
+    color: var(--status-joinme-conflicting);
 }
 
 :root[data-theme="light"] .status-online {
-    color: #22c55e;
+    color: var(--status-online);
 }
 
 :root[data-theme="light"] .status-online-conflicting {
-    color: #ccec95;
+    color: var(--status-online-conflicting);
 }
 
 :root[data-theme="light"] .status-away {
-    color: #f59e0b;
+    color: var(--status-away);
 }
 
 :root[data-theme="light"] .status-askme {
-    color: #ea580c;
+    color: var(--status-askme);
 }
 
 :root[data-theme="light"] .status-busy {
-    color: #dc2626;
+    color: var(--status-busy);
 }
 
 :root[data-theme="light"] .status-joinme {
-    color: #0ea5e9;
+    color: var(--status-joinme);
 }
 
 :root[data-theme="light"] .status-joinme-conflicting {
-    color: #9333ea;
+    color: var(--status-joinme-conflicting);
 }
