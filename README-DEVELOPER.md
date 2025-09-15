@@ -73,6 +73,7 @@ The following work remains to be done:
 ## Technology in use
 
 The app is written in .NET 9 and uses a WebView pointing to a React app set up with Vite. Offline data is stored in plain JSON.
+- On Windows, it will use WebView2 (see ui-webview). On Linux, it should use Photino (see ui-photino).
 - As I am originally a backend developer, the WebView and React frontend are [built using heavy assistance](ui-webview/src/README.md) from Claude 4 integrated
   with Jetbrains Rider.
 - The backend is designed without much assistance.
@@ -106,14 +107,16 @@ Build the `ui-webview/` project.
 
 Main application execution projects:
 
+- **ui-webview**: This is a WebView2 program that shows a React app that has been built, for use on Windows.
+- **ui-photino**: This is a version of the program being made compatible for Linux and uses Photino instead of WebView2.
+- **ui-webview/src/**: This is the unbuilt React app. It is meant to be built using `npm run build-and-copy` so that the .NET program will copy its contents to the desktop app.
 - **program**: This is a developer program to import the data. It is not user-friendly whatsoever.
-- **ui-webview**: This is a WebView program that shows a React app that has been built.
-- **ui-webview/src/**: This is the unbuilt React app. It is meant to be built using `npm run build` so that the .NET program will copy its contents to the desktop app.
 
 Core projects:
 
 - **core** contains data structures shared by many projects in this solution and the repository of Individuals that handles the business logic of ingesting incoming data.
 - **development-scaffold** loads and saves the data; mainly into JSON files.
+- **ui-backend**: This bridges the React UI with the core objects.
 
 External system projects:
 

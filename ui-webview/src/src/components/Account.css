@@ -10,13 +10,11 @@
 
 .count-container {
     background: none;
-    background-color: rgba(0,0,0,0);
     border: 1px solid rgba(0,0,0,0);
     border-radius: 8px;
     padding: 2px 12px;
-    display: flex;
-    flex-direction: column;
     gap: 8px;
+    margin-top: auto;
 }
 
 .account-header {

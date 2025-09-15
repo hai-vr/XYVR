@@ -14,6 +14,8 @@ public class VRChatLiveMonitoring : ILiveMonitoring
     private string _callerInAppIdentifier;
     private bool _isConnected;
     private VRChatLiveCommunicator _liveComms;
+    private CancellationTokenSource _cancellationTokenSource;
+    private readonly HashSet<string> _sessionsOfInterest = new();
 
     public VRChatLiveMonitoring(ICredentialsStorage credentialsStorage, LiveStatusMonitoring monitoring, WorldNameCache worldNameCache)
     {
@@ -29,6 +31,7 @@ public class VRChatLiveMonitoring : ILiveMonitoring
         try
         {
             if (_isConnected) return;
+            _cancellationTokenSource = new CancellationTokenSource();
             
             var serializer = new JsonSerializerSettings()
             {
@@ -43,6 +46,7 @@ public class VRChatLiveMonitoring : ILiveMonitoring
             };
             _liveComms.OnLiveSessionReceived += async session =>
             {
+                _sessionsOfInterest.Add(session.inAppSessionIdentifier);
                 Console.WriteLine($"OnLiveSessionReceived: {JsonConvert.SerializeObject(session, serializer)}");
                 return await _monitoring.MergeSession(session);
             };
@@ -62,6 +66,7 @@ public class VRChatLiveMonitoring : ILiveMonitoring
             };
             await _liveComms.Connect();
             
+            _ = Task.Run(BackgroundTask, _cancellationTokenSource.Token);
             _isConnected = true;
         }
         finally
@@ -76,12 +81,42 @@ public class VRChatLiveMonitoring : ILiveMonitoring
             .FirstOrDefault(session => session.inAppSessionIdentifier == location)?.guid;
     }
 
+    private async Task BackgroundTask()
+    {
+        try
+        {
+            while (true) // Canceled by token
+            {
+                // Unsure why, but if it runs for a while, we won't receive any updates until the user actually starts the game?
+                // Request a full update every so often
+                await Task.Delay(TimeSpan.FromMinutes(1), _cancellationTokenSource.Token);
+                var sessionsToUpdate = _monitoring.GetAllSessions(NamedApp.VRChat)
+                    .Where(session => _sessionsOfInterest.Contains(session.inAppSessionIdentifier))
+                    .Where(session => session.participants.Length > 0)
+                    .ToList();
+                Console.WriteLine($"Requesting to refresh all sessions of our interest (total of {sessionsToUpdate.Count} sessions)");
+                await _liveComms.QueueUpdateSessionsIfApplicable(sessionsToUpdate);
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
     public async Task StopMonitoring()
     {
         await _operationLock.WaitAsync();
         try
         {
             if (!_isConnected) return;
+            
+            Console.WriteLine("Will try to cancel token");
+            // await _cancellationTokenSource.CancelAsync();
+            _cancellationTokenSource.CancelAsync(); // FIXME: we have a problem when we wait for this to finish, it never completes. Why?
+            Console.WriteLine("Token cancelled. Will try to disconnect");
+            
             await _liveComms.Disconnect();
             _isConnected = false;
         }

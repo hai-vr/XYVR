@@ -278,7 +278,15 @@ internal class VRChatLiveCommunicator
         }
     }
 
-    private async Task QueueSessionFetchIfApplicable(string location)
+    public async Task QueueUpdateSessionsIfApplicable(List<ImmutableLiveSession> sessionsToUpdate)
+    {
+        foreach (var session in sessionsToUpdate)
+        {
+            await QueueSessionFetchIfApplicable(session.inAppSessionIdentifier);
+        }
+    }
+
+    private async Task QueueSessionFetchIfApplicable(string location, bool onlyConsiderItemsInQueue = false)
     {
         _api ??= await InitializeAPI();
         
@@ -289,7 +297,7 @@ internal class VRChatLiveCommunicator
             {
                 worldIdAndInstanceId = worldIdAndInstanceId
             };
-            if (!_allQueued.Contains(queueJob))
+            if (!onlyConsiderItemsInQueue && !_allQueued.Contains(queueJob) || onlyConsiderItemsInQueue && !_queue.Contains(queueJob))
             {
                 _queue.Enqueue(queueJob);
                 WakeUpQueue();

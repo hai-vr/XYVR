@@ -63,12 +63,14 @@ public class AppLifecycle
     {
         try
         {
+            Console.WriteLine("Saving...");
             PreferencesBff.OnClosed();
             LiveBff.OnClosed();
             foreach (var authority in _authorities)
             {
                 await authority.SaveWhateverNecessary();
             }
+            Console.WriteLine("Saved");
         }
         catch (Exception exception)
         {

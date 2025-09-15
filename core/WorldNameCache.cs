@@ -28,7 +28,7 @@ public class WorldNameCache
         {
             if (!value.isObsolete)
             {
-                if ((now - value.cachedAt).Duration().TotalHours > 1)
+                if ((now - value.cachedAt).Duration().TotalHours > 6)
                 {
                     value.needsRefresh = true;
                 }

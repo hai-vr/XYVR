@@ -334,7 +334,7 @@ internal class VRChatAPI
         {
             var response = await _client.GetAsync(url);
 
-            await EnsureRateLimiting(url, response.StatusCode);
+            await EnsureRateLimiting(url, response.StatusCode, true);
 
             if (response.StatusCode == HttpStatusCode.NotFound)
             {
@@ -410,7 +410,7 @@ internal class VRChatAPI
 
     }
 
-    private async Task EnsureRateLimiting(string urlForLogging, HttpStatusCode statusCode)
+    private async Task EnsureRateLimiting(string urlForLogging, HttpStatusCode statusCode, bool shortened = false)
     {
         if (statusCode == HttpStatusCode.TooManyRequests)
         {
@@ -422,7 +422,7 @@ internal class VRChatAPI
         
         if (!_useRateLimiting) return;
 
-        var millisecondsDelay = _random.Next(700, 1300); // Introduce some irregularity
+        var millisecondsDelay = (int)(_random.Next(700, 1300) * (shortened ? 0.25f : 1f)); // Introduce some irregularity
         Console.WriteLine($"Got {urlForLogging} ; Waiting {millisecondsDelay}ms...");
 
         await Task.Delay(millisecondsDelay);

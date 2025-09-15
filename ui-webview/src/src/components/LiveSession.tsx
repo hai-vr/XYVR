@@ -19,7 +19,8 @@ export class LiveSession extends Component<LiveSessionProps> {
         const capacityStr = `${liveSession.currentAttendance || '?'} / ${(liveSession.sessionCapacity || liveSession.virtualSpaceDefaultCapacity || '?')}`;
         return (<div key={liveSession.guid} className="live-session-card live-session-thumbnail-bg">
             <div style={{
-                position: 'relative'
+                position: 'relative',
+                height: '100%'
             }}>
                 <div style={{
                     background: `url(${liveSession.thumbnailUrl}), var(--live-session-overlay)`,
@@ -34,8 +35,12 @@ export class LiveSession extends Component<LiveSessionProps> {
                 }}></div>
                 <div style={{
                     position: 'relative',
+                    display: 'flex',
+                    flexDirection: 'column',
                     zIndex: 1,
-                    padding: '1rem'
+                    padding: '1rem',
+                    height: '100%',
+                    boxSizing: 'border-box'
                 }}>
                     <div className="live-session-header">
                         <div className="live-session-world" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -44,7 +49,7 @@ export class LiveSession extends Component<LiveSessionProps> {
                         </div>
                     </div>
                     {!mini && <div className="live-session-participants">
-                        <div className="accounts-container">
+                        <div className="session-accounts-container">
                             <div className="accounts-grid">
                                 {liveSession.participants.filter(value => value.isKnown).map((participant, pIndex) => {
                                     const matchingIndividual = individuals.find(ind =>
@@ -74,34 +79,37 @@ export class LiveSession extends Component<LiveSessionProps> {
                                         );
                                     }
                                 })}
-                                <div className="count-container">
-                                    <div style={{
-                                        margin: 'auto',
-                                        textWrap: 'nowrap',
-                                        textAlign: 'left',
-                                        lineHeight: '13px'
-                                    }}>
-                                        {Array.from({ length: liveSession.currentAttendance || 0 }, (_, index) => (
-                                            <>
-                                                {index % 20 == 0 && index != 0 && <br/>}
-                                                <span key={index} style={{
-                                                    width: '10px',
-                                                    height: '10px',
-                                                    display: 'inline-block',
-                                                    background: index < liveSession.participants.length ? 'var(--status-online)' : 'var(--text-primary)',
-                                                    margin: '1px',
-                                                    marginRight: '2px',
-                                                    marginBottom: '-1px',
-                                                    lineHeight: 0
-                                                }}></span>
-                                            </>
-                                        ))}
-                                    </div>
-                                    {liveSession.currentAttendance}&nbsp;/&nbsp;{liveSession.sessionCapacity || liveSession.virtualSpaceDefaultCapacity || '?'}
-                                </div>
                             </div>
                         </div>
                     </div>}
+
+                    <div className="count-container">
+                        <div style={{
+                            textWrap: 'nowrap',
+                            textAlign: 'left',
+                            lineHeight: '13px',
+                            margin: '0 auto',
+                            marginBottom: '5px',
+                            width: 'fit-content'
+                        }}>
+                            {Array.from({ length: liveSession.currentAttendance || 0 }, (_, index) => (
+                                <>
+                                    {index % 20 == 0 && index != 0 && <br/>}
+                                    <span key={index} style={{
+                                        width: '10px',
+                                        height: '10px',
+                                        display: 'inline-block',
+                                        background: index < liveSession.participants.length ? 'var(--status-online)' : 'var(--text-primary)',
+                                        margin: '1px',
+                                        marginRight: '2px',
+                                        marginBottom: '-1px',
+                                        lineHeight: 0
+                                    }}></span>
+                                </>
+                            ))}
+                        </div>
+                        {liveSession.currentAttendance || '?'}&nbsp;/&nbsp;{liveSession.sessionCapacity || liveSession.virtualSpaceDefaultCapacity || '?'}
+                    </div>
                 </div>
             </div>
         </div>);
