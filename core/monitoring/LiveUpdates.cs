@@ -16,6 +16,7 @@ public record ImmutableLiveUserUpdate
     public string callerInAppIdentifier { get; init; }
     
     public object? sessionSpecifics { get; init; }
+    public ImmutableArray<string> multiSessionGuids { get; init; } = ImmutableArray<string>.Empty;
 
     public ImmutableParticipant AsNonHostParticipant()
     {
@@ -28,6 +29,40 @@ public record ImmutableLiveUserUpdate
                 inAppIdentifier = inAppIdentifier
             }
         };
+    }
+
+    public virtual bool Equals(ImmutableLiveUserUpdate? other)
+    {
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return namedApp == other.namedApp &&
+               trigger == other.trigger &&
+               qualifiedAppName == other.qualifiedAppName &&
+               inAppIdentifier == other.inAppIdentifier &&
+               onlineStatus == other.onlineStatus &&
+               Equals(mainSession, other.mainSession) &&
+               customStatus == other.customStatus &&
+               callerInAppIdentifier == other.callerInAppIdentifier &&
+               Equals(sessionSpecifics, other.sessionSpecifics) &&
+               multiSessionGuids.SequenceEqual(other.multiSessionGuids);
+    }
+
+    public override int GetHashCode()
+    {
+        unchecked
+        {
+            var hashCode = (int)namedApp;
+            hashCode = (hashCode * 397) ^ trigger.GetHashCode();
+            hashCode = (hashCode * 397) ^ qualifiedAppName.GetHashCode();
+            hashCode = (hashCode * 397) ^ inAppIdentifier.GetHashCode();
+            hashCode = (hashCode * 397) ^ onlineStatus.GetHashCode();
+            hashCode = (hashCode * 397) ^ (mainSession != null ? mainSession.GetHashCode() : 0);
+            hashCode = (hashCode * 397) ^ (customStatus != null ? customStatus.GetHashCode() : 0);
+            hashCode = (hashCode * 397) ^ callerInAppIdentifier.GetHashCode();
+            hashCode = (hashCode * 397) ^ (sessionSpecifics != null ? sessionSpecifics.GetHashCode() : 0);
+            hashCode = (hashCode * 397) ^ XYVRSequenceHash.HashCodeOf(multiSessionGuids);
+            return hashCode;
+        }
     }
 }
 
@@ -103,7 +138,7 @@ public record ImmutableLiveSession
             hashCode = (hashCode * 397) ^ (inAppSessionName != null ? inAppSessionName.GetHashCode() : 0);
             hashCode = (hashCode * 397) ^ (inAppVirtualSpaceName != null ? inAppVirtualSpaceName.GetHashCode() : 0);
             hashCode = (hashCode * 397) ^ (inAppHost != null ? inAppHost.GetHashCode() : 0);
-            hashCode = (hashCode * 397) ^ participants.Aggregate(0, (h, a) => h ^ a.GetHashCode());
+            hashCode = (hashCode * 397) ^ XYVRSequenceHash.HashCodeOf(participants);
             hashCode = (hashCode * 397) ^ virtualSpaceDefaultCapacity.GetHashCode();
             hashCode = (hashCode * 397) ^ sessionCapacity.GetHashCode();
             hashCode = (hashCode * 397) ^ currentAttendance.GetHashCode();

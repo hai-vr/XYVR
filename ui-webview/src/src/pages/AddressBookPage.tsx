@@ -185,6 +185,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                                 onlineStatus: liveUpdate.onlineStatus || acc.onlineStatus,
                                 customStatus: liveUpdate.customStatus || acc.customStatus,
                                 mainSession: liveUpdate.mainSession || acc.mainSession,
+                                multiSessions: liveUpdate.multiSessions || acc.multiSessions,
                             }
                             : acc
                     );
@@ -482,7 +483,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                                     return bKnownCount - aKnownCount; // Descending order (most participants first)
                                 })
                                 .map((liveSession) => (
-                                    <LiveSession liveSession={liveSession} individuals={individuals} debugMode={debugMode} />
+                                    <LiveSession liveSession={liveSession} individuals={individuals} debugMode={debugMode} mini={false} />
                                 ))}
                         </div>
                     </div>

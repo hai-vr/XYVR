@@ -2,13 +2,14 @@
 import {CircleDot, CircleOff, Clipboard, DiamondMinus, Globe, TriangleAlert} from "lucide-react";
 import {_D, _D2} from "../haiUtils.ts";
 import {
-    type FrontAccount,
+    type FrontAccount, NamedApp,
     OnlineStatus,
     type OnlineStatusType
 } from "../types/CoreTypes.ts";
 import {type DebugFlags, DemonstrationMode} from "../types/DebugFlags.ts";
 import {LiveSessionKnowledge} from "../types/LiveUpdateTypes.ts";
 import {AppIcon} from "./AppIcon.tsx";
+import {LiveSession} from "../pages/LiveSession.tsx";
 
 interface AccountProps {
     account: FrontAccount,
@@ -179,6 +180,9 @@ const Account = ({account, imposter, showAlias, showNotes, debugMode, showSessio
                     </div>
                 </div>
             ))}
+
+            {!isSessionView && account.namedApp !== NamedApp.Resonite && account.mainSession && account.mainSession.liveSession && <LiveSession liveSession={account.mainSession.liveSession} individuals={[]} debugMode={debugMode} mini={true} />}
+            {account.namedApp === NamedApp.Resonite && account.multiSessions.map((session) => (<LiveSession liveSession={session} individuals={[]} debugMode={debugMode} mini={true} />))}
         </div>
     );
 };

@@ -17,12 +17,15 @@ public class ResoniteLiveMonitoring : ILiveMonitoring, IDisposable
     
     private ResoniteLiveCommunicator? _liveComms;
     private CancellationTokenSource _cancellationTokenSource;
+    private readonly HashToSession _hashToSession;
 
     public ResoniteLiveMonitoring(ICredentialsStorage credentialsStorage, LiveStatusMonitoring monitoring, string uid__sensitive)
     {
         _credentialsStorage = credentialsStorage;
         _monitoring = monitoring;
         _uid__sensitive = uid__sensitive;
+        
+        _hashToSession = new HashToSession();
     }
 
     public Task DefineCaller(string callerInAppIdentifier)
@@ -41,7 +44,7 @@ public class ResoniteLiveMonitoring : ILiveMonitoring, IDisposable
             if (_isConnected) return;
             _cancellationTokenSource = new CancellationTokenSource();
             
-            _liveComms = new ResoniteLiveCommunicator(_credentialsStorage, _callerInAppIdentifier, _uid__sensitive, new DoNotStoreAnythingStorage(), TryGetSessionIdToSessionGuid);
+            _liveComms = new ResoniteLiveCommunicator(_credentialsStorage, _callerInAppIdentifier, _uid__sensitive, new DoNotStoreAnythingStorage(), TryGetSessionIdToSessionGuid, _hashToSession);
             
             var serializer = new JsonSerializerSettings()
             {
@@ -67,48 +70,7 @@ public class ResoniteLiveMonitoring : ILiveMonitoring, IDisposable
                     await _liveComms.ListenOnContact(inAppIdentifier);
                 }
             };
-            _liveComms.OnSessionUpdated += async sessionUpdate =>
-            {
-                var sessionId = sessionUpdate.sessionId;
-                var correspondingSession = await _monitoring.MergeSession(new ImmutableNonIndexedLiveSession
-                {
-                    namedApp = NamedApp.Resonite,
-                    qualifiedAppName = ResoniteCommunicator.ResoniteQualifiedAppName,
-                    inAppVirtualSpaceName = ResoniteLiveCommunicator.ExtractTextFromColorTags(sessionUpdate.name),
-                    inAppSessionIdentifier = sessionId,
-                    inAppHost = new ImmutableLiveSessionHost
-                    {
-                        inAppHostIdentifier = sessionUpdate.hostUserId,
-                        inAppHostDisplayName = sessionUpdate.hostUsername
-                    },
-                    currentAttendance = sessionUpdate.joinedUsers,
-                    sessionCapacity = sessionUpdate.maxUsers,
-                    virtualSpaceDefaultCapacity = sessionUpdate.maxUsers,
-                    thumbnailUrl = sessionUpdate.thumbnailUrl,
-                });
-                
-                foreach (var userUpdate in _monitoring.GetAllUserData(NamedApp.Resonite))
-                {
-                    if (userUpdate.mainSession?.knowledge == LiveUserSessionKnowledge.KnownButNoData)
-                    {
-                        var resoniteSession = (ImmutableResoniteLiveSessionSpecifics)userUpdate.sessionSpecifics!;
-                        if (resoniteSession is { sessionHash: not null, userHashSalt: not null }
-                            && await ResoniteHash.Rehash(sessionId, resoniteSession.userHashSalt) == resoniteSession.sessionHash)
-                        {
-                            Console.WriteLine("Received a session for which a user had an unresolved hash for.");
-                            
-                            await _monitoring.MergeUser(userUpdate with
-                            {
-                                mainSession = new ImmutableLiveUserSessionState
-                                {
-                                    knowledge = LiveUserSessionKnowledge.Known,
-                                    sessionGuid = correspondingSession.guid
-                                }
-                            });
-                        }
-                    }
-                }
-            };
+            _liveComms.OnSessionUpdated += WhenSessionUpdated;
             
             await _liveComms.Connect();
             
@@ -119,6 +81,70 @@ public class ResoniteLiveMonitoring : ILiveMonitoring, IDisposable
         {
             _operationLock.Release();
         }
+    }
+
+    private async void WhenSessionUpdated(SessionUpdateJsonObject sessionUpdate)
+    {
+        var sessionId = sessionUpdate.sessionId;
+        
+        var correspondingSession = await _monitoring.MergeSession(new ImmutableNonIndexedLiveSession
+        {
+            namedApp = NamedApp.Resonite,
+            qualifiedAppName = ResoniteCommunicator.ResoniteQualifiedAppName,
+            inAppVirtualSpaceName = ResoniteLiveCommunicator.ExtractTextFromColorTags(sessionUpdate.name),
+            inAppSessionIdentifier = sessionId,
+            inAppHost = new ImmutableLiveSessionHost { inAppHostIdentifier = sessionUpdate.hostUserId, inAppHostDisplayName = sessionUpdate.hostUsername },
+            currentAttendance = sessionUpdate.joinedUsers,
+            sessionCapacity = sessionUpdate.maxUsers,
+            virtualSpaceDefaultCapacity = sessionUpdate.maxUsers,
+            thumbnailUrl = sessionUpdate.thumbnailUrl,
+        });
+        
+        _hashToSession.SubmitSession(new SessionBrief
+        {
+            sessionId = sessionId,
+            sessionGuid = correspondingSession.guid,
+        });
+
+        foreach (var userUpdate in _monitoring.GetAllUserData(NamedApp.Resonite))
+        {
+            var specifics = (ImmutableResoniteLiveSessionSpecifics)userUpdate.sessionSpecifics!;
+            if (specifics.userHashSalt != null)
+            {
+                string rehash = null;
+                if (userUpdate.mainSession?.knowledge == LiveUserSessionKnowledge.KnownButNoData)
+                {
+                    rehash = await ResoniteHash.Rehash(sessionId, specifics.userHashSalt);
+                    if (specifics is { sessionHash: not null, userHashSalt: not null } && rehash == specifics.sessionHash)
+                    {
+                        Console.WriteLine("Received a session for which a user had an unresolved hash for.");
+
+                        await _monitoring.MergeUser(userUpdate with { mainSession = new ImmutableLiveUserSessionState { knowledge = LiveUserSessionKnowledge.Known, sessionGuid = correspondingSession.guid } });
+                    }
+                }
+
+                if (specifics.sessionHashes.Length != userUpdate.multiSessionGuids.Length && specifics.userHashSalt != null)
+                {
+                    var sessionGuids = await ResolveSessionGuids(specifics);
+                    await _monitoring.MergeUser(userUpdate with { multiSessionGuids = [..sessionGuids] });
+                }
+            }
+        }
+    }
+
+    private async Task<List<string>> ResolveSessionGuids(ImmutableResoniteLiveSessionSpecifics specifics)
+    {
+        var sessionGuids = new List<string>();
+        foreach (var wantedHash in specifics.sessionHashes)
+        {
+            var session = await _hashToSession.ResolveSession(wantedHash, specifics.userHashSalt);
+            if (session != null)
+            {
+                sessionGuids.Add(session.sessionGuid);
+            }
+        }
+
+        return sessionGuids;
     }
 
     private string? TryGetSessionIdToSessionGuid(string sessionId)

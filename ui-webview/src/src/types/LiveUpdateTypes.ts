@@ -21,6 +21,7 @@ export interface FrontLiveUserUpdate {
     mainSession?: FrontLiveUserSessionState;
     customStatus?: string;
     callerInAppIdentifier: string;
+    multiSessions: FrontLiveSession[];
 }
 
 export interface FrontLiveUserSessionState {

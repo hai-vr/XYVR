@@ -8,30 +8,31 @@ import type {DebugFlags} from "../types/DebugFlags.ts";
 interface LiveSessionProps {
     liveSession: FrontLiveSession,
     individuals: FrontIndividual[],
-    debugMode: DebugFlags
+    debugMode: DebugFlags,
+    mini: boolean
 }
 
 export class LiveSession extends Component<LiveSessionProps> {
     render() {
-        const {liveSession, individuals, debugMode} = this.props;
+        const {liveSession, individuals, debugMode, mini} = this.props;
 
         return (<div key={liveSession.guid} className="live-session-card live-session-thumbnail-bg"
 
-        style={{
-            background: `url(${liveSession.thumbnailUrl})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-        }}>
+                     style={{
+                         background: `url(${liveSession.thumbnailUrl})`,
+                         backgroundSize: 'cover',
+                         backgroundPosition: 'center',
+                         backgroundRepeat: 'no-repeat',
+                     }}>
             <div className="live-session-header">
                 <div className="live-session-world">
-                    <AppIcon namedApp={liveSession.namedApp}/>
+                    {!mini && <AppIcon namedApp={liveSession.namedApp}/>}
                     <div>
                         {liveSession.inAppVirtualSpaceName || 'Unknown World'} ({liveSession.currentAttendance || '?'}&nbsp;/&nbsp;{liveSession.sessionCapacity || liveSession.virtualSpaceDefaultCapacity || '?'})
                     </div>
                 </div>
             </div>
-            <div className="live-session-participants">
+            {!mini && <div className="live-session-participants">
                 <div className="accounts-container">
                     <div className="accounts-grid">
                         {liveSession.participants.filter(value => value.isKnown).map((participant, pIndex) => {
@@ -64,7 +65,7 @@ export class LiveSession extends Component<LiveSessionProps> {
                         })}
                     </div>
                 </div>
-            </div>
+            </div>}
         </div>);
     }
 }

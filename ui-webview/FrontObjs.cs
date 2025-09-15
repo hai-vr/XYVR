@@ -28,7 +28,7 @@ internal class FrontIndividual
                 var sessionState = live.GetLiveSessionStateOrNull(account.namedApp, account.inAppIdentifier);
                 var sessionGuid = sessionState?.mainSession?.sessionGuid;
                 var session = sessionGuid != null ? live.GetSessionByGuid(sessionGuid) : null;
-                return FrontAccount.ToFrontAccount(account, sessionState, session);
+                return FrontAccount.ToFrontAccount(account, sessionState, session, live);
             }).ToList();
 
         var nonNullStatus = accounts.Select(account => account.onlineStatus).Where(status => status != null).ToList();
@@ -66,8 +66,9 @@ internal class FrontAccount
     public OnlineStatus? onlineStatus;
     public string? customStatus;
     public FrontLiveUserSessionState? mainSession;
+    public List<FrontLiveSession> multiSessions;
 
-    public static FrontAccount ToFrontAccount(ImmutableAccount account, ImmutableLiveUserUpdate? liveSessionState, ImmutableLiveSession? liveSession)
+    public static FrontAccount ToFrontAccount(ImmutableAccount account, ImmutableLiveUserUpdate? liveSessionState, ImmutableLiveSession? liveSession, LiveStatusMonitoring live)
     {
         return new FrontAccount
         {
@@ -87,6 +88,12 @@ internal class FrontAccount
             onlineStatus = liveSessionState?.onlineStatus,
             customStatus = liveSessionState?.customStatus,
             mainSession = liveSessionState?.mainSession != null ? FrontLiveUserSessionState.FromCore(liveSessionState.mainSession, liveSession) : null,
+            multiSessions = liveSessionState != null ? liveSessionState.multiSessionGuids
+                .Select(live.GetSessionByGuid)
+                .Where(aSession => aSession != null)
+                .Cast<ImmutableLiveSession>()
+                .Select(FrontLiveSession.FromCore)
+                .ToList() : [],
         };
     }
 }
@@ -168,6 +175,7 @@ internal class FrontLiveUserUpdate
     public OnlineStatus? onlineStatus;
     public string? customStatus;
     public FrontLiveUserSessionState? mainSession;
+    public List<FrontLiveSession> multiSessions;
 
     public string callerInAppIdentifier;
     
@@ -183,6 +191,12 @@ internal class FrontLiveUserUpdate
             inAppIdentifier = liveUserUpdate.inAppIdentifier,
             onlineStatus = liveUserUpdate.onlineStatus,
             mainSession = liveUserUpdate.mainSession != null ? FrontLiveUserSessionState.FromCore(liveUserUpdate.mainSession, session) : null,
+            multiSessions = liveUserUpdate.multiSessionGuids
+                .Select(live.GetSessionByGuid)
+                .Where(liveSession => liveSession != null)                
+                .Cast<ImmutableLiveSession>()
+                .Select(FrontLiveSession.FromCore)
+                .ToList(),
             customStatus = liveUserUpdate.customStatus,
             callerInAppIdentifier = liveUserUpdate.callerInAppIdentifier
         };

@@ -44,7 +44,7 @@ public record ImmutableIndividual
         unchecked
         {
             var hashCode = guid.GetHashCode();
-            hashCode = (hashCode * 397) ^ accounts.Aggregate(0, (h, a) => h ^ a.GetHashCode());
+            hashCode = (hashCode * 397) ^ XYVRSequenceHash.HashCodeOf(accounts);
             hashCode = (hashCode * 397) ^ displayName.GetHashCode();
             hashCode = (hashCode * 397) ^ isAnyContact.GetHashCode();
             hashCode = (hashCode * 397) ^ isExposed.GetHashCode();
@@ -126,8 +126,8 @@ public record ImmutableAccount
             hashCode = (hashCode * 397) ^ inAppIdentifier.GetHashCode();
             hashCode = (hashCode * 397) ^ inAppDisplayName.GetHashCode();
             hashCode = (hashCode * 397) ^ (specifics != null ? specifics.GetHashCode() : 0);
-            hashCode = (hashCode * 397) ^ callers.Aggregate(0, (h, a) => h ^ a.GetHashCode());
-            hashCode = (hashCode * 397) ^ allDisplayNames.Aggregate(0, (h, a) => h ^ a.GetHashCode());
+            hashCode = (hashCode * 397) ^ XYVRSequenceHash.HashCodeOf(callers);
+            hashCode = (hashCode * 397) ^ XYVRSequenceHash.HashCodeOf(allDisplayNames);
             return hashCode;
         }
     }
@@ -172,7 +172,7 @@ public record ImmutableVRChatSpecifics
     {
         unchecked
         {
-            var hashCode = urls.Aggregate(0, (h, a) => h ^ a.GetHashCode());
+            var hashCode = XYVRSequenceHash.HashCodeOf(urls);
             hashCode = (hashCode * 397) ^ bio.GetHashCode();
             hashCode = (hashCode * 397) ^ pronouns.GetHashCode();
             return hashCode;

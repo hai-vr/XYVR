@@ -2,7 +2,6 @@
 using Newtonsoft.Json;
 using XYVR.API.Resonite;
 using XYVR.Core;
-using XYVR.Data.Collection;
 
 namespace XYVR.AccountAuthority.Resonite;
 
@@ -13,9 +12,9 @@ internal partial class ResoniteLiveCommunicator
     private readonly string _uid;
     private readonly IResponseCollector _responseCollector;
     private readonly Func<string, string?> _trySessionIdToSessionGuidFn;
+    private readonly HashToSession _hashToSession;
     private readonly ResoniteSignalRClient _srClient;
     private readonly Dictionary<string, SessionUpdateJsonObject> _sessionIdToSessionUpdate = new();
-    private readonly Dictionary<string, string> _resolvedMixedHashToSessionId = new();
     private readonly HashSet<string> _sessionIdsToWatch = new();
 
     private ResoniteAPI? _api;
@@ -27,13 +26,14 @@ internal partial class ResoniteLiveCommunicator
     
     public event Action<SessionUpdateJsonObject>? OnSessionUpdated;
 
-    public ResoniteLiveCommunicator(ICredentialsStorage credentialsStorage, string callerInAppIdentifier, string uid__sensitive, IResponseCollector responseCollector, Func<string, string?> trySessionIdToSessionGuidFn)
+    public ResoniteLiveCommunicator(ICredentialsStorage credentialsStorage, string callerInAppIdentifier, string uid__sensitive, IResponseCollector responseCollector, Func<string, string?> trySessionIdToSessionGuidFn, HashToSession hashToSession)
     {
         _credentialsStorage = credentialsStorage;
         _callerInAppIdentifier = callerInAppIdentifier;
         _uid = uid__sensitive;
         _responseCollector = responseCollector;
         _trySessionIdToSessionGuidFn = trySessionIdToSessionGuidFn;
+        _hashToSession = hashToSession;
 
         _srClient = new ResoniteSignalRClient();
         _srClient.OnStatusUpdate += WhenStatusUpdate;
@@ -66,9 +66,12 @@ internal partial class ResoniteLiveCommunicator
         var liveSessionState = await DeriveSessionState(statusUpdate, status);
         
         var session = SessionOrNull(statusUpdate);
-
+        
         if (OnLiveUpdateReceived != null)
         {
+            var sessionHashes = statusUpdate.sessions.Select(sess => sess.sessionHash).ToList();
+            var guidified = await ResolveSessionGuids(sessionHashes, statusUpdate.hashSalt);
+            
             await OnLiveUpdateReceived(new ImmutableLiveUserUpdate
             {
                 trigger = "SignalR-OnStatusUpdate",
@@ -80,11 +83,28 @@ internal partial class ResoniteLiveCommunicator
                 sessionSpecifics = new ImmutableResoniteLiveSessionSpecifics
                 {
                     sessionHash = session?.sessionHash,
-                    userHashSalt = statusUpdate.hashSalt
+                    userHashSalt = statusUpdate.hashSalt,
+                    sessionHashes = [..sessionHashes]
                 },
+                multiSessionGuids = [..guidified],
                 callerInAppIdentifier = _callerInAppIdentifier
             });
         }
+    }
+
+    private async Task<List<string>> ResolveSessionGuids(List<string> sessionHashes, string hashSalt)
+    {
+        var sessionGuids = new List<string>();
+        foreach (var wantedHash in sessionHashes)
+        {
+            var session = await _hashToSession.ResolveSession(wantedHash, hashSalt);
+            if (session != null)
+            {
+                sessionGuids.Add(session.sessionGuid);
+            }
+        }
+
+        return sessionGuids;
     }
 
     private Task WhenSessionUpdate(SessionUpdateJsonObject sessionUpdate)
@@ -131,19 +151,11 @@ internal partial class ResoniteLiveCommunicator
 
         if (session != null && userStatusUpdate.hashSalt != null && !session.sessionHidden && session.accessLevel != "Private")
         {
-            var existingSessionId = _resolvedMixedHashToSessionId.GetValueOrDefault(session.sessionHash);
-            if (existingSessionId != null)
+            var sess = await _hashToSession.ResolveSession(session.sessionHash, userStatusUpdate.hashSalt);
+            if (sess != null)
             {
-                sessionUpdate = _sessionIdToSessionUpdate.GetValueOrDefault(existingSessionId);
-            }
-            else
-            {
-                sessionUpdate = await FindSessionOrNull(session.sessionHash, userStatusUpdate.hashSalt);
-                if (sessionUpdate != null)
-                {
-                    _resolvedMixedHashToSessionId[session.sessionHash] = sessionUpdate.sessionId;
-                    _sessionIdsToWatch.Add(sessionUpdate.sessionId);
-                }
+                sessionUpdate = _sessionIdToSessionUpdate.GetValueOrDefault(sess.sessionId);
+                _sessionIdsToWatch.Add(sess.sessionId);
             }
         }
         
@@ -188,15 +200,11 @@ internal partial class ResoniteLiveCommunicator
 
     private async Task<SessionUpdateJsonObject?> FindSessionOrNull(string wantedHash, string hashSalt)
     {
-        foreach (var sessionUpdateJsonObject in _sessionIdToSessionUpdate)
+        var resolveSession = await _hashToSession.ResolveSession(wantedHash, hashSalt);
+        if (resolveSession != null)
         {
-            var sessionId = sessionUpdateJsonObject.Key;
-            var possibleHash = await ResoniteHash.Rehash(sessionId, hashSalt);
-            if (wantedHash == possibleHash)
-            {
-                Console.WriteLine($"We FOUND the hash.");
-                return sessionUpdateJsonObject.Value;
-            }
+            var sessionUpdate = _sessionIdToSessionUpdate[resolveSession.sessionId];
+            return sessionUpdate;
         }
 
         return null;

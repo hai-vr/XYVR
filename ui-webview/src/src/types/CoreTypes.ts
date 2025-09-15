@@ -1,4 +1,4 @@
-﻿import type {FrontLiveUserSessionState} from "./LiveUpdateTypes.ts";
+﻿import type {FrontLiveSession, FrontLiveUserSessionState} from "./LiveUpdateTypes.ts";
 
 export const NamedApp = {
     NotNamed: "NotNamed",
@@ -43,6 +43,7 @@ export interface FrontAccount {
     onlineStatus?: OnlineStatusType;
     customStatus?: string;
     mainSession?: FrontLiveUserSessionState
+    multiSessions: FrontLiveSession[];
 }
 
 export interface FrontIndividual {
