@@ -1,4 +1,4 @@
-﻿namespace XYVR.UI.WebviewUI;
+﻿namespace XYVR.UI.Backend;
 
 public static class FrontEvents
 {

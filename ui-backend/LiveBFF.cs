@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using XYVR.Core;
 
-namespace XYVR.UI.WebviewUI;
+namespace XYVR.UI.Backend;
 
 [ComVisible(true)]
 public interface ILiveBFF
@@ -15,15 +15,15 @@ public interface ILiveBFF
 [ClassInterface(ClassInterfaceType.None)]
 public class LiveBFF : ILiveBFF
 {
-    private readonly MainWindow _mainWindow;
+    private readonly AppLifecycle _appLifecycle;
     private readonly JsonSerializerSettings _serializer;
 
     private List<ILiveMonitoring>? _liveMonitoringAgents;
     private HashSet<string> _doWeCareAboutThisSessionGuid = new();
 
-    public LiveBFF(MainWindow mainWindow)
+    public LiveBFF(AppLifecycle appLifecycle)
     {
-        _mainWindow = mainWindow;
+        _appLifecycle = appLifecycle;
         _serializer = BFFUtils.NewSerializer();
     }
     
@@ -31,7 +31,7 @@ public class LiveBFF : ILiveBFF
     {
         try
         {
-            var liveData = _mainWindow.LiveStatusMonitoring.GetAllUserData();
+            var liveData = _appLifecycle.LiveStatusMonitoring.GetAllUserData();
             return JsonConvert.SerializeObject(liveData, _serializer);
         }
         catch (Exception e)
@@ -45,7 +45,7 @@ public class LiveBFF : ILiveBFF
     {
         try
         {
-            var liveData = _mainWindow.LiveStatusMonitoring.GetAllSessions();
+            var liveData = _appLifecycle.LiveStatusMonitoring.GetAllSessions();
             return JsonConvert.SerializeObject(liveData, _serializer);
         }
         catch (Exception e)
@@ -59,9 +59,9 @@ public class LiveBFF : ILiveBFF
     {
         if (_liveMonitoringAgents != null) return;
         
-        var connectors = _mainWindow.ConnectorsMgt;
-        var credentials = _mainWindow.CredentialsMgt;
-        var monitoring = _mainWindow.LiveStatusMonitoring;
+        var connectors = _appLifecycle.ConnectorsMgt;
+        var credentials = _appLifecycle.CredentialsMgt;
+        var monitoring = _appLifecycle.LiveStatusMonitoring;
 
         monitoring.AddUserUpdateMergedListener(WhenUserUpdateMerged);
         monitoring.AddSessionUpdatedListener(WhenSessionUpdated);
@@ -86,7 +86,7 @@ public class LiveBFF : ILiveBFF
     {
         if (_liveMonitoringAgents == null) return;
 
-        var monitoring = _mainWindow.LiveStatusMonitoring;
+        var monitoring = _appLifecycle.LiveStatusMonitoring;
         
         monitoring.RemoveUserUpdateMergedListener(WhenUserUpdateMerged);
         monitoring.RemoveSessionUpdatedListener(WhenSessionUpdated);
@@ -115,8 +115,8 @@ public class LiveBFF : ILiveBFF
 
     private async Task WhenUserUpdateMerged(ImmutableLiveUserUpdate update)
     {
-        var live = _mainWindow.LiveStatusMonitoring;
-        await _mainWindow.SendEventToReact(FrontEvents.EventForLiveUpdateMerged, FrontLiveUserUpdate.FromCore(update, live));
+        var live = _appLifecycle.LiveStatusMonitoring;
+        await _appLifecycle.SendEventToReact(FrontEvents.EventForLiveUpdateMerged, FrontLiveUserUpdate.FromCore(update, live));
     }
 
     private async Task WhenSessionUpdated(ImmutableLiveSession session)
@@ -136,13 +136,13 @@ public class LiveBFF : ILiveBFF
         }
         _doWeCareAboutThisSessionGuid.Add(session.guid);
         
-        await _mainWindow.SendEventToReact(FrontEvents.EventForLiveSessionUpdated, FrontLiveSession.FromCore(session));
+        await _appLifecycle.SendEventToReact(FrontEvents.EventForLiveSessionUpdated, FrontLiveSession.FromCore(session));
 
-        var live = _mainWindow.LiveStatusMonitoring;
+        var live = _appLifecycle.LiveStatusMonitoring;
         foreach (var userOfThatSession in live.GetAllUserData(session.namedApp)
                      .Where(update => update?.mainSession?.sessionGuid == session.guid))
         {
-            await _mainWindow.SendEventToReact(FrontEvents.EventForLiveUpdateMerged, FrontLiveUserUpdate.FromCore(userOfThatSession, live));
+            await _appLifecycle.SendEventToReact(FrontEvents.EventForLiveUpdateMerged, FrontLiveUserUpdate.FromCore(userOfThatSession, live));
         }
     }
 

@@ -1,9 +1,7 @@
 ﻿using System.IO;
 using System.Windows;
 using Microsoft.Web.WebView2.Core;
-using Newtonsoft.Json;
 using XYVR.Core;
-using XYVR.Data.Collection;
 using XYVR.Scaffold;
 
 namespace XYVR.UI.WebviewUI;
@@ -12,28 +10,11 @@ public partial class MainWindow : Window
 {
     private const string VirtualHost = "appassets.example";
     
-    private readonly AppBFF _appBff;
-    private readonly DataCollectionBFF _dataCollectionBff;
-    private readonly PreferencesBFF _preferencesBff;
-    private readonly LiveBFF _liveBff;
-    private readonly JsonSerializerSettings _serializer;
-    private WorldNameCache? _openWorldNameCache;
-    private List<IAuthority> Authorities;
-
     public App AppHandle { get; private set; }
-    public IndividualRepository IndividualRepository { get; private set; }
-    public ConnectorManagement ConnectorsMgt { get; private set; }
-    public CredentialsManagement CredentialsMgt { get; private set; }
-    public LiveStatusMonitoring LiveStatusMonitoring { get; private set; }
 
     public MainWindow()
     {
         InitializeComponent();
-        _appBff = new AppBFF(this);
-        _dataCollectionBff = new DataCollectionBFF(this);
-        _preferencesBff = new PreferencesBFF(this);
-        _liveBff = new LiveBFF(this);
-        _serializer = BFFUtils.NewSerializer();
 
         Title = XYVRValues.ApplicationTitle;
         
@@ -43,20 +24,7 @@ public partial class MainWindow : Window
 
     private async Task OnClosed(object? sender, EventArgs e)
     {
-        try
-        {
-            _preferencesBff.OnClosed();
-            _liveBff.OnClosed();
-            foreach (var authority in Authorities)
-            {
-                await authority.SaveWhateverNecessary();
-            }
-        }
-        catch (Exception exception)
-        {
-            Console.WriteLine(exception);
-            throw;
-        }
+        await AppHandle.Lifecycle.WhenApplicationCloses();
     }
 
     private async Task MWL(object sender, RoutedEventArgs evt)
@@ -77,20 +45,13 @@ public partial class MainWindow : Window
         Console.WriteLine("WebView: Main window loaded.");
         
         AppHandle = (App)Application.Current;
-
-        Authorities = await IAuthorityScaffolder.FindAll();
-        IndividualRepository = new IndividualRepository(await Scaffolding.OpenRepository());
-        ConnectorsMgt = new ConnectorManagement(await Scaffolding.OpenConnectors());
-        CredentialsMgt = new CredentialsManagement(await Scaffolding.OpenCredentials(), Authorities);
-        LiveStatusMonitoring = new LiveStatusMonitoring();
-
-        _ = Task.Run(() => _liveBff.StartMonitoring()); // don't wait this;
+        await AppHandle.Lifecycle.WhenWindowLoaded(SendScriptToReact);
         
         await WebView.EnsureCoreWebView2Async();
-        WebView.CoreWebView2.AddHostObjectToScript("appApi", _appBff);
-        WebView.CoreWebView2.AddHostObjectToScript("dataCollectionApi", _dataCollectionBff);
-        WebView.CoreWebView2.AddHostObjectToScript("preferencesApi", _preferencesBff);
-        WebView.CoreWebView2.AddHostObjectToScript("liveApi", _liveBff);
+        WebView.CoreWebView2.AddHostObjectToScript("appApi", AppHandle.Lifecycle.AppBff);
+        WebView.CoreWebView2.AddHostObjectToScript("dataCollectionApi", AppHandle.Lifecycle.DataCollectionBff);
+        WebView.CoreWebView2.AddHostObjectToScript("preferencesApi", AppHandle.Lifecycle.PreferencesBff);
+        WebView.CoreWebView2.AddHostObjectToScript("liveApi", AppHandle.Lifecycle.LiveBff);
 
         // Intercept clicks on links
         WebView.CoreWebView2.NavigationStarting += CoreWebView2_NavigationStarting;
@@ -136,14 +97,9 @@ public partial class MainWindow : Window
             }
         }
     }
-    
-    internal async Task SendEventToReact(string eventType__vulnerableToInjections, object obj)
+
+    private async Task SendScriptToReact(string script)
     {
-        if (eventType__vulnerableToInjections.Contains('\'')) throw new ArgumentException("Event type cannot contain single quotes.");
-        
-        var eventJson = JsonConvert.SerializeObject(obj, _serializer);
-        var script = $"window.dispatchEvent(new CustomEvent('{eventType__vulnerableToInjections}', {{ detail: {eventJson} }}));";
-        
         await Dispatcher.InvokeAsync(() =>
         {
             if (WebView?.CoreWebView2 != null)

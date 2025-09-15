@@ -1,6 +1,6 @@
 ﻿using XYVR.Core;
 
-namespace XYVR.UI.WebviewUI;
+namespace XYVR.UI.Backend;
 
 internal class FrontIndividual
 {

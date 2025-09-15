@@ -1,10 +1,9 @@
 ﻿using System.Runtime.InteropServices;
-using System.Windows;
 using Newtonsoft.Json;
 using XYVR.Core;
 using XYVR.Scaffold;
 
-namespace XYVR.UI.WebviewUI;
+namespace XYVR.UI.Backend;
 
 [ComVisible(true)]
 public interface IAppBFF
@@ -13,19 +12,18 @@ public interface IAppBFF
     string GetAllExposedIndividualsOrderedByContact();
     Task FusionIndividuals(string toDesolidarize, string toDestroy);
     Task DesolidarizeIndividuals(string toDesolidarize);
-    void CloseApp();
 }
 
 [ComVisible(true)]
 [ClassInterface(ClassInterfaceType.None)]
 public class AppBFF : IAppBFF
 {
-    private readonly MainWindow _mainWindow;
+    private readonly AppLifecycle _appLifecycle;
     private readonly JsonSerializerSettings _serializer;
 
-    public AppBFF(MainWindow mainWindow)
+    public AppBFF(AppLifecycle appLifecycle)
     {
-        _mainWindow = mainWindow;
+        _appLifecycle = appLifecycle;
         _serializer = BFFUtils.NewSerializer();
     }
 
@@ -36,9 +34,9 @@ public class AppBFF : IAppBFF
 
     public string GetAllExposedIndividualsOrderedByContact()
     {
-        var live = _mainWindow.LiveStatusMonitoring;
+        var live = _appLifecycle.LiveStatusMonitoring;
         
-        var responseObj = _mainWindow.IndividualRepository.Individuals
+        var responseObj = _appLifecycle.IndividualRepository.Individuals
             .Where(individual => individual.isExposed)
             .OrderByDescending(individual => individual.isAnyContact)
             .Select(individual => FrontIndividual.FromCore(individual, live))
@@ -52,28 +50,20 @@ public class AppBFF : IAppBFF
         Console.WriteLine($"Fusion individuals was called: {toDesolidarize}, {toDestroy}");
         if (toDesolidarize == toDestroy) throw new ArgumentException("Cannot fusion an Individual with itself");
         
-        var to = _mainWindow.IndividualRepository.GetByGuid(toDesolidarize);
-        var beingDestroyed = _mainWindow.IndividualRepository.GetByGuid(toDestroy);
-        _mainWindow.IndividualRepository.FusionIndividuals(to, beingDestroyed);
-        await Scaffolding.SaveRepository(_mainWindow.IndividualRepository);
+        var to = _appLifecycle.IndividualRepository.GetByGuid(toDesolidarize);
+        var beingDestroyed = _appLifecycle.IndividualRepository.GetByGuid(toDestroy);
+        _appLifecycle.IndividualRepository.FusionIndividuals(to, beingDestroyed);
+        await Scaffolding.SaveRepository(_appLifecycle.IndividualRepository);
     }
 
     public async Task DesolidarizeIndividuals(string toDesolidarize)
     {
         Console.WriteLine($"Desolidarize was called: {toDesolidarize}");
         
-        var individual = _mainWindow.IndividualRepository.GetByGuid(toDesolidarize);
+        var individual = _appLifecycle.IndividualRepository.GetByGuid(toDesolidarize);
         if (individual.accounts.Length <= 1) return;
         
-        _mainWindow.IndividualRepository.DesolidarizeIndividualAccounts(individual);
-        await Scaffolding.SaveRepository(_mainWindow.IndividualRepository);
-    }
-
-    public void CloseApp()
-    {
-        Application.Current.Dispatcher.Invoke(() =>
-        {
-            _mainWindow.Close();
-        });
+        _appLifecycle.IndividualRepository.DesolidarizeIndividualAccounts(individual);
+        await Scaffolding.SaveRepository(_appLifecycle.IndividualRepository);
     }
 }

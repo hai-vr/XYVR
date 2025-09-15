@@ -26,7 +26,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\development-scaffold\development-scaffold.csproj" />
+      <ProjectReference Include="..\ui-backend\ui-backend.csproj" />
     </ItemGroup>
 
 </Project>

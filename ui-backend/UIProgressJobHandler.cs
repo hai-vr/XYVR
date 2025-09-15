@@ -1,7 +1,7 @@
 ﻿using XYVR.Core;
 using XYVR.Scaffold;
 
-namespace XYVR.UI.WebviewUI;
+namespace XYVR.UI.Backend;
 
 public class UIProgressJobHandler(IndividualRepository repository, Func<ImmutableIndividual, Task> individualUpdatedEventFn) : IIncrementalDataCollectionJobHandler
 {

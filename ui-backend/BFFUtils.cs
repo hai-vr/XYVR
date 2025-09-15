@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace XYVR.UI.WebviewUI;
+namespace XYVR.UI.Backend;
 
 public static class BFFUtils
 {

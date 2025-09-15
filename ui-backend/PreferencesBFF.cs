@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using XYVR.Scaffold;
 
-namespace XYVR.UI.WebviewUI;
+namespace XYVR.UI.Backend;
 
 [ComVisible(true)]
 public interface IPreferencesBFF
@@ -15,14 +15,14 @@ public interface IPreferencesBFF
 [ClassInterface(ClassInterfaceType.None)]
 public class PreferencesBFF : IPreferencesBFF
 {
-    private readonly MainWindow _mainWindow;
+    private readonly AppLifecycle _appLifecycle;
     private readonly JsonSerializerSettings _serializer;
     private ReactAppPreferences? _lastPrefs;
     private ReactAppPreferences? _newPrefs;
 
-    public PreferencesBFF(MainWindow mainWindow)
+    public PreferencesBFF(AppLifecycle appLifecycle)
     {
-        _mainWindow = mainWindow;
+        _appLifecycle = appLifecycle;
         _serializer = BFFUtils.NewSerializer();
     }
     

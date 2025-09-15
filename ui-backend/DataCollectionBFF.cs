@@ -4,7 +4,7 @@ using XYVR.Core;
 using XYVR.Login;
 using XYVR.Scaffold;
 
-namespace XYVR.UI.WebviewUI;
+namespace XYVR.UI.Backend;
 
 [ComVisible(true)]
 public interface IDataCollectionBFF
@@ -22,15 +22,15 @@ public interface IDataCollectionBFF
 [ClassInterface(ClassInterfaceType.None)]
 public class DataCollectionBFF : IDataCollectionBFF
 {
-    private readonly MainWindow _mainWindow;
+    private readonly AppLifecycle _appLifecycle;
     private readonly JsonSerializerSettings _serializer;
     private static readonly SemaphoreSlim Lock = new(1, 1);
     
     private bool _isRunningDataCollection;
 
-    public DataCollectionBFF(MainWindow mainWindow)
+    public DataCollectionBFF(AppLifecycle appLifecycle)
     {
-        _mainWindow = mainWindow;
+        _appLifecycle = appLifecycle;
         _serializer = BFFUtils.NewSerializer();
     }
 
@@ -43,9 +43,9 @@ public class DataCollectionBFF : IDataCollectionBFF
         {
             _isRunningDataCollection = true;
 
-            var repository = _mainWindow.IndividualRepository;
-            var connectors = _mainWindow.ConnectorsMgt;
-            var credentials = _mainWindow.CredentialsMgt;
+            var repository = _appLifecycle.IndividualRepository;
+            var connectors = _appLifecycle.ConnectorsMgt;
+            var credentials = _appLifecycle.CredentialsMgt;
             var storage = new ResponseCollectionStorage();
 
             var dataCollection = new CompoundDataCollection(repository, (await Task.WhenAll(connectors.Connectors
@@ -58,7 +58,7 @@ public class DataCollectionBFF : IDataCollectionBFF
 
             await dataCollection.IncrementalUpdateRepository(new UIProgressJobHandler(repository, async individual =>
             {
-                await _mainWindow.SendEventToReact(FrontEvents.EventForIndividualUpdated, FrontIndividual.FromCore(individual, _mainWindow.LiveStatusMonitoring));
+                await _appLifecycle.SendEventToReact(FrontEvents.EventForIndividualUpdated, FrontIndividual.FromCore(individual, _appLifecycle.LiveStatusMonitoring));
             }));
             await Scaffolding.SaveRepository(repository);
         }
@@ -76,10 +76,10 @@ public class DataCollectionBFF : IDataCollectionBFF
     
     public async Task<string> GetConnectors()
     {
-        var connectors = _mainWindow.ConnectorsMgt.Connectors;
+        var connectors = _appLifecycle.ConnectorsMgt.Connectors;
         
         var connectorF = (await Task.WhenAll(connectors
-            .Select(async connector => FrontConnector.FromCore(connector, await _mainWindow.CredentialsMgt.IsLoggedInWithoutRequest(connector)))
+            .Select(async connector => FrontConnector.FromCore(connector, await _appLifecycle.CredentialsMgt.IsLoggedInWithoutRequest(connector)))
             .ToList())).ToList();
         
         return ToJSON(connectorF);
@@ -87,22 +87,22 @@ public class DataCollectionBFF : IDataCollectionBFF
 
     public async Task<string> CreateConnector(string connectorType)
     {
-        var newConnector = _mainWindow.ConnectorsMgt.CreateNewConnector(Enum.Parse<ConnectorType>(connectorType));
-        await Scaffolding.SaveConnectors(_mainWindow.ConnectorsMgt);
+        var newConnector = _appLifecycle.ConnectorsMgt.CreateNewConnector(Enum.Parse<ConnectorType>(connectorType));
+        await Scaffolding.SaveConnectors(_appLifecycle.ConnectorsMgt);
         
         return ToJSON(newConnector);
     }
 
     public async Task DeleteConnector(string guid)
     {
-        _mainWindow.ConnectorsMgt.DeleteConnector(guid);
-        await Scaffolding.SaveConnectors(_mainWindow.ConnectorsMgt);
+        _appLifecycle.ConnectorsMgt.DeleteConnector(guid);
+        await Scaffolding.SaveConnectors(_appLifecycle.ConnectorsMgt);
     }
 
     public async Task<string> TryLogin(string guid, string login__sensitive, string password__sensitive, bool stayLoggedIn)
     {
-        var connector = _mainWindow.ConnectorsMgt.GetConnector(guid);
-        var connectionResult = await _mainWindow.CredentialsMgt.TryConnect(connector, new ConnectionAttempt
+        var connector = _appLifecycle.ConnectorsMgt.GetConnector(guid);
+        var connectionResult = await _appLifecycle.CredentialsMgt.TryConnect(connector, new ConnectionAttempt
         {
             connector = connector,
             login__sensitive = login__sensitive,
@@ -116,17 +116,17 @@ public class DataCollectionBFF : IDataCollectionBFF
 
     public async Task<string> TryLogout(string guid)
     {
-        var connector = _mainWindow.ConnectorsMgt.GetConnector(guid);
-        var connectionResult = await _mainWindow.CredentialsMgt.TryLogout(connector);
-        await Scaffolding.SaveCredentials(await _mainWindow.CredentialsMgt.SerializeCredentials());
+        var connector = _appLifecycle.ConnectorsMgt.GetConnector(guid);
+        var connectionResult = await _appLifecycle.CredentialsMgt.TryLogout(connector);
+        await Scaffolding.SaveCredentials(await _appLifecycle.CredentialsMgt.SerializeCredentials());
     
         return ToJSON(connectionResult);
     }
 
     public async Task<string> TryTwoFactor(string guid, bool isTwoFactorEmail, string twoFactorCode__sensitive, bool stayLoggedIn)
     {
-        var connector = _mainWindow.ConnectorsMgt.GetConnector(guid);
-        var connectionResult = await _mainWindow.CredentialsMgt.TryConnect(connector, new ConnectionAttempt
+        var connector = _appLifecycle.ConnectorsMgt.GetConnector(guid);
+        var connectionResult = await _appLifecycle.CredentialsMgt.TryConnect(connector, new ConnectionAttempt
         {
             connector = connector,
             twoFactorCode__sensitive = twoFactorCode__sensitive,
@@ -144,14 +144,14 @@ public class DataCollectionBFF : IDataCollectionBFF
         {
             if (stayLoggedIn)
             {
-                await Scaffolding.SaveCredentials(await _mainWindow.CredentialsMgt.SerializeCredentials());
+                await Scaffolding.SaveCredentials(await _appLifecycle.CredentialsMgt.SerializeCredentials());
             }
             
-            var connector = _mainWindow.ConnectorsMgt.GetConnector(connectionResult.guid);
+            var connector = _appLifecycle.ConnectorsMgt.GetConnector(connectionResult.guid);
             connector.account = connectionResult.account;
-            _mainWindow.ConnectorsMgt.UpdateConnector(connector);
+            _appLifecycle.ConnectorsMgt.UpdateConnector(connector);
             
-            await Scaffolding.SaveConnectors(_mainWindow.ConnectorsMgt);
+            await Scaffolding.SaveConnectors(_appLifecycle.ConnectorsMgt);
         }
     }
 
