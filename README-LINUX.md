@@ -8,7 +8,7 @@ To run on Linux, you need to:
 - Install `libwebkit2gtk-4.0` see [below](#install-libwebkit2gtk-40).
 
 Then:
-- In **ui-frontend/**, run `npm install`
+- In **ui-frontend/src/**, run `npm install`
 - Run the **ui-photino-linux/** project.
   - `cd ui-photino-linux; dotnet run`
   - Building this project *should* automatically build the frontend project, as it internally calls `npm run build-and-copy`.
