@@ -8,6 +8,7 @@ function App() {
 
 // @ts-ignore
     const [appVersion, setAppVersion] = useState('');
+    const [isBound, setIsBound] = useState(false);
 
     useEffect(() => {
         // Wait for WebView2 API to be available
@@ -19,9 +20,12 @@ function App() {
         initializeApi();
 
         DotNetApi.EnsureRegistered();
+        setIsBound(DotNetApi.IsBound());
     }, []);
 
-    return <AppRouter appVersion={appVersion} />
+    return <>
+        {isBound && <AppRouter appVersion={appVersion} />}
+    </>
 }
 
 export default App

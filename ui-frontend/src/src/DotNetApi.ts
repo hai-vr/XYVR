@@ -14,6 +14,10 @@
         }
     }
 
+    static IsBound(): boolean {
+        return ((!!(window.external as any).sendMessage) || (!!(window.chrome?.webview)) || false);
+    }
+
     // noinspection JSDeprecatedSymbols
     private _isPhotino: boolean = !!(window.external as any).sendMessage;
 
