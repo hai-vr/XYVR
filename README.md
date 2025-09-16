@@ -33,6 +33,7 @@ If you are a developer, feel free to read below.
 - We only perform requests to the following URLs:
   - for VRChat accounts: `https://api.vrchat.cloud/api/1` (live updates: `wss://pipeline.vrchat.cloud/`)
   - for Resonite accounts: `https://api.resonite.com/` (live updates: `https://api.resonite.com/hub`)
+  - for ChilloutVR accounts: `https://api.abinteractive.net/1`
 - There are no requests to any other server.
 - There is no telemetry, no analytics, and no cloud storage.
 
