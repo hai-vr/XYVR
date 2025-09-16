@@ -10,24 +10,22 @@ on:
 
 env:
   outputAppFolder: "XYVR"
-  netProject: "ui-webview-windows"
-  netCsProj: "ui-webview-windows/ui-webview-windows.csproj"
+  netCsProjWindows: "ui-webview-windows/ui-webview-windows.csproj"
+  netCsProjLinux: "ui-photino-linux/ui-photino-linux.csproj"
   packageName: "dev.hai-vr.xyvr"
-  applicationName: "XYVR"
+  applicationNameWindows: "XYVR"
+  applicationNameLinux: "xyvr"
 
 permissions:
   contents: write
 
 jobs:
-  build-windows:
-    name: Build .NET
+  build_windows:
+    name: Build Windows Executable
     runs-on: windows-latest
     outputs:
       version: ${{ steps.version.outputs.prop }}
     steps:
-      #      - name: Enable Git long paths (Windows)
-      #        run: git config --global core.longpaths true
-
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -57,94 +55,80 @@ jobs:
       - name: Build
         shell: bash
         run: |
-          SEMVER_VERSION=${{ steps.version.outputs.prop }}
-          # Convert semver to assembly version format
-          # Extract the base version (everything before the first hyphen)
-          BASE_VERSION=$(echo "$SEMVER_VERSION" | cut -d'-' -f1)
-          
-          # If there's a pre-release part, extract it
-          if [[ "$SEMVER_VERSION" == *"-"* ]]; then
-            PRERELEASE=$(echo "$SEMVER_VERSION" | cut -d'-' -f2-)
-          
-            # Extract the numeric part from prerelease (e.g., "13" from "alpha.13")
-            PRERELEASE_NUM=$(echo "$PRERELEASE" | grep -o '[0-9]\+$' || echo "0")
-          
-            # Assign different ranges based on prerelease type
-            if [[ "$PRERELEASE" == alpha* ]]; then
-              # Alpha: use 1000-1999 range
-              REVISION=$((1000 + PRERELEASE_NUM))
-            elif [[ "$PRERELEASE" == beta* ]]; then
-              # Beta: use 2000-2999 range  
-              REVISION=$((2000 + PRERELEASE_NUM))
-            else
-              # Other prerelease types: use 9000+ range
-              REVISION=$((9000 + PRERELEASE_NUM))
-            fi
-          
-            export ASSEMBLY_VERSION="${BASE_VERSION}.${REVISION}"
-          else
-            # No pre-release, use .0 as revision (stable release)
-            export ASSEMBLY_VERSION="${BASE_VERSION}.0"
-          fi
-          
-          echo "Converting semver $SEMVER_VERSION to assembly version $ASSEMBLY_VERSION"
-          dotnet publish ${{env.netCsProj}} --runtime "${{ matrix.target }}" -c Release -o "App/${{env.outputAppFolder}}"
+          dotnet publish ${{env.netCsProjWindows}} \
+            --runtime win-x64 \
+            --self-contained true \
+            -c Release \
+            -o "App/${{env.outputAppFolder}}"
 
       - name: Create Executable Zip
         uses: thedoctor0/zip-release@09336613be18a8208dfa66bd57efafd9e2685657
         with:
           type: "zip"
           directory: "App/"
-          filename: "../${{ env.applicationName }}-${{ steps.version.outputs.prop }}-executable.zip"
+          filename: "../${{ env.applicationNameWindows }}-${{ steps.version.outputs.prop }}-windows-x64-executable.zip"
 
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
           name: windows-executable
-          path: "${{ env.applicationName }}-${{ steps.version.outputs.prop }}-executable.zip"
-  
-#  build-ubuntu:
-#    name: Build Unitypackage
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Checkout
-#        uses: actions/checkout@v4
-#
-#      - name: get version
-#        id: version
-#        uses: notiz-dev/github-action-json-property@7c8cf5cc36eb85d8d287a8086a39dac59628eb31
-#        with:
-#          path: "Packages/${{env.packageName}}/package.json"
-#          prop_path: "version"
-#
-#      - name: Create Unity Package Zip
-#        uses: thedoctor0/zip-release@09336613be18a8208dfa66bd57efafd9e2685657
-#        with:
-#          type: "zip"
-#          directory: "Packages/${{env.packageName}}/"
-#          filename: "../../${{ env.packageName }}-${{ steps.version.outputs.prop }}.zip" # make the zip file two directories up, since we start two directories in above
-#
-#      - run: find "Packages/${{env.packageName}}/" -name \*.meta >> metaList
-#
-#      - name: Create .unitypackage
-#        uses: pCYSl5EDgo/create-unitypackage@cfcd3cf0391a5ef1306342794866a9897c32af0b
-#        with:
-#          package-path: "${{ env.packageName }}-${{ steps.version.outputs.prop }}.unitypackage"
-#          include-files: metaList
-#
-#      - name: Upload Unity artifacts
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: unity-packages
-#          path: |
-#            ${{ env.packageName }}-${{ steps.version.outputs.prop }}.zip
-#            ${{ env.packageName }}-${{ steps.version.outputs.prop }}.unitypackage
-#            Packages/${{ env.packageName }}/package.json
+          path: "${{ env.applicationNameWindows }}-${{ steps.version.outputs.prop }}-windows-x64-executable.zip"
+
+  build_linux:
+    name: Build Linux Executable
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.prop }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: get version
+        id: version
+        uses: notiz-dev/github-action-json-property@7c8cf5cc36eb85d8d287a8086a39dac59628eb31
+        with:
+          path: "Packages/${{env.packageName}}/package.json"
+          prop_path: "version"
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install and build React app
+        run: |
+          cd ui-frontend/src
+          npm install
+          npm run build-and-copy
+
+      - name: Build
+        run: |
+          dotnet publish ${{env.netCsProjLinux}} \
+            --runtime linux-x64 \
+            --self-contained true \
+            -c Release \
+            -o "App/${{env.outputAppFolder}}"
+
+      - name: Create Executable Tarball
+        run: |
+          cd App
+          tar -czf ../${{ env.applicationNameLinux }}-${{ steps.version.outputs.prop }}-linux-x64-executable.tar.gz .
+
+      - name: Upload Linux artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-executable
+          path: "${{ env.applicationNameLinux }}-${{ steps.version.outputs.prop }}-linux-x64-executable.tar.gz"
 
   release:
     name: Release
     runs-on: ubuntu-latest
-    needs: [build-windows]
+    needs: [build_windows, build_linux]
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
@@ -152,6 +136,7 @@ jobs:
       - name: Make Release
         uses: softprops/action-gh-release@1e07f4398721186383de40550babbdf2b84acfc5
         with:
-          tag_name: ${{ needs.build-windows.outputs.version }}
+          tag_name: ${{ needs.build_windows.outputs.version }}
           files: |
-            windows-executable/${{ env.applicationName }}-${{ needs.build-windows.outputs.version }}-executable.zip
+            windows-executable/${{ env.applicationNameWindows }}-${{ needs.build_windows.outputs.version }}-windows-x64-executable.zip
+            linux-executable/${{ env.applicationNameLinux }}-${{ needs.build_linux.outputs.version }}-linux-x64-executable.tar.gz
