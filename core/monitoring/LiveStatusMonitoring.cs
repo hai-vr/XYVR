@@ -84,8 +84,6 @@ public class LiveStatusMonitoring
             }
             else
             {
-                Console.WriteLine($"A LiveUpdate on {existingUpdate.inAppIdentifier} has resulted in no change (triggered by {inputUpdate.trigger}, there will be no OnLiveUserUpdateMerged emitted.");
-
                 actualUpdate = existingUpdate;
                 updateWasModified = false;
             }
