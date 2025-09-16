@@ -195,13 +195,21 @@ public static class Scaffolding
     {
         var isHttp = url.ToLowerInvariant().StartsWith("https://") || url.ToLowerInvariant().StartsWith("http://");
         if (!isHttp) throw new Exception("URL must be HTTP or HTTPS. This must be caught by the caller, not here!");
-        
-        Process.Start(new ProcessStartInfo
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            // SECURITY: Don't allow any URL here. Otherwise, this can cause a RCE.
-            FileName = url,
-            UseShellExecute = true
-        });
+            Process.Start(new ProcessStartInfo
+            {
+                // SECURITY: Don't allow any URL here. Otherwise, this can cause a RCE.
+                FileName = url,
+                UseShellExecute = true
+            });
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            // SECURITY: URL is an argument to xdg-open. Do not modify the code to pass it to the shell or something, that would enable possible RCEs.
+            Process.Start("xdg-open", url);
+        }
     }
 
     public static string RandomUID__NotCryptographicallySecure()
