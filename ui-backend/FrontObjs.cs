@@ -239,6 +239,7 @@ internal class FrontLiveSession
     public int? sessionCapacity;
     public int? currentAttendance;
     public string? thumbnailUrl;
+    public bool? isVirtualSpacePrivate;
 
     public static FrontLiveSession FromCore(ImmutableLiveSession liveSession)
     {
@@ -256,6 +257,7 @@ internal class FrontLiveSession
             sessionCapacity = liveSession.sessionCapacity,
             currentAttendance = liveSession.currentAttendance,
             thumbnailUrl = liveSession.thumbnailUrl,
+            isVirtualSpacePrivate = liveSession.isVirtualSpacePrivate,
         };
     }
 }

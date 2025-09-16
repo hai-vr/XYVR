@@ -320,6 +320,7 @@ internal class VRChatLiveCommunicator
             inAppSessionIdentifier = location,
             inAppVirtualSpaceName = cachedWorld?.name,
             virtualSpaceDefaultCapacity = cachedWorld?.capacity,
+            isVirtualSpacePrivate = cachedWorld?.releaseStatus == "private",
             thumbnailUrl = cachedWorld?.thumbnailUrl,
         };
     }

@@ -109,6 +109,7 @@ public record ImmutableLiveSession
     public int? currentAttendance { get; init; }
     
     public string? thumbnailUrl { get; init; }
+    public bool? isVirtualSpacePrivate { get; init; }
 
     public virtual bool Equals(ImmutableLiveSession? other)
     {
@@ -124,7 +125,8 @@ public record ImmutableLiveSession
                participants.SequenceEqual(other.participants) && 
                virtualSpaceDefaultCapacity == other.virtualSpaceDefaultCapacity &&
                sessionCapacity == other.sessionCapacity &&
-               currentAttendance == other.currentAttendance;
+               currentAttendance == other.currentAttendance &&
+               isVirtualSpacePrivate == other.isVirtualSpacePrivate;
     }
 
     public override int GetHashCode()
@@ -142,6 +144,7 @@ public record ImmutableLiveSession
             hashCode = (hashCode * 397) ^ virtualSpaceDefaultCapacity.GetHashCode();
             hashCode = (hashCode * 397) ^ sessionCapacity.GetHashCode();
             hashCode = (hashCode * 397) ^ currentAttendance.GetHashCode();
+            hashCode = (hashCode * 397) ^ (isVirtualSpacePrivate != null ? isVirtualSpacePrivate.GetHashCode() : 0);
             return hashCode;
         }
     }
@@ -177,6 +180,8 @@ public record ImmutableNonIndexedLiveSession
     public int? currentAttendance { get; init; }
     
     public string? thumbnailUrl { get; init; }
+    
+    public bool? isVirtualSpacePrivate { get; init; }
 
     public static ImmutableLiveSession MakeIndexed(ImmutableNonIndexedLiveSession inputSession)
     {
@@ -194,6 +199,7 @@ public record ImmutableNonIndexedLiveSession
             sessionCapacity = inputSession.sessionCapacity,
             currentAttendance = inputSession.currentAttendance,
             thumbnailUrl = inputSession.thumbnailUrl,
+            isVirtualSpacePrivate = inputSession.isVirtualSpacePrivate
         };
     }
 }
