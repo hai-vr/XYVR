@@ -93,6 +93,7 @@ public class VRChatLiveMonitoring : ILiveMonitoring
                 var sessionsToUpdate = _monitoring.GetAllSessions(NamedApp.VRChat)
                     .Where(session => _sessionsOfInterest.Contains(session.inAppSessionIdentifier))
                     .Where(session => session.participants.Length > 0)
+                    .OrderByDescending(session => session.currentAttendance ?? session.participants.Length)
                     .ToList();
                 Console.WriteLine($"Requesting to refresh all sessions of our interest (total of {sessionsToUpdate.Count} sessions)");
                 await _liveComms.QueueUpdateSessionsIfApplicable(sessionsToUpdate);
