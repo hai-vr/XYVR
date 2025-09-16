@@ -244,7 +244,7 @@ internal class VRChatLiveCommunicator
                 }
 
                 ImmutableLiveSession session = null;
-                if (content.location != null)
+                if (content.location != null && content.location.StartsWith("wrld_"))
                 {
                     session = await OnLiveSessionReceived(MakeNonIndexedBasedOnWorld(content.location, cachedWorld));
 

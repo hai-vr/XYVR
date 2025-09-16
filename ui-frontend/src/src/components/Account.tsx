@@ -135,12 +135,12 @@ const Account = ({account, imposter, showAlias, showNotes, debugMode, showSessio
                         {/*    <span className="status-char status-online">⬤</span>*/}
                         {/*    <i>{_D2(worldName, debugMode, undefined, DemonstrationMode.EverythingButSessionNames)}</i>*/}
                         {/*</div>}*/}
-                        {/*{showSession && !isOffline && !worldName && account.mainSession*/}
-                        {/*    && account.mainSession.knowledge !== LiveSessionKnowledge.PrivateSession*/}
-                        {/*    && account.mainSession.knowledge !== LiveSessionKnowledge.PrivateWorld &&*/}
-                        {/*    <div className="account-app-name">*/}
-                        {/*        <CircleOff className="status-icon status-busy"/> {account.mainSession.knowledge}*/}
-                        {/*    </div>}*/}
+                        {showSession && !isOffline && !worldName && account.mainSession
+                            && account.mainSession.knowledge !== LiveSessionKnowledge.PrivateSession
+                            && account.mainSession.knowledge !== LiveSessionKnowledge.PrivateWorld &&
+                            <div className="account-app-name">
+                                <CircleOff className="status-icon status-busy"/> {account.mainSession.knowledge}
+                            </div>}
                     </div>
                 </div>
                 {!imposter && (<div className="account-badges">
