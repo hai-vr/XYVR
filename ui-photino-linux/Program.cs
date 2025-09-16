@@ -12,6 +12,8 @@ namespace XYVR.UI.Photino
     // Or edit the .csproj file and change the <OutputType> tag from "WinExe" to "Exe".
     class Program
     {
+        private const string LoadBearingSpace = " "; // This space is load-bearing, it makes the icon work in Windows 11 ¯\_(ツ)_/¯
+        
         private static JsonSerializerSettings _serializer;
         private static PhotinoWindow? _window;
         private static AppLifecycle _appLifecycle;
@@ -28,7 +30,7 @@ namespace XYVR.UI.Photino
                 _appLifecycle.WhenApplicationStarts(args);
             
                 // Window title declared here for visibility
-                var windowTitle = "XYVR";
+                var windowTitle = $"XYVR{LoadBearingSpace}";
             
                 PhotinoServer
                     .CreateStaticFileServer(args, out string baseUrl)
