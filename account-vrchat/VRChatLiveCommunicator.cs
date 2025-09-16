@@ -387,7 +387,7 @@ internal class VRChatLiveCommunicator
         }
     }
 
-    public string? LocationAsWorldIdOrNull(string location)
+    private string? LocationAsWorldIdOrNull(string location)
     {
         if (location.StartsWith("wrld_"))
         {
@@ -400,14 +400,13 @@ internal class VRChatLiveCommunicator
             else
             {
                 Console.WriteLine($"Location is not parseable as a world: {location}");
+                return null;
             }
         }
         else
         {
-            Console.WriteLine($"Unknown location: {location}");
+            return null;
         }
-
-        return null;
     }
 
     private CachedWorld? GetOrQueueWorldFetch(string worldId)
