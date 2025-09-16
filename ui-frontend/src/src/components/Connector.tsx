@@ -7,6 +7,10 @@ import {type FrontAccount, NamedApp} from "../types/CoreTypes.ts";
 import {ConnectorType, type FrontConnector, type FrontConnectorAccount} from "../types/ConnectorTypes.ts";
 import {type DebugFlags, DemonstrationMode, DISABLED_DEBUG_FLAGS} from "../types/DebugFlags.ts";
 import {DotNetApi} from "../DotNetApi.ts";
+import {
+    type ConnectionAttemptResult,
+    ConnectionAttemptResultType
+} from "../types/ConnectionAttemptTypes.ts";
 
 interface DeleteState {
     confirming: boolean;
@@ -50,14 +54,14 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated, 
         if (!isInTwoFactorMode) {
             const json = await dotNetApi.dataCollectionApiTryLogin(connector.guid, login, password, stayLoggedIn);
             setIsRequestInProgress(false);
-            const obj = JSON.parse(json);
-            if (obj.type === 'NeedsTwoFactorCode') {
+            const obj: ConnectionAttemptResult = JSON.parse(json);
+            if (obj.type === ConnectionAttemptResultType.NeedsTwoFactorCode) {
                 setIsInTwoFactorMode(true);
                 setIsTwoFactorEmail(obj.isTwoFactorEmail)
                 setLogin('');
                 setPassword('');
             }
-            else if (obj.type === 'Success') {
+            else if (obj.type === ConnectionAttemptResultType.Success) {
                 setIsInTwoFactorMode(false);
                 setLogin('');
                 setPassword('');
@@ -70,8 +74,8 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated, 
         else {
             const json = await dotNetApi.dataCollectionApiTryTwoFactor(connector.guid, isTwoFactorEmail, twoFactorCode, stayLoggedIn);
             setIsRequestInProgress(false);
-            const obj = JSON.parse(json);
-            if (obj.type === 'Success') {
+            const obj: ConnectionAttemptResult = JSON.parse(json);
+            if (obj.type === ConnectionAttemptResultType.Success) {
                 setIsInTwoFactorMode(false);
                 setLogin('');
                 setPassword('');
@@ -86,8 +90,8 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated, 
         setIsRequestInProgress(true);
         const json = await dotNetApi.dataCollectionApiTryLogout(connector.guid);
         setIsRequestInProgress(false);
-        const obj = JSON.parse(json);
-        if (obj.type === 'LoggedOut') {
+        const obj: ConnectionAttemptResult = JSON.parse(json);
+        if (obj.type === ConnectionAttemptResultType.LoggedOut) {
             connector.isLoggedIn = false;
             onConnectorUpdated();
         }

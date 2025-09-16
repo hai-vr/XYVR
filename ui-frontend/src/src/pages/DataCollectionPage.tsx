@@ -30,7 +30,7 @@ function DataCollectionPage({ isDark, setIsDark, debugMode }: DataCollectionPage
     useEffect(() => {
         const initializeApi = async () => {
             const json = await dotNetApi.dataCollectionApiGetConnectors();
-            const arr = JSON.parse(json);
+            const arr: FrontConnector[] = JSON.parse(json);
             setConnectors(arr);
             setInitialized(true);
         };
@@ -42,7 +42,7 @@ function DataCollectionPage({ isDark, setIsDark, debugMode }: DataCollectionPage
         await dotNetApi.dataCollectionApiCreateConnector(connectorType);
 
         const json = await dotNetApi.dataCollectionApiGetConnectors();
-        const arr = JSON.parse(json);
+        const arr: FrontConnector[] = JSON.parse(json);
         setConnectors(arr);
     }
 
@@ -86,13 +86,13 @@ function DataCollectionPage({ isDark, setIsDark, debugMode }: DataCollectionPage
         await dotNetApi.dataCollectionApiDeleteConnector(guid);
 
         const json = await dotNetApi.dataCollectionApiGetConnectors();
-        const arr = JSON.parse(json);
+        const arr: FrontConnector[] = JSON.parse(json);
         setConnectors(arr);
     }
 
     const refreshConnectors = async () => {
         const json = await dotNetApi.dataCollectionApiGetConnectors();
-        const arr = JSON.parse(json);
+        const arr: FrontConnector[] = JSON.parse(json);
         setConnectors(arr);
     }
 

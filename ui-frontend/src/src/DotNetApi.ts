@@ -39,11 +39,7 @@
 
     private async dispatch(endpoint: string, methodName: string, parameters: any[] = []): Promise<string> {
         if (this._isPhotino) {
-            return this.PhotinoSendMessage({
-                endpoint,
-                methodName,
-                parameters
-            });
+            return this.PhotinoSendMessage({endpoint, methodName, parameters});
         } else {
             const hostObject = (window.chrome.webview.hostObjects as any)[endpoint];
             return await hostObject[methodName](...parameters);
@@ -69,7 +65,7 @@
     }
 
     public static WhenPhotinoMessageReceived(photinoReceivedMsg: string) {
-        const receive = JSON.parse(photinoReceivedMsg) as PhotinoReceiveMessage;
+        const receive: PhotinoReceiveMessage = JSON.parse(photinoReceivedMsg);
         if (!receive.isPhotinoMessage) return;
 
         if (receive.isEvent) {

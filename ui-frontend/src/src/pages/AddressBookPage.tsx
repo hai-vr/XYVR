@@ -135,7 +135,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
         const initializeApi = async () => {
             // Load individuals when the component loads
             const allIndividuals = await dotNetApi.appApiGetAllExposedIndividualsOrderedByContact();
-            const individualsArray = JSON.parse(allIndividuals);
+            const individualsArray: FrontIndividual[] = JSON.parse(allIndividuals);
 
             const allLiveSessionData = await dotNetApi.liveApiGetAllExistingLiveSessionData();
             const liveSessionArray = JSON.parse(allLiveSessionData);
@@ -342,7 +342,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
         setMergeAccountGuidOrUnd(undefined);
 
         const allIndividuals = await dotNetApi.appApiGetAllExposedIndividualsOrderedByContact();
-        const individualsArray = JSON.parse(allIndividuals);
+        const individualsArray: FrontIndividual[] = JSON.parse(allIndividuals);
         setIndividuals(individualsArray);
     };
 
@@ -352,7 +352,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
         await dotNetApi.appApiDesolidarizeIndividuals(toDesolidarize);
 
         const allIndividuals = await dotNetApi.appApiGetAllExposedIndividualsOrderedByContact();
-        const individualsArray = JSON.parse(allIndividuals);
+        const individualsArray: FrontIndividual[] = JSON.parse(allIndividuals);
         setIndividuals(individualsArray);
     };
 
