@@ -1,5 +1,6 @@
 ﻿using Photino.NET;
 using System.Drawing;
+using System.Runtime.InteropServices;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using XYVR.UI.Backend;
@@ -46,9 +47,11 @@ namespace XYVR.UI.Photino
                     {
                         var window = (PhotinoWindow)sender;
                         Task.Run(async () => await HandleMessage(window, message));
-                    })
-                    .SetIconFile("favicon.ico")
-                    .Load($"{baseUrl}/index.html");
+                    });
+
+                _window.SetIconFile(RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "favicon.ico" : "icon.png");
+
+                _window.Load($"{baseUrl}/index.html");
                 
                 _appLifecycle.WhenWindowLoaded(SendEventToReact).Wait();
             
