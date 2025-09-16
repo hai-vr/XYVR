@@ -47,19 +47,17 @@
     }
 
     
-    private PhotinoSendMessage(payload: PhotinoSendMessagePayload): Promise<string> {
+    private PhotinoSendMessage(payload__sensitive: PhotinoSendMessagePayload): Promise<string> {
         const indexedPromise = this.makeIndexedPromise();
         (DotNetApi.G_dict)[indexedPromise.id] = indexedPromise;
 
-        console.log(`PhotinoSendMessage[${indexedPromise.id}] = ${payload}`);
-
-        const message: PhotinoSendMessage = {
+        const message__sensitive: PhotinoSendMessage = {
             id: indexedPromise.id,
-            payload: payload
+            payload: payload__sensitive
         };
 
         // noinspection JSDeprecatedSymbols
-        (window.external as any).sendMessage(JSON.stringify(message))
+        (window.external as any).sendMessage(JSON.stringify(message__sensitive))
 
         return indexedPromise.promise;
     }

@@ -43,12 +43,12 @@ namespace XYVR.UI.Photino
                     // Users can resize windows by default.
                     // Let's make this one fixed instead.
                     // .SetResizable(false)
-                    .RegisterWebMessageReceivedHandler((sender, message) =>
+                    .RegisterWebMessageReceivedHandler((sender, message__sensitive) =>
                     {
                         if (sender == null) throw new InvalidOperationException("Got null sender");
                         
                         var window = (PhotinoWindow)sender;
-                        Task.Run(async () => await HandleMessage(window, message));
+                        Task.Run(async () => await HandleMessage(window, message__sensitive));
                     });
 
                 _window.SetIconFile(RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "favicon.ico" : "icon.png");
@@ -85,48 +85,51 @@ namespace XYVR.UI.Photino
             await _window.SendWebMessageAsync(JsonConvert.SerializeObject(receiveMessage, _serializer));
         }
 
-        private static async Task HandleMessage(PhotinoWindow window, string message)
+        private static async Task HandleMessage(PhotinoWindow window, string message__sensitive)
         {
-            var sendMessage = JsonConvert.DeserializeObject<PhotinoSendMessage>(message, _serializer)!;
-            var endpoint = GetEndpointOrNull(sendMessage);
+            var sendMessage__sensitive = JsonConvert.DeserializeObject<PhotinoSendMessage>(message__sensitive, _serializer)!;
+            var endpoint = GetEndpointOrNull(sendMessage__sensitive.payload.endpoint);
+            
+            var promiseId = sendMessage__sensitive.id;
+            
             if (endpoint == null)
             {
-                await ReplyError(window, sendMessage.id, "Invalid endpoint");
+                await ReplyError(window, promiseId, "Invalid endpoint");
                 return;
             }
 
             try
             {
-                var methodInfo = endpoint.GetType().GetMethod(sendMessage.payload.methodName);
+                var methodInfo = endpoint.GetType().GetMethod(sendMessage__sensitive.payload.methodName);
                 if (methodInfo == null)
                 {
-                    await ReplyError(window, sendMessage.id, $"Method '{sendMessage.payload.methodName}' not found");
+                    await ReplyError(window, promiseId, $"Method '{sendMessage__sensitive.payload.methodName}' not found");
                     return;
                 }
 
-                var parameters = sendMessage.payload.parameters;
+                var parameters__sensitive = sendMessage__sensitive.payload.parameters;
                 var parameterTypes = methodInfo.GetParameters();
 
-                var convertedParameters = new object[parameters.Length];
-                for (var i = 0; i < parameters.Length; i++)
+                var convertedParameters__sensitive = new object[parameters__sensitive.Length];
+                for (var i = 0; i < parameters__sensitive.Length; i++)
                 {
                     if (i < parameterTypes.Length)
                     {
                         var expectedType = parameterTypes[i].ParameterType;
-                        if (parameters[i] is JToken jToken)
-                            convertedParameters[i] = jToken.ToObject(expectedType)!;
-                        else if (parameters[i].GetType() != expectedType && expectedType != typeof(object))
-                            convertedParameters[i] = Convert.ChangeType(parameters[i], expectedType);
+                        if (parameters__sensitive[i] is JToken jToken)
+                            convertedParameters__sensitive[i] = jToken.ToObject(expectedType)!;
+                        else if (parameters__sensitive[i].GetType() != expectedType && expectedType != typeof(object))
+                            convertedParameters__sensitive[i] = Convert.ChangeType(parameters__sensitive[i], expectedType);
                         else
-                            convertedParameters[i] = parameters[i];
+                            convertedParameters__sensitive[i] = parameters__sensitive[i];
                     }
                     else
                     {
-                        convertedParameters[i] = parameters[i];
+                        convertedParameters__sensitive[i] = parameters__sensitive[i];
                     }
                 }
 
-                var result = methodInfo.Invoke(endpoint, convertedParameters);
+                var result = methodInfo.Invoke(endpoint, convertedParameters__sensitive);
 
                 if (result is Task task)
                 {
@@ -136,21 +139,21 @@ namespace XYVR.UI.Photino
                     {
                         var property = task.GetType().GetProperty("Result");
                         var taskResult = property?.GetValue(task);
-                        await ReplySuccess(window, sendMessage.id, taskResult?.ToString() ?? null);
+                        await ReplySuccess(window, promiseId, taskResult?.ToString() ?? null);
                     }
                     else
                     {
-                        await ReplySuccess(window, sendMessage.id, null);
+                        await ReplySuccess(window, promiseId, null);
                     }
                 }
                 else
                 {
-                    await ReplySuccess(window, sendMessage.id, result?.ToString() ?? null);
+                    await ReplySuccess(window, promiseId, result?.ToString() ?? null);
                 }
             }
             catch (Exception ex)
             {
-                await ReplyError(window, sendMessage.id, ex.Message);
+                await ReplyError(window, promiseId, ex.Message);
             }
         }
 
@@ -169,13 +172,13 @@ namespace XYVR.UI.Photino
         }
 
 
-        private static async Task ReplyError(PhotinoWindow window, string sendMessageId, string invalidEndpoint)
+        private static async Task ReplyError(PhotinoWindow window, string promiseId, string invalidEndpoint)
         {
             var receiveMessage = new PhotinoReceiveMessage
             {
                 isPhotinoMessage = true,
                 isEvent = false,
-                id = sendMessageId,
+                id = promiseId,
                 payload = invalidEndpoint,
                 isError = true
             };
@@ -183,9 +186,9 @@ namespace XYVR.UI.Photino
             await window.SendWebMessageAsync(JsonConvert.SerializeObject(receiveMessage, _serializer));
         }
 
-        private static object? GetEndpointOrNull(PhotinoSendMessage sendMessage)
+        private static object? GetEndpointOrNull(string payloadEndpoint)
         {
-            return sendMessage.payload.endpoint switch
+            return payloadEndpoint switch
             {
                 "appApi" => _appLifecycle.AppBff,
                 "dataCollectionApi" => _appLifecycle.DataCollectionBff,
