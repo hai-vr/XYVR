@@ -1,8 +1,10 @@
 ﻿using System.IO;
 using System.Windows;
 using Microsoft.Web.WebView2.Core;
+using Newtonsoft.Json;
 using XYVR.Core;
 using XYVR.Scaffold;
+using XYVR.UI.Backend;
 
 namespace XYVR.UI.WebviewUI;
 
@@ -12,9 +14,12 @@ public partial class MainWindow : Window
     
     public App AppHandle { get; private set; }
 
+    private readonly JsonSerializerSettings _serializer;
+
     public MainWindow()
     {
         InitializeComponent();
+        _serializer = BFFUtils.NewSerializer();
 
         Title = XYVRValues.ApplicationTitle;
         
@@ -98,8 +103,13 @@ public partial class MainWindow : Window
         }
     }
 
-    private async Task SendScriptToReact(string script)
+    private async Task SendScriptToReact(EventToSendToReact eventToSendToReact)
     {
+        if (eventToSendToReact.eventType__vulnerableToInjections.Contains('\'')) throw new ArgumentException("Event type cannot contain single quotes.");
+        
+        var detailString = JsonConvert.SerializeObject(eventToSendToReact.obj, _serializer);
+        var script = $"window.dispatchEvent(new CustomEvent('{eventToSendToReact.eventType__vulnerableToInjections}', {{ detail: {detailString} }}));";
+        
         await Dispatcher.InvokeAsync(() =>
         {
             if (WebView?.CoreWebView2 != null)

@@ -17,11 +17,10 @@ public class AppLifecycle
     public CredentialsManagement CredentialsMgt { get; private set; }
     public LiveStatusMonitoring LiveStatusMonitoring { get; private set; }
 
-    private JsonSerializerSettings _serializer;
     private List<IAuthority> _authorities;
 
     private readonly Action<Action> _dispatchFn;
-    private Func<string, Task> _scriptRunnerFn;
+    private Func<EventToSendToReact, Task> _scriptRunnerFn;
 
     public AppLifecycle(Action<Action> dispatchFn)
     {
@@ -41,7 +40,7 @@ public class AppLifecycle
         Console.WriteLine($"Version is {VERSION.version}");
     }
 
-    public async Task WhenWindowLoaded(Func<string, Task> scriptRunnerFn)
+    public async Task WhenWindowLoaded(Func<EventToSendToReact, Task> scriptRunnerFn)
     {
         _scriptRunnerFn = scriptRunnerFn;
         
@@ -50,7 +49,6 @@ public class AppLifecycle
         PreferencesBff = new PreferencesBFF(this);
         LiveBff = new LiveBFF(this);
         
-        _serializer = BFFUtils.NewSerializer();
         _authorities = await IAuthorityScaffolder.FindAll();
         
         IndividualRepository = new IndividualRepository(await Scaffolding.OpenRepository());
@@ -90,9 +88,8 @@ public class AppLifecycle
     {
         if (eventType__vulnerableToInjections.Contains('\'')) throw new ArgumentException("Event type cannot contain single quotes.");
     
-        var eventJson = JsonConvert.SerializeObject(obj, _serializer);
-        var script = $"window.dispatchEvent(new CustomEvent('{eventType__vulnerableToInjections}', {{ detail: {eventJson} }}));";
-    
-        await _scriptRunnerFn(script);
+        await _scriptRunnerFn(new EventToSendToReact(eventType__vulnerableToInjections, obj));
     }
 }
+
+public record EventToSendToReact(string eventType__vulnerableToInjections, object obj);

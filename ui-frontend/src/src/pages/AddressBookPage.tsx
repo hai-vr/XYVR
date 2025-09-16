@@ -137,7 +137,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
             const allIndividuals = await dotNetApi.appApiGetAllExposedIndividualsOrderedByContact();
             const individualsArray = JSON.parse(allIndividuals);
 
-            const allLiveSessionData = await window.chrome.webview.hostObjects.liveApi.GetAllExistingLiveSessionData();
+            const allLiveSessionData = await dotNetApi.liveApiGetAllExistingLiveSessionData();
             const liveSessionArray = JSON.parse(allLiveSessionData);
 
             setIndividuals(individualsArray);

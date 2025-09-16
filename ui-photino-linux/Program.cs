@@ -1,5 +1,7 @@
 ﻿using Photino.NET;
 using System.Drawing;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using XYVR.UI.Backend;
 using Photino.NET.Server;
 
@@ -9,13 +11,18 @@ namespace HelloPhotinoApp
     // Or edit the .csproj file and change the <OutputType> tag from "WinExe" to "Exe".
     class Program
     {
+        private static JsonSerializerSettings _serializer;
         private static PhotinoWindow? _window;
+        private static AppLifecycle _appLifecycle;
 
         [STAThread]
         static void Main(string[] args)
         {
+            _serializer = BFFUtils.NewSerializer();
+            
             var appLifecycle = new AppLifecycle(DispatchFn);
-            appLifecycle.WhenApplicationStarts(args);
+            _appLifecycle = appLifecycle;
+            _appLifecycle.WhenApplicationStarts(args);
             
             // Window title declared here for visibility
             var windowTitle = "XYVR";
@@ -53,25 +60,144 @@ namespace HelloPhotinoApp
                 .RegisterWebMessageReceivedHandler((object sender, string message) =>
                 {
                     var window = (PhotinoWindow)sender;
+                    Task.Run(async () => await HandleMessage(window, message));
 
                     // The message argument is coming in from sendMessage.
                     // "window.external.sendMessage(message: string)"
-                    var response = $"Received message: \"{message}\"";
+                    // var response = $"Received message: \"{message}\"";
 
                     // Send a message back the to JavaScript event handler.
                     // "window.external.receiveMessage(callback: Function)"
-                    window.SendWebMessage(response);
+                    // window.SendWebMessage(response);
                 })
                 .SetIconFile("favicon.ico")
                 .Load($"{baseUrl}/index.html");
 
-            appLifecycle.WhenWindowLoaded(async script =>
-            {
-                await _window.SendWebMessageAsync(script);
-            }).Wait();
+            _appLifecycle.WhenWindowLoaded(SendEventToReact).Wait();
             
             _window.WaitForClose(); // Starts the application event loop
             // await appLifecycle.WhenApplicationCloses();
+        }
+
+        private static async Task SendEventToReact(EventToSendToReact eventToSendToReact)
+        {
+            if (eventToSendToReact.eventType__vulnerableToInjections.Contains('\'')) throw new ArgumentException("Event type cannot contain single quotes.");
+            
+            var receiveMessage = new PhotinoReceiveMessage
+            {
+                isPhotinoMessage = true,
+                isEvent = true,                
+                id = eventToSendToReact.eventType__vulnerableToInjections,
+                payload = JsonConvert.SerializeObject(eventToSendToReact.obj, _serializer), // Yes, this is doubly serialized. It's done this way because since all BFFs also return string, this makes things more consistent.
+                isError = false
+            };
+
+            await _window.SendWebMessageAsync(JsonConvert.SerializeObject(receiveMessage, _serializer));
+        }
+
+        private static async Task HandleMessage(PhotinoWindow window, string message)
+        {
+            var sendMessage = JsonConvert.DeserializeObject<PhotinoSendMessage>(message, _serializer)!;
+            var endpoint = GetEndpointOrNull(sendMessage);
+            if (endpoint == null) await ReplyError(window, sendMessage.id, "Invalid endpoint");
+
+            try
+            {
+                var methodInfo = endpoint.GetType().GetMethod(sendMessage.payload.methodName);
+                if (methodInfo == null)
+                {
+                    await ReplyError(window, sendMessage.id, $"Method '{sendMessage.payload.methodName}' not found");
+                    return;
+                }
+
+                var parameters = sendMessage.payload.parameters;
+                var parameterTypes = methodInfo.GetParameters();
+
+                var convertedParameters = new object[parameters.Length];
+                for (var i = 0; i < parameters.Length; i++)
+                {
+                    if (i < parameterTypes.Length)
+                    {
+                        var expectedType = parameterTypes[i].ParameterType;
+                        if (parameters[i] is JToken jToken)
+                            convertedParameters[i] = jToken.ToObject(expectedType);
+                        else if (parameters[i].GetType() != expectedType && expectedType != typeof(object))
+                            convertedParameters[i] = Convert.ChangeType(parameters[i], expectedType);
+                        else
+                            convertedParameters[i] = parameters[i];
+                    }
+                    else
+                    {
+                        convertedParameters[i] = parameters[i];
+                    }
+                }
+
+                var result = methodInfo.Invoke(endpoint, convertedParameters);
+
+                if (result is Task task)
+                {
+                    await task;
+
+                    if (task.GetType().IsGenericType)
+                    {
+                        var property = task.GetType().GetProperty("Result");
+                        var taskResult = property?.GetValue(task);
+                        await ReplySuccess(window, sendMessage.id, taskResult?.ToString() ?? null);
+                    }
+                    else
+                    {
+                        await ReplySuccess(window, sendMessage.id, null);
+                    }
+                }
+                else
+                {
+                    await ReplySuccess(window, sendMessage.id, result?.ToString() ?? null);
+                }
+            }
+            catch (Exception ex)
+            {
+                await ReplyError(window, sendMessage.id, ex.Message);
+            }
+        }
+
+        private static async Task ReplySuccess(PhotinoWindow window, string sendMessageId, string? result)
+        {
+            var receiveMessage = new PhotinoReceiveMessage
+            {
+                isPhotinoMessage = true,
+                id = sendMessageId,
+                payload = result,
+                isError = false
+            };
+
+            await window.SendWebMessageAsync(JsonConvert.SerializeObject(receiveMessage, _serializer));
+        }
+
+
+        private static async Task ReplyError(PhotinoWindow window, string sendMessageId, string invalidEndpoint)
+        {
+            var receiveMessage = new PhotinoReceiveMessage
+            {
+                isPhotinoMessage = true,
+                id = sendMessageId,
+                payload = invalidEndpoint,
+                isError = true
+            };
+            
+            await window.SendWebMessageAsync(JsonConvert.SerializeObject(receiveMessage, _serializer));
+        }
+
+        private static object? GetEndpointOrNull(PhotinoSendMessage? sendMessage)
+        {
+            switch (sendMessage.payload.endpoint)
+            {
+                case "appApi": return _appLifecycle.AppBff;
+                case "dataCollectionApi": return _appLifecycle.DataCollectionBff;
+                case "preferencesApi": return _appLifecycle.PreferencesBff;
+                case "liveApi": return _appLifecycle.LiveBff;
+            }
+
+            return null;
         }
 
         private static void DispatchFn(Action action)
@@ -79,4 +205,27 @@ namespace HelloPhotinoApp
             action();
         }
     }
+}
+
+internal class PhotinoSendMessage
+{
+    public string id;
+    public PhotinoSendMessagePayload payload;
+}
+
+internal class PhotinoSendMessagePayload
+{
+    public string endpoint;
+    public string methodName;
+    public object[] parameters;
+}
+
+internal class PhotinoReceiveMessage
+{
+    public bool isPhotinoMessage;
+    public bool isEvent;
+    
+    public string id;
+    public string? payload;
+    public bool isError;
 }

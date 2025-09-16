@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import './App.css'
 import AppRouter from './components/AppRouter.tsx'
+import {DotNetApi} from "./DotNetApi.ts";
 
 function App() {
 // @ts-ignore
@@ -14,6 +15,8 @@ function App() {
         };
 
         initializeApi();
+
+        DotNetApi.EnsureRegistered();
     }, []);
 
     return <AppRouter appVersion={appVersion} />
