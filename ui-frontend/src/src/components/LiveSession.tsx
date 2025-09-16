@@ -17,7 +17,13 @@ export class LiveSession extends Component<LiveSessionProps> {
     render() {
         const {liveSession, individuals, debugMode, mini} = this.props;
 
-        const capacityStr = `${liveSession.currentAttendance || '?'} / ${(liveSession.sessionCapacity || liveSession.virtualSpaceDefaultCapacity || '?')}`;
+        let specialCapacity = liveSession.sessionCapacity || liveSession.virtualSpaceDefaultCapacity || '?';
+        const vscap = liveSession.virtualSpaceDefaultCapacity || liveSession.sessionCapacity || 0;
+        const sesscap = liveSession.sessionCapacity || 0;
+        if (vscap < sesscap) {
+            specialCapacity = `${sesscap} (${vscap} + ${sesscap - vscap})`;
+        }
+        const capacityStr = `${liveSession.currentAttendance || '?'} / ${specialCapacity}`;
         return (<div key={liveSession.guid} className="live-session-card live-session-thumbnail-bg">
             <div style={{
                 position: 'relative',
@@ -111,7 +117,7 @@ export class LiveSession extends Component<LiveSessionProps> {
                                 </>
                             ))}
                         </div>
-                        {liveSession.currentAttendance || '?'}&nbsp;/&nbsp;{liveSession.sessionCapacity || liveSession.virtualSpaceDefaultCapacity || '?'}
+                        <span title={capacityStr}>{liveSession.currentAttendance || '?'}&nbsp;/&nbsp;{specialCapacity}</span>
                     </div>
                 </div>
             </div>
