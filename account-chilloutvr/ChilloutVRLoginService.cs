@@ -18,7 +18,7 @@ public class ChilloutVRLoginService : ILoginService
         {
             var auth__sensitive = result.Auth!;
 
-            var authCredentialsStorage__sensitive = new CvrAuthCredentialsStorage
+            var authCredentialsStorage__sensitive = new ChilloutVRAuthStorage
             {
                 username = auth__sensitive.data.username,
                 accessKey = auth__sensitive.data.accessKey,

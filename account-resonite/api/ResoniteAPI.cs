@@ -4,9 +4,8 @@ using System.Text;
 using Newtonsoft.Json;
 using XYVR.API.Audit;
 using XYVR.Core;
-using XYVR.Data.Collection;
 
-namespace XYVR.API.Resonite;
+namespace XYVR.AccountAuthority.Resonite;
 
 // Based on https://wiki.resonite.com/API
 internal class ResoniteAPI
@@ -241,7 +240,7 @@ internal class ResoniteAPI
 
     public string GetAllUserAndToken__Sensitive()
     {
-        return JsonConvert.SerializeObject(new ResAuthenticationStorage
+        return JsonConvert.SerializeObject(new ResoniteAuthStorage
         {
             userId = _myUserId,
             token = _token__sensitive
@@ -250,7 +249,7 @@ internal class ResoniteAPI
 
     public void ProvideUserAndToken(string userAndToken__sensitive)
     {
-        var resAuthenticationStorage__sensitive = JsonConvert.DeserializeObject<ResAuthenticationStorage>(userAndToken__sensitive);
+        var resAuthenticationStorage__sensitive = JsonConvert.DeserializeObject<ResoniteAuthStorage>(userAndToken__sensitive);
         _myUserId = resAuthenticationStorage__sensitive.userId;
         _token__sensitive = resAuthenticationStorage__sensitive.token;
     }
@@ -264,11 +263,4 @@ internal class ResoniteAPI
 
         await Task.Delay(millisecondsDelay);
     }
-}
-
-[Serializable]
-public record ResAuthenticationStorage
-{
-    public required string userId { get; init; }
-    public required string token { get; init; }
 }

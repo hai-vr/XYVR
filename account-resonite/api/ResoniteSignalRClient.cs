@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.SignalR.Client;
 using Newtonsoft.Json;
 using XYVR.API.Audit;
 
-namespace XYVR.API.Resonite;
+namespace XYVR.AccountAuthority.Resonite;
 
 internal class ResoniteSignalRClient
 {
@@ -17,7 +17,7 @@ internal class ResoniteSignalRClient
 
     public event Func<Task>? OnReconnected;
 
-    public async Task StartAsync(ResAuthenticationStorage authStorage__sensitive)
+    public async Task StartAsync(ResoniteAuthStorage authStorage__sensitive)
     {
         _connection = new HubConnectionBuilder()
             .WithUrl(AuditUrls.ResoniteHubUrl, options =>

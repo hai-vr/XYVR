@@ -1,5 +1,4 @@
-﻿using XYVR.API.VRChat;
-using XYVR.Core;
+﻿using XYVR.Core;
 using XYVR.Login;
 
 namespace XYVR.AccountAuthority.VRChat;

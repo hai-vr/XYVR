@@ -16,12 +16,6 @@ internal class ChilloutVRAPI
         _client.DefaultRequestHeaders.UserAgent.ParseAdd(XYVRValues.UserAgent);
     }
 
-    internal enum AuthMethod
-    {
-        AccessKey = 1,
-        Password = 2
-    }
-    
     public async Task<CvrLoginResponse> Login(string userinput_account__sensitive, string userinput_password__sensitive)
     {
         var request = new HttpRequestMessage(HttpMethod.Post, $"{AuditUrls.ChilloutVrApiUrlV1}/users/auth");
@@ -50,53 +44,4 @@ internal class ChilloutVRAPI
             Auth = JsonConvert.DeserializeObject<CvrAuth>(await response.Content.ReadAsStringAsync())!
         };
     }
-}
-
-internal record CvrAuthenticationRequest
-{
-    public required CvrAuthType AuthType;
-    public required string Username;
-    public required string Password;
-}
-
-internal class CvrLoginResponse
-{
-    public CvrLoginResponseStatus Status;
-    public CvrAuth? Auth;
-}
-
-internal class CvrAuth
-{
-    public required string message;
-    public required CvrAuthData data;
-}
-
-internal class CvrAuthData
-{
-    public string username;
-    public string accessKey;
-    public string userId;
-    public string currentAvatar;
-    public string currentHomeWorld;
-    public string videoUrlResolverExecutable;
-    public string videoUrlResolverHashes;
-    public string[] blockedUsers;
-    public string image;
-}
-
-internal class CvrAuthCredentialsStorage
-{
-    public string username;
-    public string accessKey;
-}
-
-internal enum CvrLoginResponseStatus
-{
-    Unresolved, OutsideProtocol, Failure, Success, RequiresTwofer
-}
-
-internal enum CvrAuthType
-{
-    AccessKey = 1,
-    Password = 2
 }

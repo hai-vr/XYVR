@@ -1,5 +1,4 @@
-﻿using XYVR.API.Resonite;
-
+﻿
 namespace XYVR.AccountAuthority.Resonite;
 
 internal class HashToSession

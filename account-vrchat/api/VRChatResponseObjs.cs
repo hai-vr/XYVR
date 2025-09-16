@@ -1,4 +1,4 @@
-﻿namespace XYVR.API.VRChat;
+﻿namespace XYVR.AccountAuthority.VRChat;
 
 #pragma warning disable CS8618
 #pragma warning disable 0649

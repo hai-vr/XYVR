@@ -1,6 +1,5 @@
 ﻿using System.Text.RegularExpressions;
 using Newtonsoft.Json;
-using XYVR.API.Resonite;
 using XYVR.Core;
 
 namespace XYVR.AccountAuthority.Resonite;
@@ -251,9 +250,9 @@ internal partial class ResoniteLiveCommunicator
         };
     }
 
-    private async Task<ResAuthenticationStorage?> GetToken__sensitive()
+    private async Task<ResoniteAuthStorage?> GetToken__sensitive()
     {
-        return JsonConvert.DeserializeObject<ResAuthenticationStorage>(await _credentialsStorage.RequireCookieOrToken());
+        return JsonConvert.DeserializeObject<ResoniteAuthStorage>(await _credentialsStorage.RequireCookieOrToken());
     }
 
     public async Task RequestFullUpdate()

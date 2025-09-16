@@ -1,6 +1,5 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using XYVR.API.VRChat;
 using XYVR.Core;
 
 namespace XYVR.AccountAuthority.VRChat;
@@ -254,7 +253,7 @@ internal class VRChatLiveCommunicator
                 
                 // FIXME: This is a task???
                 OnlineStatus? onlineStatus = type is "user-update" ? null : ParseStatus(type, content.location, content.user.platform, content.user.status);
-                OnLiveUpdateReceived(new ImmutableLiveUserUpdate
+                await OnLiveUpdateReceived(new ImmutableLiveUserUpdate
                 {
                     trigger = $"WS-{type}",
                     namedApp = NamedApp.VRChat,
@@ -464,7 +463,7 @@ internal class VRChatLiveCommunicator
 
     private async Task<string> GetToken__sensitive()
     {
-        return JsonConvert.DeserializeObject<VRChatAPI.VrcAuthenticationCookies>(await _credentialsStorage.RequireCookieOrToken())
+        return JsonConvert.DeserializeObject<VRChatAuthStorage>(await _credentialsStorage.RequireCookieOrToken())
             .auth.Value;
     }
     

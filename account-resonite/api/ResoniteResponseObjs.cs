@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace XYVR.API.Resonite;
+namespace XYVR.AccountAuthority.Resonite;
 
 #pragma warning disable CS8618
 #pragma warning disable 0649

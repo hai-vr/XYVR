@@ -1,7 +1,5 @@
 ﻿using Newtonsoft.Json;
-using XYVR.API.Resonite;
 using XYVR.Core;
-using XYVR.Data.Collection;
 
 namespace XYVR.AccountAuthority.Resonite;
 

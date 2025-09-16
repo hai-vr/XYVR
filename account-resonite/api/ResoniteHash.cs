@@ -1,7 +1,7 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
 
-namespace XYVR.API.Resonite;
+namespace XYVR.AccountAuthority.Resonite;
 
 public static class ResoniteHash
 {

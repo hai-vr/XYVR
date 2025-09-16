@@ -3,7 +3,7 @@ using System.Text;
 using XYVR.API.Audit;
 using XYVR.Core;
 
-namespace XYVR.API.VRChat;
+namespace XYVR.AccountAuthority.VRChat;
 
 internal class VRChatWebsocketClient : IDisposable
 {

@@ -1,9 +1,10 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace XYVR.API.VRChat;
+namespace XYVR.AccountAuthority.VRChat;
 
 #pragma warning disable CS8618
 #pragma warning disable 0649
+[Serializable]
 internal class VRChatInstance
 {
     // public bool? active;
@@ -51,6 +52,7 @@ internal class VRChatInstance
     // public bool? hardClose;
 }
 
+[Serializable]
 internal class ContentSettings
 {
     public bool? drones;
@@ -61,6 +63,7 @@ internal class ContentSettings
     public bool? props;
 }
 
+[Serializable]
 internal class Platforms
 {
     public int? android;
@@ -68,6 +71,7 @@ internal class Platforms
     public int? standalonewindows;
 }
 
+[Serializable]
 internal class World
 {
     public string? authorId;
@@ -106,6 +110,7 @@ internal class World
     public string[]? udonProducts;
 }
 
+[Serializable]
 internal class UnityPackage
 {
     public string? id;
@@ -126,6 +131,7 @@ internal class UnityPackage
     public string? variant;
 }
 
+[Serializable]
 internal class User
 {
     public string? ageVerificationStatus;

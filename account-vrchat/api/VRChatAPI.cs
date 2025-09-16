@@ -6,9 +6,8 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using XYVR.API.Audit;
 using XYVR.Core;
-using XYVR.Data.Collection;
 
-namespace XYVR.API.VRChat;
+namespace XYVR.AccountAuthority.VRChat;
 
 internal class VRChatAPI
 {
@@ -50,7 +49,7 @@ internal class VRChatAPI
     public void ProvideCookies(string userinput_cookies__sensitive)
     {
         _cookies = new CookieContainer();
-        var deserialized = JsonConvert.DeserializeObject<VrcAuthenticationCookies>(userinput_cookies__sensitive);
+        var deserialized = JsonConvert.DeserializeObject<VRChatAuthStorage>(userinput_cookies__sensitive);
         if (deserialized.auth != null) _cookies.Add(new Uri(AuditUrls.VrcCookieDomain), RebuildCookie(deserialized.auth, "auth"));
         if (deserialized.twoFactorAuth != null) _cookies.Add(new Uri(AuditUrls.VrcCookieDomain), RebuildCookie(deserialized.twoFactorAuth, "twoFactorAuth"));
         var handler = new HttpClientHandler
@@ -67,7 +66,7 @@ internal class VRChatAPI
         IsLoggedIn = deserialized.auth != null && deserialized.twoFactorAuth != null;
     }
 
-    private static Cookie RebuildCookie(VrcCookie cookie, string name)
+    private static Cookie RebuildCookie(VRChatAuthCookie cookie, string name)
     {
         return new Cookie
         {
@@ -80,40 +79,26 @@ internal class VRChatAPI
         };
     }
 
-    private VrcAuthenticationCookies CompileCookies()
+    private VRChatAuthStorage CompileCookies()
     {
         var subCookies = _cookies.GetCookies(new Uri(AuditUrls.VrcCookieDomain)).ToArray();
         var authNullable = subCookies.Where(cookie => cookie.Name == "auth").Select(Cookify).FirstOrDefault();
         var twoFactorAuthNullable = subCookies.Where(cookie => cookie.Name == "twoFactorAuth").Select(Cookify).FirstOrDefault();
         
-        return new VrcAuthenticationCookies
+        return new VRChatAuthStorage
         {
             auth = authNullable,
             twoFactorAuth = twoFactorAuthNullable
         };
     }
 
-    private VrcCookie Cookify(Cookie cookie)
+    private VRChatAuthCookie Cookify(Cookie cookie)
     {
-        return new VrcCookie
+        return new VRChatAuthCookie
         {
             Value = cookie.Value,
             Expires = cookie.Expires,
         };
-    }
-
-    [Serializable]
-    internal class VrcAuthenticationCookies
-    {
-        public VrcCookie auth;
-        public VrcCookie twoFactorAuth;
-    }
-
-    [Serializable]
-    internal class VrcCookie
-    {
-        public string Value;
-        public DateTime Expires;
     }
     
     public async Task<LoginResponse> Login(string userinput_account__sensitive, string userinput_password__sensitive)
@@ -509,32 +494,4 @@ internal enum ListFriendsRequestType
 {
     OnlyOnline,
     OnlyOffline,
-}
-
-internal class LoginResponse
-{
-    public LoginResponseStatus Status;
-    public TwoferMethod TwoferMethod;
-}
-
-internal enum LoginResponseStatus
-{
-    Unresolved, OutsideProtocol, Failure, Success, RequiresTwofer
-}
-
-internal enum LogoutResponseStatus
-{
-    Unresolved, OutsideProtocol, Success, Unauthorized, NotLoggedIn
-}
-
-internal enum TwoferMethod
-{
-    Other, Email
-}
-
-[Serializable]
-internal class TwoferRequestPayload
-{
-    // ReSharper disable once InconsistentNaming
-    public string code;
 }
