@@ -23,7 +23,7 @@ internal class ResoniteAPI
     private readonly Random _random = new();
 
     private string _myUserId;
-    private string _token__sensitive;
+    private string? _token__sensitive;
 
     public ResoniteAPI(string secretMachineId_isGuid, string uid_isSha256Hash, IResponseCollector responseCollector, bool useRateLimiting = true)
     {
@@ -267,8 +267,8 @@ internal class ResoniteAPI
 }
 
 [Serializable]
-public class ResAuthenticationStorage
+public record ResAuthenticationStorage
 {
-    public string userId;
-    public string token;
+    public required string userId { get; init; }
+    public required string token { get; init; }
 }

@@ -4,7 +4,7 @@ namespace XYVR.Core;
 
 public class XYVRSequenceHash
 {
-    public static int HashCodeOf<T>(ImmutableArray<T> array)
+    public static int HashCodeOf<T>(ImmutableArray<T> array) where T : notnull
     {
         return array.Aggregate(0, (h, a) => h ^ a.GetHashCode());
     }

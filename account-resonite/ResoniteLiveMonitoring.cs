@@ -16,7 +16,7 @@ public class ResoniteLiveMonitoring : ILiveMonitoring, IDisposable
     private string? _callerInAppIdentifier;
     
     private ResoniteLiveCommunicator? _liveComms;
-    private CancellationTokenSource _cancellationTokenSource;
+    private CancellationTokenSource? _cancellationTokenSource;
     private readonly HashToSession _hashToSession;
 
     public ResoniteLiveMonitoring(ICredentialsStorage credentialsStorage, LiveStatusMonitoring monitoring, string uid__sensitive)
@@ -181,13 +181,14 @@ public class ResoniteLiveMonitoring : ILiveMonitoring, IDisposable
             
             Console.WriteLine("Will try to cancel token");
             // await _cancellationTokenSource.CancelAsync();
-            _cancellationTokenSource.CancelAsync(); // FIXME: we have a problem when we wait for this to finish, it never completes. Why?
+            _cancellationTokenSource!.CancelAsync(); // FIXME: we have a problem when we wait for this to finish, it never completes. Why?
             Console.WriteLine("Token cancelled. Will try to disconnect");
             
-            await _liveComms.Disconnect();
+            await _liveComms!.Disconnect();
             Console.WriteLine("Disconnected.");
             
             _liveComms = null;
+            _cancellationTokenSource = null;
             _isConnected = false;
         }
         finally

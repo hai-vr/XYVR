@@ -4,16 +4,16 @@ namespace XYVR.Core;
 
 public record ImmutableLiveUserUpdate
 {
-    public NamedApp namedApp { get; init; }
-    public string trigger { get; init; }
-    public string qualifiedAppName { get; init; }
-    public string inAppIdentifier { get; init; }
+    public required NamedApp namedApp { get; init; }
+    public required string trigger { get; init; }
+    public required string qualifiedAppName { get; init; }
+    public required string inAppIdentifier { get; init; }
 
     public OnlineStatus? onlineStatus { get; init; }
     public ImmutableLiveUserSessionState? mainSession { get; init; }
     public string? customStatus { get; init; }
 
-    public string callerInAppIdentifier { get; init; }
+    public required string callerInAppIdentifier { get; init; }
     
     public object? sessionSpecifics { get; init; }
     public ImmutableArray<string> multiSessionGuids { get; init; } = ImmutableArray<string>.Empty;
@@ -84,18 +84,18 @@ public enum OnlineStatus
 
 public record ImmutableLiveUserSessionState
 {
-    public LiveUserSessionKnowledge knowledge { get; init; }
+    public required LiveUserSessionKnowledge knowledge { get; init; }
     public string? sessionGuid { get; init; } // Non-null if knowledge is set to Known
 }
 
 public record ImmutableLiveSession
 {
-    public string guid { get; init; }
+    public required string guid { get; init; }
 
-    public NamedApp namedApp { get; init; }
-    public string qualifiedAppName { get; init; }
+    public required NamedApp namedApp { get; init; }
+    public required string qualifiedAppName { get; init; }
     
-    public string inAppSessionIdentifier { get; init; }
+    public required string inAppSessionIdentifier { get; init; }
     
     public string? inAppSessionName { get; init; }
     public string? inAppVirtualSpaceName { get; init; }
@@ -215,7 +215,7 @@ public record ImmutableParticipant
 
 public record ImmutableKnownParticipantAccount
 {
-    public string inAppIdentifier { get; init; }
+    public required string inAppIdentifier { get; init; }
 }
 
 public record ImmutableUnknownParticipantAccount
@@ -241,6 +241,6 @@ public enum LiveUserSessionKnowledge
 
 public record ImmutableLiveSessionHost
 {
-    public string inAppHostIdentifier { get; init; }
+    public required string inAppHostIdentifier { get; init; }
     public string? inAppHostDisplayName { get; init; }
 }

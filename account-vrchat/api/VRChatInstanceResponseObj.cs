@@ -2,7 +2,9 @@
 
 namespace XYVR.API.VRChat;
 
-public class VRChatInstance
+#pragma warning disable CS8618
+#pragma warning disable 0649
+internal class VRChatInstance
 {
     // public bool? active;
     // public bool? ageGate;
@@ -49,7 +51,7 @@ public class VRChatInstance
     // public bool? hardClose;
 }
 
-public class ContentSettings
+internal class ContentSettings
 {
     public bool? drones;
     public bool? emoji;
@@ -59,14 +61,14 @@ public class ContentSettings
     public bool? props;
 }
 
-public class Platforms
+internal class Platforms
 {
     public int? android;
     public int? ios;
     public int? standalonewindows;
 }
 
-public class World
+internal class World
 {
     public string? authorId;
     public string? authorName;
@@ -104,7 +106,7 @@ public class World
     public string[]? udonProducts;
 }
 
-public class UnityPackage
+internal class UnityPackage
 {
     public string? id;
     public string? assetUrl;
@@ -124,7 +126,7 @@ public class UnityPackage
     public string? variant;
 }
 
-public class User
+internal class User
 {
     public string? ageVerificationStatus;
     public bool? ageVerified;
@@ -154,3 +156,5 @@ public class User
     public string[]? tags;
     public string? userIcon;
 }
+#pragma warning restore 0649
+#pragma warning restore CS8618

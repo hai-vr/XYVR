@@ -15,7 +15,7 @@ public class CredentialsManagement
     {
         if (serializedCredentials.hasAnything)
         {
-            foreach (var keyValuePair in serializedCredentials.guidToPayload)
+            foreach (var keyValuePair in serializedCredentials.guidToPayload!) // Not null, implied by hasAnything
             {
                 _connectorGuidToCredentialsStorageState[keyValuePair.Key] = new InMemoryCredentialsStorage(keyValuePair.Value);
                 _isPersistent[keyValuePair.Key] = true;

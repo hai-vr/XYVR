@@ -16,7 +16,7 @@ internal class ChilloutVRAPI
         _client.DefaultRequestHeaders.UserAgent.ParseAdd(XYVRValues.UserAgent);
     }
 
-    public enum AuthMethod
+    internal enum AuthMethod
     {
         AccessKey = 1,
         Password = 2

@@ -1,6 +1,9 @@
 ﻿namespace XYVR.API.Resonite;
 
-public class UserStatusUpdate
+#pragma warning disable CS8618
+#pragma warning disable 0649
+[Serializable]
+internal class UserStatusUpdate
 {
     public string userId;
     public string userSessionId;
@@ -19,7 +22,8 @@ public class UserStatusUpdate
     public int currentSessionIndex;
 }
 
-public class Session
+[Serializable]
+internal class Session
 {
     public string sessionHash;
     public string accessLevel;
@@ -27,3 +31,5 @@ public class Session
     public bool isHost;
     public string? broadcastKey;
 }
+#pragma warning restore 0649
+#pragma warning restore CS8618

@@ -15,8 +15,8 @@ internal class ResoniteCommunicator
     private readonly string _uid;
     
     private ResoniteAPI? _api;
-    private string _callerUserId;
-    private string _callerDisplayName;
+    private string _callerUserId = null!;
+    private string _callerDisplayName = null!;
 
     public ResoniteCommunicator(IResponseCollector responseCollector, bool stayLoggedIn, string uid__sensitive, ICredentialsStorage credentialsStorage)
     {

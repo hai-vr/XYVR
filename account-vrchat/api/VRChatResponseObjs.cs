@@ -1,6 +1,9 @@
 ﻿namespace XYVR.API.VRChat;
 
-public class VRChatWebsocketContentContainingUser
+#pragma warning disable CS8618
+#pragma warning disable 0649
+[Serializable]
+internal class VRChatWebsocketContentContainingUser
 {
     public string userId;
     public VRChatUser user;
@@ -11,7 +14,8 @@ public class VRChatWebsocketContentContainingUser
     public string worldId;
 }
 
-public class VRChatFriend
+[Serializable]
+internal class VRChatFriend
 {
     public string bio;
     public string[] bioLinks;
@@ -39,14 +43,14 @@ public class VRChatFriend
 }
 
 // Incomplete. This is just what we need from that API.
-public struct VRChatAuthUser
+internal class VRChatAuthUser
 {
     public string id;
     public string displayName;
     public string[] friends;
 }
 
-public struct VRChatUser
+internal class VRChatUser
 {
     public string ageVerificationStatus;
     public bool ageVerified;
@@ -87,7 +91,7 @@ public struct VRChatUser
     public string worldId;
 }
 
-public struct VRChatBadge
+internal class VRChatBadge
 {
     public string assignedAt;
     public string badgeDescription;
@@ -99,12 +103,13 @@ public struct VRChatBadge
     public string updatedAt;
 }
 
-public struct VRChatNote
+internal class VRChatNote
 {
     public string note;
 }
 
-public class VRChatNoteFull
+[Serializable]
+internal class VRChatNoteFull
 {
     public DateTime createdAt;
     public string id;
@@ -114,7 +119,8 @@ public class VRChatNoteFull
     public string userId;
 }
 
-public class VRChatNoteFullTargetUser
+[Serializable]
+internal class VRChatNoteFullTargetUser
 {
     public string[] currentAvatarTags;
     public string currentAvatarThumbnailImageUrl;
@@ -124,7 +130,8 @@ public class VRChatNoteFullTargetUser
     public string userIcon;
 }
 
-public class VRChatWorld
+[Serializable]
+internal class VRChatWorld
 {
     public string authorId;
     public string authorName;
@@ -161,7 +168,8 @@ public class VRChatWorld
     public string[] udonProducts;
 }
 
-public class VRChatWorldContentSettings
+[Serializable]
+internal class VRChatWorldContentSettings
 {
     public bool drones;
     public bool emoji;
@@ -171,7 +179,8 @@ public class VRChatWorldContentSettings
     public bool props;
 }
 
-public class VRChatUnityPackage
+[Serializable]
+internal class VRChatUnityPackage
 {
     public string id;
     public string assetUrl;
@@ -190,3 +199,5 @@ public class VRChatUnityPackage
     public string scanStatus;
     public string variant;
 }
+#pragma warning restore 0649
+#pragma warning restore CS8618

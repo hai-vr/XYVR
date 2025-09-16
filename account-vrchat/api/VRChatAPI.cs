@@ -103,19 +103,18 @@ internal class VRChatAPI
     }
 
     [Serializable]
-    public class VrcAuthenticationCookies
+    internal class VrcAuthenticationCookies
     {
         public VrcCookie auth;
         public VrcCookie twoFactorAuth;
     }
 
     [Serializable]
-    public class VrcCookie
+    internal class VrcCookie
     {
         public string Value;
         public DateTime Expires;
     }
-    
     
     public async Task<LoginResponse> Login(string userinput_account__sensitive, string userinput_password__sensitive)
     {
@@ -506,35 +505,35 @@ internal class VRChatAPI
     }
 }
 
-public enum ListFriendsRequestType
+internal enum ListFriendsRequestType
 {
     OnlyOnline,
     OnlyOffline,
 }
 
-public struct LoginResponse
+internal class LoginResponse
 {
     public LoginResponseStatus Status;
     public TwoferMethod TwoferMethod;
 }
 
-public enum LoginResponseStatus
+internal enum LoginResponseStatus
 {
     Unresolved, OutsideProtocol, Failure, Success, RequiresTwofer
 }
 
-public enum LogoutResponseStatus
+internal enum LogoutResponseStatus
 {
     Unresolved, OutsideProtocol, Success, Unauthorized, NotLoggedIn
 }
 
-public enum TwoferMethod
+internal enum TwoferMethod
 {
     Other, Email
 }
 
 [Serializable]
-public class TwoferRequestPayload
+internal class TwoferRequestPayload
 {
     // ReSharper disable once InconsistentNaming
     public string code;

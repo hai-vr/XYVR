@@ -1,34 +1,33 @@
-﻿namespace XYVR.Core
+﻿namespace XYVR.Core;
+
+public class ResponseCollectionTrail
 {
-    public class ResponseCollectionTrail
-    {
-        public DateTime timestamp;
-        public string trailGuid;
-        public string requestGuid;
+    public required DateTime timestamp;
+    public required string trailGuid;
+    public required string requestGuid;
 
-        public DataCollectionReason reason;
-        public string apiSource;
-        public string route;
+    public required DataCollectionReason reason;
+    public required string apiSource;
+    public required string route;
 
-        public DataCollectionResponseStatus status;
-        public object? responseObject;
-        public object? metaObject;
-    }
+    public required DataCollectionResponseStatus status;
+    public object? responseObject;
+    public object? metaObject;
+}
 
-    public enum DataCollectionReason
-    {
-        ManualRequest,
-        CollectCallerAccount,
-        FindUndiscoveredAccounts,
-        CollectUndiscoveredAccount,
-        CollectExistingAccount,
-        CollectSessionLocationInformation
-    }
+public enum DataCollectionReason
+{
+    ManualRequest,
+    CollectCallerAccount,
+    FindUndiscoveredAccounts,
+    CollectUndiscoveredAccount,
+    CollectExistingAccount,
+    CollectSessionLocationInformation
+}
 
-    public enum DataCollectionResponseStatus
-    {
-        Success,
-        NotFound,
-        Failure
-    }
+public enum DataCollectionResponseStatus
+{
+    Success,
+    NotFound,
+    Failure
 }

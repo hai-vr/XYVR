@@ -17,6 +17,11 @@ public class VERSION
             version = "ExecutingFromSource";
             miniVersion = "v0.0.0";
         }
+        else if (v == null) // Not sure how this can be null
+        {
+            version = "Unknown-NullVersion";
+            miniVersion = "v0.0.0";
+        }
         else
         {
             version = string.Format(CultureInfo.InvariantCulture, "v{0}.{1}.{2}.{3}", v.Major, v.Minor, v.Build, v.Revision);

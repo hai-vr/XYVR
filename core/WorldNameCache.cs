@@ -48,19 +48,20 @@ public class WorldNameCache
     }
 }
 
+[Serializable]
 public class CachedWorld
 {
     public bool isObsolete;
     
-    public DateTime cachedAt;
+    public required DateTime cachedAt;
     [NonSerialized] public bool needsRefresh;
     
-    public string worldId;
-    public string name;
-    public string author;
-    public string authorName;
-    public string thumbnailUrl;
-    public string releaseStatus;
-    public string description;
-    public int capacity;
+    public required string worldId;
+    public required string name;
+    public required string author;
+    public required string authorName;
+    public required string thumbnailUrl;
+    public required string releaseStatus;
+    public required string description;
+    public required int capacity;
 }

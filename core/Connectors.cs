@@ -1,24 +1,26 @@
 ﻿namespace XYVR.Core;
 
+[Serializable]
 public class Connector
 {
-    public string guid;
+    public required string guid;
     
-    public string displayName;
-    public ConnectorType type;
-    public RefreshMode refreshMode;
-    public LiveMode liveMode;
+    public required string displayName;
+    public required ConnectorType type;
+    public required RefreshMode refreshMode;
+    public required LiveMode liveMode;
 
     public ConnectorAccount? account;
 }
 
+[Serializable]
 public class ConnectorAccount
 {
-    public NamedApp namedApp;
-    public string qualifiedAppName;
+    public required NamedApp namedApp;
+    public required string qualifiedAppName;
 
-    public string inAppIdentifier;
-    public string inAppDisplayName;
+    public required string inAppIdentifier;
+    public required string inAppDisplayName;
 }
 
 public enum ConnectorType
@@ -41,23 +43,4 @@ public enum LiveMode
     NoLiveFunction,
     OnlyInGameStatus,
     FullStatus,
-}
-
-public class ConnectorCredentials
-{
-    public string associatedGuid;
-    
-    public string? login;
-    public string? password;
-    public string? twoFactorCode;
-
-    public ConnectorToken? token;
-}
-
-public class ConnectorToken
-{
-    public DateTime tokenCreatedAt;
-    public string token;
-    
-    public DateTime? tokenExpiresAfter;
 }

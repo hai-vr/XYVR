@@ -2,7 +2,7 @@
 
 namespace XYVR.AccountAuthority.Resonite;
 
-public class HashToSession
+internal class HashToSession
 {
     private readonly HashSet<string> _sessionIds = new();
     private readonly Dictionary<string, SessionBrief> _sessionIdToSessionBrief = new();

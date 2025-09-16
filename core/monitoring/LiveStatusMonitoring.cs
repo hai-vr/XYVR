@@ -189,7 +189,7 @@ public class LiveStatusMonitoring
     {
         ImmutableLiveSession actualSession;
         bool outChanged;
-        ImmutableLiveSession participantRemoval = null;
+        ImmutableLiveSession? participantRemoval = null;
         
         if (_namedAppToInAppIdToSession[inputSession.namedApp].TryGetValue(inputSession.inAppSessionIdentifier, out var existingSession))
         {

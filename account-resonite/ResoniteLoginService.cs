@@ -14,6 +14,11 @@ public class ResoniteLoginService : ILoginService
 
     public async Task<ConnectionAttemptResult> Connect(ICredentialsStorage credentialsStorage, string guid, ConnectionAttempt connectionAttempt)
     {
+        if (connectionAttempt.login__sensitive == null || connectionAttempt.password__sensitive == null)
+        {
+            throw new InvalidOperationException("Login and password are mandatory");
+        }
+        
         var communicator = new ResoniteCommunicator(
             new DoNotStoreAnythingStorage(),
             connectionAttempt.stayLoggedIn,

@@ -149,6 +149,7 @@ public class LiveBFF : ILiveBFF
     public void OnClosed()
     {
         // FIXME: We start a task because we're having an issue cancelling the task. So: stop monitoring without awaiting, wait a second, then close.
+        // FIXME: This could probably be fixed using AppLifecycle.Dispatch or something. Something to do with the main thread.
         Task.Run(async () =>
         {
             StopMonitoring();

@@ -34,10 +34,11 @@ public class PreferencesBFF : IPreferencesBFF
         return ToJSON(_lastPrefs);
     }
 
-    public async Task SetPreferences(string preferences)
+    public Task SetPreferences(string preferences)
     {
         Console.WriteLine("Set preferences was called.");
         _newPrefs = JsonConvert.DeserializeObject<ReactAppPreferences>(preferences)!;
+        return Task.CompletedTask;
     }
 
     public void OnClosed()

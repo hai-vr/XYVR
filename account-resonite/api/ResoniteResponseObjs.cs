@@ -2,12 +2,16 @@
 
 namespace XYVR.API.Resonite;
 
-public struct LoginResponseJsonObject
+#pragma warning disable CS8618
+#pragma warning disable 0649
+[Serializable]
+internal class LoginResponseJsonObject
 {
     public LoginResponseEntityJsonObject entity;
 }
 
-public struct LoginResponseEntityJsonObject
+[Serializable]
+internal class LoginResponseEntityJsonObject
 {
     public string userId;
     public string token;
@@ -30,7 +34,8 @@ public struct LoginResponseEntityJsonObject
     public string? eTag;
 }
 
-public struct ContactResponseElementJsonObject
+[Serializable]
+internal class ContactResponseElementJsonObject
 {
     public string id;
     public string contactUsername;
@@ -43,13 +48,15 @@ public struct ContactResponseElementJsonObject
     public string ownerId;
 }
 
-public struct ContactResponseElementProfileJsonObject
+[Serializable]
+internal class ContactResponseElementProfileJsonObject
 {
     public string iconUrl;
     public string[] displayBadges;
 }
 
-public struct UserResponseJsonObject
+[Serializable]
+internal class UserResponseJsonObject
 {
     public string id;
     public string username;
@@ -68,13 +75,15 @@ public struct UserResponseJsonObject
     public MigratedDataJsonObject migratedData;
 }
 
-public struct UserProfileJsonObject
+[Serializable]
+internal class UserProfileJsonObject
 {
     public string iconUrl;
     public string[] displayBadges;
 }
 
-public struct SupporterMetadataJsonObject
+[Serializable]
+internal class SupporterMetadataJsonObject
 {
     [JsonProperty("$type")]
     public string type;
@@ -89,7 +98,8 @@ public struct SupporterMetadataJsonObject
     public DateTime lastSupportTimestamp;
 }
 
-public struct EntitlementJsonObject
+[Serializable]
+internal class EntitlementJsonObject
 {
     [JsonProperty("$type")]
     public string type;
@@ -100,7 +110,8 @@ public struct EntitlementJsonObject
     public string[] entitlementOrigins;
 }
 
-public struct MigratedDataJsonObject
+[Serializable]
+internal class MigratedDataJsonObject
 {
     public string username;
     public string userId;
@@ -110,14 +121,15 @@ public struct MigratedDataJsonObject
     public DateTime registrationDate;
 }
 
-public struct QuotaByteSourcesJsonObject
+[Serializable]
+internal class QuotaByteSourcesJsonObject
 {
     [JsonProperty("base")]
     public long baseQuota;
     public long patreon;
 }
 
-public class SessionUpdateJsonObject
+internal class SessionUpdateJsonObject
 {
     public string name;
     public string description;
@@ -157,14 +169,16 @@ public class SessionUpdateJsonObject
     // public bool isValid;
 }
 
-public class CorrespondingWorldIdJsonObject
+internal class CorrespondingWorldIdJsonObject
 {
     public string recordId;
     public string ownerId;
 }
 
-public class DataModelAssemblyJsonObject
+internal class DataModelAssemblyJsonObject
 {
     public string name;
     public string compatibilityHash;
 }
+#pragma warning restore 0649
+#pragma warning restore CS8618

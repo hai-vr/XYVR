@@ -1,19 +1,21 @@
-﻿using XYVR.Core;
+﻿using System.Collections.Immutable;
+using XYVR.Core;
 
 namespace XYVR.UI.Backend;
 
-internal class FrontIndividual
+[Serializable]
+internal record FrontIndividual
 {
-    public string guid;
-    public List<FrontAccount> accounts = new();
-    public string displayName;
-    public string? note;
-    public bool isAnyContact;
-    public bool isExposed;
-    public string? customName;
+    public required string guid { get; init; }
+    public ImmutableArray<FrontAccount> accounts { get; init; } = ImmutableArray<FrontAccount>.Empty;
+    public required string displayName { get; init; }
+    public string? note { get; init; }
+    public bool isAnyContact { get; init; }
+    public bool isExposed { get; init; }
+    public string? customName { get; init; }
 
-    public OnlineStatus? onlineStatus;
-    public string? customStatus;
+    public OnlineStatus? onlineStatus { get; init; }
+    public string? customStatus { get; init; }
     
     public static string? ToFrontNote(ImmutableNote note)
     {
@@ -35,7 +37,7 @@ internal class FrontIndividual
         return new FrontIndividual
         {
             guid = individual.guid,
-            accounts = accounts,
+            accounts = [..accounts],
             displayName = individual.displayName,
             note = ToFrontNote(individual.note),
             isAnyContact = individual.isAnyContact,
@@ -47,26 +49,27 @@ internal class FrontIndividual
     }
 }
 
-internal class FrontAccount
+[Serializable]
+internal record FrontAccount
 {
-    public string guid;
-    public NamedApp namedApp;
-    public string qualifiedAppName;
-    public string inAppIdentifier;
-    public string inAppDisplayName;
-    public List<FrontCallerAccount> callers;
-    public bool isTechnical;
-    public object? specifics;
-    public List<string> allDisplayNames;
-    public bool isPendingUpdate;
+    public required string guid { get; init; }
+    public NamedApp namedApp { get; init; }
+    public required string qualifiedAppName { get; init; }
+    public required string inAppIdentifier { get; init; }
+    public required string inAppDisplayName { get; init; }
+    public required ImmutableArray<FrontCallerAccount> callers { get; init; } = ImmutableArray<FrontCallerAccount>.Empty;
+    public bool isTechnical { get; init; }
+    public object? specifics { get; init; }
+    public required ImmutableArray<string> allDisplayNames { get; init; } = ImmutableArray<string>.Empty;
+    public bool isPendingUpdate { get; init; }
     
-    public bool isAnyCallerContact;
-    public bool isAnyCallerNote;
+    public bool isAnyCallerContact { get; init; }
+    public bool isAnyCallerNote { get; init; }
     
-    public OnlineStatus? onlineStatus;
-    public string? customStatus;
-    public FrontLiveUserSessionState? mainSession;
-    public List<FrontLiveSession> multiSessions;
+    public OnlineStatus? onlineStatus { get; init; }
+    public string? customStatus { get; init; }
+    public FrontLiveUserSessionState? mainSession { get; init; }
+    public required ImmutableArray<FrontLiveSession> multiSessions { get; init; } = ImmutableArray<FrontLiveSession>.Empty;
 
     public static FrontAccount ToFrontAccount(ImmutableAccount account, ImmutableLiveUserUpdate? liveSessionState, ImmutableLiveSession? liveSession, LiveStatusMonitoring live)
     {
@@ -78,33 +81,35 @@ internal class FrontAccount
             inAppIdentifier = account.inAppIdentifier,
             inAppDisplayName = account.inAppDisplayName,
             specifics = account.specifics,
-            callers = account.callers.Select(FrontCallerAccount.FromCore).ToList(),
+            callers = [..account.callers.Select(FrontCallerAccount.FromCore)],
             isTechnical = account.isTechnical,
             isAnyCallerContact = account.callers.Any(caller => caller.isContact),
             isAnyCallerNote = account.callers.Any(caller => caller.note.status == NoteState.Exists),
-            allDisplayNames = account.allDisplayNames.ToList(),
+            allDisplayNames = [..account.allDisplayNames],
             isPendingUpdate = account.isPendingUpdate,
 
             onlineStatus = liveSessionState?.onlineStatus,
             customStatus = liveSessionState?.customStatus,
             mainSession = liveSessionState?.mainSession != null ? FrontLiveUserSessionState.FromCore(liveSessionState.mainSession, liveSession) : null,
-            multiSessions = liveSessionState != null ? liveSessionState.multiSessionGuids
-                .Select(live.GetSessionByGuid)
-                .Where(aSession => aSession != null)
-                .Cast<ImmutableLiveSession>()
-                .Select(FrontLiveSession.FromCore)
-                .ToList() : [],
+            multiSessions = liveSessionState != null ? [
+                ..liveSessionState.multiSessionGuids
+                    .Select(live.GetSessionByGuid)
+                    .Where(aSession => aSession != null)
+                    .Cast<ImmutableLiveSession>()
+                    .Select(FrontLiveSession.FromCore)
+            ] : [],
         };
     }
 }
 
-internal class FrontCallerAccount
+[Serializable]
+internal record FrontCallerAccount
 {
-    public bool isAnonymous;
-    public string? inAppIdentifier; // Can only be null if it's an anonymous caller.
+    public bool isAnonymous { get; init; }
+    public string? inAppIdentifier { get; init; } // Can only be null if it's an anonymous caller.
     
-    public string? note;
-    public bool isContact;
+    public string? note { get; init; }
+    public bool isContact { get; init; }
 
     public static FrontCallerAccount FromCore(ImmutableCallerAccount callerAccount)
     {
@@ -118,16 +123,17 @@ internal class FrontCallerAccount
     }
 }
 
-internal class FrontConnector
+[Serializable]
+internal record FrontConnector
 {
-    public string guid;
-    public string displayName;
-    public ConnectorType type;
-    public RefreshMode refreshMode;
-    public LiveMode liveMode;
-    public FrontConnectorAccount? account;
+    public required string guid { get; init; }
+    public required string displayName { get; init; }
+    public ConnectorType type { get; init; }
+    public RefreshMode refreshMode { get; init; }
+    public LiveMode liveMode { get; init; }
+    public FrontConnectorAccount? account { get; init; }
 
-    public bool isLoggedIn;
+    public bool isLoggedIn { get; init; }
 
     public static FrontConnector FromCore(Connector connector, bool isLoggedIn)
     {
@@ -145,13 +151,14 @@ internal class FrontConnector
     }
 }
 
-internal class FrontConnectorAccount
+[Serializable]
+internal record FrontConnectorAccount
 {
-    public NamedApp namedApp;
-    public string qualifiedAppName;
+    public NamedApp namedApp { get; init; }
+    public required string qualifiedAppName { get; init; }
 
-    public string inAppIdentifier;
-    public string inAppDisplayName;
+    public required string inAppIdentifier { get; init; }
+    public required string inAppDisplayName { get; init; }
 
     public static FrontConnectorAccount FromCore(ConnectorAccount connectorAccount)
     {
@@ -165,19 +172,20 @@ internal class FrontConnectorAccount
     }
 }
 
-internal class FrontLiveUserUpdate
+[Serializable]
+internal record FrontLiveUserUpdate
 {
-    public NamedApp namedApp;
-    public string trigger;
-    public string qualifiedAppName;
-    public string inAppIdentifier;
+    public NamedApp namedApp { get; init; }
+    public required string trigger { get; init; }
+    public required string qualifiedAppName { get; init; }
+    public required string inAppIdentifier { get; init; }
 
-    public OnlineStatus? onlineStatus;
-    public string? customStatus;
-    public FrontLiveUserSessionState? mainSession;
-    public List<FrontLiveSession> multiSessions;
+    public OnlineStatus? onlineStatus { get; init; }
+    public string? customStatus { get; init; }
+    public FrontLiveUserSessionState? mainSession { get; init; }
+    public required ImmutableArray<FrontLiveSession> multiSessions { get; init; }
 
-    public string callerInAppIdentifier;
+    public required string callerInAppIdentifier { get; init; }
     
     public static FrontLiveUserUpdate FromCore(ImmutableLiveUserUpdate liveUserUpdate, LiveStatusMonitoring live)
     {
@@ -191,23 +199,25 @@ internal class FrontLiveUserUpdate
             inAppIdentifier = liveUserUpdate.inAppIdentifier,
             onlineStatus = liveUserUpdate.onlineStatus,
             mainSession = liveUserUpdate.mainSession != null ? FrontLiveUserSessionState.FromCore(liveUserUpdate.mainSession, session) : null,
-            multiSessions = liveUserUpdate.multiSessionGuids
-                .Select(live.GetSessionByGuid)
-                .Where(liveSession => liveSession != null)                
-                .Cast<ImmutableLiveSession>()
-                .Select(FrontLiveSession.FromCore)
-                .ToList(),
+            multiSessions = [
+                ..liveUserUpdate.multiSessionGuids
+                    .Select(live.GetSessionByGuid)
+                    .Where(liveSession => liveSession != null)                
+                    .Cast<ImmutableLiveSession>()
+                    .Select(FrontLiveSession.FromCore)
+            ],
             customStatus = liveUserUpdate.customStatus,
             callerInAppIdentifier = liveUserUpdate.callerInAppIdentifier
         };
     }
 }
 
-internal class FrontLiveUserSessionState
+[Serializable]
+internal record FrontLiveUserSessionState
 {
-    public LiveUserSessionKnowledge knowledge;
-    public string? sessionGuid;
-    public FrontLiveSession? liveSession;
+    public LiveUserSessionKnowledge knowledge { get; init; }
+    public string? sessionGuid { get; init; }
+    public FrontLiveSession? liveSession { get; init; }
     
     public static FrontLiveUserSessionState FromCore(ImmutableLiveUserSessionState liveUserSessionState, ImmutableLiveSession? liveSession)
     {
@@ -220,26 +230,27 @@ internal class FrontLiveUserSessionState
     }
 }
 
-internal class FrontLiveSession
+[Serializable]
+internal record FrontLiveSession
 {
-    public string guid;
+    public required string guid { get; init; }
 
-    public NamedApp namedApp;
-    public string qualifiedAppName;
+    public NamedApp namedApp { get; init; }
+    public required string qualifiedAppName { get; init; }
     
-    public string inAppSessionIdentifier;
+    public required string inAppSessionIdentifier { get; init; }
     
-    public string? inAppSessionName;
-    public string? inAppVirtualSpaceName;
+    public string? inAppSessionName { get; init; }
+    public string? inAppVirtualSpaceName { get; init; }
     
-    public FrontLiveSessionHost? inAppHost;
+    public FrontLiveSessionHost? inAppHost { get; init; }
 
-    public List<FrontParticipant> participants = new();
-    public int? virtualSpaceDefaultCapacity;
-    public int? sessionCapacity;
-    public int? currentAttendance;
-    public string? thumbnailUrl;
-    public bool? isVirtualSpacePrivate;
+    public ImmutableArray<FrontParticipant> participants  { get; init; } = ImmutableArray<FrontParticipant>.Empty;
+    public int? virtualSpaceDefaultCapacity { get; init; }
+    public int? sessionCapacity { get; init; }
+    public int? currentAttendance { get; init; }
+    public string? thumbnailUrl { get; init; }
+    public bool? isVirtualSpacePrivate { get; init; }
 
     public static FrontLiveSession FromCore(ImmutableLiveSession liveSession)
     {
@@ -252,7 +263,7 @@ internal class FrontLiveSession
             inAppSessionName = liveSession.inAppSessionName,
             inAppVirtualSpaceName = liveSession.inAppVirtualSpaceName,
             inAppHost = liveSession.inAppHost != null ? FrontLiveSessionHost.FromCore(liveSession.inAppHost) : null,
-            participants = liveSession.participants.Select(FrontParticipant.FromCore).ToList(),
+            participants = [..liveSession.participants.Select(FrontParticipant.FromCore)],
             virtualSpaceDefaultCapacity = liveSession.virtualSpaceDefaultCapacity,
             sessionCapacity = liveSession.sessionCapacity,
             currentAttendance = liveSession.currentAttendance,
@@ -262,7 +273,8 @@ internal class FrontLiveSession
     }
 }
 
-internal class FrontParticipant
+[Serializable]
+internal record FrontParticipant
 {
     public bool isKnown;
     public FrontImmutableKnownParticipantAccount? knownAccount;
@@ -282,9 +294,10 @@ internal class FrontParticipant
     }
 }
 
+[Serializable]
 public record FrontImmutableKnownParticipantAccount
 {
-    public string inAppIdentifier { get; init; }
+    public required string inAppIdentifier { get; init; }
 
     public static FrontImmutableKnownParticipantAccount FromCore(ImmutableKnownParticipantAccount participantKnownAccount)
     {
@@ -295,6 +308,7 @@ public record FrontImmutableKnownParticipantAccount
     }
 }
 
+[Serializable]
 public record FrontImmutableUnknownParticipantAccount
 {
     public string? inAppIdentifier { get; init; }
@@ -310,9 +324,10 @@ public record FrontImmutableUnknownParticipantAccount
     }
 }
 
-internal class FrontLiveSessionHost
+[Serializable]
+internal record FrontLiveSessionHost
 {
-    public string inAppHostIdentifier;
+    public required string inAppHostIdentifier;
     public string? inAppHostDisplayName;
     
     public static FrontLiveSessionHost FromCore(ImmutableLiveSessionHost liveSessionHost)
