@@ -5,7 +5,7 @@
 [Serializable]
 internal class CvrContactsResponse
 {
-    public string message;
+    public string? message;
     public CvrContactsResponseData[] data;
 }
 
