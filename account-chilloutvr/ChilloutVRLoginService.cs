@@ -43,6 +43,7 @@ public class ChilloutVRLoginService : ILoginService
         {
             return new ConnectionAttemptResult
             {
+                guid = guid,
                 type = ConnectionAttemptResultType.Failure
             };
         }
