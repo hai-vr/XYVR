@@ -251,8 +251,14 @@ internal class VRChatLiveCommunicator
                     await QueueSessionFetchIfApplicable(content.location);
                 }
                 
+                
                 // FIXME: This is a task???
                 OnlineStatus? onlineStatus = type is "user-update" ? null : ParseStatus(type, content.location, content.user.platform, content.user.status);
+                var figureOutSessionStateOrNull = session != null ? new ImmutableLiveUserSessionState
+                {
+                    knowledge = LiveUserSessionKnowledge.Known,
+                    sessionGuid = session.guid
+                } : FigureOutSessionStateOrNull(type, onlineStatus, content, session);
                 await OnLiveUpdateReceived(new ImmutableLiveUserUpdate
                 {
                     trigger = $"WS-{type}",
@@ -262,7 +268,7 @@ internal class VRChatLiveCommunicator
                     onlineStatus = onlineStatus,
                     callerInAppIdentifier = _callerInAppIdentifier,
                     customStatus = content.user.statusDescription,
-                    mainSession = FigureOutSessionStateOrNull(type, onlineStatus, content, session)
+                    mainSession = figureOutSessionStateOrNull
                 });
             }
             else
