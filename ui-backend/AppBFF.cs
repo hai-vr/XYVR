@@ -12,6 +12,7 @@ public interface IAppBFF
     string GetAllExposedIndividualsOrderedByContact();
     Task FusionIndividuals(string toDesolidarize, string toDestroy);
     Task DesolidarizeIndividuals(string toDesolidarize);
+    void OpenLink(string url);
 }
 
 [ComVisible(true)]
@@ -30,6 +31,18 @@ public class AppBFF : IAppBFF
     public string GetAppVersion()
     {
         return VERSION.version;
+    }
+
+    public void OpenLink(string url)
+    {
+        var isHttp = url.ToLowerInvariant().StartsWith("https://") || url.ToLowerInvariant().StartsWith("http://");
+        if (!isHttp)
+        {
+            Console.WriteLine($"Refusing to open link: {url}");
+            return;
+        }
+
+        Scaffolding.DANGER_OpenUrl(url);
     }
 
     public string GetAllExposedIndividualsOrderedByContact()

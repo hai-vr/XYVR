@@ -5,7 +5,7 @@ using Newtonsoft.Json.Linq;
 using XYVR.UI.Backend;
 using Photino.NET.Server;
 
-namespace HelloPhotinoApp
+namespace XYVR.UI.Photino
 {
     //NOTE: To hide the console window, go to the project properties and change the Output Type to Windows Application.
     // Or edit the .csproj file and change the <OutputType> tag from "WinExe" to "Exe".
@@ -18,42 +18,50 @@ namespace HelloPhotinoApp
         [STAThread]
         static void Main(string[] args)
         {
-            _serializer = BFFUtils.NewSerializer();
+            try
+            {
+                _serializer = BFFUtils.NewSerializer();
             
-            var appLifecycle = new AppLifecycle(DispatchFn);
-            _appLifecycle = appLifecycle;
-            _appLifecycle.WhenApplicationStarts(args);
+                var appLifecycle = new AppLifecycle(DispatchFn);
+                _appLifecycle = appLifecycle;
+                _appLifecycle.WhenApplicationStarts(args);
             
-            // Window title declared here for visibility
-            var windowTitle = "XYVR";
+                // Window title declared here for visibility
+                var windowTitle = "XYVR";
             
-            PhotinoServer
-                .CreateStaticFileServer(args, out string baseUrl)
-                .RunAsync();
+                PhotinoServer
+                    .CreateStaticFileServer(args, out string baseUrl)
+                    .RunAsync();
             
-            _window = new PhotinoWindow()
-                .SetTitle(windowTitle)
-                // Resize to a percentage of the main monitor work area
-                .SetUseOsDefaultSize(false)
-                .SetSize(new Size(600, 1000))
-                .Center()
-                // Users can resize windows by default.
-                // Let's make this one fixed instead.
-                // .SetResizable(false)
-                .RegisterWebMessageReceivedHandler((object sender, string message) =>
-                {
-                    var window = (PhotinoWindow)sender;
-                    Task.Run(async () => await HandleMessage(window, message));
-                })
-                .SetIconFile("favicon.ico")
-                .Load($"{baseUrl}/index.html");
-
-            _appLifecycle.WhenWindowLoaded(SendEventToReact).Wait();
+                _window = new PhotinoWindow()
+                    .SetTitle(windowTitle)
+                    // Resize to a percentage of the main monitor work area
+                    .SetUseOsDefaultSize(false)
+                    .SetSize(new Size(600, 1000))
+                    .Center()
+                    // Users can resize windows by default.
+                    // Let's make this one fixed instead.
+                    // .SetResizable(false)
+                    .RegisterWebMessageReceivedHandler((object sender, string message) =>
+                    {
+                        var window = (PhotinoWindow)sender;
+                        Task.Run(async () => await HandleMessage(window, message));
+                    })
+                    .SetIconFile("favicon.ico")
+                    .Load($"{baseUrl}/index.html");
+                
+                _appLifecycle.WhenWindowLoaded(SendEventToReact).Wait();
             
-            // Starts the application event loop
-            _window.WaitForClose();
+                // Starts the application event loop
+                _window.WaitForClose();
             
-            appLifecycle.WhenApplicationCloses().Wait();
+                appLifecycle.WhenApplicationCloses().Wait();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
         }
 
         private static async Task SendEventToReact(EventToSendToReact eventToSendToReact)

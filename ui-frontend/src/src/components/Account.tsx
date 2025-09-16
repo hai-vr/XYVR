@@ -11,6 +11,7 @@ import {type DebugFlags, DemonstrationMode} from "../types/DebugFlags.ts";
 import {LiveSessionKnowledge} from "../types/LiveUpdateTypes.ts";
 import {AppIcon} from "./AppIcon.tsx";
 import {LiveSession} from "./LiveSession.tsx";
+import {DotNetApi} from "../DotNetApi.ts";
 
 interface AccountProps {
     account: FrontAccount,
@@ -23,10 +24,17 @@ interface AccountProps {
 }
 // @ts-ignore
 const Account = ({account, imposter, showAlias, showNotes, debugMode, showSession, isSessionView}: AccountProps) => {
+    const dotNetApi = new DotNetApi();
+
     const hasNote = account.isAnyCallerNote;
 
     const copyInAppIdentifier = async () => {
         await navigator.clipboard.writeText(account.inAppIdentifier);
+    };
+
+    const openLink = async () => {
+        var link = `${account.namedApp === "VRChat" && 'https://vrchat.com/home/user/' || 'https://hub.chilloutvr.net/social/profile?guid='}${account.inAppIdentifier}`
+        await dotNetApi.appApiOpenLink(link);
     };
 
     const getAppDisplayName = (account: FrontAccount) => {
@@ -99,6 +107,7 @@ const Account = ({account, imposter, showAlias, showNotes, debugMode, showSessio
     const isKnownSession = account.mainSession && account.mainSession.knowledge === LiveSessionKnowledge.Known && true || false;
     // @ts-ignore
     const worldName = isKnownSession && account.mainSession && (account.mainSession.liveSession && (account.mainSession.liveSession.inAppVirtualSpaceName || 'Loading...')) || undefined;
+
     return (
         <div className="account-container">
             <div className="account-header">
@@ -152,9 +161,9 @@ const Account = ({account, imposter, showAlias, showNotes, debugMode, showSessio
                     )}
                     {(account.namedApp === "VRChat" || account.namedApp === "ChilloutVR") && (
                         <a
-                            href={`${account.namedApp === "VRChat" && 'https://vrchat.com/home/user/' || 'https://hub.chilloutvr.net/social/profile?guid='}${account.inAppIdentifier}`}
+                            onClick={openLink}
                             rel="noopener noreferrer"
-                            className="icon-button"
+                            className="icon-button link-pointer"
                             title={`Open ${account.namedApp} Profile`}
                         >
                             <Globe size={16}/>

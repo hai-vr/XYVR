@@ -420,3 +420,7 @@ button:disabled:hover {
 :root[data-theme="light"] .status-joinme-conflicting {
     color: var(--status-joinme-conflicting);
 }
+
+.link-pointer {
+    cursor: pointer;
+}

@@ -9,6 +9,7 @@
                         FusionIndividuals(toAugment: string, toDestroy: string): Promise<void>;
                         DesolidarizeIndividuals(toDesolidarize: string): Promise<void>;
                         GetAllExposedIndividualsOrderedByContact(): Promise<string>;
+                        OpenLink(url: string): Promise<void>;
                     };
                     preferencesApi: {
                         GetPreferences(): Promise<string>;

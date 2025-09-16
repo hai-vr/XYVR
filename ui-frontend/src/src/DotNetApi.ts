@@ -21,6 +21,7 @@
     async appApiGetAllExposedIndividualsOrderedByContact(): Promise<string> { return this.dispatch('appApi', 'GetAllExposedIndividualsOrderedByContact'); }
     async appApiFusionIndividuals(toAugment: string, toDestroy: string): Promise<string> { return this.dispatch('appApi', 'FusionIndividuals', [toAugment, toDestroy]); }
     async appApiDesolidarizeIndividuals(toDesolidarize: string): Promise<string> { return this.dispatch('appApi', 'DesolidarizeIndividuals', [toDesolidarize]); }
+    async appApiOpenLink(url: string): Promise<string> { return this.dispatch('appApi', 'OpenLink', [url]); }
 
     async liveApiGetAllExistingLiveSessionData(): Promise<string> { return this.dispatch('liveApi', 'GetAllExistingLiveSessionData'); }
 

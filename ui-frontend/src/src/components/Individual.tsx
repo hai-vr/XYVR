@@ -6,6 +6,7 @@ import {accountMatchesFromRegularTerms, anyAccountMatchesSpecialTerms, parseSear
 import {_D, _D2} from "../haiUtils.ts";
 import type {FrontAccount, FrontIndividual} from "../types/CoreTypes.ts";
 import {type DebugFlags, DemonstrationMode} from "../types/DebugFlags.ts";
+import {DotNetApi} from "../DotNetApi.ts";
 
 interface IndividualProps {
     individual: FrontIndividual;
@@ -38,6 +39,8 @@ function Individual({
                         showNotes,
                         debugMode
                     }: IndividualProps) {
+    const dotNetApi = new DotNetApi();
+
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [filteredAccounts, setFilteredAccounts] = useState<FrontAccount[]>([]);
     const dropdownRef = useRef<HTMLDivElement>(null);
@@ -152,6 +155,11 @@ function Individual({
         return str.charAt(0).toUpperCase() || '?';
     };
 
+    const openLink = async (url: string) => {
+        const realUrl = debugMode.demoMode !== DemonstrationMode.Disabled ? 'https://example.com' : url
+        await dotNetApi.appApiOpenLink(realUrl);
+    };
+
     return (
         <div className={`${!compactMode ? 'individual-container' : 'individual-container-compact'} ${!isVisible ? 'hidden' : ''} ${isBeingMerged ? 'being-merged' : ''}`}>
             {!compactMode && (<>
@@ -236,9 +244,9 @@ function Individual({
                     {vrChatLinks.map((url, linkIndex) => (
                         <div key={linkIndex} className="vrchat-link-item">
                             <a
-                                href={debugMode.demoMode !== DemonstrationMode.Disabled ? 'https://example.com' : url}
+                                onClick={() => openLink(url)}
                                 rel="noopener noreferrer"
-                                className="vrchat-link"
+                                className="vrchat-link link-pointer"
                             >
                                 {debugMode.demoMode !== DemonstrationMode.Disabled ? 'https://' + _D2(url.replace('http://', '').replace('https://', ''), debugMode, '/') : _D2(url, debugMode, '/')}
                             </a>
