@@ -32,6 +32,8 @@ public class AppLifecycle
     {
         // Order matters
         Scaffolding.DefineSavePathFromArgsOrUseDefault(args);
+        Scaffolding.CreateDirectoriesPertainingToSavePath();
+        
         var lockfile = new FileLock(Scaffolding.LockfileFilePath);
         lockfile.AcquireLock();
 

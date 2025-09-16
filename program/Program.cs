@@ -22,6 +22,7 @@ internal class Program
     public static async Task Main(string[] args)
     {
         Scaffolding.DefineSavePathFromArgsOrUseDefault(args);
+        Scaffolding.CreateDirectoriesPertainingToSavePath();
 
         var serializer = new JsonSerializerSettings()
         {

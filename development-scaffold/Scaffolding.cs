@@ -56,6 +56,11 @@ public static class Scaffolding
         DefineSavePath(FindSavePathInArgsOrNull(args) ?? DefaultSavePathAbsolute());
     }
 
+    public static void CreateDirectoriesPertainingToSavePath()
+    {
+        Directory.CreateDirectory(SavePath());
+    }
+
     private static string? FindSavePathInArgsOrNull(string[] args)
     {
         var watchNext = false;
