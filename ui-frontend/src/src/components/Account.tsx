@@ -161,7 +161,7 @@ const Account = ({account, imposter, showAlias, showNotes, debugMode, showSessio
                     )}
                     {(account.namedApp === "VRChat" || account.namedApp === "ChilloutVR") && (
                         <a
-                            onClick={openLink}
+                            onClick={openLink} onAuxClick={(e) => e.button === 1 && openLink()} onMouseDown={(e) => e.preventDefault()}
                             rel="noopener noreferrer"
                             className="icon-button link-pointer"
                             title={`Open ${account.namedApp} Profile`}

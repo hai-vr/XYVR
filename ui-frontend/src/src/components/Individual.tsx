@@ -244,7 +244,7 @@ function Individual({
                     {vrChatLinks.map((url, linkIndex) => (
                         <div key={linkIndex} className="vrchat-link-item">
                             <a
-                                onClick={() => openLink(url)}
+                                onClick={() => openLink(url)} onAuxClick={(e) => e.button === 1 && openLink(url)} onMouseDown={(e) => e.preventDefault()}
                                 rel="noopener noreferrer"
                                 className="vrchat-link link-pointer"
                             >

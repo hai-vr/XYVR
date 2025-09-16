@@ -179,7 +179,7 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated, 
                                 {connector.type === ConnectorType.ResoniteAPI && <>All data is stored locally. Requests are sent directly to the Resonite API from your machine. </>}
                                 {connector.type === ConnectorType.VRChatAPI && <>All data is stored locally. Requests are sent directly to the VRChat API from your machine. </>}
                                 {connector.type === ConnectorType.ChilloutVRAPI && <>All data is stored locally. Requests are sent directly to the ChilloutVR API from your machine. </>}
-                                <a className="link-pointer" title="Open privacy and data considerations docs in your browser" onClick={openPrivacyDocs}>Learn more</a>.
+                                <a className="link-pointer" title="Open privacy and data considerations docs in your browser" onClick={openPrivacyDocs} onAuxClick={(e) => e.button === 1 && openPrivacyDocs()} onMouseDown={(e) => e.preventDefault()}>Learn more</a>.
                             </p>
 
                         </>
