@@ -91,7 +91,7 @@ interface AddressBookPageProps {
 
 function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyContacts, compactMode, setCompactMode, showNotes, setShowNotes, debugMode }: AddressBookPageProps) {
     const dotNetApi = new DotNetApi();
-    
+
     const navigate = useNavigate()
     const searchInputRef = useRef<HTMLInputElement>(null)
     const [initialized, setInitialized] = useState(false);
@@ -338,10 +338,10 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
         if (toDestroy === toAugment) return;
         if (toAugment === undefined) return;
 
-        await window.chrome.webview.hostObjects.appApi.FusionIndividuals(toAugment, toDestroy);
+        await dotNetApi.appApiFusionIndividuals(toAugment, toDestroy);
         setMergeAccountGuidOrUnd(undefined);
 
-        const allIndividuals = await window.chrome.webview.hostObjects.appApi.GetAllExposedIndividualsOrderedByContact();
+        const allIndividuals = await dotNetApi.appApiGetAllExposedIndividualsOrderedByContact();
         const individualsArray = JSON.parse(allIndividuals);
         setIndividuals(individualsArray);
     };
@@ -349,9 +349,9 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
     const unmergeAccounts = async function (toDesolidarize?: string) {
         if (toDesolidarize === undefined) return;
 
-        await window.chrome.webview.hostObjects.appApi.DesolidarizeIndividuals(toDesolidarize);
+        await dotNetApi.appApiDesolidarizeIndividuals(toDesolidarize);
 
-        const allIndividuals = await window.chrome.webview.hostObjects.appApi.GetAllExposedIndividualsOrderedByContact();
+        const allIndividuals = await dotNetApi.appApiGetAllExposedIndividualsOrderedByContact();
         const individualsArray = JSON.parse(allIndividuals);
         setIndividuals(individualsArray);
     };

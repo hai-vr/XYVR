@@ -6,6 +6,7 @@ import Connector from "../components/Connector.tsx";
 import DarkModeToggleButton from "../components/DarkModeToggleButton.tsx";
 import {ConnectorType, type ConnectorTypeType, type FrontConnector} from "../types/ConnectorTypes.ts";
 import type {DebugFlags} from "../types/DebugFlags.ts";
+import {DotNetApi} from "../DotNetApi.ts";
 
 interface DataCollectionPageProps {
     isDark: boolean;
@@ -19,6 +20,8 @@ interface DeleteStateType {
 }
 
 function DataCollectionPage({ isDark, setIsDark, debugMode }: DataCollectionPageProps) {
+    const dotNetApi = new DotNetApi();
+
     const navigate = useNavigate()
     const [initialized, setInitialized] = useState(false);
     const [connectors, setConnectors] = useState<FrontConnector[]>([]);
@@ -26,7 +29,7 @@ function DataCollectionPage({ isDark, setIsDark, debugMode }: DataCollectionPage
 
     useEffect(() => {
         const initializeApi = async () => {
-            const json = await window.chrome.webview.hostObjects.dataCollectionApi.GetConnectors();
+            const json = await dotNetApi.dataCollectionApiGetConnectors();
             const arr = JSON.parse(json);
             setConnectors(arr);
             setInitialized(true);
@@ -36,9 +39,9 @@ function DataCollectionPage({ isDark, setIsDark, debugMode }: DataCollectionPage
     }, []);
 
     const createNewConnector = async (connectorType: ConnectorTypeType) => {
-        await window.chrome.webview.hostObjects.dataCollectionApi.CreateConnector(connectorType);
+        await dotNetApi.dataCollectionApiCreateConnector(connectorType);
 
-        const json = await window.chrome.webview.hostObjects.dataCollectionApi.GetConnectors();
+        const json = await dotNetApi.dataCollectionApiGetConnectors();
         const arr = JSON.parse(json);
         setConnectors(arr);
     }
@@ -80,21 +83,21 @@ function DataCollectionPage({ isDark, setIsDark, debugMode }: DataCollectionPage
     };
 
     const deleteConnector = async (guid: string) => {
-        await window.chrome.webview.hostObjects.dataCollectionApi.DeleteConnector(guid);
+        await dotNetApi.dataCollectionApiDeleteConnector(guid);
 
-        const json = await window.chrome.webview.hostObjects.dataCollectionApi.GetConnectors();
+        const json = await dotNetApi.dataCollectionApiGetConnectors();
         const arr = JSON.parse(json);
         setConnectors(arr);
     }
 
     const refreshConnectors = async () => {
-        const json = await window.chrome.webview.hostObjects.dataCollectionApi.GetConnectors();
+        const json = await dotNetApi.dataCollectionApiGetConnectors();
         const arr = JSON.parse(json);
         setConnectors(arr);
     }
 
     const startDataCollection = async () => {
-        await window.chrome.webview.hostObjects.dataCollectionApi.StartDataCollection();
+        await dotNetApi.dataCollectionApiStartDataCollection();
     }
 
     return (

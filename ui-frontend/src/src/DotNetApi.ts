@@ -17,31 +17,38 @@
     // noinspection JSDeprecatedSymbols
     private _isPhotino: boolean = !!(window.external as any).sendMessage;
 
-    async appApiGetAllExposedIndividualsOrderedByContact(): Promise<string> {
+    async appApiGetAppVersion(): Promise<string> { return this.dispatch('appApi', 'GetAppVersion'); }
+    async appApiGetAllExposedIndividualsOrderedByContact(): Promise<string> { return this.dispatch('appApi', 'GetAllExposedIndividualsOrderedByContact'); }
+    async appApiFusionIndividuals(toAugment: string, toDestroy: string): Promise<string> { return this.dispatch('appApi', 'FusionIndividuals', [toAugment, toDestroy]); }
+    async appApiDesolidarizeIndividuals(toDesolidarize: string): Promise<string> { return this.dispatch('appApi', 'DesolidarizeIndividuals', [toDesolidarize]); }
+
+    async liveApiGetAllExistingLiveSessionData(): Promise<string> { return this.dispatch('liveApi', 'GetAllExistingLiveSessionData'); }
+
+    async preferencesApiSetPreferences(str: string): Promise<string> { return this.dispatch('preferencesApi', 'SetPreferences', [str]); }
+    async preferencesApiGetPreferences(): Promise<string> { return this.dispatch('preferencesApi', 'GetPreferences'); }
+
+    async dataCollectionApiTryLogin(guid: string, login: string, password: string, stayLoggedIn: boolean): Promise<string> { return this.dispatch('dataCollectionApi', 'TryLogin', [guid, login, password, stayLoggedIn]); }
+    async dataCollectionApiTryTwoFactor(guid: string, isTwoFactorEmail: boolean, twoFactorCode: string, stayLoggedIn: boolean): Promise<string> { return this.dispatch('dataCollectionApi', 'TryTwoFactor', [guid, isTwoFactorEmail, twoFactorCode, stayLoggedIn]); }
+    async dataCollectionApiTryLogout(guid: string): Promise<string> { return this.dispatch('dataCollectionApi', 'TryLogout', [guid]); }
+
+    async dataCollectionApiGetConnectors(): Promise<string> { return this.dispatch('dataCollectionApi', 'GetConnectors'); }
+    async dataCollectionApiCreateConnector(connectorType: string): Promise<string> { return this.dispatch('dataCollectionApi', 'CreateConnector', [connectorType]); }
+    async dataCollectionApiDeleteConnector(guid: string): Promise<string> { return this.dispatch('dataCollectionApi', 'DeleteConnector', [guid]); }
+    async dataCollectionApiStartDataCollection(): Promise<string> { return this.dispatch('dataCollectionApi', 'StartDataCollection'); }
+
+    private async dispatch(endpoint: string, methodName: string, parameters: any[] = []): Promise<string> {
         if (this._isPhotino) {
             return this.PhotinoSendMessage({
-                endpoint: 'appApi',
-                methodName: 'GetAllExposedIndividualsOrderedByContact',
-                parameters: []
-            })
-        }
-        else {
-            return await window.chrome.webview.hostObjects.appApi.GetAllExposedIndividualsOrderedByContact();
+                endpoint,
+                methodName,
+                parameters
+            });
+        } else {
+            const hostObject = (window.chrome.webview.hostObjects as any)[endpoint];
+            return await hostObject[methodName](...parameters);
         }
     }
 
-    async liveApiGetAllExistingLiveSessionData(): Promise<string> {
-        if (this._isPhotino) {
-            return this.PhotinoSendMessage({
-                endpoint: 'liveApi',
-                methodName: 'GetAllExistingLiveSessionData',
-                parameters: []
-            })
-        }
-        else {
-            return await window.chrome.webview.hostObjects.liveApi.GetAllExistingLiveSessionData();
-        }
-    }
     
     private PhotinoSendMessage(payload: PhotinoSendMessagePayload): Promise<string> {
         const indexedPromise = this.makeIndexedPromise();

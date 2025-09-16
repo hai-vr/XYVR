@@ -6,9 +6,12 @@ import './AppRouter.css'
 import {Toaster} from "react-hot-toast";
 import type {ReactAppPreferences} from "../types/APITypes.ts";
 import {type DebugFlags, DemonstrationMode} from "../types/DebugFlags.ts";
+import {DotNetApi} from "../DotNetApi.ts";
 
 // @ts-ignore
 const AppRouter = ({ appVersion }: { appVersion: string }) => {
+    const dotNetApi = new DotNetApi();
+
     const [isDark, setIsDark] = useState(true)
     const [showOnlyContacts, setShowOnlyContacts] = useState(false)
     const [compactMode, setCompactMode] = useState(false)
@@ -41,7 +44,7 @@ const AppRouter = ({ appVersion }: { appVersion: string }) => {
     useEffect(() => {
         const updatePreferences = async () => {
             if (isPreferencesObtained) {
-                await window.chrome.webview.hostObjects.preferencesApi.SetPreferences(JSON.stringify(preferences));
+                await dotNetApi.preferencesApiSetPreferences(JSON.stringify(preferences));
             }
         };
 
@@ -52,7 +55,7 @@ const AppRouter = ({ appVersion }: { appVersion: string }) => {
     useEffect(() => {
         const initializeApi = async () => {
             if (!isPreferencesObtained) {
-                const prefs: ReactAppPreferences = JSON.parse(await window.chrome.webview.hostObjects.preferencesApi.GetPreferences());
+                const prefs: ReactAppPreferences = JSON.parse(await dotNetApi.preferencesApiGetPreferences());
                 setPreferences(prefs);
                 setIsDark(prefs.isDark);
                 setShowOnlyContacts(prefs.showOnlyContacts);

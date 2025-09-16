@@ -6,6 +6,7 @@ import {TriangleAlert, X} from "lucide-react";
 import {type FrontAccount, NamedApp} from "../types/CoreTypes.ts";
 import {ConnectorType, type FrontConnector, type FrontConnectorAccount} from "../types/ConnectorTypes.ts";
 import {type DebugFlags, DemonstrationMode, DISABLED_DEBUG_FLAGS} from "../types/DebugFlags.ts";
+import {DotNetApi} from "../DotNetApi.ts";
 
 interface DeleteState {
     confirming: boolean;
@@ -21,6 +22,8 @@ interface ConnectorProps {
 }
 
 const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated, debugMode } : ConnectorProps) => {
+    const dotNetApi = new DotNetApi();
+
     const [login, setLogin] = useState('');
     const [password, setPassword] = useState('');
     const [twoFactorCode, setTwoFactorCode] = useState('');
@@ -45,7 +48,7 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated, 
     const tryLogin = async () => {
         setIsRequestInProgress(true);
         if (!isInTwoFactorMode) {
-            const json = await window.chrome.webview.hostObjects.dataCollectionApi.TryLogin(connector.guid, login, password, stayLoggedIn);
+            const json = await dotNetApi.dataCollectionApiTryLogin(connector.guid, login, password, stayLoggedIn);
             setIsRequestInProgress(false);
             const obj = JSON.parse(json);
             if (obj.type === 'NeedsTwoFactorCode') {
@@ -65,7 +68,7 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated, 
             }
         }
         else {
-            const json = await window.chrome.webview.hostObjects.dataCollectionApi.TryTwoFactor(connector.guid, isTwoFactorEmail, twoFactorCode, stayLoggedIn);
+            const json = await dotNetApi.dataCollectionApiTryTwoFactor(connector.guid, isTwoFactorEmail, twoFactorCode, stayLoggedIn);
             setIsRequestInProgress(false);
             const obj = JSON.parse(json);
             if (obj.type === 'Success') {
@@ -81,7 +84,7 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated, 
 
     const tryLogout = async () => {
         setIsRequestInProgress(true);
-        const json = await window.chrome.webview.hostObjects.dataCollectionApi.TryLogout(connector.guid);
+        const json = await dotNetApi.dataCollectionApiTryLogout(connector.guid);
         setIsRequestInProgress(false);
         const obj = JSON.parse(json);
         if (obj.type === 'LoggedOut') {

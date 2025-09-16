@@ -4,13 +4,15 @@ import AppRouter from './components/AppRouter.tsx'
 import {DotNetApi} from "./DotNetApi.ts";
 
 function App() {
+    const dotNetApi = new DotNetApi();
+
 // @ts-ignore
     const [appVersion, setAppVersion] = useState('');
 
     useEffect(() => {
         // Wait for WebView2 API to be available
         const initializeApi = async () => {
-            const version = await window.chrome.webview.hostObjects.appApi.GetAppVersion();
+            const version = await dotNetApi.appApiGetAppVersion();
             setAppVersion(version);
         };
 

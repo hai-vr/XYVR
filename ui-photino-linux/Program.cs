@@ -31,52 +31,29 @@ namespace HelloPhotinoApp
                 .CreateStaticFileServer(args, out string baseUrl)
                 .RunAsync();
             
-            // Creating a new PhotinoWindow instance with the fluent API
             _window = new PhotinoWindow()
                 .SetTitle(windowTitle)
                 // Resize to a percentage of the main monitor work area
                 .SetUseOsDefaultSize(false)
-                .SetSize(new Size(1000, 600))
-                // Center window in the middle of the screen
+                .SetSize(new Size(600, 1000))
                 .Center()
                 // Users can resize windows by default.
                 // Let's make this one fixed instead.
                 // .SetResizable(false)
-                // .RegisterCustomSchemeHandler("app", (object sender, string scheme, string url, out string contentType) =>
-                // {
-                //     contentType = "text/javascript";
-                //     return new MemoryStream(Encoding.UTF8.GetBytes(@"
-                //         (() =>{
-                //             window.setTimeout(() => {
-                //                 alert(`🎉 Dynamically inserted JavaScript.`);
-                //             }, 1000);
-                //         })();
-                //     "));
-                // })
-                // Most event handlers can be registered after the
-                // PhotinoWindow was instantiated by calling a registration 
-                // method like the following RegisterWebMessageReceivedHandler.
-                // This could be added in the PhotinoWindowOptions if preferred.
                 .RegisterWebMessageReceivedHandler((object sender, string message) =>
                 {
                     var window = (PhotinoWindow)sender;
                     Task.Run(async () => await HandleMessage(window, message));
-
-                    // The message argument is coming in from sendMessage.
-                    // "window.external.sendMessage(message: string)"
-                    // var response = $"Received message: \"{message}\"";
-
-                    // Send a message back the to JavaScript event handler.
-                    // "window.external.receiveMessage(callback: Function)"
-                    // window.SendWebMessage(response);
                 })
                 .SetIconFile("favicon.ico")
                 .Load($"{baseUrl}/index.html");
 
             _appLifecycle.WhenWindowLoaded(SendEventToReact).Wait();
             
-            _window.WaitForClose(); // Starts the application event loop
-            // await appLifecycle.WhenApplicationCloses();
+            // Starts the application event loop
+            _window.WaitForClose();
+            
+            appLifecycle.WhenApplicationCloses().Wait();
         }
 
         private static async Task SendEventToReact(EventToSendToReact eventToSendToReact)
