@@ -8,6 +8,7 @@
         <Nullable>enable</Nullable>
         <RootNamespace>XYVR.UI.Photino</RootNamespace>
         <GenerateEmbeddedFilesManifest>true</GenerateEmbeddedFilesManifest>
+        <AssemblyName>xyvr</AssemblyName>
     </PropertyGroup>
 
     <ItemGroup>
