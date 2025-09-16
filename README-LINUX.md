@@ -1,8 +1,17 @@
 ﻿# Linux
 
-**This app is not currently working on Linux**, there's still some issues to figure out.
+The **ui-photino-linux** is the .NET project you need to build, along with the **ui-frontend** React project.
 
-To run on Linux, you need to build the **ui-photino-linux** project instead of ~~ui-webview-windows~~.
+To run on Linux, you need to:
+- Install [.NET 9 SDK](https://learn.microsoft.com/en-us/dotnet/core/install/linux?WT.mc_id=dotnet-35129-website).
+- Install [`npm` and `node`](https://nodejs.org/en/download)
+- Install `libwebkit2gtk-4.0` see [below](#install-libwebkit2gtk-40).
+
+Then:
+- In **ui-frontend/**, run `npm install`
+- Run the **ui-photino-linux/** project.
+  - `cd ui-photino-linux; dotnet run`
+  - Building this project *should* automatically build the frontend project, as it internally calls `npm run build-and-copy`.
 
 ### Install libwebkit2gtk-4.0
 
