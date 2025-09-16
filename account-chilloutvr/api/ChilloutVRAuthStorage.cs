@@ -1,8 +1,9 @@
 ﻿namespace XYVR.AccountAuthority.ChilloutVR;
 
 [Serializable]
-internal class ChilloutVRAuthStorage
+internal record ChilloutVRAuthStorage
 {
-    public string username;
-    public string accessKey;
+    public required string username { get; init; }
+    public required string accessKey { get; init; }
+    public required string userId { get; init; }
 }

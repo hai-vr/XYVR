@@ -17,12 +17,12 @@ public class ChilloutVRAuthority : IAuthority
 
     public Task<IDataCollection> NewDataCollection(IndividualRepository repository, ICredentialsStorage credentialsStorage, IResponseCollector storage)
     {
-        return Task.FromResult<IDataCollection>(new ChilloutVRDataCollection());
+        return Task.FromResult<IDataCollection>(new ChilloutVRDataCollection(repository, credentialsStorage, storage));
     }
 
     public Task<ILiveMonitoring> NewLiveMonitoring(LiveStatusMonitoring monitoring, ICredentialsStorage credentialsStorage)
     {
-        return Task.FromResult<ILiveMonitoring>(new ChilloutVRLiveMonitoring());
+        return Task.FromResult<ILiveMonitoring>(new ChilloutVRLiveMonitoring(monitoring, credentialsStorage));
     }
 
     public Task<ImmutableNonIndexedAccount> ResolveCallerAccount(ICredentialsStorage credentialsStorage)

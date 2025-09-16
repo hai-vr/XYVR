@@ -22,6 +22,7 @@ public class ChilloutVRLoginService : ILoginService
             {
                 username = auth__sensitive.data.username,
                 accessKey = auth__sensitive.data.accessKey,
+                userId = auth__sensitive.data.userId,
             };
 
             await credentialsStorage.StoreCookieOrToken(JsonConvert.SerializeObject(authCredentialsStorage__sensitive));
