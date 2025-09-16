@@ -16,14 +16,8 @@
     </ItemGroup>
 
     <Target Name="BuildReactApp" BeforeTargets="Build">
-        <Exec Command="npm run build" WorkingDirectory="src" />
+        <Exec Command="npm run build-and-copy" WorkingDirectory="../ui-frontend/src" />
     </Target>
-    
-    <ItemGroup>
-        <None Update="src/dist/**\*.*">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
-    </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\ui-backend\ui-backend.csproj" />

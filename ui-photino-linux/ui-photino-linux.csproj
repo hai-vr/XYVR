@@ -16,6 +16,10 @@
         <PackageReference Include="Photino.NET.Server" Version="4.0.12"/>
     </ItemGroup>
 
+    <Target Name="BuildReactApp" BeforeTargets="Build">
+        <Exec Command="npm run build-and-copy" WorkingDirectory="../ui-frontend/src" />
+    </Target>
+
     <ItemGroup>
         <Compile Remove="wwwroot\**"/>
         <None Update="wwwroot\**">
@@ -36,9 +40,5 @@
 
     <ItemGroup>
         <ProjectReference Include="..\ui-backend\ui-backend.csproj"/>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="wwwroot\" />
     </ItemGroup>
 </Project>

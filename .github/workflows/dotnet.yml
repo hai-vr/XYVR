@@ -10,8 +10,8 @@ on:
 
 env:
   outputAppFolder: "XYVR"
-  netProject: "ui-webview"
-  netCsProj: "ui-webview/ui-webview.csproj"
+  netProject: "ui-webview-windows"
+  netCsProj: "ui-webview-windows/ui-webview-windows.csproj"
   packageName: "dev.hai-vr.xyvr"
   applicationName: "XYVR"
 
@@ -50,9 +50,9 @@ jobs:
 
       - name: Install and build React app
         run: |
-          cd ui-webview/src
+          cd ui-frontend/src
           npm install
-          npm run build
+          npm run build-and-copy
 
       - name: Build
         shell: bash

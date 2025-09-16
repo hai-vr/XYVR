@@ -1,8 +1,8 @@
 bin/
 obj/
-ui-webview/src/node_modules/
-ui-webview/src/dist/
-ui-photino/wwwroot
+ui-frontend/src/node_modules/
+ui-frontend/src/dist/
+ui-photino-linux/wwwroot
 .idea
 *.DotSettings.user
 

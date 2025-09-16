@@ -24,9 +24,9 @@ function copyDir(src, dest) {
 
 const sourceDir = 'dist';
 const allDestinations = [
-    '../bin/Debug/net9.0-windows/src/dist',
-    '../../ui-photino/bin/Debug/net9.0/wwwroot',
-    '../../ui-photino/wwwroot'
+    '../../ui-webview-windows/bin/Debug/net9.0-windows/src/dist',
+    '../../ui-photino-linux/bin/Debug/net9.0/wwwroot',
+    '../../ui-photino-linux/wwwroot'
 ];
 
 const destinations = os.platform() === 'win32'
