@@ -72,9 +72,9 @@ The following work remains to be done:
 
 ## Technology in use
 
-The app is written in .NET 9 and uses a WebView pointing to a React app set up with Vite. Offline data is stored in plain JSON.
-- On Windows, it will use WebView2 (see ui-webview). On Linux, it should use Photino (see ui-photino).
-- As I am originally a backend developer, the WebView and React frontend are [built using heavy assistance](ui-webview/src/README.md) from Claude 4 integrated
+The app is written in .NET 9 and uses WebView2 on Windows and [Photino on Linux](./README-LINUX.md), pointing to a React app set up with Vite.
+Offline data is stored in plain JSON.
+- As I am originally a backend developer, the WebView and React frontend are [built using heavy assistance](ui-webview-windows/src/README.md) from Claude 4 integrated
   with Jetbrains Rider.
 - The backend is designed without much assistance.
 
@@ -84,21 +84,23 @@ The app is written in .NET 9 and uses a WebView pointing to a React app set up w
 
 #### Build the React app
 
-To run the desktop app, we need to generate the `ui-webview/src/dist/` folder containing the React webapp
+*For Linux build instructions, go to [README-LINUX.md](./README-LINUX.md) instead.*
+
+To run the desktop app, we need to generate the `ui-webview-windows/src/dist/` folder containing the React webapp
 that will be then copied to the desktop application during the .NET build process.
 
 - Requires Node or something.
-- In `ui-webview/src/`, run `npm install` and then `npm run build`
+- In `ui-webview-windows/src/`, run `npm install` and then `npm run build-and-copy`
 
 #### Build the desktop app that shows the React app
 
-Build the `ui-webview/` project.
+Build the `ui-webview-windows/` project.
 
 #### Importing the data
 
 *The instructions to import the data have not been written yet.*
 
-- Login to the VRChat and Resonite accounts using the `ui-webview` project by launching the WebView application.
+- Login to the VRChat and Resonite accounts using the `ui-webview-windows` project or the `ui-photino-linux` project by launching the UI application.
     - This app does not currently support 2FA using authenticator, please check back another time.
 - In the Connections tab of the desktop app, click the "Start data collection" button, then go back to the Contacts page and wait.
     - There is currently no indication of when the data collection is finished.
@@ -107,9 +109,9 @@ Build the `ui-webview/` project.
 
 Main application execution projects:
 
-- **ui-webview**: This is a WebView2 program that shows a React app that has been built, for use on Windows.
-- **ui-photino**: This is a version of the program being made compatible for Linux and uses Photino instead of WebView2.
-- **ui-webview/src/**: This is the unbuilt React app. It is meant to be built using `npm run build-and-copy` so that the .NET program will copy its contents to the desktop app.
+- **ui-webview-windows**: This is a WebView2 program that shows a React app that has been built, for use on Windows.
+- **ui-photino**: This is a Photino program that shows a React app that has been built, for use on Linux.
+- **ui-frontend/src/**: This is the unbuilt React app. It is meant to be built using `npm run build-and-copy` so that the .NET program will copy its contents to the desktop app.
 - **program**: This is a developer program to import the data. It is not user-friendly whatsoever.
 
 Core projects:
