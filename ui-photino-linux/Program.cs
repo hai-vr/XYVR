@@ -8,15 +8,13 @@ using Photino.NET.Server;
 
 namespace XYVR.UI.Photino
 {
-    //NOTE: To hide the console window, go to the project properties and change the Output Type to Windows Application.
-    // Or edit the .csproj file and change the <OutputType> tag from "WinExe" to "Exe".
     class Program
     {
         private const string LoadBearingSpace = " "; // This space is load-bearing, it makes the icon work in Windows 11 ¯\_(ツ)_/¯
         
-        private static JsonSerializerSettings _serializer;
-        private static PhotinoWindow? _window;
-        private static AppLifecycle _appLifecycle;
+        private static JsonSerializerSettings _serializer = null!;
+        private static PhotinoWindow _window = null!;
+        private static AppLifecycle _appLifecycle = null!;
 
         [STAThread]
         static void Main(string[] args)
@@ -45,8 +43,10 @@ namespace XYVR.UI.Photino
                     // Users can resize windows by default.
                     // Let's make this one fixed instead.
                     // .SetResizable(false)
-                    .RegisterWebMessageReceivedHandler((object sender, string message) =>
+                    .RegisterWebMessageReceivedHandler((sender, message) =>
                     {
+                        if (sender == null) throw new InvalidOperationException("Got null sender");
+                        
                         var window = (PhotinoWindow)sender;
                         Task.Run(async () => await HandleMessage(window, message));
                     });
@@ -89,7 +89,11 @@ namespace XYVR.UI.Photino
         {
             var sendMessage = JsonConvert.DeserializeObject<PhotinoSendMessage>(message, _serializer)!;
             var endpoint = GetEndpointOrNull(sendMessage);
-            if (endpoint == null) await ReplyError(window, sendMessage.id, "Invalid endpoint");
+            if (endpoint == null)
+            {
+                await ReplyError(window, sendMessage.id, "Invalid endpoint");
+                return;
+            }
 
             try
             {
@@ -110,7 +114,7 @@ namespace XYVR.UI.Photino
                     {
                         var expectedType = parameterTypes[i].ParameterType;
                         if (parameters[i] is JToken jToken)
-                            convertedParameters[i] = jToken.ToObject(expectedType);
+                            convertedParameters[i] = jToken.ToObject(expectedType)!;
                         else if (parameters[i].GetType() != expectedType && expectedType != typeof(object))
                             convertedParameters[i] = Convert.ChangeType(parameters[i], expectedType);
                         else
@@ -155,6 +159,7 @@ namespace XYVR.UI.Photino
             var receiveMessage = new PhotinoReceiveMessage
             {
                 isPhotinoMessage = true,
+                isEvent = false,
                 id = sendMessageId,
                 payload = result,
                 isError = false
@@ -169,6 +174,7 @@ namespace XYVR.UI.Photino
             var receiveMessage = new PhotinoReceiveMessage
             {
                 isPhotinoMessage = true,
+                isEvent = false,
                 id = sendMessageId,
                 payload = invalidEndpoint,
                 isError = true
@@ -177,17 +183,16 @@ namespace XYVR.UI.Photino
             await window.SendWebMessageAsync(JsonConvert.SerializeObject(receiveMessage, _serializer));
         }
 
-        private static object? GetEndpointOrNull(PhotinoSendMessage? sendMessage)
+        private static object? GetEndpointOrNull(PhotinoSendMessage sendMessage)
         {
-            switch (sendMessage.payload.endpoint)
+            return sendMessage.payload.endpoint switch
             {
-                case "appApi": return _appLifecycle.AppBff;
-                case "dataCollectionApi": return _appLifecycle.DataCollectionBff;
-                case "preferencesApi": return _appLifecycle.PreferencesBff;
-                case "liveApi": return _appLifecycle.LiveBff;
-            }
-
-            return null;
+                "appApi" => _appLifecycle.AppBff,
+                "dataCollectionApi" => _appLifecycle.DataCollectionBff,
+                "preferencesApi" => _appLifecycle.PreferencesBff,
+                "liveApi" => _appLifecycle.LiveBff,
+                _ => null
+            };
         }
 
         private static void DispatchFn(Action action)
@@ -195,27 +200,4 @@ namespace XYVR.UI.Photino
             action();
         }
     }
-}
-
-internal class PhotinoSendMessage
-{
-    public string id;
-    public PhotinoSendMessagePayload payload;
-}
-
-internal class PhotinoSendMessagePayload
-{
-    public string endpoint;
-    public string methodName;
-    public object[] parameters;
-}
-
-internal class PhotinoReceiveMessage
-{
-    public bool isPhotinoMessage;
-    public bool isEvent;
-    
-    public string id;
-    public string? payload;
-    public bool isError;
 }
