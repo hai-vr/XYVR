@@ -1,5 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 using Newtonsoft.Json;
+using XYVR.Core;
 using XYVR.Scaffold;
 
 namespace XYVR.UI.Backend;
@@ -28,7 +29,7 @@ public class PreferencesBFF : IPreferencesBFF
     
     public async Task<string> GetPreferences()
     {
-        Console.WriteLine("Getting preferences");
+        XYVRLogging.WriteLine("Getting preferences");
         _lastPrefs = await Scaffolding.OpenReactAppPreferences();
         
         return ToJSON(_lastPrefs);
@@ -36,7 +37,7 @@ public class PreferencesBFF : IPreferencesBFF
 
     public Task SetPreferences(string preferences)
     {
-        Console.WriteLine("Set preferences was called.");
+        XYVRLogging.WriteLine("Set preferences was called.");
         _newPrefs = JsonConvert.DeserializeObject<ReactAppPreferences>(preferences)!;
         return Task.CompletedTask;
     }
@@ -46,7 +47,7 @@ public class PreferencesBFF : IPreferencesBFF
         if (_newPrefs == null) return;
         if (_lastPrefs == null || !_newPrefs.Equals(_lastPrefs))
         {
-            Console.WriteLine("Saving preferences");
+            XYVRLogging.WriteLine("Saving preferences");
             _lastPrefs = _newPrefs;
             Task.Run(async () => await Scaffolding.SaveReactAppPreferences(_newPrefs))
                 .Wait();

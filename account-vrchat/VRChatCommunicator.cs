@@ -96,7 +96,7 @@ internal class VRChatCommunicator
 
         if (missingFriends.Count > 0)
         {
-            Console.WriteLine($"Listing all friends caused a few misses ({missingFriends.Count}), we'll get them now {string.Join(", ", missingFriends)}");
+            XYVRLogging.WriteLine($"Listing all friends caused a few misses ({missingFriends.Count}), we'll get them now {string.Join(", ", missingFriends)}");
         }
         
         foreach (var userId in missingFriends)

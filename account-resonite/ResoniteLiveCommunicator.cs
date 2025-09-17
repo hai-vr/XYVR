@@ -51,7 +51,7 @@ internal partial class ResoniteLiveCommunicator
         
         _api ??= await InitializeApi();
         var sessionsTemp = await _api.GetSessions__Temp(DataCollectionReason.CollectSessionLocationInformation);
-        Console.WriteLine(sessionsTemp);
+        XYVRLogging.WriteLine(sessionsTemp);
     }
     
     public async Task Disconnect()
@@ -113,14 +113,14 @@ internal partial class ResoniteLiveCommunicator
         // FIXME: Resonite sends a massive amount of session updates objects per second. This needs to be restricted further
         if (_sessionIdToSessionUpdate.TryAdd(sessionUpdate.sessionId, sessionUpdate))
         {
-            Console.WriteLine($"Storing for the first time information about {sessionUpdate.sessionId}, which is {sessionUpdate.name}");
+            XYVRLogging.WriteLine($"Storing for the first time information about {sessionUpdate.sessionId}, which is {sessionUpdate.name}");
             anySessionUpdated = true;
         }
         else
         {
             if (_sessionIdsToWatch.Contains(sessionUpdate.sessionId))
             {
-                Console.WriteLine($"Updating information about a session we actually care about: {sessionUpdate.sessionId}, which is {sessionUpdate.name}");
+                XYVRLogging.WriteLine($"Updating information about a session we actually care about: {sessionUpdate.sessionId}, which is {sessionUpdate.name}");
                 _sessionIdToSessionUpdate[sessionUpdate.sessionId] = sessionUpdate;
                 anySessionUpdated = true;
             }
@@ -180,7 +180,7 @@ internal partial class ResoniteLiveCommunicator
                 }
                 else
                 {
-                    Console.WriteLine($"We don't know the session GUID for {sessionUpdate.sessionId}");
+                    XYVRLogging.WriteLine($"We don't know the session GUID for {sessionUpdate.sessionId}");
                     return new ImmutableLiveUserSessionState
                     {
                         knowledge = LiveUserSessionKnowledge.KnownButNoData

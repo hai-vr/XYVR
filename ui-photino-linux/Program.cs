@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using XYVR.UI.Backend;
 using Photino.NET.Server;
+using XYVR.Core;
 
 namespace XYVR.UI.Photino
 {
@@ -64,7 +65,7 @@ namespace XYVR.UI.Photino
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                XYVRLogging.WriteLine(e);
                 throw;
             }
         }

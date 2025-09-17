@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.SignalR.Client;
 using Newtonsoft.Json;
 using XYVR.API.Audit;
+using XYVR.Core;
 
 namespace XYVR.AccountAuthority.Resonite;
 
@@ -97,19 +98,19 @@ internal class ResoniteSignalRClient
 
     private Task WhenConnectionClosed(Exception? exception)
     {
-        Console.WriteLine($"Connection closed. Exception?: {exception?.Message}");
+        XYVRLogging.WriteLine($"Connection closed. Exception?: {exception?.Message}");
         return Task.CompletedTask;
     }
 
     private Task WhenReconnecting(Exception? exception)
     {
-        Console.WriteLine($"Reconnecting... Exception?: {exception?.Message}");
+        XYVRLogging.WriteLine($"Reconnecting... Exception?: {exception?.Message}");
         return Task.CompletedTask;
     }
 
     private async Task WhenReconnected(string? connectionId)
     {
-        Console.WriteLine($"Reconnected with connection ID: {connectionId}");
+        XYVRLogging.WriteLine($"Reconnected with connection ID: {connectionId}");
         if (OnReconnected != null) await OnReconnected?.Invoke();
     }
     

@@ -38,7 +38,7 @@ public class AppBFF : IAppBFF
         var isHttp = url.ToLowerInvariant().StartsWith("https://") || url.ToLowerInvariant().StartsWith("http://");
         if (!isHttp)
         {
-            Console.WriteLine($"Refusing to open link: {url}");
+            XYVRLogging.WriteLine($"Refusing to open link: {url}");
             return;
         }
 
@@ -60,7 +60,7 @@ public class AppBFF : IAppBFF
 
     public async Task FusionIndividuals(string toDesolidarize, string toDestroy)
     {
-        Console.WriteLine($"Fusion individuals was called: {toDesolidarize}, {toDestroy}");
+        XYVRLogging.WriteLine($"Fusion individuals was called: {toDesolidarize}, {toDestroy}");
         if (toDesolidarize == toDestroy) throw new ArgumentException("Cannot fusion an Individual with itself");
         
         var to = _appLifecycle.IndividualRepository.GetByGuid(toDesolidarize);
@@ -71,7 +71,7 @@ public class AppBFF : IAppBFF
 
     public async Task DesolidarizeIndividuals(string toDesolidarize)
     {
-        Console.WriteLine($"Desolidarize was called: {toDesolidarize}");
+        XYVRLogging.WriteLine($"Desolidarize was called: {toDesolidarize}");
         
         var individual = _appLifecycle.IndividualRepository.GetByGuid(toDesolidarize);
         if (individual.accounts.Length <= 1) return;

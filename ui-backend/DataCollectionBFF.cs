@@ -64,7 +64,7 @@ public class DataCollectionBFF : IDataCollectionBFF
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            XYVRLogging.WriteLine(e);
             throw;
         }
         finally

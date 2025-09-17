@@ -26,7 +26,7 @@ internal class ResoniteCommunicator
         
         if (_uid == null)
         {
-            Console.Error.WriteLine($"UID missing. Do you need one? Here's a random UID: {ResoniteAPI.RandomUID__NotCryptographicallySecure()}");
+            XYVRLogging.ErrorWriteLine($"UID missing. Do you need one? Here's a random UID: {ResoniteAPI.RandomUID__NotCryptographicallySecure()}");
             throw new ArgumentException("Missing UID");
         }
     }

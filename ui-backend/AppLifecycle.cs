@@ -36,8 +36,8 @@ public class AppLifecycle
         var lockfile = new FileLock(Scaffolding.LockfileFilePath);
         lockfile.AcquireLock();
 
-        Console.WriteLine("Application startup");
-        Console.WriteLine($"Version is {VERSION.version}");
+        XYVRLogging.WriteLine("Application startup");
+        XYVRLogging.WriteLine($"Version is {VERSION.version}");
     }
 
     public async Task WhenWindowLoaded(Func<EventToSendToReact, Task> scriptRunnerFn)
@@ -63,18 +63,18 @@ public class AppLifecycle
     {
         try
         {
-            Console.WriteLine("Saving...");
+            XYVRLogging.WriteLine("Saving...");
             PreferencesBff.OnClosed();
             LiveBff.OnClosed();
             foreach (var authority in _authorities)
             {
                 await authority.SaveWhateverNecessary();
             }
-            Console.WriteLine("Saved");
+            XYVRLogging.WriteLine("Saved");
         }
         catch (Exception exception)
         {
-            Console.WriteLine(exception);
+            XYVRLogging.WriteLine(exception);
             throw;
         }
     }

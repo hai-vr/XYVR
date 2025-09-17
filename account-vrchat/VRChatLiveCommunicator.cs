@@ -68,7 +68,7 @@ internal class VRChatLiveCommunicator
 
     private async Task ProcessQueue()
     {
-        Console.WriteLine("Processing queue");
+        XYVRLogging.WriteLine("Processing queue");
         _api ??= await InitializeAPI();
         
         while (_queue.Count > 0)
@@ -201,7 +201,7 @@ internal class VRChatLiveCommunicator
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e);
+                    XYVRLogging.WriteLine(e);
                     throw;
                 }
             }
@@ -258,7 +258,7 @@ internal class VRChatLiveCommunicator
                 var isContentUserNull = content.user == null;
                 if (isContentUserNull)
                 {
-                    Console.Error.WriteLine($"unexpected content user is null on {content.userId} {content.location}");
+                    XYVRLogging.ErrorWriteLine($"unexpected content user is null on {content.userId} {content.location}");
                 }
                 OnlineStatus? onlineStatus = type is "user-update" || isContentUserNull ? null : ParseStatus(type, content.location, content.user.platform, content.user.status);
                 var figureOutSessionStateOrNull = isSessionKnowable ? session != null ? new ImmutableLiveUserSessionState
@@ -280,12 +280,12 @@ internal class VRChatLiveCommunicator
             }
             else
             {
-                Console.WriteLine($"Received UNHANDLED message of type {type} from vrc ws api");
+                XYVRLogging.WriteLine($"Received UNHANDLED message of type {type} from vrc ws api");
             }
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            XYVRLogging.WriteLine(e);
             throw;
         }
     }
@@ -406,7 +406,7 @@ internal class VRChatLiveCommunicator
             }
             else
             {
-                Console.WriteLine($"Location is not parseable as a world: {location}");
+                XYVRLogging.WriteLine($"Location is not parseable as a world: {location}");
                 return null;
             }
         }
@@ -425,8 +425,8 @@ internal class VRChatLiveCommunicator
         var job = new WorldQueueJob { worldId = worldId };
         if (shouldAttemptQueueing && !_allQueued.Contains(job))
         {
-            if (cachedWorldNullable != null) Console.WriteLine($"We don't know world id {worldId}, will queue fetch...");
-            else Console.WriteLine($"We need to refresh our knowledge of world id {worldId}, will queue fetch...");
+            if (cachedWorldNullable != null) XYVRLogging.WriteLine($"We don't know world id {worldId}, will queue fetch...");
+            else XYVRLogging.WriteLine($"We need to refresh our knowledge of world id {worldId}, will queue fetch...");
 
             _allQueued.Add(job);
             _queue.Enqueue(job);
@@ -462,10 +462,10 @@ internal class VRChatLiveCommunicator
 
     private void WhenDisconnected(string reason)
     {
-        Console.WriteLine($"We got disconnected from the vrc ws api. Reason: {reason}");
+        XYVRLogging.WriteLine($"We got disconnected from the vrc ws api. Reason: {reason}");
         if (!_hasInitiatedDisconnect)
         {
-            Console.WriteLine("Will try reconnecting.");
+            XYVRLogging.WriteLine("Will try reconnecting.");
             Task.Run(async () =>
             {
                 await Connect();

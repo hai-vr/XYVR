@@ -36,7 +36,7 @@ public class LiveBFF : ILiveBFF
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            XYVRLogging.WriteLine(e);
             throw;
         }
     }
@@ -50,7 +50,7 @@ public class LiveBFF : ILiveBFF
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            XYVRLogging.WriteLine(e);
             throw;
         }
     }
@@ -97,12 +97,12 @@ public class LiveBFF : ILiveBFF
             {
                 try
                 {
-                    Console.WriteLine($"Stopping monitoring of {agent.GetType().Name}");
+                    XYVRLogging.WriteLine($"Stopping monitoring of {agent.GetType().Name}");
                     await agent.StopMonitoring();
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e);
+                    XYVRLogging.WriteLine(e);
                     throw;
                 }
             });
@@ -125,12 +125,11 @@ public class LiveBFF : ILiveBFF
         {
             if (_doWeCareAboutThisSessionGuid.Contains(session.guid))
             {
-                Console.WriteLine($"We no longer care about session: {session.inAppVirtualSpaceName}");
+                XYVRLogging.WriteLine($"We no longer care about session: {session.inAppVirtualSpaceName} in {session.namedApp}");
                 _doWeCareAboutThisSessionGuid.Remove(session.guid);
             }
             else
             {
-                Console.WriteLine($"We do not care about session: {session.inAppVirtualSpaceName}");
                 return;
             }
         }

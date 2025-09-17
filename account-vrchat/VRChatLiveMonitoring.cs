@@ -41,18 +41,18 @@ public class VRChatLiveMonitoring : ILiveMonitoring
             _liveComms = new VRChatLiveCommunicator(_credentialsStorage, _callerInAppIdentifier, new DoNotStoreAnythingStorage(), _worldNameCache);
             _liveComms.OnLiveUpdateReceived += async update =>
             {
-                Console.WriteLine($"OnLiveUpdateReceived: {JsonConvert.SerializeObject(update, serializer)}");
+                XYVRLogging.WriteLine($"OnLiveUpdateReceived: {JsonConvert.SerializeObject(update, serializer)}");
                 await _monitoring.MergeUser(update);
             };
             _liveComms.OnLiveSessionReceived += async session =>
             {
                 _sessionsOfInterest.Add(session.inAppSessionIdentifier);
-                Console.WriteLine($"OnLiveSessionReceived: {JsonConvert.SerializeObject(session, serializer)}");
+                XYVRLogging.WriteLine($"OnLiveSessionReceived: {JsonConvert.SerializeObject(session, serializer)}");
                 return await _monitoring.MergeSession(session);
             };
             _liveComms.OnWorldCached += async world =>
             {
-                Console.WriteLine($"OnWorldCached: {JsonConvert.SerializeObject(world, serializer)}");
+                XYVRLogging.WriteLine($"OnWorldCached: {JsonConvert.SerializeObject(world, serializer)}");
 
                 var allSessionsOnThisWorld = _monitoring.GetAllSessions(NamedApp.VRChat)
                     .Where(session => session.inAppSessionIdentifier.StartsWith(world.worldId))
@@ -95,13 +95,13 @@ public class VRChatLiveMonitoring : ILiveMonitoring
                     .Where(session => session.participants.Length > 0)
                     .OrderByDescending(session => session.currentAttendance ?? session.participants.Length)
                     .ToList();
-                Console.WriteLine($"Requesting to refresh all sessions of our interest (total of {sessionsToUpdate.Count} sessions)");
+                XYVRLogging.WriteLine($"Requesting to refresh all sessions of our interest (total of {sessionsToUpdate.Count} sessions)");
                 await _liveComms.QueueUpdateSessionsIfApplicable(sessionsToUpdate);
             }
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            XYVRLogging.WriteLine(e);
             throw;
         }
     }
@@ -113,10 +113,10 @@ public class VRChatLiveMonitoring : ILiveMonitoring
         {
             if (!_isConnected) return;
             
-            Console.WriteLine("Will try to cancel token");
+            XYVRLogging.WriteLine("Will try to cancel token");
             // await _cancellationTokenSource.CancelAsync();
             _cancellationTokenSource.CancelAsync(); // FIXME: we have a problem when we wait for this to finish, it never completes. Why?
-            Console.WriteLine("Token cancelled. Will try to disconnect");
+            XYVRLogging.WriteLine("Token cancelled. Will try to disconnect");
             
             await _liveComms.Disconnect();
             _isConnected = false;

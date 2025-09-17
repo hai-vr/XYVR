@@ -259,7 +259,7 @@ internal class ResoniteAPI
         if (!_useRateLimiting) return;
 
         var millisecondsDelay = _random.Next(400, 600); // Introduce some irregularity
-        Console.WriteLine($"Got {urlForLogging} ; Waiting {millisecondsDelay}ms...");
+        XYVRLogging.WriteLine($"Got {urlForLogging} ; Waiting {millisecondsDelay}ms...");
 
         await Task.Delay(millisecondsDelay);
     }

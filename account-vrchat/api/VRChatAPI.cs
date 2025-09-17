@@ -398,7 +398,7 @@ internal class VRChatAPI
     {
         if (statusCode == HttpStatusCode.TooManyRequests)
         {
-            Console.WriteLine($"Got {urlForLogging} ; however, TooManyRequests was received. Waiting 70 seconds.");
+            XYVRLogging.WriteLine($"Got {urlForLogging} ; however, TooManyRequests was received. Waiting 70 seconds.");
             await Task.Delay(TimeSpan.FromSeconds(70));
             
             return;
@@ -407,7 +407,7 @@ internal class VRChatAPI
         if (!_useRateLimiting) return;
 
         var millisecondsDelay = (int)(_random.Next(700, 1300) * (shortened ? 0.25f : 1f)); // Introduce some irregularity
-        Console.WriteLine($"Got {urlForLogging} ; Waiting {millisecondsDelay}ms...");
+        XYVRLogging.WriteLine($"Got {urlForLogging} ; Waiting {millisecondsDelay}ms...");
 
         await Task.Delay(millisecondsDelay);
     }
