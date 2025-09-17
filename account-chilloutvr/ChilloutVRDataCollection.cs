@@ -6,7 +6,8 @@ namespace XYVR.AccountAuthority.ChilloutVR;
 public class ChilloutVRDataCollection(IndividualRepository repository, ICredentialsStorage credentialsStorage, IResponseCollector storage) : IDataCollection
 {
     private ChilloutVRAPI? _api;
-    private string _userId;
+    private string? _userId;
+    private string? _username;
 
     public Task<List<ImmutableNonIndexedAccount>> RebuildFromDataCollectionStorage(List<ResponseCollectionTrail> trails)
     {
@@ -18,6 +19,31 @@ public class ChilloutVRDataCollection(IndividualRepository repository, ICredenti
         try
         {
             _api ??= await InitializeAPI();
+            if (_api == null || _userId == null || _username == null) throw new InvalidOperationException("Unable to initialize API");
+
+            var local = repository.MergeAccounts([
+                new ImmutableNonIndexedAccount
+                {
+                    namedApp = NamedApp.ChilloutVR,
+                    qualifiedAppName = ChilloutVRAuthority.QualifiedAppName,
+                    inAppIdentifier = _userId,
+                    inAppDisplayName = _username,
+                    callers = [
+                        new ImmutableCallerAccount
+                        {
+                            isAnonymous = false,
+                            inAppIdentifier = _userId,
+                            isContact = true,
+                            note = new ImmutableNote
+                            {
+                                status = NoteState.NeverHad,
+                                text = null
+                            }
+                        }
+                    ]
+                }
+            ]);
+            await jobHandler.NotifyAccountUpdated(local.ToList());
 
             var results = new List<ImmutableAccountIdentification>();
         
@@ -96,6 +122,7 @@ public class ChilloutVRDataCollection(IndividualRepository repository, ICredenti
         {
             var deserialized__sensitive = JsonConvert.DeserializeObject<ChilloutVRAuthStorage>(token__sensitive)!;
             _userId = deserialized__sensitive.userId;
+            _username = deserialized__sensitive.username;
             api.Provide(deserialized__sensitive);
         }
 
