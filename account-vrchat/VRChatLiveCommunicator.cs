@@ -224,9 +224,12 @@ internal class VRChatLiveCommunicator
         {
             var rootObj = JObject.Parse(msg);
             var type = rootObj["type"].Value<string>();
-        
-            if (type is "friend-online" or "friend-update" or "friend-offline" or "friend-location" or "friend-active" or "user-location")
+            
+            if (type is "friend-online" or "friend-update" or "friend-location" or "friend-active" or "user-location" or "friend-offline")
             {
+                var isSessionKnowable = type is "friend-online" or "friend-location" or "friend-offline" or "friend-active";
+                var isOffline = type is "friend-offline" or "friend-active";
+                
                 // FIXME: We are ignoring user-update for now, it causes issues where the user is considered to be back online even though they are just on the website
                 // despite the `onlineStatus = type is "user-update" ? null : ...` below
                 
@@ -242,23 +245,27 @@ internal class VRChatLiveCommunicator
                 {
                     cachedWorld = null;
                 }
-
+                
                 ImmutableLiveSession session = null;
-                if (content.location != null && content.location.StartsWith("wrld_"))
+                if (isSessionKnowable && !isOffline && content.location != null && content.location.StartsWith("wrld_"))
                 {
                     session = await OnLiveSessionReceived(MakeNonIndexedBasedOnWorld(content.location, cachedWorld));
 
                     await QueueSessionFetchIfApplicable(content.location);
                 }
                 
-                
                 // FIXME: This is a task???
-                OnlineStatus? onlineStatus = type is "user-update" ? null : ParseStatus(type, content.location, content.user.platform, content.user.status);
-                var figureOutSessionStateOrNull = session != null ? new ImmutableLiveUserSessionState
+                var isContentUserNull = content.user == null;
+                if (isContentUserNull)
+                {
+                    Console.Error.WriteLine($"unexpected content user is null on {content.userId} {content.location}");
+                }
+                OnlineStatus? onlineStatus = type is "user-update" || isContentUserNull ? null : ParseStatus(type, content.location, content.user.platform, content.user.status);
+                var figureOutSessionStateOrNull = isSessionKnowable ? session != null ? new ImmutableLiveUserSessionState
                 {
                     knowledge = LiveUserSessionKnowledge.Known,
                     sessionGuid = session.guid
-                } : FigureOutSessionStateOrNull(type, onlineStatus, content, session);
+                } : FigureOutSessionStateOrNull(type, onlineStatus, content, session) : null;
                 await OnLiveUpdateReceived(new ImmutableLiveUserUpdate
                 {
                     trigger = $"WS-{type}",
@@ -268,7 +275,7 @@ internal class VRChatLiveCommunicator
                     onlineStatus = onlineStatus,
                     callerInAppIdentifier = _callerInAppIdentifier,
                     customStatus = content.user.statusDescription,
-                    mainSession = figureOutSessionStateOrNull
+                    mainSession = isSessionKnowable ? figureOutSessionStateOrNull : null
                 });
             }
             else
