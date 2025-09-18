@@ -503,7 +503,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                                     const aCapacity = a.sessionCapacity || a.virtualSpaceDefaultCapacity || 0;
                                     const bCapacity = b.sessionCapacity || b.virtualSpaceDefaultCapacity || 0;
                                     const dCapacity = bCapacity - aCapacity;
-                                    if (dCapacity !== 0) return dCapacity;
+                                    if (dCapacity !== 0) return -dCapacity; // Prioritize low capacity by negating it
 
                                     return 0;
                                 })
