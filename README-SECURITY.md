@@ -83,7 +83,7 @@ they transmit sensitive information to the backend. The backend takes care of ac
 
 The session tokens and cookies obtained as a result of logging in are not transmitted back to the frontend upon successful login.
 
-If there is code injection in the frontend, the frontend should not be able to extract session information and tokens as there is no endpoint in the backend
+If there is code injection in the frontend, the frontend should not be able to extract session cookies and tokens as there is no endpoint in the backend
 that allows this.
 
 ## Frontend communication with external services
