@@ -162,7 +162,7 @@ internal class SessionUpdateJsonObject
     // public DateTime lastUpdate;
     // public string accessLevel;
     // public bool hideFromListing;
-    // public string broadcastKey;
+    public string broadcastKey;
     // public bool awayKickEnabled;
     // public int awayKickMinutes;
     // public bool hasEnded;

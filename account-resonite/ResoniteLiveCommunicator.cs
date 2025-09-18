@@ -120,7 +120,6 @@ internal partial class ResoniteLiveCommunicator
         {
             if (_sessionIdsToWatch.Contains(sessionUpdate.sessionId))
             {
-                XYVRLogging.WriteLine($"Updating information about a session we actually care about: {sessionUpdate.sessionId}, which is {sessionUpdate.name}");
                 _sessionIdToSessionUpdate[sessionUpdate.sessionId] = sessionUpdate;
                 anySessionUpdated = true;
             }
@@ -154,7 +153,11 @@ internal partial class ResoniteLiveCommunicator
             if (sess != null)
             {
                 sessionUpdate = _sessionIdToSessionUpdate.GetValueOrDefault(sess.sessionId);
-                _sessionIdsToWatch.Add(sess.sessionId);
+                var added = _sessionIdsToWatch.Add(sess.sessionId);
+                if (added && sessionUpdate != null)
+                {
+                    await _srClient.ListenOnKey(sessionUpdate.broadcastKey);
+                }
             }
         }
         

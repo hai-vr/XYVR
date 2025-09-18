@@ -125,7 +125,7 @@ public class LiveBFF : ILiveBFF
         {
             if (_doWeCareAboutThisSessionGuid.Contains(session.guid))
             {
-                XYVRLogging.WriteLine($"We no longer care about session: {session.inAppVirtualSpaceName} in {session.namedApp}");
+                XYVRLogging.WriteLine($"All known participants have left {session.inAppVirtualSpaceName} in {session.namedApp}, so we will stop monitoring it.");
                 _doWeCareAboutThisSessionGuid.Remove(session.guid);
             }
             else

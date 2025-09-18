@@ -28,6 +28,7 @@ internal class VRChatLiveCommunicator
     private readonly Lock _queueLock = new();
     private readonly HashSet<IQueueJob> _allQueued = new();
     private readonly Queue<IQueueJob> _queue = new();
+    private readonly Queue<IQueueJob> _highPriorityQueue = new();
     private Task _queueTask = Task.CompletedTask;
 
     private VRChatWebsocketClient _wsClient;
@@ -71,9 +72,9 @@ internal class VRChatLiveCommunicator
         XYVRLogging.WriteLine("Processing queue");
         _api ??= await InitializeAPI();
         
-        while (_queue.Count > 0)
+        while (_queue.Count > 0 || _highPriorityQueue.Count > 0)
         {
-            var dequeued = _queue.Dequeue();
+            var dequeued = _highPriorityQueue.Count > 0 ? _highPriorityQueue.Dequeue() : _queue.Dequeue();
             if (dequeued is WorldQueueJob worldQueueJob)
             {
                 var worldId = worldQueueJob.worldId;
@@ -173,6 +174,15 @@ internal class VRChatLiveCommunicator
                             sessionGuid = actualSession.guid
                         };
                     }
+                    else if (knowledgePartial == null && worldId != null)
+                    {
+                        var actualSession = await OnLiveSessionReceived(MakeNonIndexedBasedOnWorld(friend.location, null));
+                        sessionState = new ImmutableLiveUserSessionState
+                        {
+                            knowledge = LiveUserSessionKnowledge.Known,
+                            sessionGuid = actualSession.guid
+                        };
+                    }
                     else
                     {
                         sessionState = new ImmutableLiveUserSessionState
@@ -189,7 +199,7 @@ internal class VRChatLiveCommunicator
                         namedApp = NamedApp.VRChat,
                         qualifiedAppName = VRChatCommunicator.VRChatQualifiedAppName,
                         inAppIdentifier = friend.id,
-                        onlineStatus = ParseStatus("xxx", friend.location, friend.platform, friend.status),
+                        onlineStatus = friend.platform == "web" ? OnlineStatus.Offline : ParseStatus(friend.status, friend.platform),
                         callerInAppIdentifier = _callerInAppIdentifier,
                         customStatus = friend.statusDescription,
                         mainSession = sessionState,
@@ -225,57 +235,86 @@ internal class VRChatLiveCommunicator
             var rootObj = JObject.Parse(msg);
             var type = rootObj["type"].Value<string>();
             
-            if (type is "friend-online" or "friend-update" or "friend-location" or "friend-active" or "user-location" or "friend-offline")
+            var contentddd = JsonConvert.DeserializeObject<VRChatWebsocketContentContainingUser>(rootObj["content"].Value<string>())!;
+            XYVRLogging.WriteLine($"-- [[{type}]] from vrc ws api. {contentddd.userId} ({contentddd.user?.displayName}) location: {contentddd.location} -- platform: {contentddd.user?.platform} --- status: {contentddd.user?.status}");
+            
+            var isSessionKnowable = type is "friend-online" or "friend-location" or "friend-offline" or "friend-active";
+            if (isSessionKnowable)
             {
-                var isSessionKnowable = type is "friend-online" or "friend-location" or "friend-offline" or "friend-active";
-                var isOffline = type is "friend-offline" or "friend-active";
-                
-                // FIXME: We are ignoring user-update for now, it causes issues where the user is considered to be back online even though they are just on the website
-                // despite the `onlineStatus = type is "user-update" ? null : ...` below
-                
                 var content = JsonConvert.DeserializeObject<VRChatWebsocketContentContainingUser>(rootObj["content"].Value<string>())!;
-
-                var worldId = content.location != null ? LocationAsWorldIdOrNull(content.location) : null;
-                CachedWorld? cachedWorld;
-                if (worldId != null)
+                
+                var isOffline = type is "friend-offline" or "friend-active";
+                if (!isOffline)
                 {
-                    cachedWorld = GetOrQueueWorldFetch(worldId);
+                    var worldId = content.location != null ? LocationAsWorldIdOrNull(content.location) : null;
+                    CachedWorld? cachedWorld;
+                    if (worldId != null)
+                    {
+                        cachedWorld = GetOrQueueWorldFetch(worldId);
+                    }
+                    else
+                    {
+                        cachedWorld = null;
+                    }
+                
+                    ImmutableLiveSession session = null;
+                    if (content.location != null && content.location.StartsWith("wrld_"))
+                    {
+                        session = await OnLiveSessionReceived(MakeNonIndexedBasedOnWorld(content.location, cachedWorld));
+
+                        await QueueSessionFetchIfApplicable(content.location);
+                    }
+                
+                    OnlineStatus? onlineStatus = content.user != null ? ParseStatus(content.user.status, content.user.platform) : null;
+                    var figureOutSessionStateOrNull = session != null ? new ImmutableLiveUserSessionState
+                    {
+                        knowledge = LiveUserSessionKnowledge.Known,
+                        sessionGuid = session.guid
+                    } : FigureOutSessionStateOrNull(type, onlineStatus, content, session);
+                    await OnLiveUpdateReceived(new ImmutableLiveUserUpdate
+                    {
+                        trigger = $"WS-{type}",
+                        namedApp = NamedApp.VRChat,
+                        qualifiedAppName = VRChatCommunicator.VRChatQualifiedAppName,
+                        inAppIdentifier = content.userId,
+                        onlineStatus = onlineStatus,
+                        callerInAppIdentifier = _callerInAppIdentifier,
+                        customStatus = content.user?.statusDescription,
+                        mainSession = isSessionKnowable ? figureOutSessionStateOrNull : null
+                    });
                 }
                 else
                 {
-                    cachedWorld = null;
-                }
+                    await OnLiveUpdateReceived(new ImmutableLiveUserUpdate
+                    {
+                        trigger = $"WS-{type}",
+                        namedApp = NamedApp.VRChat,
+                        qualifiedAppName = VRChatCommunicator.VRChatQualifiedAppName,
+                        inAppIdentifier = content.userId,
+                        onlineStatus = OnlineStatus.Offline,
+                        callerInAppIdentifier = _callerInAppIdentifier,
+                        customStatus = content.user?.statusDescription,
+                        mainSession = new ImmutableLiveUserSessionState
+                        {
+                            knowledge = LiveUserSessionKnowledge.Offline,
+                        }
+                    });
+                };
+            }
+            else if (type is "friend-update" or "user-location" or "user-update")
+            {
+                var content = JsonConvert.DeserializeObject<VRChatWebsocketContentContainingUser>(rootObj["content"].Value<string>())!;
                 
-                ImmutableLiveSession session = null;
-                if (isSessionKnowable && !isOffline && content.location != null && content.location.StartsWith("wrld_"))
-                {
-                    session = await OnLiveSessionReceived(MakeNonIndexedBasedOnWorld(content.location, cachedWorld));
-
-                    await QueueSessionFetchIfApplicable(content.location);
-                }
-                
-                // FIXME: This is a task???
-                var isContentUserNull = content.user == null;
-                if (isContentUserNull)
-                {
-                    XYVRLogging.ErrorWriteLine($"unexpected content user is null on {content.userId} {content.location}");
-                }
-                OnlineStatus? onlineStatus = type is "user-update" || isContentUserNull ? null : ParseStatus(type, content.location, content.user.platform, content.user.status);
-                var figureOutSessionStateOrNull = isSessionKnowable ? session != null ? new ImmutableLiveUserSessionState
-                {
-                    knowledge = LiveUserSessionKnowledge.Known,
-                    sessionGuid = session.guid
-                } : FigureOutSessionStateOrNull(type, onlineStatus, content, session) : null;
                 await OnLiveUpdateReceived(new ImmutableLiveUserUpdate
                 {
                     trigger = $"WS-{type}",
                     namedApp = NamedApp.VRChat,
                     qualifiedAppName = VRChatCommunicator.VRChatQualifiedAppName,
                     inAppIdentifier = content.userId,
-                    onlineStatus = onlineStatus,
+                    onlineStatus = null,
                     callerInAppIdentifier = _callerInAppIdentifier,
-                    customStatus = content.user.statusDescription,
-                    mainSession = isSessionKnowable ? figureOutSessionStateOrNull : null
+                    customStatus = content.user?.statusDescription,
+                    mainSession = null
                 });
             }
             else
@@ -303,13 +342,14 @@ internal class VRChatLiveCommunicator
         _api ??= await InitializeAPI();
         
         var worldIdAndInstanceId = WorldIdAndInstanceIdOrNull(location);
-        if (worldIdAndInstanceId != null && !_locationToInstance.TryGetValue(location, out var instance))
+        if (worldIdAndInstanceId != null)// && !_locationToInstance.TryGetValue(location, out var instance))
         {
             var queueJob = new InstanceQueueJob
             {
                 worldIdAndInstanceId = worldIdAndInstanceId
             };
-            if (!onlyConsiderItemsInQueue && !_allQueued.Contains(queueJob) || onlyConsiderItemsInQueue && !_queue.Contains(queueJob))
+            if (!onlyConsiderItemsInQueue && !_allQueued.Contains(queueJob)
+                || onlyConsiderItemsInQueue && !_queue.Contains(queueJob) && !_highPriorityQueue.Contains(queueJob))
             {
                 _queue.Enqueue(queueJob);
                 WakeUpQueue();
@@ -347,45 +387,38 @@ internal class VRChatLiveCommunicator
                 knowledge = LiveUserSessionKnowledge.Offline,
             };
         }
+
+        if (content.location == "private")
+        {
+            return new ImmutableLiveUserSessionState
+            {
+                knowledge = LiveUserSessionKnowledge.PrivateWorld,
+            };
+        }
+        else if (content.location == "traveling")
+        {
+            return new ImmutableLiveUserSessionState
+            {
+                knowledge = LiveUserSessionKnowledge.VRCTraveling,
+            };
+        }
         else if (type == "friend-location")
         {
-            // Order matters. "private" check comes before checking for location.
-            if (content.worldId == "private" || content.location == "private")
+            var sessionGuid = session?.guid;
+            if (sessionGuid == null)
             {
                 return new ImmutableLiveUserSessionState
                 {
-                    knowledge = LiveUserSessionKnowledge.PrivateWorld,
+                    knowledge = LiveUserSessionKnowledge.Indeterminate,
                 };
             }
             else
             {
-                var location = content.location;
-                if (location == "traveling")
+                return new ImmutableLiveUserSessionState
                 {
-                    return new ImmutableLiveUserSessionState
-                    {
-                        knowledge = LiveUserSessionKnowledge.VRCTraveling,
-                    };
-                }
-                else
-                {
-                    var sessionGuid = session?.guid;
-                    if (sessionGuid == null)
-                    {
-                        return new ImmutableLiveUserSessionState
-                        {
-                            knowledge = LiveUserSessionKnowledge.Indeterminate,
-                        };
-                    }
-                    else
-                    {
-                        return new ImmutableLiveUserSessionState
-                        {
-                            knowledge = LiveUserSessionKnowledge.Known,
-                            sessionGuid = sessionGuid
-                        };
-                    }
-                }
+                    knowledge = LiveUserSessionKnowledge.Known,
+                    sessionGuid = sessionGuid
+                };
             }
         }
         else
@@ -425,24 +458,26 @@ internal class VRChatLiveCommunicator
         var job = new WorldQueueJob { worldId = worldId };
         if (shouldAttemptQueueing && !_allQueued.Contains(job))
         {
-            if (cachedWorldNullable != null) XYVRLogging.WriteLine($"We don't know world id {worldId}, will queue fetch...");
-            else XYVRLogging.WriteLine($"We need to refresh our knowledge of world id {worldId}, will queue fetch...");
-
             _allQueued.Add(job);
-            _queue.Enqueue(job);
+            if (cachedWorldNullable != null)
+            {
+                XYVRLogging.WriteLine($"We don't know world id {worldId}, will queue fetch...");
+                _highPriorityQueue.Enqueue(job);
+            }
+            else
+            {
+                XYVRLogging.WriteLine($"We need to refresh our knowledge of world id {worldId}, will queue fetch...");
+                _queue.Enqueue(job);
+            }
+
             WakeUpQueue();
         }
             
         return cachedWorldNullable;
     }
 
-    private OnlineStatus ParseStatus(string type, string? contentLocation, string platform, string userStatus)
+    private OnlineStatus ParseStatus(string userStatus, string platform)
     {
-        if (contentLocation == "offline:offline") return OnlineStatus.Offline;
-        
-        if (type == "friend-active") return OnlineStatus.Offline;
-        if (type == "friend-offline") return OnlineStatus.Offline;
-        
         if (platform == "web") return OnlineStatus.Offline;
         
         return userStatus switch

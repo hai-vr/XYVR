@@ -4,16 +4,16 @@ public static class XYVRLogging
 {
     public static void WriteLine(string str)
     {
-        Console.WriteLine(str);
+        System.Diagnostics.Debug.WriteLine(str);
     }
     
     public static void WriteLine(Exception e)
     {
-        Console.WriteLine(e);
+        System.Diagnostics.Trace.TraceError("Exception occurred: {0}\nStack Trace: {1}", e.Message, e.StackTrace);
     }
 
     public static void ErrorWriteLine(string s)
     {
-        Console.Error.WriteLine(s);
+        System.Diagnostics.Trace.TraceError(s);
     }
 }
