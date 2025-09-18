@@ -11,6 +11,7 @@ import {
     type ConnectionAttemptResult,
     ConnectionAttemptResultType
 } from "../types/ConnectionAttemptTypes.ts";
+import {useTranslation} from "react-i18next";
 
 interface DeleteState {
     confirming: boolean;
@@ -27,6 +28,7 @@ interface ConnectorProps {
 
 const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated, debugMode } : ConnectorProps) => {
     const dotNetApi = new DotNetApi();
+    const { t } = useTranslation();
 
     const [login, setLogin] = useState('');
     const [password, setPassword] = useState('');
@@ -121,16 +123,20 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated, 
                                     className={`pill-option ${!useAccessKey ? 'active' : ''}`}
                                     onClick={() => setUseAccessKey(false)}
                                     disabled={isRequestInProgress}
+                                    title={t('connector.email.title')}
+                                    aria-label={t('connector.email.label')}
                                 >
-                                    Email
+                                    {t('connector.email.label')}
                                 </button>
                                 <button
                                     type="button"
                                     className={`pill-option ${useAccessKey ? 'active' : ''}`}
                                     onClick={() => setUseAccessKey(true)}
                                     disabled={isRequestInProgress}
+                                    title={t('connector.accessKey.title')}
+                                    aria-label={t('connector.accessKey.label')}
                                 >
-                                    Access Key
+                                    {t('connector.accessKey.label')}
                                 </button>
                             </div>)}
                             <input
@@ -171,7 +177,7 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated, 
                                     If your username has a @ symbol in it, ignore this message and continue to login.
                                 </p>
                             }
-                            <button title={`Login to ${virtualApp}`} onClick={() => tryLogin()} disabled={!login || !password || isRequestInProgress}>Login to {virtualApp}</button>
+                            <button title={t('connector.login.title', { app: virtualApp })} onClick={() => tryLogin()} disabled={!login || !password || isRequestInProgress}>{t('connector.login.label', { app: virtualApp })}</button>
                             <p className="info-message">
                                 {stayLoggedIn && connector.type === ConnectorType.ResoniteAPI && 'This application does not store your email and password, only a connection token that expires in 30 days. '}
                                 {stayLoggedIn && connector.type === ConnectorType.VRChatAPI && 'This application does not store your password, only a cookie. '}
@@ -186,16 +192,16 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated, 
                     )}
                     {isInTwoFactorMode && (
                         <>
-                            <h3 className="input-title">Enter your {virtualApp} 2FA code ({isTwoFactorEmail && `Email` || `Authenticator`})</h3>
+                            <h3 className="input-title">{t('connector.enter2fa.title', { app: virtualApp, method: isTwoFactorEmail ? 'Email' : 'Authenticator' })}</h3>
                             <input
                                 type={debugMode.demoMode !== DemonstrationMode.Disabled && 'password' || 'text'}
-                                placeholder={`2FA Code (${isTwoFactorEmail ? 'Email' : 'Authenticator'})`}
+                                placeholder={t('connector.enter2fa.placeholder', { method: isTwoFactorEmail ? 'Email' : 'Authenticator' })}
                                 value={twoFactorCode}
                                 onChange={(e) => setTwoFactorCode(e.target.value)}
                                 className="login-input"
                                 disabled={isRequestInProgress}
                             />
-                            <button title="Confirm" onClick={() => tryLogin()} disabled={!twoFactorCode || isRequestInProgress}>Confirm</button>
+                            <button title={t('connector.confirm.title')} onClick={() => tryLogin()} disabled={!twoFactorCode || isRequestInProgress}>{t('connector.confirm.label')}</button>
                         </>
                     )}
                 </div>
@@ -203,15 +209,15 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated, 
 
             <div className="connector-actions">
                 {connector.isLoggedIn && (
-                    <button title="Confirm" className="delete-button" onClick={() => tryLogout()} disabled={isRequestInProgress}>Log out</button>
+                    <button title={t('connection.logOut.title')} className="delete-button" onClick={() => tryLogout()} disabled={isRequestInProgress}>{t('connection.logOut.label')}</button>
                 )}
                 <button
                     disabled={isRequestInProgress || !isInTwoFactorMode && (!!login || !!password) || isInTwoFactorMode && !!twoFactorCode}
                     className={`delete-button ${deleteState?.confirming ? '' : ''}`}
                     onClick={() => onDeleteClick(connector.guid)}
-                    title={deleteState?.confirming ? 'Click again to confirm remove' : 'Remove connector'}
+                    title={deleteState?.confirming ? t('connection.removeConfirm.title') : t('connection.remove.title')}
                 >
-                    {deleteState?.confirming ? <><TriangleAlert /> Really remove?</> : <><X /><span>Remove</span></>}
+                    {deleteState?.confirming ? <><TriangleAlert /> {t('connection.removeConfirm.label')}</> : <><X /><span>{t('connection.remove.label')}</span></>}
                 </button>
             </div>
         </div>

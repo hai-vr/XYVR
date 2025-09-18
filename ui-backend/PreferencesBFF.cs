@@ -32,7 +32,7 @@ public class PreferencesBFF : IPreferencesBFF
         XYVRLogging.WriteLine("Getting preferences");
         _lastPrefs = await Scaffolding.OpenReactAppPreferences();
         
-        return ToJSON(_lastPrefs);
+        return ToJson(_lastPrefs);
     }
 
     public Task SetPreferences(string preferences)
@@ -54,7 +54,7 @@ public class PreferencesBFF : IPreferencesBFF
         }
     }
 
-    private string ToJSON(object result)
+    private string ToJson(ReactAppPreferences result)
     {
         return JsonConvert.SerializeObject(result, Formatting.None, _serializer);
     }

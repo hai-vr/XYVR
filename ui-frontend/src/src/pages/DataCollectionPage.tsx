@@ -7,11 +7,13 @@ import DarkModeToggleButton from "../components/DarkModeToggleButton.tsx";
 import {ConnectorType, type ConnectorTypeType, type FrontConnector} from "../types/ConnectorTypes.ts";
 import type {DebugFlags} from "../types/DebugFlags.ts";
 import {DotNetApi} from "../DotNetApi.ts";
+import {useTranslation} from "react-i18next";
 
 interface DataCollectionPageProps {
-    isDark: boolean;
-    setIsDark: (isDark: boolean) => void;
-    debugMode: DebugFlags;
+    isDark: boolean,
+    setIsDark: (isDark: boolean) => void,
+    debugMode: DebugFlags,
+    setLang: (lang: string) => void
 }
 
 interface DeleteStateType {
@@ -19,8 +21,9 @@ interface DeleteStateType {
     firstClick: number;
 }
 
-function DataCollectionPage({ isDark, setIsDark, debugMode }: DataCollectionPageProps) {
+function DataCollectionPage({isDark, setIsDark, debugMode, setLang}: DataCollectionPageProps) {
     const dotNetApi = new DotNetApi();
+    const {t} = useTranslation();
 
     const navigate = useNavigate()
     const [initialized, setInitialized] = useState(false);
@@ -34,7 +37,7 @@ function DataCollectionPage({ isDark, setIsDark, debugMode }: DataCollectionPage
             setConnectors(arr);
             setInitialized(true);
         };
-        
+
         initializeApi();
     }, []);
 
@@ -55,7 +58,7 @@ function DataCollectionPage({ isDark, setIsDark, debugMode }: DataCollectionPage
             deleteConnector(guid);
             // Reset the delete state
             setDeleteStates(prev => {
-                const newStates = { ...prev };
+                const newStates = {...prev};
                 delete newStates[guid];
                 return newStates;
             });
@@ -72,7 +75,7 @@ function DataCollectionPage({ isDark, setIsDark, debugMode }: DataCollectionPage
             // Clear the confirmation state after 2 seconds
             setTimeout(() => {
                 setDeleteStates(prev => {
-                    const newStates = { ...prev };
+                    const newStates = {...prev};
                     if (newStates[guid] && newStates[guid].firstClick === currentTime) {
                         delete newStates[guid];
                     }
@@ -106,15 +109,17 @@ function DataCollectionPage({ isDark, setIsDark, debugMode }: DataCollectionPage
                 <div className="header-section">
                     <div className="header-content">
                         <h2 className="header-title">
-                            Connections
+                            {t('section.connections')}
                         </h2>
 
-                        <DarkModeToggleButton isDark={isDark} setIsDark={setIsDark} />
+                        <DarkModeToggleButton isDark={isDark} setIsDark={setIsDark}/>
                     </div>
                 </div>
                 <div className="header-thin-right">
                     <h2 className="header-title">
-                        <button className="header-nav" title="Back to address book" onClick={() => navigate('/address-book')}>✕</button>
+                        <button className="header-nav" title={t('nav.backToAddressBook.title')}
+                                onClick={() => navigate('/address-book')}>✕
+                        </button>
                     </h2>
                 </div>
             </div>
@@ -138,38 +143,43 @@ function DataCollectionPage({ isDark, setIsDark, debugMode }: DataCollectionPage
                     <div className="connector-actions">
                         <button
                             onClick={() => createNewConnector(ConnectorType.ResoniteAPI)}
-                            title="Create new Resonite connection"
+                            title={t('connectors.addConnection.title', {connectionName: 'Resonite'})}
                         >
-                            + Add Resonite connection
+                            + {t('connectors.addConnection.label', {connectionName: 'Resonite'})}
                         </button>
                         <button
                             onClick={() => createNewConnector(ConnectorType.VRChatAPI)}
-                            title="Create new VRChat connection"
+                            title={t('connectors.addConnection.title', {connectionName: 'VRChat'})}
                         >
-                            + Add VRChat connection
+                            + {t('connectors.addConnection.label', {connectionName: 'VRChat'})}
                         </button>
                         <button
                             onClick={() => createNewConnector(ConnectorType.ChilloutVRAPI)}
-                            title="Create new ChilloutVR connection"
+                            title={t('connectors.addConnection.title', {connectionName: 'ChilloutVR'})}
                         >
-                            + Add ChilloutVR connection
+                            + {t('connectors.addConnection.label', {connectionName: 'ChilloutVR'})}
                         </button>
-                        <button
-                            onClick={() => createNewConnector(ConnectorType.Offline)}
-                            title="Create offline connection"
-                        >
-                            + Import offline data
-                        </button>
+                        {/*<button*/}
+                        {/*    onClick={() => createNewConnector(ConnectorType.Offline)}*/}
+                        {/*    title="Create offline connection"*/}
+                        {/*>*/}
+                        {/*    + Import offline data*/}
+                        {/*</button>*/}
                     </div>
                 </>
             )}
 
             <button
                 onClick={() => startDataCollection()}
-                title="Start data collection"
+                title={t('dataCollection.start.title')}
             >
-                Start data collection
+                {t('dataCollection.start.label')}
             </button>
+
+            <button title={t('language.english.title')}
+                    onClick={() => setLang('en')}>{t('language.english.label')}</button>
+            <button title={t('language.japanese.title')}
+                    onClick={() => setLang('ja')}>{t('language.japanese.label')}</button>
         </div>
     )
 }
