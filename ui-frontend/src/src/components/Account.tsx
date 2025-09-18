@@ -80,22 +80,22 @@ const Account = ({account, imposter, showAlias, showNotes, debugMode, showSessio
     const getOnlineStatusText = (onlineStatus: OnlineStatusType, isKnownSession: boolean) => {
         switch (onlineStatus) {
             case OnlineStatus.Online:
-                if (isKnownSession) return 'Online';
-                else return 'Online (Private)';
+                if (isKnownSession) return t('account.status.online');
+                else return t('account.status.onlinePrivate');
             case OnlineStatus.ResoniteBusy:
-                return 'Busy';
+                return t('account.status.busy');
             case OnlineStatus.VRChatDND:
-                return 'Do Not Disturb';
+                return t('account.status.doNotDisturb');
             case OnlineStatus.ResoniteAway:
-                if (isKnownSession) return 'Away';
-                return 'Away (Private)';
+                if (isKnownSession) return t('account.status.away');
+                return t('account.status.awayPrivate');
             case OnlineStatus.VRChatAskMe:
-                return 'Ask Me';
+                return t('account.status.askMe');
             case OnlineStatus.ResoniteSociable:
-                return 'Sociable';
+                return t('account.status.sociable');
             case OnlineStatus.VRChatJoinMe:
-                if (isKnownSession) return 'Join Me';
-                else return 'Join Me (Private)';
+                if (isKnownSession) return t('account.status.joinMe');
+                else return t('account.status.joinMePrivate');
             case OnlineStatus.Offline:
                 return '';
             default:
@@ -148,17 +148,17 @@ const Account = ({account, imposter, showAlias, showNotes, debugMode, showSessio
                 {!imposter && (<div className="account-badges">
                     {!account.isAnyCallerContact && hasNote && (
                         <span className="badge note">
-                            📝 Note
+                            📝 {t('account.badge.note')}
                         </span>
                     )}
                     {!isSessionView && account.isAnyCallerContact && (
                         <span className="badge contact">
-                            {account.namedApp === "VRChat" || account.namedApp === "ChilloutVR" ? 'Friend' : 'Contact'}
+                            {account.namedApp === "VRChat" || account.namedApp === "ChilloutVR" ? t('account.badge.friend') : t('account.badge.contact')}
                         </span>
                     )}
                     {account.isTechnical && (
                         <span className="badge bot">
-                            Bot
+                            {t('account.badge.bot')}
                         </span>
                     )}
                     {(account.namedApp === "VRChat" || account.namedApp === "ChilloutVR") && (
@@ -166,7 +166,7 @@ const Account = ({account, imposter, showAlias, showNotes, debugMode, showSessio
                             onClick={openLink} onAuxClick={(e) => e.button === 1 && openLink()} onMouseDown={(e) => e.preventDefault()}
                             rel="noopener noreferrer"
                             className="icon-button link-pointer"
-                            title={`Open ${account.namedApp} Profile`}
+                            title={t('account.openProfile.title', { app: account.namedApp })}
                         >
                             <Globe size={16}/>
                         </a>
@@ -184,14 +184,17 @@ const Account = ({account, imposter, showAlias, showNotes, debugMode, showSessio
             {account.isPendingUpdate && (
                 <p className="warning-message">
                     <span className="warning-icon"><TriangleAlert/></span>
-                    We have not yet collected all information for this account. Notes, bio, and links may be missing.
+                    {t('account.pendingUpdate.message')}
                 </p>
             )}
 
             {showNotes && account.callers && account.callers.filter(caller => caller.note).map((caller, index) => (
                 <div key={index} className="note-container">
                     <div className="note-text">
-                        {caller.note!.startsWith('mt ') ? (_D2('Met through ' + caller.note!.substring(3), debugMode)) : _D2(caller.note!, debugMode)}
+                        {caller.note!.startsWith('mt ')
+                            ? t('account.note.metThrough', { location: _D2(caller.note!.substring(3), debugMode) })
+                            : _D2(caller.note!, debugMode)
+                        }
                     </div>
                 </div>
             ))}
