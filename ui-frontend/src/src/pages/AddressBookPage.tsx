@@ -375,6 +375,14 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                 )
             )
         ));
+
+    const supportedApps = [
+        { key: 'resonite', display: 'Resonite' },
+        { key: 'vrchat', display: 'VRChat' },
+        { key: 'cluster', display: 'Cluster' },
+        { key: 'chilloutvr', display: 'ChilloutVR' }
+    ];
+
     return (
         <>
             <div className="individuals-container">
@@ -425,7 +433,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                     <input
                         ref={searchInputRef}
                         type={debugMode.demoMode !== DemonstrationMode.Disabled ? 'password' : 'text'}
-                        placeholder="Search by name or note..."
+                        placeholder={t('addressBook.search.placeholder')}
                         value={searchField}
                         onChange={(e) => setSearchField(e.target.value)}
                         className="search-input"
@@ -448,28 +456,29 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                     <div className="no-results-message">
                         <div className="no-results-icon"><Search size={48}/></div>
                         {!showHelp && <>
-                            <div className="no-results-text">No individuals found matching
-                                "<strong>{_D2(debouncedSearchField, debugMode)}</strong>"
+                            <div className="no-results-text">
+                                {t('addressBook.noResults.text', { searchTerm: _D2(debouncedSearchField, debugMode) })}
                             </div>
                         </>}
                         <div className="no-results-hint">
-                            <p>Try searching by name, note content, or use special terms like:</p>
-                            <p><code className="inline-code-clickable" onClick={() => { setSearchField('bio:'); focusSearchInput(); }}>bio:<i>creator</i></code> to display and search in the bio.</p>
-                            <p><code className="inline-code-clickable" onClick={() => { setSearchField('links:'); focusSearchInput(); }}>links:<i>misskey</i></code> to search in the links.</p>
-                            <p><code className="inline-code-clickable" onClick={() => { setSearchField('alias:'); focusSearchInput(); }}>alias:<i>aoi</i></code> to search in previous user names.</p>
-                            <p><code className="inline-code-clickable" onClick={() => { setSearchField('session:'); focusSearchInput(); }}>session:<i>mmc</i></code> to search for the name of an active session.</p>
-                            <p>Search for groups of words using quotation marks, such as <code className="inline-code-clickable" onClick={() => { setSearchField('session:"'); focusSearchInput(); }}>session:<i>"h p"</i></code></p>
-                            <p><code className="inline-code-clickable" onClick={() => { setSearchField('accounts:>1 '); focusSearchInput(); }}>accounts:&gt;1</code> for users who have more than one account.</p>
-                            <p><code className="inline-code-clickable" onClick={() => { setSearchField('has:alt '); focusSearchInput(); }}>has:alt</code> for users who have several accounts on the same app.</p>
-                            <p><code className="inline-code-clickable" onClick={() => { setSearchField('on: '); focusSearchInput(); }}>on:</code> for currently online users on any app.</p>
-                            <p><code className="inline-code-clickable" onClick={() => { setSearchField('app:resonite '); focusSearchInput(); }}>app:resonite</code> for Resonite account owners, and <code className="inline-code-clickable" onClick={() => { setSearchField('on:resonite '); focusSearchInput(); }}>on:resonite</code> for currently online users.</p>
-                            <p><code className="inline-code-clickable" onClick={() => { setSearchField('app:vrchat '); focusSearchInput(); }}>app:vrchat</code> for VRChat account owners, and <code className="inline-code-clickable" onClick={() => { setSearchField('on:vrchat '); focusSearchInput(); }}>on:vrchat</code> for currently online users.</p>
-                            <p><code className="inline-code-clickable" onClick={() => { setSearchField('app:cluster '); focusSearchInput(); }}>app:cluster</code> for Cluster account owners, and <code className="inline-code-clickable" onClick={() => { setSearchField('on:cluster '); focusSearchInput(); }}>on:cluster</code> for currently online users.</p>
-                            <p><code className="inline-code-clickable" onClick={() => { setSearchField('app:chilloutvr '); focusSearchInput(); }}>app:chilloutvr</code> for ChilloutVR account owners, and <code className="inline-code-clickable" onClick={() => { setSearchField('on:chilloutvr '); focusSearchInput(); }}>on:chilloutvr</code> for currently online users.</p>
-                            <p><code className="inline-code-clickable" onClick={() => { setSearchField('app:resonite app:vrchat '); focusSearchInput(); }}>app:resonite app:vrchat</code> for Resonite account owners who also have a VRChat account.</p>
-                            <p><code className="inline-code-clickable" onClick={() => { setSearchField(':confusables ' + searchField); focusSearchInput(); }}>:confusables</code> converts some cyrillic and special characters visually similar to latin when searching for names.</p>
+                            <p>{t('addressBook.noResults.help')}</p>
+                            <p><code className="inline-code-clickable" onClick={() => { setSearchField('bio:'); focusSearchInput(); }}>bio:<i>creator</i></code> {t('addressBook.search.bio.example')}</p>
+                            <p><code className="inline-code-clickable" onClick={() => { setSearchField('links:'); focusSearchInput(); }}>links:<i>misskey</i></code> {t('addressBook.search.links.example')}</p>
+                            <p><code className="inline-code-clickable" onClick={() => { setSearchField('alias:'); focusSearchInput(); }}>alias:<i>aoi</i></code> {t('addressBook.search.alias.example')}</p>
+                            <p><code className="inline-code-clickable" onClick={() => { setSearchField('session:'); focusSearchInput(); }}>session:<i>mmc</i></code> {t('addressBook.search.session.example')}</p>
+                            <p>{t('addressBook.search.quotes.help')} <code className="inline-code-clickable" onClick={() => { setSearchField('session:"'); focusSearchInput(); }}>session:<i>"h p"</i></code></p>
+                            <p><code className="inline-code-clickable" onClick={() => { setSearchField('accounts:>1 '); focusSearchInput(); }}>accounts:&gt;1</code> {t('addressBook.search.accounts.example')}</p>
+                            <p><code className="inline-code-clickable" onClick={() => { setSearchField('has:alt '); focusSearchInput(); }}>has:alt</code> {t('addressBook.search.hasAlt.example')}</p>
+                            <p><code className="inline-code-clickable" onClick={() => { setSearchField('on: '); focusSearchInput(); }}>on:</code> {t('addressBook.search.on.example')}</p>
+                            {supportedApps.map(app => (
+                                <p key={app.key}>
+                                    <code className="inline-code-clickable" onClick={() => { setSearchField(`app:${app.key} `); focusSearchInput(); }}>app:{app.key}</code> {t('addressBook.search.app.example', { app: app.display })} <code className="inline-code-clickable" onClick={() => { setSearchField(`on:${app.key} `); focusSearchInput(); }}>on:{app.key}</code> {t('addressBook.search.online.example')}
+                                </p>
+                            ))}
+                            <p><code className="inline-code-clickable" onClick={() => { setSearchField('app:resonite app:vrchat '); focusSearchInput(); }}>app:resonite app:vrchat</code> {t('addressBook.search.multipleApps.example')}</p>
+                            <p><code className="inline-code-clickable" onClick={() => { setSearchField(':confusables ' + searchField); focusSearchInput(); }}>:confusables</code> {t('addressBook.search.confusables.example')}</p>
 
-                            <p>Open the <a title="Open https://docs.hai-vr.dev/docs/products/xyvr/search in your browser" className="link-pointer" onClick={openSearchDocs} onAuxClick={(e) => e.button === 1 && openSearchDocs()} onMouseDown={(e) => e.preventDefault()}>search documentation</a> in your browser.</p>
+                            <p>{t('addressBook.search.docs.link')} <a title={t('addressBook.search.docs.title')} className="link-pointer" onClick={openSearchDocs} onAuxClick={(e) => e.button === 1 && openSearchDocs()} onMouseDown={(e) => e.preventDefault()}>{t('addressBook.search.docs.link')}</a>.</p>
                         </div>
                     </div>
                 )}
@@ -478,11 +487,13 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                     {debouncedSearchField && (
                         <div className="search-results-info">
                             {totalFilteredCount === 0
-                                ? `No results found for "${debouncedSearchField}"`
-                                : <>{totalFilteredCount > 1 && `Showing ${totalFilteredCount} results. ` || `Only one result. `}
-                                    Type <code className="inline-code-clickable"onClick={() => { setSearchField(':help '); focusSearchInput(); }}>:help</code> for help.
-                                    Type <code className="inline-code-clickable"onClick={() => { setSearchField(searchField + ' alias:'); focusSearchInput(); }}>alias:</code> to show previous names.
-                                    Type <code className="inline-code-clickable"onClick={() => { setSearchField(searchField + ' bio:'); focusSearchInput(); }}>bio:</code> to show bios.</>
+                                ? t('addressBook.results.noResults', { searchTerm: debouncedSearchField })
+                                : <>{totalFilteredCount > 1
+                                    ? t('addressBook.results.multipleResults', { count: totalFilteredCount })
+                                    : t('addressBook.results.singleResult')} {' '}
+                                    Type <code className="inline-code-clickable"onClick={() => { setSearchField(':help '); focusSearchInput(); }}>:help</code> {t('addressBook.results.typeHelp')} {' '}
+                                    Type <code className="inline-code-clickable"onClick={() => { setSearchField(searchField + ' alias:'); focusSearchInput(); }}>alias:</code> {t('addressBook.results.typeAlias')} {' '}
+                                    Type <code className="inline-code-clickable"onClick={() => { setSearchField(searchField + ' bio:'); focusSearchInput(); }}>bio:</code> {t('addressBook.results.typeBio')}</>
                             }
                         </div>
                     )}
