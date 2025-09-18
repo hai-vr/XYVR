@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import './App.css'
 import AppRouter from './components/AppRouter.tsx'
 import {DotNetApi} from "./DotNetApi.ts";
+import "./i18n.ts";
 
 function App() {
     const dotNetApi = new DotNetApi();

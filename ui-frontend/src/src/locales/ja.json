@@ -1,0 +1,10 @@
+﻿{
+    "section.connections": "接続",
+    "section.contacts": "連絡先",
+    "section.contactsAndNotes": "連絡先とメモ",
+    "connectors.addConnection.label": "{{connectionName}} 接続を追加",
+    "connectors.addConnection.title": "新しい {{connectionName}} 接続を作成",
+    "connection.logOut.label": "ログアウト",
+    "connection.remove.label": "削除",
+    "connection.removeConfirm.label": "本当に削除しますか？"
+}

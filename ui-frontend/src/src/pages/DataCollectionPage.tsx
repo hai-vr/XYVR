@@ -7,6 +7,7 @@ import DarkModeToggleButton from "../components/DarkModeToggleButton.tsx";
 import {ConnectorType, type ConnectorTypeType, type FrontConnector} from "../types/ConnectorTypes.ts";
 import type {DebugFlags} from "../types/DebugFlags.ts";
 import {DotNetApi} from "../DotNetApi.ts";
+import {useTranslation} from "react-i18next";
 
 interface DataCollectionPageProps {
     isDark: boolean;
@@ -21,6 +22,7 @@ interface DeleteStateType {
 
 function DataCollectionPage({ isDark, setIsDark, debugMode }: DataCollectionPageProps) {
     const dotNetApi = new DotNetApi();
+    const { t, i18n } = useTranslation();
 
     const navigate = useNavigate()
     const [initialized, setInitialized] = useState(false);
@@ -106,7 +108,7 @@ function DataCollectionPage({ isDark, setIsDark, debugMode }: DataCollectionPage
                 <div className="header-section">
                     <div className="header-content">
                         <h2 className="header-title">
-                            Connections
+                            {t('section.connections')}
                         </h2>
 
                         <DarkModeToggleButton isDark={isDark} setIsDark={setIsDark} />
@@ -138,28 +140,28 @@ function DataCollectionPage({ isDark, setIsDark, debugMode }: DataCollectionPage
                     <div className="connector-actions">
                         <button
                             onClick={() => createNewConnector(ConnectorType.ResoniteAPI)}
-                            title="Create new Resonite connection"
+                            title={t('connectors.addConnection.title', { connectionName: 'Resonite' })}
                         >
-                            + Add Resonite connection
+                            + {t('connectors.addConnection.label', { connectionName: 'Resonite' })}
                         </button>
                         <button
                             onClick={() => createNewConnector(ConnectorType.VRChatAPI)}
-                            title="Create new VRChat connection"
+                            title={t('connectors.addConnection.title', { connectionName: 'VRChat' })}
                         >
-                            + Add VRChat connection
+                            + {t('connectors.addConnection.label', { connectionName: 'VRChat' })}
                         </button>
                         <button
                             onClick={() => createNewConnector(ConnectorType.ChilloutVRAPI)}
-                            title="Create new ChilloutVR connection"
+                            title={t('connectors.addConnection.title', { connectionName: 'ChilloutVR' })}
                         >
-                            + Add ChilloutVR connection
+                            + {t('connectors.addConnection.label', { connectionName: 'ChilloutVR' })}
                         </button>
-                        <button
-                            onClick={() => createNewConnector(ConnectorType.Offline)}
-                            title="Create offline connection"
-                        >
-                            + Import offline data
-                        </button>
+                        {/*<button*/}
+                        {/*    onClick={() => createNewConnector(ConnectorType.Offline)}*/}
+                        {/*    title="Create offline connection"*/}
+                        {/*>*/}
+                        {/*    + Import offline data*/}
+                        {/*</button>*/}
                     </div>
                 </>
             )}
@@ -170,6 +172,9 @@ function DataCollectionPage({ isDark, setIsDark, debugMode }: DataCollectionPage
             >
                 Start data collection
             </button>
+
+            <button onClick={() => i18n.changeLanguage('en')}>English</button>
+            <button onClick={() => i18n.changeLanguage('ja')}>日本語</button>
         </div>
     )
 }

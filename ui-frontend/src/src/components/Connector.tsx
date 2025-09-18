@@ -11,6 +11,7 @@ import {
     type ConnectionAttemptResult,
     ConnectionAttemptResultType
 } from "../types/ConnectionAttemptTypes.ts";
+import {useTranslation} from "react-i18next";
 
 interface DeleteState {
     confirming: boolean;
@@ -27,6 +28,7 @@ interface ConnectorProps {
 
 const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated, debugMode } : ConnectorProps) => {
     const dotNetApi = new DotNetApi();
+    const { t } = useTranslation();
 
     const [login, setLogin] = useState('');
     const [password, setPassword] = useState('');
@@ -203,7 +205,7 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated, 
 
             <div className="connector-actions">
                 {connector.isLoggedIn && (
-                    <button title="Confirm" className="delete-button" onClick={() => tryLogout()} disabled={isRequestInProgress}>Log out</button>
+                    <button title="Log out" className="delete-button" onClick={() => tryLogout()} disabled={isRequestInProgress}>{t('connection.logOut.label')}</button>
                 )}
                 <button
                     disabled={isRequestInProgress || !isInTwoFactorMode && (!!login || !!password) || isInTwoFactorMode && !!twoFactorCode}
@@ -211,7 +213,7 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated, 
                     onClick={() => onDeleteClick(connector.guid)}
                     title={deleteState?.confirming ? 'Click again to confirm remove' : 'Remove connector'}
                 >
-                    {deleteState?.confirming ? <><TriangleAlert /> Really remove?</> : <><X /><span>Remove</span></>}
+                    {deleteState?.confirming ? <><TriangleAlert /> {t('connection.removeConfirm.label')}</> : <><X /><span>{t('connection.remove.label')}</span></>}
                 </button>
             </div>
         </div>

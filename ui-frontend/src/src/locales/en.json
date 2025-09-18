@@ -1,0 +1,10 @@
+﻿{
+    "section.connections": "Connections",
+    "section.contacts": "Contacts",
+    "section.contactsAndNotes": "Contacts & Notes",
+    "connectors.addConnection.label": "Add {{connectionName}} connection",
+    "connectors.addConnection.title": "Create a new {{connectionName}} connection",
+    "connection.logOut.label": "Log out",
+    "connection.remove.label": "Remove",
+    "connection.removeConfirm.label": "Really remove?"
+}

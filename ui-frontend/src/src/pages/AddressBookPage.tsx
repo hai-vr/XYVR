@@ -23,6 +23,7 @@ import {type FrontLiveSession, type FrontLiveUserUpdate, LiveSessionKnowledge} f
 import {type DebugFlags, DemonstrationMode} from "../types/DebugFlags.ts";
 import {LiveSession} from "../components/LiveSession.tsx";
 import {DotNetApi} from "../DotNetApi.ts";
+import {useTranslation} from "react-i18next";
 
 const sortIndividuals = (individuals: FrontIndividual[], unparsedSearchField: string) => {
     if (!unparsedSearchField) {
@@ -91,6 +92,7 @@ interface AddressBookPageProps {
 
 function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyContacts, compactMode, setCompactMode, showNotes, setShowNotes, debugMode }: AddressBookPageProps) {
     const dotNetApi = new DotNetApi();
+    const { t } = useTranslation();
 
     const navigate = useNavigate()
     const searchInputRef = useRef<HTMLInputElement>(null)
@@ -380,7 +382,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                     <div className="header-section">
                         <div className="header-content">
                             <h2 className="header-title">
-                                {showOnlyContacts && 'Contacts' || 'Contacts & Notes'} {initialized && <>({totalFilteredCount})</> || <>(...)</>}
+                                {showOnlyContacts && t('section.contacts') || t('section.contactsAndNotes')} {initialized && <>({totalFilteredCount})</> || <>(...)</>}
                             </h2>
 
                             <div className="header-buttons">
