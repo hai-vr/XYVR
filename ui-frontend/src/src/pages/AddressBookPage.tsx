@@ -360,6 +360,19 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
         await dotNetApi.appApiOpenLink('https://docs.hai-vr.dev/docs/products/xyvr/search');
     };
 
+    const online = sortedIndividuals
+        .filter(individual => {
+            return individual.accounts.some(account => account.onlineStatus !== OnlineStatus.Offline && account.mainSession && account.mainSession.knowledge !== LiveSessionKnowledge.Known)
+        });
+    const filteredLiveSessions = liveSessionArray
+        .filter(liveSession => liveSession.participants.some(p => p.isKnown &&
+            sortedIndividuals.some(ind =>
+                ind.accounts?.some(acc =>
+                    acc.qualifiedAppName === liveSession.qualifiedAppName &&
+                    acc.inAppIdentifier === p.knownAccount!.inAppIdentifier
+                )
+            )
+        ));
     return (
         <>
             <div className="individuals-container">
@@ -472,18 +485,10 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                     )}
                 </div>
 
-                {liveSessionArray.length > 0 && (
+                {filteredLiveSessions.length > 0 && (
                     <div className="live-sessions-section">
                         <div className="live-sessions-grid">
-                            {liveSessionArray
-                                .filter(liveSession => liveSession.participants.some(p => p.isKnown &&
-                                    sortedIndividuals.some(ind =>
-                                        ind.accounts?.some(acc =>
-                                            acc.qualifiedAppName === liveSession.qualifiedAppName &&
-                                            acc.inAppIdentifier === p.knownAccount!.inAppIdentifier
-                                        )
-                                    )
-                                ))
+                            {filteredLiveSessions
                                 .sort((a, b) => {
                                     const aKnownCount = a.participants.filter(p => p.isKnown).length;
                                     const bKnownCount = b.participants.filter(p => p.isKnown).length;
@@ -509,43 +514,67 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                     </div>
                 )}
 
-                <div className={`individuals-grid ${compactMode ? 'compact-mode' : ''}`}>
-                    {displayedIndividuals.map((individual, index) => (
-                        <Individual
-                            key={individual.guid || index}
-                            individual={individual}
-                            isVisible={true}
-                            showBio={showBio}
-                            showAlias={showAlias}
-                            setMergeAccountGuidOrUnd={setMergeAccountGuidOrUnd}
-                            isBeingMerged={mergeAccountGuidOrUnd === individual.guid}
-                            displayNameOfOtherBeingMergedOrUnd={displayNameOfOtherBeingMergedOrUnd}
-                            fusionAccounts={fusionAccounts}
-                            unmergeAccounts={unmergeAccounts}
-                            compactMode={compactMode}
-                            searchField={debouncedSearchField}
-                            showNotes={showNotes}
-                            debugMode={debugMode}
-                        />
+                {!debouncedSearchField && online.length > 0 && <div className={`individuals-grid ${compactMode ? 'compact-mode' : ''}`}>
+                    {online
+                        .map((individual, index) => (
+                            <Individual
+                                key={individual.guid || index}
+                                individual={individual}
+                                isVisible={true}
+                                showBio={showBio}
+                                showAlias={showAlias}
+                                setMergeAccountGuidOrUnd={setMergeAccountGuidOrUnd}
+                                isBeingMerged={mergeAccountGuidOrUnd === individual.guid}
+                                displayNameOfOtherBeingMergedOrUnd={displayNameOfOtherBeingMergedOrUnd}
+                                fusionAccounts={fusionAccounts}
+                                unmergeAccounts={unmergeAccounts}
+                                compactMode={true}
+                                searchField={debouncedSearchField}
+                                showNotes={false}
+                                debugMode={debugMode}
+                            />
                     ))}
-                </div>
+                </div>}
 
-                {hasMoreItems && (
-                    <div className="load-more-section">
-                        {isLoading ? (
-                            <div className="loading-indicator">
-                                <div className="loading-spinner"></div>
-                                <span>Loading more results...</span>
-                            </div>
-                        ) : (
-                            <button
-                                onClick={loadMoreItems}
-                            >
-                                Load More ({totalFilteredCount - displayedCount} remaining)
-                            </button>
-                        )}
+                {debouncedSearchField && <>
+                    <div className={`individuals-grid ${compactMode ? 'compact-mode' : ''}`}>
+                        {displayedIndividuals.map((individual, index) => (
+                            <Individual
+                                key={individual.guid || index}
+                                individual={individual}
+                                isVisible={true}
+                                showBio={showBio}
+                                showAlias={showAlias}
+                                setMergeAccountGuidOrUnd={setMergeAccountGuidOrUnd}
+                                isBeingMerged={mergeAccountGuidOrUnd === individual.guid}
+                                displayNameOfOtherBeingMergedOrUnd={displayNameOfOtherBeingMergedOrUnd}
+                                fusionAccounts={fusionAccounts}
+                                unmergeAccounts={unmergeAccounts}
+                                compactMode={compactMode}
+                                searchField={debouncedSearchField}
+                                showNotes={showNotes}
+                                debugMode={debugMode}
+                            />
+                        ))}
                     </div>
-                )}
+
+                    {hasMoreItems && (
+                        <div className="load-more-section">
+                            {isLoading ? (
+                                <div className="loading-indicator">
+                                    <div className="loading-spinner"></div>
+                                    <span>Loading more results...</span>
+                                </div>
+                            ) : (
+                                <button
+                                    onClick={loadMoreItems}
+                                >
+                                    Load More ({totalFilteredCount - displayedCount} remaining)
+                                </button>
+                            )}
+                        </div>
+                    )}
+                </>}
             </div>
         </>
     )
