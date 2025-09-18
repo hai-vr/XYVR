@@ -390,7 +390,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                                     className="theme-toggle-btn"
                                     onClick={() => setCompactMode(!compactMode)}
                                     aria-pressed={compactMode}
-                                    title={`${compactMode ? 'Switch to full mode' : 'Switch to compact mode'}`}
+                                    title={compactMode ? t('ui.switchToFullMode.title') : t('ui.switchToCompactMode.title')}
                                 >
                                     {compactMode ? <Binoculars /> : <Glasses />}
                                 </button>
@@ -398,7 +398,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                                     className="theme-toggle-btn"
                                     onClick={() => setShowNotes(!showNotes)}
                                     aria-pressed={showNotes}
-                                    title={`${showNotes ? 'Switch to hide notes' : 'Switch to show notes'}`}
+                                    title={showNotes ? t('ui.hideNotes.title') : t('ui.showNotes.title')}
                                 >
                                     {showNotes ? <NotebookText /> : <Notebook />}
                                 </button>
@@ -406,7 +406,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                                     className="theme-toggle-btn"
                                     onClick={() => setShowOnlyContacts(!showOnlyContacts)}
                                     aria-pressed={showOnlyContacts}
-                                    title={`${showOnlyContacts ? 'Switch to show contacts and users with notes' : 'Switch to show only contacts'}`}
+                                    title={showOnlyContacts ? t('ui.showContactsAndNotes.title') : t('ui.showOnlyContacts.title')}
                                 >
                                     {showOnlyContacts ? <UserStar /> : <UserPen />}
                                 </button>
@@ -416,7 +416,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                     </div>
                     <div className="header-thin-right">
                         <h2 className="header-title">
-                            <button className="header-nav" title="Configure connections" onClick={() => navigate('/data-collection')}><Settings /></button>
+                            <button className="header-nav" title={t('nav.configureConnections.title')} onClick={() => navigate('/data-collection')}><Settings /></button>
                         </h2>
                     </div>
                 </div>
@@ -437,6 +437,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                         <button
                             onClick={() => setSearchField('')}
                             className="icon-button search-clear-button"
+                            title={t('search.clear.title')}
                         >
                             <X size={16} />
                         </button>
@@ -565,13 +566,14 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                             {isLoading ? (
                                 <div className="loading-indicator">
                                     <div className="loading-spinner"></div>
-                                    <span>Loading more results...</span>
+                                    <span>{t('address.loadingMore.label')}</span>
                                 </div>
                             ) : (
                                 <button
                                     onClick={loadMoreItems}
+                                    title={t('address.loadMore.title')}
                                 >
-                                    Load More ({totalFilteredCount - displayedCount} remaining)
+                                    {t('address.loadMore.label', { remaining: totalFilteredCount - displayedCount })}
                                 </button>
                             )}
                         </div>

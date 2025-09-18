@@ -116,7 +116,7 @@ function DataCollectionPage({ isDark, setIsDark, debugMode }: DataCollectionPage
                 </div>
                 <div className="header-thin-right">
                     <h2 className="header-title">
-                        <button className="header-nav" title="Back to address book" onClick={() => navigate('/address-book')}>✕</button>
+                        <button className="header-nav" title={t('nav.backToAddressBook.title')} onClick={() => navigate('/address-book')}>✕</button>
                     </h2>
                 </div>
             </div>
@@ -168,13 +168,13 @@ function DataCollectionPage({ isDark, setIsDark, debugMode }: DataCollectionPage
 
             <button
                 onClick={() => startDataCollection()}
-                title="Start data collection"
+                title={t('dataCollection.start.title')}
             >
-                Start data collection
+                {t('dataCollection.start.label')}
             </button>
 
-            <button onClick={() => i18n.changeLanguage('en')}>English</button>
-            <button onClick={() => i18n.changeLanguage('ja')}>日本語</button>
+            <button title={t('language.english.title')} onClick={() => i18n.changeLanguage('en')}>{t('language.english.label')}</button>
+            <button title={t('language.japanese.title')} onClick={() => i18n.changeLanguage('ja')}>{t('language.japanese.label')}</button>
         </div>
     )
 }

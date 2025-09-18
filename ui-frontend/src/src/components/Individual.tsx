@@ -7,6 +7,7 @@ import {_D, _D2} from "../haiUtils.ts";
 import type {FrontAccount, FrontIndividual} from "../types/CoreTypes.ts";
 import {type DebugFlags, DemonstrationMode} from "../types/DebugFlags.ts";
 import {DotNetApi} from "../DotNetApi.ts";
+import { useTranslation } from "react-i18next";
 
 interface IndividualProps {
     individual: FrontIndividual;
@@ -40,6 +41,7 @@ function Individual({
                         debugMode
                     }: IndividualProps) {
     const dotNetApi = new DotNetApi();
+    const { t } = useTranslation();
 
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [filteredAccounts, setFilteredAccounts] = useState<FrontAccount[]>([]);
@@ -173,7 +175,7 @@ function Individual({
                     {individual.isAnyContact && (
                         <span className="contact-badge">
                             <Phone size={16} />
-                            <span>Contact</span>
+                            <span>{t('individual.contact.label')}</span>
                         </span>
                     )}
                     <div className="individual-menu" ref={dropdownRef}>
@@ -183,7 +185,7 @@ function Individual({
                                 e.stopPropagation();
                                 setIsDropdownOpen(!isDropdownOpen);
                             }}
-                            title="More actions"
+                            title={t('individual.moreActions.title')}
                         >
                             ⋯
                         </button>
@@ -192,14 +194,16 @@ function Individual({
                                 {displayNameOfOtherBeingMergedOrUnd !== undefined && !isBeingMerged && (<button
                                     className="dropdown-item"
                                     onClick={(e) => handleMenuAction('confirmMerge', e)}
+                                    title={t('individual.confirmMerge.title')}
                                 >
-                                    Merge {_D(displayNameOfOtherBeingMergedOrUnd, debugMode)} into this
+                                    {t('individual.confirmMerge.label', { name: _D(displayNameOfOtherBeingMergedOrUnd, debugMode) })}
                                 </button>)}
                                 {displayNameOfOtherBeingMergedOrUnd === undefined && <button
                                     className="dropdown-item"
                                     onClick={(e) => handleMenuAction('merge', e)}
+                                    title={t('individual.mergeAccount.title')}
                                 >
-                                    Merge account...
+                                    {t('individual.mergeAccount.label')}
                                 </button>}
                                 {displayNameOfOtherBeingMergedOrUnd !== undefined && <button
                                     className="dropdown-item"

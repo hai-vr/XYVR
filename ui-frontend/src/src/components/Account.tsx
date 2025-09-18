@@ -12,6 +12,7 @@ import {LiveSessionKnowledge} from "../types/LiveUpdateTypes.ts";
 import {AppIcon} from "./AppIcon.tsx";
 import {LiveSession} from "./LiveSession.tsx";
 import {DotNetApi} from "../DotNetApi.ts";
+import { useTranslation } from "react-i18next";
 
 interface AccountProps {
     account: FrontAccount,
@@ -25,6 +26,7 @@ interface AccountProps {
 // @ts-ignore
 const Account = ({account, imposter, showAlias, showNotes, debugMode, showSession, isSessionView}: AccountProps) => {
     const dotNetApi = new DotNetApi();
+    const { t } = useTranslation();
 
     const hasNote = account.isAnyCallerNote;
 
@@ -172,7 +174,7 @@ const Account = ({account, imposter, showAlias, showNotes, debugMode, showSessio
                     <button
                         onClick={copyInAppIdentifier}
                         className="icon-button"
-                        title={`Copy ID: ${_D(account.inAppIdentifier, debugMode)}`}
+                        title={t('account.copyId.title', { id: _D(account.inAppIdentifier, debugMode) })}
                     >
                         <Clipboard size={16}/>
                     </button>
