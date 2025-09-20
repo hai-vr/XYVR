@@ -138,7 +138,7 @@ internal class VRChatWorld
     public int capacity;
     public int recommendedCapacity;
     public DateTime created_at;
-    public VRChatWorldContentSettings defaultContentSettings;
+    // public VRChatWorldContentSettings defaultContentSettings;
     public string description;
     public int favorites;
     public bool featured;
@@ -160,7 +160,7 @@ internal class VRChatWorld
     public string storeId;
     public string[] tags;
     public string thumbnailImageUrl;
-    public VRChatUnityPackage[] unityPackages;
+    // public VRChatUnityPackage[] unityPackages;
     public DateTime updated_at;
     public string[] urlList;
     public int version;
@@ -186,7 +186,7 @@ internal class VRChatUnityPackage
     public string assetUrl;
     public object assetUrlObject;
     public int assetVersion;
-    public DateTime created_at;
+    public DateTime? created_at; // Error converting value {null} to type 'System.DateTime'. Path 'unityPackages[3].created_at', line 1, position 2492
     public string impostorizerVersion;
     public string performanceRating;
     public string platform;

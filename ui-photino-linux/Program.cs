@@ -36,6 +36,7 @@ namespace XYVR.UI.Photino
                     .RunAsync();
             
                 _window = new PhotinoWindow()
+                    .SetLogVerbosity(0)
                     .SetTitle(windowTitle)
                     // Resize to a percentage of the main monitor work area
                     .SetUseOsDefaultSize(false)
@@ -49,7 +50,18 @@ namespace XYVR.UI.Photino
                         if (sender == null) throw new InvalidOperationException("Got null sender");
                         
                         var window = (PhotinoWindow)sender;
-                        Task.Run(async () => await HandleMessage(window, message__sensitive));
+                        Task.Run(async () =>
+                        {
+                            try
+                            {
+                                await HandleMessage(window, message__sensitive);
+                            }
+                            catch (Exception e)
+                            {
+                                XYVRLogging.WriteLine(e);
+                                throw;
+                            }
+                        });
                     });
 
                 _window.SetIconFile(RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "favicon.ico" : "icon.png");

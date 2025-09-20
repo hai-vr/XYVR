@@ -10,9 +10,10 @@ import {DotNetApi} from "../DotNetApi.ts";
 import {useTranslation} from "react-i18next";
 
 interface DataCollectionPageProps {
-    isDark: boolean;
-    setIsDark: (isDark: boolean) => void;
-    debugMode: DebugFlags;
+    isDark: boolean,
+    setIsDark: (isDark: boolean) => void,
+    debugMode: DebugFlags,
+    setLang: (lang: string) => void
 }
 
 interface DeleteStateType {
@@ -20,9 +21,9 @@ interface DeleteStateType {
     firstClick: number;
 }
 
-function DataCollectionPage({ isDark, setIsDark, debugMode }: DataCollectionPageProps) {
+function DataCollectionPage({isDark, setIsDark, debugMode, setLang}: DataCollectionPageProps) {
     const dotNetApi = new DotNetApi();
-    const { t, i18n } = useTranslation();
+    const {t} = useTranslation();
 
     const navigate = useNavigate()
     const [initialized, setInitialized] = useState(false);
@@ -36,7 +37,7 @@ function DataCollectionPage({ isDark, setIsDark, debugMode }: DataCollectionPage
             setConnectors(arr);
             setInitialized(true);
         };
-        
+
         initializeApi();
     }, []);
 
@@ -57,7 +58,7 @@ function DataCollectionPage({ isDark, setIsDark, debugMode }: DataCollectionPage
             deleteConnector(guid);
             // Reset the delete state
             setDeleteStates(prev => {
-                const newStates = { ...prev };
+                const newStates = {...prev};
                 delete newStates[guid];
                 return newStates;
             });
@@ -74,7 +75,7 @@ function DataCollectionPage({ isDark, setIsDark, debugMode }: DataCollectionPage
             // Clear the confirmation state after 2 seconds
             setTimeout(() => {
                 setDeleteStates(prev => {
-                    const newStates = { ...prev };
+                    const newStates = {...prev};
                     if (newStates[guid] && newStates[guid].firstClick === currentTime) {
                         delete newStates[guid];
                     }
@@ -111,12 +112,14 @@ function DataCollectionPage({ isDark, setIsDark, debugMode }: DataCollectionPage
                             {t('section.connections')}
                         </h2>
 
-                        <DarkModeToggleButton isDark={isDark} setIsDark={setIsDark} />
+                        <DarkModeToggleButton isDark={isDark} setIsDark={setIsDark}/>
                     </div>
                 </div>
                 <div className="header-thin-right">
                     <h2 className="header-title">
-                        <button className="header-nav" title={t('nav.backToAddressBook.title')} onClick={() => navigate('/address-book')}>✕</button>
+                        <button className="header-nav" title={t('nav.backToAddressBook.title')}
+                                onClick={() => navigate('/address-book')}>✕
+                        </button>
                     </h2>
                 </div>
             </div>
@@ -140,21 +143,21 @@ function DataCollectionPage({ isDark, setIsDark, debugMode }: DataCollectionPage
                     <div className="connector-actions">
                         <button
                             onClick={() => createNewConnector(ConnectorType.ResoniteAPI)}
-                            title={t('connectors.addConnection.title', { connectionName: 'Resonite' })}
+                            title={t('connectors.addConnection.title', {connectionName: 'Resonite'})}
                         >
-                            + {t('connectors.addConnection.label', { connectionName: 'Resonite' })}
+                            + {t('connectors.addConnection.label', {connectionName: 'Resonite'})}
                         </button>
                         <button
                             onClick={() => createNewConnector(ConnectorType.VRChatAPI)}
-                            title={t('connectors.addConnection.title', { connectionName: 'VRChat' })}
+                            title={t('connectors.addConnection.title', {connectionName: 'VRChat'})}
                         >
-                            + {t('connectors.addConnection.label', { connectionName: 'VRChat' })}
+                            + {t('connectors.addConnection.label', {connectionName: 'VRChat'})}
                         </button>
                         <button
                             onClick={() => createNewConnector(ConnectorType.ChilloutVRAPI)}
-                            title={t('connectors.addConnection.title', { connectionName: 'ChilloutVR' })}
+                            title={t('connectors.addConnection.title', {connectionName: 'ChilloutVR'})}
                         >
-                            + {t('connectors.addConnection.label', { connectionName: 'ChilloutVR' })}
+                            + {t('connectors.addConnection.label', {connectionName: 'ChilloutVR'})}
                         </button>
                         {/*<button*/}
                         {/*    onClick={() => createNewConnector(ConnectorType.Offline)}*/}
@@ -173,8 +176,10 @@ function DataCollectionPage({ isDark, setIsDark, debugMode }: DataCollectionPage
                 {t('dataCollection.start.label')}
             </button>
 
-            <button title={t('language.english.title')} onClick={() => i18n.changeLanguage('en')}>{t('language.english.label')}</button>
-            <button title={t('language.japanese.title')} onClick={() => i18n.changeLanguage('ja')}>{t('language.japanese.label')}</button>
+            <button title={t('language.english.title')}
+                    onClick={() => setLang('en')}>{t('language.english.label')}</button>
+            <button title={t('language.japanese.title')}
+                    onClick={() => setLang('ja')}>{t('language.japanese.label')}</button>
         </div>
     )
 }

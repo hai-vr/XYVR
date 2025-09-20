@@ -16,6 +16,7 @@ internal record WorldQueueJob : IQueueJob
 internal record InstanceQueueJob : IQueueJob
 {
     public string worldIdAndInstanceId { get; init; }
+    public bool useFastFetch { get; init; } = false;
 }
 
 internal class VRChatLiveCommunicator
@@ -62,7 +63,18 @@ internal class VRChatLiveCommunicator
         {
             if (_queueTask.IsCompleted)
             {
-                _queueTask = Task.Run(ProcessQueue);
+                _queueTask = Task.Run(async () =>
+                {
+                    try
+                    {
+                        await ProcessQueue();
+                    }
+                    catch (Exception e)
+                    {
+                        XYVRLogging.WriteLine(e);
+                        throw;
+                    }
+                });
             }
         }
     }
@@ -104,7 +116,7 @@ internal class VRChatLiveCommunicator
             else if (dequeued is InstanceQueueJob instanceQueueJob)
             {
                 var worldIdAndInstanceId = instanceQueueJob.worldIdAndInstanceId;
-                var locationInformation = await _api.GetInstanceLenient(DataCollectionReason.CollectSessionLocationInformation, worldIdAndInstanceId);
+                var locationInformation = await _api.GetInstanceLenient(DataCollectionReason.CollectSessionLocationInformation, worldIdAndInstanceId, instanceQueueJob.useFastFetch);
                 if (locationInformation != null)
                 {
                     _locationToInstance.TryAdd(instanceQueueJob.worldIdAndInstanceId, locationInformation);
@@ -191,7 +203,7 @@ internal class VRChatLiveCommunicator
                         };
                     }
                     
-                    await QueueSessionFetchIfApplicable(friend.location);
+                    await QueueSessionFetchIfApplicable(friend.location, useFastFetch: true);
 
                     await OnLiveUpdateReceived(new ImmutableLiveUserUpdate
                     {
@@ -333,11 +345,11 @@ internal class VRChatLiveCommunicator
     {
         foreach (var session in sessionsToUpdate)
         {
-            await QueueSessionFetchIfApplicable(session.inAppSessionIdentifier);
+            await QueueSessionFetchIfApplicable(session.inAppSessionIdentifier, onlyConsiderItemsInQueue: true, useFastFetch: false);
         }
     }
 
-    private async Task QueueSessionFetchIfApplicable(string location, bool onlyConsiderItemsInQueue = false)
+    private async Task QueueSessionFetchIfApplicable(string location, bool onlyConsiderItemsInQueue = false, bool useFastFetch = false)
     {
         _api ??= await InitializeAPI();
         
@@ -346,11 +358,13 @@ internal class VRChatLiveCommunicator
         {
             var queueJob = new InstanceQueueJob
             {
-                worldIdAndInstanceId = worldIdAndInstanceId
+                worldIdAndInstanceId = worldIdAndInstanceId,
+                useFastFetch = useFastFetch
             };
             if (!onlyConsiderItemsInQueue && !_allQueued.Contains(queueJob)
                 || onlyConsiderItemsInQueue && !_queue.Contains(queueJob) && !_highPriorityQueue.Contains(queueJob))
             {
+                _allQueued.Add(queueJob);
                 _queue.Enqueue(queueJob);
                 WakeUpQueue();
             }
@@ -503,7 +517,15 @@ internal class VRChatLiveCommunicator
             XYVRLogging.WriteLine("Will try reconnecting.");
             Task.Run(async () =>
             {
-                await Connect();
+                try
+                {
+                    await Connect();
+                }
+                catch (Exception e)
+                {
+                    XYVRLogging.WriteLine(e);
+                    throw;
+                }
             }).Wait();
         }
     }
