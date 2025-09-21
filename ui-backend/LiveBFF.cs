@@ -57,28 +57,36 @@ public class LiveBFF : ILiveBFF
 
     public async Task StartMonitoring()
     {
-        if (_liveMonitoringAgents != null) return;
-        
-        var connectors = _appLifecycle.ConnectorsMgt;
-        var credentials = _appLifecycle.CredentialsMgt;
-        var monitoring = _appLifecycle.LiveStatusMonitoring;
-
-        monitoring.AddUserUpdateMergedListener(WhenUserUpdateMerged);
-        monitoring.AddSessionUpdatedListener(WhenSessionUpdated);
-        
-        ILiveMonitoring?[] liveMonitorings = await Task.WhenAll(connectors.Connectors
-            .Where(connector => connector.liveMode != LiveMode.NoLiveFunction)
-            .Select(async connector => await credentials.GetConnectedLiveMonitoringOrNull(connector, monitoring))
-            .ToList());
-        
-        _liveMonitoringAgents = liveMonitorings
-            .Where(collection => collection != null)
-            .Cast<ILiveMonitoring>()
-            .ToList();
-        
-        foreach (var agent in _liveMonitoringAgents)
+        try
         {
-            await agent.StartMonitoring();
+            if (_liveMonitoringAgents != null) return;
+        
+            var connectors = _appLifecycle.ConnectorsMgt;
+            var credentials = _appLifecycle.CredentialsMgt;
+            var monitoring = _appLifecycle.LiveStatusMonitoring;
+
+            monitoring.AddUserUpdateMergedListener(WhenUserUpdateMerged);
+            monitoring.AddSessionUpdatedListener(WhenSessionUpdated);
+        
+            ILiveMonitoring?[] liveMonitorings = await Task.WhenAll(connectors.Connectors
+                .Where(connector => connector.liveMode != LiveMode.NoLiveFunction)
+                .Select(async connector => await credentials.GetConnectedLiveMonitoringOrNull(connector, monitoring))
+                .ToList());
+        
+            _liveMonitoringAgents = liveMonitorings
+                .Where(collection => collection != null)
+                .Cast<ILiveMonitoring>()
+                .ToList();
+        
+            foreach (var agent in _liveMonitoringAgents)
+            {
+                await agent.StartMonitoring();
+            }
+        }
+        catch (Exception e)
+        {
+            XYVRLogging.WriteLine(e);
+            throw;
         }
     }
 
@@ -151,8 +159,16 @@ public class LiveBFF : ILiveBFF
         // FIXME: This could probably be fixed using AppLifecycle.Dispatch or something. Something to do with the main thread.
         Task.Run(async () =>
         {
-            StopMonitoring();
-            await Task.Delay(1000);
+            try
+            {
+                StopMonitoring();
+                await Task.Delay(1000);
+            }
+            catch (Exception e)
+            {
+                XYVRLogging.WriteLine(e);
+                throw;
+            }
             // Close for real
         }).Wait();
     }

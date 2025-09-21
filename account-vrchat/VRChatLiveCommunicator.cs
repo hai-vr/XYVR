@@ -63,7 +63,18 @@ internal class VRChatLiveCommunicator
         {
             if (_queueTask.IsCompleted)
             {
-                _queueTask = Task.Run(ProcessQueue);
+                _queueTask = Task.Run(async () =>
+                {
+                    try
+                    {
+                        await ProcessQueue();
+                    }
+                    catch (Exception e)
+                    {
+                        XYVRLogging.WriteLine(e);
+                        throw;
+                    }
+                });
             }
         }
     }
@@ -506,7 +517,15 @@ internal class VRChatLiveCommunicator
             XYVRLogging.WriteLine("Will try reconnecting.");
             Task.Run(async () =>
             {
-                await Connect();
+                try
+                {
+                    await Connect();
+                }
+                catch (Exception e)
+                {
+                    XYVRLogging.WriteLine(e);
+                    throw;
+                }
             }).Wait();
         }
     }
