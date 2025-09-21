@@ -83,17 +83,27 @@ internal class ResoniteSignalRClient
     private async Task OnReceiveStatusUpdate(object statusUpdate)
     {
         var rawText = ((JsonElement)statusUpdate).GetRawText();
-        var obj = JsonConvert.DeserializeObject<UserStatusUpdate>(rawText);
+        var obj = XYVRSerializationUtils.LogDeserializeOrNull<UserStatusUpdate>(this, rawText);
+        if (obj == null)
+        {
+            XYVRLogging.WriteLine(this, "Failed to deserialize a status update.");
+            return;
+        }
         
-        if (OnStatusUpdate != null) await OnStatusUpdate?.Invoke(obj);
+        if (OnStatusUpdate != null) await OnStatusUpdate.Invoke(obj);
     }
 
     private async Task OnReceiveSessionUpdate(object sessionUpdate)
     {
         var rawText = ((JsonElement)sessionUpdate).GetRawText();
-        var obj = JsonConvert.DeserializeObject<SessionUpdateJsonObject>(rawText);
+        var obj = XYVRSerializationUtils.LogDeserializeOrNull<SessionUpdateJsonObject>(this, rawText);
+        if (obj == null)
+        {
+            XYVRLogging.WriteLine(this, "Failed to deserialize a session update.");
+            return;
+        }
 
-        if (OnSessionUpdate != null) await OnSessionUpdate?.Invoke(obj);
+        if (OnSessionUpdate != null) await OnSessionUpdate.Invoke(obj);
     }
 
     private Task WhenConnectionClosed(Exception? exception)
