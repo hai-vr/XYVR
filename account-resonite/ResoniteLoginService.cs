@@ -26,7 +26,7 @@ public class ResoniteLoginService : ILoginService
             credentialsStorage
         );
         
-        XYVRLogging.WriteLine("Connecting to Resonite...");
+        XYVRLogging.WriteLine(this, "Connecting to Resonite...");
         try
         {
             await communicator.ResoniteLogin(connectionAttempt.login__sensitive, connectionAttempt.password__sensitive);

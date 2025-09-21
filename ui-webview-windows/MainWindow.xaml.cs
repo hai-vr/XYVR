@@ -40,14 +40,14 @@ public partial class MainWindow : Window
         }
         catch (Exception e)
         {
-            XYVRLogging.WriteLine(e);
+            XYVRLogging.WriteLine(this, e);
             throw;
         }
     }
 
     private async Task MainWindow_Loaded()
     {
-        XYVRLogging.WriteLine("WebView: Main window loaded.");
+        XYVRLogging.WriteLine(this, "WebView: Main window loaded.");
         
         AppHandle = (App)Application.Current;
         await AppHandle.Lifecycle.WhenWindowLoaded(SendScriptToReact);

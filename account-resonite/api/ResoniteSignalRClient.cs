@@ -98,19 +98,19 @@ internal class ResoniteSignalRClient
 
     private Task WhenConnectionClosed(Exception? exception)
     {
-        XYVRLogging.WriteLine($"Connection closed. Exception?: {exception?.Message}");
+        XYVRLogging.WriteLine(this, $"Connection closed. Exception?: {exception?.Message}");
         return Task.CompletedTask;
     }
 
     private Task WhenReconnecting(Exception? exception)
     {
-        XYVRLogging.WriteLine($"Reconnecting... Exception?: {exception?.Message}");
+        XYVRLogging.WriteLine(this, $"Reconnecting... Exception?: {exception?.Message}");
         return Task.CompletedTask;
     }
 
     private async Task WhenReconnected(string? connectionId)
     {
-        XYVRLogging.WriteLine($"Reconnected with connection ID: {connectionId}");
+        XYVRLogging.WriteLine(this, $"Reconnected with connection ID: {connectionId}");
         if (OnReconnected != null) await OnReconnected?.Invoke();
     }
     

@@ -10,9 +10,9 @@ public class ChilloutVRLoginService : ILoginService
     {
         var api = new ChilloutVRAPI();
         
-        XYVRLogging.WriteLine("Connecting to ChilloutVR...");
+        XYVRLogging.WriteLine(this, "Connecting to ChilloutVR...");
         var result = await api.Login(connectionAttempt.login__sensitive, connectionAttempt.password__sensitive);
-        XYVRLogging.WriteLine($"The result was {result.Status}");
+        XYVRLogging.WriteLine(this, $"The result was {result.Status}");
         
         if (result.Status == CvrLoginResponseStatus.Success)
         {

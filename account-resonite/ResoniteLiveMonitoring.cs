@@ -53,7 +53,7 @@ public class ResoniteLiveMonitoring : ILiveMonitoring, IDisposable
             var alreadyListeningTo = new HashSet<string>();
             _liveComms.OnLiveUpdateReceived += async update =>
             {
-                XYVRLogging.WriteLine($"OnLiveUpdateReceived: {JsonConvert.SerializeObject(update, serializer)}");
+                XYVRLogging.WriteLine(this, $"OnLiveUpdateReceived: {JsonConvert.SerializeObject(update, serializer)}");
                 await _monitoring.MergeUser(update);
 
                 if (!alreadyListeningTo.Contains(update.inAppIdentifier))
@@ -116,7 +116,7 @@ public class ResoniteLiveMonitoring : ILiveMonitoring, IDisposable
                     rehash = await ResoniteHash.Rehash(sessionId, specifics.userHashSalt);
                     if (specifics is { sessionHash: not null, userHashSalt: not null } && rehash == specifics.sessionHash)
                     {
-                        XYVRLogging.WriteLine("Received a session for which a user had an unresolved hash for.");
+                        XYVRLogging.WriteLine(this, "Received a session for which a user had an unresolved hash for.");
 
                         await _monitoring.MergeUser(userUpdate with { mainSession = new ImmutableLiveUserSessionState { knowledge = LiveUserSessionKnowledge.Known, sessionGuid = correspondingSession.guid } });
                     }
@@ -166,7 +166,7 @@ public class ResoniteLiveMonitoring : ILiveMonitoring, IDisposable
         }
         catch (Exception e)
         {
-            XYVRLogging.WriteLine(e);
+            XYVRLogging.WriteLine(this, e);
             throw;
         }
     }
@@ -178,13 +178,13 @@ public class ResoniteLiveMonitoring : ILiveMonitoring, IDisposable
         {
             if (!_isConnected) return;
             
-            XYVRLogging.WriteLine("Will try to cancel token");
+            XYVRLogging.WriteLine(this, "Will try to cancel token");
             // await _cancellationTokenSource.CancelAsync();
             _cancellationTokenSource!.CancelAsync(); // FIXME: we have a problem when we wait for this to finish, it never completes. Why?
-            XYVRLogging.WriteLine("Token cancelled. Will try to disconnect");
+            XYVRLogging.WriteLine(this, "Token cancelled. Will try to disconnect");
             
             await _liveComms!.Disconnect();
-            XYVRLogging.WriteLine("Disconnected.");
+            XYVRLogging.WriteLine(this, "Disconnected.");
             
             _liveComms = null;
             _cancellationTokenSource = null;

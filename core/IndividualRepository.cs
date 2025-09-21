@@ -102,10 +102,10 @@ public class IndividualRepository
 
         if (duplicateRecords.Count > 0)
         {
-            XYVRLogging.WriteLine($"Made a mistake, we have duplicate records:");
+            XYVRLogging.WriteLine(this, $"Made a mistake, we have duplicate records:");
             foreach (var discriminatorRecord in duplicateRecords)
             {
-                XYVRLogging.WriteLine($"{discriminatorRecord.AccountQualifiedAppName} {discriminatorRecord.AccountInAppIdentifier}");
+                XYVRLogging.WriteLine(this, $"{discriminatorRecord.AccountQualifiedAppName} {discriminatorRecord.AccountInAppIdentifier}");
             }
             
             // Detect problematic duplicates
@@ -115,7 +115,7 @@ public class IndividualRepository
                     .Select(ind => ind.value)
                     .Where(individual => individual.accounts.Any(account => account.qualifiedAppName == discriminatorRecord.AccountQualifiedAppName && account.inAppIdentifier == discriminatorRecord.AccountInAppIdentifier))
                     .ToList();
-                XYVRLogging.WriteLine($"Problematic ({problematics.Count}): {string.Join(",", problematics.Select(individual => individual.accounts.Length).ToList())}");
+                XYVRLogging.WriteLine(this, $"Problematic ({problematics.Count}): {string.Join(",", problematics.Select(individual => individual.accounts.Length).ToList())}");
                 if (problematics.Any(individual => individual.accounts.Length > 1))
                 {
                     var max = problematics.Max(individual => individual.accounts.Length);
@@ -185,19 +185,19 @@ public class IndividualRepository
                 var modifiedIndividual = ModifyIndividualBasedOnAccounts(existingIndividual with { accounts = [..modifiedAccounts] });
                 if (existingIndividual != modifiedIndividual)
                 {
-                    XYVRLogging.WriteLine($"Something about {inputAccount.inAppDisplayName} changed.");
+                    XYVRLogging.WriteLine(this, $"Something about {inputAccount.inAppDisplayName} changed.");
                     existingIndividualRef.value = modifiedIndividual;
                     
                     actuallyModified.Add(inputAccount.AsIdentification());
                 }
                 else
                 {
-                    XYVRLogging.WriteLine($"Merging account of {inputAccount.inAppDisplayName} resulted in no change.");
+                    XYVRLogging.WriteLine(this, $"Merging account of {inputAccount.inAppDisplayName} resulted in no change.");
                 }
             }
             else
             {
-                XYVRLogging.WriteLine($"Creating new individual from incomplete account: {inputAccount.namedApp} {inputAccount.inAppIdentifier} {inputAccount.inAppDisplayName}");
+                XYVRLogging.WriteLine(this, $"Creating new individual from incomplete account: {inputAccount.namedApp} {inputAccount.inAppIdentifier} {inputAccount.inAppDisplayName}");
                 _ = CreateNewIndividualFromIncompleteAccount(inputAccount);
                     
                 actuallyModified.Add(inputAccount.AsIdentification());
@@ -232,19 +232,19 @@ public class IndividualRepository
                 var modifiedIndividual = ModifyIndividualBasedOnAccounts(existingIndividual with { accounts = [..modifiedAccounts] });
                 if (existingIndividual != modifiedIndividual)
                 {
-                    XYVRLogging.WriteLine($"Something about {inputAccount.inAppDisplayName} changed.");
+                    XYVRLogging.WriteLine(this, $"Something about {inputAccount.inAppDisplayName} changed.");
                     existingIndividualRef.value = modifiedIndividual;
                     
                     actuallyModified.Add(inputAccount.AsIdentification());
                 }
                 else
                 {
-                    XYVRLogging.WriteLine($"Merging account of {inputAccount.inAppDisplayName} resulted in no change.");
+                    XYVRLogging.WriteLine(this, $"Merging account of {inputAccount.inAppDisplayName} resulted in no change.");
                 }
             }
             else
             {
-                XYVRLogging.WriteLine($"Creating new individual: {inputAccount.namedApp} {inputAccount.inAppIdentifier} {inputAccount.inAppDisplayName}");
+                XYVRLogging.WriteLine(this, $"Creating new individual: {inputAccount.namedApp} {inputAccount.inAppIdentifier} {inputAccount.inAppDisplayName}");
                 _ = CreateNewIndividualFromNonIndexedAccount(inputAccount);
                 
                 actuallyModified.Add(inputAccount.AsIdentification());
