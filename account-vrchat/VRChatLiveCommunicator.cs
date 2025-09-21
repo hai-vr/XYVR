@@ -247,9 +247,6 @@ internal class VRChatLiveCommunicator
             var rootObj = JObject.Parse(msg);
             var type = rootObj["type"].Value<string>();
             
-            var contentddd = JsonConvert.DeserializeObject<VRChatWebsocketContentContainingUser>(rootObj["content"].Value<string>())!;
-            XYVRLogging.WriteLine(this, $"-- [[{type}]] from vrc ws api. {contentddd.userId} ({contentddd.user?.displayName}) location: {contentddd.location} -- platform: {contentddd.user?.platform} --- status: {contentddd.user?.status}");
-            
             var isSessionKnowable = type is "friend-online" or "friend-location" or "friend-offline" or "friend-active";
             if (isSessionKnowable)
             {
