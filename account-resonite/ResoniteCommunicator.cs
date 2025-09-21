@@ -23,12 +23,6 @@ internal class ResoniteCommunicator
 
         _stayLoggedIn = stayLoggedIn;
         _uid = uid__sensitive;
-        
-        if (_uid == null)
-        {
-            XYVRLogging.ErrorWriteLine(this, $"UID missing. Do you need one? Here's a random UID: {ResoniteAPI.RandomUID__NotCryptographicallySecure()}");
-            throw new ArgumentException("Missing UID");
-        }
     }
 
     public async Task ResoniteLogin(string username__sensitive, string password__sensitive)
