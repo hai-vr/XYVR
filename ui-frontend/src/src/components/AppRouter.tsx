@@ -7,16 +7,19 @@ import {Toaster} from "react-hot-toast";
 import type {ReactAppPreferences} from "../types/APITypes.ts";
 import {type DebugFlags, DemonstrationMode} from "../types/DebugFlags.ts";
 import {DotNetApi} from "../DotNetApi.ts";
+import {useTranslation} from "react-i18next";
 
 // @ts-ignore
 const AppRouter = ({ appVersion }: { appVersion: string }) => {
     const dotNetApi = new DotNetApi();
+    const { i18n } = useTranslation();
 
     const [isDark, setIsDark] = useState(true)
     const [showOnlyContacts, setShowOnlyContacts] = useState(false)
     const [compactMode, setCompactMode] = useState(false)
+    const [lang, setLang] = useState('en')
     const [showNotes, setShowNotes] = useState(true)
-    const [preferences, setPreferences] = useState<ReactAppPreferences>({isDark: true, showOnlyContacts: false})
+    const [preferences, setPreferences] = useState<ReactAppPreferences>({isDark: true, showOnlyContacts: false, compactMode: false, lang: 'en'})
     const [isPreferencesObtained, setIsPreferencesObtained] = useState(false)
     const [debugMode, setDebugMode] = useState<DebugFlags>({debugMode: false, demoMode: DemonstrationMode.Disabled})
 
@@ -42,6 +45,24 @@ const AppRouter = ({ appVersion }: { appVersion: string }) => {
     }, [showOnlyContacts])
 
     useEffect(() => {
+        const updatedPreferences = {...preferences, compactMode};
+        setPreferences(updatedPreferences);
+
+    }, [compactMode])
+
+    useEffect(() => {
+        const changeLang = async () => {
+            await i18n.changeLanguage(lang);
+        };
+
+        changeLang();
+
+        const updatedPreferences = {...preferences, lang};
+        setPreferences(updatedPreferences);
+
+    }, [lang])
+
+    useEffect(() => {
         const updatePreferences = async () => {
             if (isPreferencesObtained) {
                 await dotNetApi.preferencesApiSetPreferences(JSON.stringify(preferences));
@@ -59,6 +80,8 @@ const AppRouter = ({ appVersion }: { appVersion: string }) => {
                 setPreferences(prefs);
                 setIsDark(prefs.isDark);
                 setShowOnlyContacts(prefs.showOnlyContacts);
+                setCompactMode(prefs.compactMode);
+                setLang(prefs.lang)
                 setIsPreferencesObtained(true);
             }
         };
@@ -116,6 +139,7 @@ const AppRouter = ({ appVersion }: { appVersion: string }) => {
                         />}/>
                         <Route path="/data-collection"
                                element={<DataCollectionPage isDark={isDark} setIsDark={setIsDark}
+                                                            setLang={setLang}
                                                             debugMode={debugMode}/>}/>
                     </Routes>
                 </main>
