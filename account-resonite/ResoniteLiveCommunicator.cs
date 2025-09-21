@@ -50,8 +50,8 @@ internal partial class ResoniteLiveCommunicator
         await _srClient.SubmitRequestStatus();
         
         _api ??= await InitializeApi();
-        var sessionsTemp = await _api.GetSessions__Temp(DataCollectionReason.CollectSessionLocationInformation);
-        XYVRLogging.WriteLine(sessionsTemp);
+        // var sessionsTemp = await _api.GetSessions__Temp(DataCollectionReason.CollectSessionLocationInformation);
+        // XYVRLogging.WriteLine(this, sessionsTemp);
     }
     
     public async Task Disconnect()
