@@ -19,7 +19,7 @@ public class WorldNameCache
                 value.isObsolete = true;
                 value.needsRefresh = true;
             }
-            XYVRLogging.WriteLine($"Cache data is now marked as obsolete. Cache version was {cacheVersion} and it is now {LatestVersion}.");
+            XYVRLogging.WriteLine(this, $"Cache data is now marked as obsolete. Cache version was {cacheVersion} and it is now {LatestVersion}.");
             cacheVersion = LatestVersion;
         }
 

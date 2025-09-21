@@ -50,8 +50,8 @@ internal partial class ResoniteLiveCommunicator
         await _srClient.SubmitRequestStatus();
         
         _api ??= await InitializeApi();
-        var sessionsTemp = await _api.GetSessions__Temp(DataCollectionReason.CollectSessionLocationInformation);
-        XYVRLogging.WriteLine(sessionsTemp);
+        // var sessionsTemp = await _api.GetSessions__Temp(DataCollectionReason.CollectSessionLocationInformation);
+        // XYVRLogging.WriteLine(this, sessionsTemp);
     }
     
     public async Task Disconnect()
@@ -113,7 +113,7 @@ internal partial class ResoniteLiveCommunicator
         // FIXME: Resonite sends a massive amount of session updates objects per second. This needs to be restricted further
         if (_sessionIdToSessionUpdate.TryAdd(sessionUpdate.sessionId, sessionUpdate))
         {
-            XYVRLogging.WriteLine($"Storing for the first time information about {sessionUpdate.sessionId}, which is {sessionUpdate.name}");
+            XYVRLogging.WriteLine(this, $"Storing for the first time information about {sessionUpdate.sessionId}, which is {sessionUpdate.name}");
             anySessionUpdated = true;
         }
         else
@@ -183,7 +183,7 @@ internal partial class ResoniteLiveCommunicator
                 }
                 else
                 {
-                    XYVRLogging.WriteLine($"We don't know the session GUID for {sessionUpdate.sessionId}");
+                    XYVRLogging.WriteLine(this, $"We don't know the session GUID for {sessionUpdate.sessionId}");
                     return new ImmutableLiveUserSessionState
                     {
                         knowledge = LiveUserSessionKnowledge.KnownButNoData
