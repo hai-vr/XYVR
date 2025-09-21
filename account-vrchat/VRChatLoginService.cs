@@ -14,16 +14,16 @@ public class VRChatLoginService : ILoginService
         LoginResponse result;
         if (connectionAttempt.twoFactorCode__sensitive == null)
         {
-            XYVRLogging.WriteLine("Connecting to VRChat...");
+            XYVRLogging.WriteLine(this, "Connecting to VRChat...");
             result = await vrcApi.Login(connectionAttempt.login__sensitive, connectionAttempt.password__sensitive);
-            XYVRLogging.WriteLine($"The result was {result.Status}");
+            XYVRLogging.WriteLine(this, $"The result was {result.Status}");
         }
         else
         {
             var twoferMethod = connectionAttempt.isTwoFactorEmail ? TwoferMethod.Email : TwoferMethod.Other;
-            XYVRLogging.WriteLine($"Verifying 2FA for VRChat ({twoferMethod})...");
+            XYVRLogging.WriteLine(this, $"Verifying 2FA for VRChat ({twoferMethod})...");
             result = await vrcApi.VerifyTwofer(connectionAttempt.twoFactorCode__sensitive, twoferMethod);
-            XYVRLogging.WriteLine($"The result was {result.Status}");
+            XYVRLogging.WriteLine(this, $"The result was {result.Status}");
         }
 
         if (result.Status == LoginResponseStatus.Success)

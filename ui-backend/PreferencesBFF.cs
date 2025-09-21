@@ -29,7 +29,7 @@ public class PreferencesBFF : IPreferencesBFF
     
     public async Task<string> GetPreferences()
     {
-        XYVRLogging.WriteLine("Getting preferences");
+        XYVRLogging.WriteLine(this, "Getting preferences");
         _lastPrefs = await Scaffolding.OpenReactAppPreferences();
         
         return ToJson(_lastPrefs);
@@ -37,7 +37,7 @@ public class PreferencesBFF : IPreferencesBFF
 
     public Task SetPreferences(string preferences)
     {
-        XYVRLogging.WriteLine("Set preferences was called.");
+        XYVRLogging.WriteLine(this, "Set preferences was called.");
         _newPrefs = JsonConvert.DeserializeObject<ReactAppPreferences>(preferences)!;
         return Task.CompletedTask;
     }
@@ -47,7 +47,7 @@ public class PreferencesBFF : IPreferencesBFF
         if (_newPrefs == null) return;
         if (_lastPrefs == null || !_newPrefs.Equals(_lastPrefs))
         {
-            XYVRLogging.WriteLine("Saving preferences");
+            XYVRLogging.WriteLine(this, "Saving preferences");
             _lastPrefs = _newPrefs;
             Task.Run(async () =>
                 {
@@ -57,7 +57,7 @@ public class PreferencesBFF : IPreferencesBFF
                     }
                     catch (Exception e)
                     {
-                        XYVRLogging.WriteLine(e);
+                        XYVRLogging.WriteLine(this, e);
                         throw;
                     }
                 })

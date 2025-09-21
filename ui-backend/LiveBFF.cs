@@ -36,7 +36,7 @@ public class LiveBFF : ILiveBFF
         }
         catch (Exception e)
         {
-            XYVRLogging.WriteLine(e);
+            XYVRLogging.WriteLine(this, e);
             throw;
         }
     }
@@ -50,7 +50,7 @@ public class LiveBFF : ILiveBFF
         }
         catch (Exception e)
         {
-            XYVRLogging.WriteLine(e);
+            XYVRLogging.WriteLine(this, e);
             throw;
         }
     }
@@ -85,7 +85,7 @@ public class LiveBFF : ILiveBFF
         }
         catch (Exception e)
         {
-            XYVRLogging.WriteLine(e);
+            XYVRLogging.WriteLine(this, e);
             throw;
         }
     }
@@ -105,12 +105,12 @@ public class LiveBFF : ILiveBFF
             {
                 try
                 {
-                    XYVRLogging.WriteLine($"Stopping monitoring of {agent.GetType().Name}");
+                    XYVRLogging.WriteLine(this, $"Stopping monitoring of {agent.GetType().Name}");
                     await agent.StopMonitoring();
                 }
                 catch (Exception e)
                 {
-                    XYVRLogging.WriteLine(e);
+                    XYVRLogging.WriteLine(this, e);
                     throw;
                 }
             });
@@ -133,7 +133,7 @@ public class LiveBFF : ILiveBFF
         {
             if (_doWeCareAboutThisSessionGuid.Contains(session.guid))
             {
-                XYVRLogging.WriteLine($"All known participants have left {session.inAppVirtualSpaceName} in {session.namedApp}, so we will stop monitoring it.");
+                XYVRLogging.WriteLine(this, $"All known participants have left {session.inAppVirtualSpaceName} in {session.namedApp}, so we will stop monitoring it.");
                 _doWeCareAboutThisSessionGuid.Remove(session.guid);
             }
             else
@@ -166,7 +166,7 @@ public class LiveBFF : ILiveBFF
             }
             catch (Exception e)
             {
-                XYVRLogging.WriteLine(e);
+                XYVRLogging.WriteLine(this, e);
                 throw;
             }
             // Close for real

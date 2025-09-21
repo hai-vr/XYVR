@@ -20,7 +20,7 @@ public class ResponseCollectionStorage : IResponseCollector
             }
             catch (Exception e)
             {
-                XYVRLogging.WriteLine(e);
+                XYVRLogging.WriteLine(this, e);
                 throw;
             }
         });

@@ -71,7 +71,7 @@ internal class VRChatLiveCommunicator
                     }
                     catch (Exception e)
                     {
-                        XYVRLogging.WriteLine(e);
+                        XYVRLogging.WriteLine(this, e);
                         throw;
                     }
                 });
@@ -81,7 +81,7 @@ internal class VRChatLiveCommunicator
 
     private async Task ProcessQueue()
     {
-        XYVRLogging.WriteLine("Processing queue");
+        XYVRLogging.WriteLine(this, "Processing queue");
         _api ??= await InitializeAPI();
         
         while (_queue.Count > 0 || _highPriorityQueue.Count > 0)
@@ -223,7 +223,7 @@ internal class VRChatLiveCommunicator
                 }
                 catch (Exception e)
                 {
-                    XYVRLogging.WriteLine(e);
+                    XYVRLogging.WriteLine(this, e);
                     throw;
                 }
             }
@@ -248,7 +248,7 @@ internal class VRChatLiveCommunicator
             var type = rootObj["type"].Value<string>();
             
             var contentddd = JsonConvert.DeserializeObject<VRChatWebsocketContentContainingUser>(rootObj["content"].Value<string>())!;
-            XYVRLogging.WriteLine($"-- [[{type}]] from vrc ws api. {contentddd.userId} ({contentddd.user?.displayName}) location: {contentddd.location} -- platform: {contentddd.user?.platform} --- status: {contentddd.user?.status}");
+            XYVRLogging.WriteLine(this, $"-- [[{type}]] from vrc ws api. {contentddd.userId} ({contentddd.user?.displayName}) location: {contentddd.location} -- platform: {contentddd.user?.platform} --- status: {contentddd.user?.status}");
             
             var isSessionKnowable = type is "friend-online" or "friend-location" or "friend-offline" or "friend-active";
             if (isSessionKnowable)
@@ -331,12 +331,12 @@ internal class VRChatLiveCommunicator
             }
             else
             {
-                XYVRLogging.WriteLine($"Received UNHANDLED message of type {type} from vrc ws api");
+                XYVRLogging.WriteLine(this, $"Received UNHANDLED message of type {type} from vrc ws api");
             }
         }
         catch (Exception e)
         {
-            XYVRLogging.WriteLine(e);
+            XYVRLogging.WriteLine(this, e);
             throw;
         }
     }
@@ -453,7 +453,7 @@ internal class VRChatLiveCommunicator
             }
             else
             {
-                XYVRLogging.WriteLine($"Location is not parseable as a world: {location}");
+                XYVRLogging.WriteLine(this, $"Location is not parseable as a world: {location}");
                 return null;
             }
         }
@@ -475,12 +475,12 @@ internal class VRChatLiveCommunicator
             _allQueued.Add(job);
             if (cachedWorldNullable != null)
             {
-                XYVRLogging.WriteLine($"We don't know world id {worldId}, will queue fetch...");
+                XYVRLogging.WriteLine(this, $"We don't know world id {worldId}, will queue fetch...");
                 _highPriorityQueue.Enqueue(job);
             }
             else
             {
-                XYVRLogging.WriteLine($"We need to refresh our knowledge of world id {worldId}, will queue fetch...");
+                XYVRLogging.WriteLine(this, $"We need to refresh our knowledge of world id {worldId}, will queue fetch...");
                 _queue.Enqueue(job);
             }
 
@@ -511,10 +511,10 @@ internal class VRChatLiveCommunicator
 
     private void WhenDisconnected(string reason)
     {
-        XYVRLogging.WriteLine($"We got disconnected from the vrc ws api. Reason: {reason}");
+        XYVRLogging.WriteLine(this, $"We got disconnected from the vrc ws api. Reason: {reason}");
         if (!_hasInitiatedDisconnect)
         {
-            XYVRLogging.WriteLine("Will try reconnecting.");
+            XYVRLogging.WriteLine(this, "Will try reconnecting.");
             Task.Run(async () =>
             {
                 try
@@ -523,7 +523,7 @@ internal class VRChatLiveCommunicator
                 }
                 catch (Exception e)
                 {
-                    XYVRLogging.WriteLine(e);
+                    XYVRLogging.WriteLine(this, e);
                     throw;
                 }
             }).Wait();

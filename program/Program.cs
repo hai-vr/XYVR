@@ -107,7 +107,7 @@ internal class JobHandler : IIncrementalDataCollectionJobHandler
 {
     public Task NotifyAccountUpdated(List<ImmutableAccountIdentification> increment)
     {
-        XYVRLogging.WriteLine($"Updated the following {increment.Count} accounts: {string.Join(", ", increment)}");
+        XYVRLogging.WriteLine(this, $"Updated the following {increment.Count} accounts: {string.Join(", ", increment)}");
         return Task.CompletedTask;
     }
 
@@ -118,7 +118,7 @@ internal class JobHandler : IIncrementalDataCollectionJobHandler
 
     public Task NotifyEnumeration(IncrementalEnumerationTracker tracker, int enumerationAccomplished, int enumerationTotalCount_canBeZero)
     {
-        XYVRLogging.WriteLine($"Progress: {enumerationAccomplished} / {enumerationTotalCount_canBeZero}");
+        XYVRLogging.WriteLine(this, $"Progress: {enumerationAccomplished} / {enumerationTotalCount_canBeZero}");
         return Task.CompletedTask;
     }
 
