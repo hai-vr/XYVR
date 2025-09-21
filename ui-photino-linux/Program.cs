@@ -36,6 +36,7 @@ namespace XYVR.UI.Photino
                     .RunAsync();
             
                 _window = new PhotinoWindow()
+                    .SetLogVerbosity(0)
                     .SetTitle(windowTitle)
                     // Resize to a percentage of the main monitor work area
                     .SetUseOsDefaultSize(false)
