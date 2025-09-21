@@ -35,7 +35,18 @@ internal class VRChatWebsocketClient : IDisposable
             
             Connected?.Invoke();
             
-            _ = Task.Run(async () => await ListenForMessages(_cancellationTokenSource.Token));
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await ListenForMessages(_cancellationTokenSource.Token);
+                }
+                catch (Exception e)
+                {
+                    XYVRLogging.WriteLine(e);
+                    throw;
+                }
+            });
         }
         catch (Exception ex)
         {

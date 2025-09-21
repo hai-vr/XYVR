@@ -49,7 +49,18 @@ public class PreferencesBFF : IPreferencesBFF
         {
             XYVRLogging.WriteLine("Saving preferences");
             _lastPrefs = _newPrefs;
-            Task.Run(async () => await Scaffolding.SaveReactAppPreferences(_newPrefs))
+            Task.Run(async () =>
+                {
+                    try
+                    {
+                        await Scaffolding.SaveReactAppPreferences(_newPrefs);
+                    }
+                    catch (Exception e)
+                    {
+                        XYVRLogging.WriteLine(e);
+                        throw;
+                    }
+                })
                 .Wait();
         }
     }

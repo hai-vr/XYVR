@@ -12,7 +12,18 @@ public class ResponseCollectionStorage : IResponseCollector
     
     public void Ingest(ResponseCollectionTrail trail)
     {
-        _ = Task.Run(async () => await WriteToJsonlFileAsync(trail));
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await WriteToJsonlFileAsync(trail);
+            }
+            catch (Exception e)
+            {
+                XYVRLogging.WriteLine(e);
+                throw;
+            }
+        });
     }
 
     private async Task WriteToJsonlFileAsync(ResponseCollectionTrail trail)

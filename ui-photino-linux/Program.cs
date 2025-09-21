@@ -50,7 +50,18 @@ namespace XYVR.UI.Photino
                         if (sender == null) throw new InvalidOperationException("Got null sender");
                         
                         var window = (PhotinoWindow)sender;
-                        Task.Run(async () => await HandleMessage(window, message__sensitive));
+                        Task.Run(async () =>
+                        {
+                            try
+                            {
+                                await HandleMessage(window, message__sensitive);
+                            }
+                            catch (Exception e)
+                            {
+                                XYVRLogging.WriteLine(e);
+                                throw;
+                            }
+                        });
                     });
 
                 _window.SetIconFile(RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "favicon.ico" : "icon.png");
