@@ -36,7 +36,7 @@ export function LiveSession({liveSession, individuals, debugMode, mini}: LiveSes
             height: '100%'
         }}>
             <div style={{
-                background: `url(${liveSession.thumbnailUrl}), var(--live-session-overlay)`,
+                background: liveSession.thumbnailUrl && `url(${liveSession.thumbnailUrl}), var(--live-session-overlay)` || 'var(--live-session-overlay)',
                 // filter: liveSession.isVirtualSpacePrivate || debugMode.demoMode === DemonstrationMode.Everything ? 'blur(10px)' : 'none',
                 // backdropFilter: liveSession.isVirtualSpacePrivate || debugMode.demoMode === DemonstrationMode.Everything ? 'blur(10px)' : 'none',
                 backgroundBlendMode: 'var(--live-session-blend-mode), normal',
