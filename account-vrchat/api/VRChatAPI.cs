@@ -307,7 +307,7 @@ internal class VRChatAPI
         }
     }
 
-    public async Task<VRChatInstance?> GetInstanceLenient(DataCollectionReason dataCollectionReason, string worldIdAndInstanceId)
+    public async Task<VRChatInstance?> GetInstanceLenient(DataCollectionReason dataCollectionReason, string worldIdAndInstanceId, bool useFastFetch)
     {
         ThrowIfNotLoggedIn();
         
@@ -318,7 +318,7 @@ internal class VRChatAPI
         {
             var response = await _client.GetAsync(url);
 
-            await EnsureRateLimiting(url, response.StatusCode, true);
+            await EnsureRateLimiting(url, response.StatusCode, useFastFetch);
 
             if (response.StatusCode == HttpStatusCode.NotFound)
             {
@@ -394,7 +394,7 @@ internal class VRChatAPI
 
     }
 
-    private async Task EnsureRateLimiting(string urlForLogging, HttpStatusCode statusCode, bool shortened = false)
+    private async Task EnsureRateLimiting(string urlForLogging, HttpStatusCode statusCode, bool useFastFetch = false)
     {
         if (statusCode == HttpStatusCode.TooManyRequests)
         {
@@ -406,7 +406,7 @@ internal class VRChatAPI
         
         if (!_useRateLimiting) return;
 
-        var millisecondsDelay = (int)(_random.Next(700, 1300) * (shortened ? 0.25f : 1f)); // Introduce some irregularity
+        var millisecondsDelay = (int)(_random.Next(700, 1300) * (useFastFetch ? 0.25f : 1f)); // Introduce some irregularity
         XYVRLogging.WriteLine($"Got {urlForLogging} ; Waiting {millisecondsDelay}ms...");
 
         await Task.Delay(millisecondsDelay);

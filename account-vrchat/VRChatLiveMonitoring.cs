@@ -87,9 +87,7 @@ public class VRChatLiveMonitoring : ILiveMonitoring
         {
             while (true) // Canceled by token
             {
-                // Unsure why, but if it runs for a while, we won't receive any updates until the user actually starts the game?
-                // Request a full update every so often
-                await Task.Delay(TimeSpan.FromMinutes(1), _cancellationTokenSource.Token);
+                await Task.Delay(TimeSpan.FromMinutes(5), _cancellationTokenSource.Token);
                 var sessionsToUpdate = _monitoring.GetAllSessions(NamedApp.VRChat)
                     .Where(session => _sessionsOfInterest.Contains(session.inAppSessionIdentifier))
                     .Where(session => session.participants.Length > 0)
