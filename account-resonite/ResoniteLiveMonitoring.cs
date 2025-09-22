@@ -53,7 +53,7 @@ public class ResoniteLiveMonitoring : ILiveMonitoring, IDisposable
             var alreadyListeningTo = new HashSet<string>();
             _liveComms.OnLiveUpdateReceived += async update =>
             {
-                XYVRLogging.WriteLine(this, $"OnLiveUpdateReceived: {JsonConvert.SerializeObject(update, serializer)}");
+                // XYVRLogging.WriteLine(this, $"OnLiveUpdateReceived: {JsonConvert.SerializeObject(update, serializer)}");
                 await _monitoring.MergeUser(update);
 
                 if (!alreadyListeningTo.Contains(update.inAppIdentifier))
@@ -166,7 +166,7 @@ public class ResoniteLiveMonitoring : ILiveMonitoring, IDisposable
         }
         catch (Exception e)
         {
-            XYVRLogging.WriteLine(this, e);
+            XYVRLogging.ErrorWriteLine(this, e);
             throw;
         }
     }

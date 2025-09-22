@@ -58,7 +58,7 @@ namespace XYVR.UI.Photino
                             }
                             catch (Exception e)
                             {
-                                XYVRLogging.WriteLine(typeof(Program), e);
+                                XYVRLogging.ErrorWriteLine(typeof(Program), e);
                                 throw;
                             }
                         });
@@ -77,7 +77,7 @@ namespace XYVR.UI.Photino
             }
             catch (Exception e)
             {
-                XYVRLogging.WriteLine(typeof(Program), e);
+                XYVRLogging.ErrorWriteLine(typeof(Program), e);
                 throw;
             }
         }

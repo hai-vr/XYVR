@@ -74,7 +74,7 @@ public class AppLifecycle
         }
         catch (Exception exception)
         {
-            XYVRLogging.WriteLine(this, exception);
+            XYVRLogging.ErrorWriteLine(this, exception);
             throw;
         }
     }

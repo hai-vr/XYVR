@@ -98,7 +98,7 @@ public class ChilloutVRDataCollection(IndividualRepository repository, ICredenti
         }
         catch (Exception e)
         {
-            XYVRLogging.WriteLine(this, e);
+            XYVRLogging.ErrorWriteLine(this, e);
             throw;
         }
     }

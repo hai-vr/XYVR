@@ -86,7 +86,7 @@ internal class ResoniteSignalRClient
         var obj = XYVRSerializationUtils.LogDeserializeOrNull<UserStatusUpdate>(this, rawText);
         if (obj == null)
         {
-            XYVRLogging.WriteLine(this, "Failed to deserialize a status update.");
+            XYVRLogging.ErrorWriteLine(this, "Failed to deserialize a status update.");
             return;
         }
         
@@ -99,7 +99,7 @@ internal class ResoniteSignalRClient
         var obj = XYVRSerializationUtils.LogDeserializeOrNull<SessionUpdateJsonObject>(this, rawText);
         if (obj == null)
         {
-            XYVRLogging.WriteLine(this, "Failed to deserialize a session update.");
+            XYVRLogging.ErrorWriteLine(this, "Failed to deserialize a session update.");
             return;
         }
 

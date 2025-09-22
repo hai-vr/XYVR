@@ -71,7 +71,7 @@ internal class VRChatLiveCommunicator
                     }
                     catch (Exception e)
                     {
-                        XYVRLogging.WriteLine(this, e);
+                        XYVRLogging.ErrorWriteLine(this, e);
                         throw;
                     }
                 });
@@ -223,7 +223,7 @@ internal class VRChatLiveCommunicator
                 }
                 catch (Exception e)
                 {
-                    XYVRLogging.WriteLine(this, e);
+                    XYVRLogging.ErrorWriteLine(this, e);
                     throw;
                 }
             }
@@ -333,7 +333,7 @@ internal class VRChatLiveCommunicator
         }
         catch (Exception e)
         {
-            XYVRLogging.WriteLine(this, e);
+            XYVRLogging.ErrorWriteLine(this, e);
             throw;
         }
     }
@@ -520,7 +520,7 @@ internal class VRChatLiveCommunicator
                 }
                 catch (Exception e)
                 {
-                    XYVRLogging.WriteLine(this, e);
+                    XYVRLogging.ErrorWriteLine(this, e);
                     throw;
                 }
             }).Wait();

@@ -33,26 +33,21 @@ public class VRChatLiveMonitoring : ILiveMonitoring
             if (_isConnected) return;
             _cancellationTokenSource = new CancellationTokenSource();
             
-            var serializer = new JsonSerializerSettings()
-            {
-                Converters = { new StringEnumConverter() }
-            };
-            
             _liveComms = new VRChatLiveCommunicator(_credentialsStorage, _callerInAppIdentifier, new DoNotStoreAnythingStorage(), _worldNameCache);
             _liveComms.OnLiveUpdateReceived += async update =>
             {
-                XYVRLogging.WriteLine(this, $"OnLiveUpdateReceived: {JsonConvert.SerializeObject(update, serializer)}");
+                // XYVRLogging.WriteLine(this, $"OnLiveUpdateReceived: {JsonConvert.SerializeObject(update, serializer)}");
                 await _monitoring.MergeUser(update);
             };
             _liveComms.OnLiveSessionReceived += async session =>
             {
                 _sessionsOfInterest.Add(session.inAppSessionIdentifier);
-                XYVRLogging.WriteLine(this, $"OnLiveSessionReceived: {JsonConvert.SerializeObject(session, serializer)}");
+                // XYVRLogging.WriteLine(this, $"OnLiveSessionReceived: {JsonConvert.SerializeObject(session, serializer)}");
                 return await _monitoring.MergeSession(session);
             };
             _liveComms.OnWorldCached += async world =>
             {
-                XYVRLogging.WriteLine(this, $"OnWorldCached: {JsonConvert.SerializeObject(world, serializer)}");
+                XYVRLogging.WriteLine(this, $"A world was cached: {world.worldId} {world.name} by {world.authorName}");
 
                 var allSessionsOnThisWorld = _monitoring.GetAllSessions(NamedApp.VRChat)
                     .Where(session => session.inAppSessionIdentifier.StartsWith(world.worldId))
@@ -75,12 +70,6 @@ public class VRChatLiveMonitoring : ILiveMonitoring
         }
     }
 
-    private string? TryLocationToSessionGuid(string location)
-    {
-        return _monitoring.GetAllSessions(NamedApp.VRChat)
-            .FirstOrDefault(session => session.inAppSessionIdentifier == location)?.guid;
-    }
-
     private async Task BackgroundTask()
     {
         try
@@ -99,7 +88,7 @@ public class VRChatLiveMonitoring : ILiveMonitoring
         }
         catch (Exception e)
         {
-            XYVRLogging.WriteLine(this, e);
+            XYVRLogging.ErrorWriteLine(this, e);
             throw;
         }
     }

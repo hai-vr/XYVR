@@ -2,19 +2,28 @@
 
 public static class XYVRLogging
 {
+    public static event ErrorLog? OnErrorLog;
+    public delegate void ErrorLog(string message); 
+    
     public static void WriteLine(object caller, string str)
     {
         Console.WriteLine($"{Header(caller)} {str}");
     }
 
-    public static void WriteLine(object caller, Exception e)
+    public static void ErrorWriteLine(object caller, Exception e)
     {
-        Console.Error.WriteLine("{2} Exception occurred: {0}\nStack Trace: {1}", e.Message, e.StackTrace, Header(caller));
+        var line = $"{Header(caller)} Exception occurred: {e.Message}\nStack Trace: {e.StackTrace}";
+        Console.Error.WriteLine(line);
+        
+        OnErrorLog?.Invoke(line);
     }
 
     public static void ErrorWriteLine(object caller, string str)
     {
-        Console.Error.WriteLine($"{Header(caller)} {str}");
+        var line = $"{Header(caller)} {str}";
+        Console.Error.WriteLine(line);
+        
+        OnErrorLog?.Invoke(line);
     }
 
     private static string Header(object caller)

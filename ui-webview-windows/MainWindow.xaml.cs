@@ -40,7 +40,7 @@ public partial class MainWindow : Window
         }
         catch (Exception e)
         {
-            XYVRLogging.WriteLine(this, e);
+            XYVRLogging.ErrorWriteLine(this, e);
             throw;
         }
     }

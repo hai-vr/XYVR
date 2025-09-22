@@ -12,7 +12,7 @@ public class XYVRSerializationUtils
         }
         catch (Exception e)
         {
-            XYVRLogging.WriteLine(callerForLogging, e);
+            XYVRLogging.ErrorWriteLine(callerForLogging, e);
             return default;
         }
     }

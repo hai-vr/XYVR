@@ -43,7 +43,7 @@ internal class VRChatWebsocketClient : IDisposable
                 }
                 catch (Exception e)
                 {
-                    XYVRLogging.WriteLine(this, e);
+                    XYVRLogging.ErrorWriteLine(this, e);
                     throw;
                 }
             });

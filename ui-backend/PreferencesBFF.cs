@@ -57,7 +57,7 @@ public class PreferencesBFF : IPreferencesBFF
                     }
                     catch (Exception e)
                     {
-                        XYVRLogging.WriteLine(this, e);
+                        XYVRLogging.ErrorWriteLine(this, e);
                         throw;
                     }
                 })

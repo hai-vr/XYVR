@@ -36,7 +36,7 @@ public class LiveBFF : ILiveBFF
         }
         catch (Exception e)
         {
-            XYVRLogging.WriteLine(this, e);
+            XYVRLogging.ErrorWriteLine(this, e);
             throw;
         }
     }
@@ -50,7 +50,7 @@ public class LiveBFF : ILiveBFF
         }
         catch (Exception e)
         {
-            XYVRLogging.WriteLine(this, e);
+            XYVRLogging.ErrorWriteLine(this, e);
             throw;
         }
     }
@@ -85,7 +85,7 @@ public class LiveBFF : ILiveBFF
         }
         catch (Exception e)
         {
-            XYVRLogging.WriteLine(this, e);
+            XYVRLogging.ErrorWriteLine(this, e);
             throw;
         }
     }
@@ -110,7 +110,7 @@ public class LiveBFF : ILiveBFF
                 }
                 catch (Exception e)
                 {
-                    XYVRLogging.WriteLine(this, e);
+                    XYVRLogging.ErrorWriteLine(this, e);
                     throw;
                 }
             });
@@ -167,7 +167,7 @@ public class LiveBFF : ILiveBFF
             }
             catch (Exception e)
             {
-                XYVRLogging.WriteLine(this, e);
+                XYVRLogging.ErrorWriteLine(this, e);
                 throw;
             }
             // Close for real
