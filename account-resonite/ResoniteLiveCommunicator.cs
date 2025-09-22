@@ -1,6 +1,7 @@
 ﻿using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using XYVR.Core;
+using System.Runtime.Caching;
 
 namespace XYVR.AccountAuthority.Resonite;
 
@@ -13,7 +14,7 @@ internal partial class ResoniteLiveCommunicator
     private readonly Func<string, string?> _trySessionIdToSessionGuidFn;
     private readonly HashToSession _hashToSession;
     private readonly ResoniteSignalRClient _srClient;
-    private readonly Dictionary<string, SessionUpdateJsonObject> _sessionIdToSessionUpdate = new();
+    private readonly MemoryCache/*<string, SessionUpdateJsonObject>*/ _sessionIdToSessionUpdate = MemoryCache.Default;
     private readonly HashSet<string> _sessionIdsToWatch = new();
 
     private ResoniteAPI? _api;
@@ -111,9 +112,14 @@ internal partial class ResoniteLiveCommunicator
         var anySessionUpdated = false;
         
         // FIXME: Resonite sends a massive amount of session updates objects per second. This needs to be restricted further
-        if (_sessionIdToSessionUpdate.TryAdd(sessionUpdate.sessionId, sessionUpdate))
+        var has = _sessionIdToSessionUpdate.Contains(sessionUpdate.sessionId);
+        if (!has)
         {
-            XYVRLogging.WriteLine(this, $"Storing for the first time information about {sessionUpdate.sessionId}, which is {sessionUpdate.name}");
+            _sessionIdToSessionUpdate.Add(sessionUpdate.sessionId, sessionUpdate, new CacheItemPolicy
+            {
+                SlidingExpiration = TimeSpan.FromMinutes(5)
+            });
+            XYVRLogging.WriteLine(this, $"Storing for the first time information about {sessionUpdate.sessionId}, which is {ExtractTextFromColorTags(sessionUpdate.name)}");
             anySessionUpdated = true;
         }
         else
@@ -152,7 +158,7 @@ internal partial class ResoniteLiveCommunicator
             var sess = await _hashToSession.ResolveSession(session.sessionHash, userStatusUpdate.hashSalt);
             if (sess != null)
             {
-                sessionUpdate = _sessionIdToSessionUpdate.GetValueOrDefault(sess.sessionId);
+                sessionUpdate = (SessionUpdateJsonObject?)_sessionIdToSessionUpdate.Get(sess.sessionId);
                 var added = _sessionIdsToWatch.Add(sess.sessionId);
                 if (added && sessionUpdate != null)
                 {
@@ -205,7 +211,7 @@ internal partial class ResoniteLiveCommunicator
         var resolveSession = await _hashToSession.ResolveSession(wantedHash, hashSalt);
         if (resolveSession != null)
         {
-            var sessionUpdate = _sessionIdToSessionUpdate[resolveSession.sessionId];
+            var sessionUpdate = (SessionUpdateJsonObject?)_sessionIdToSessionUpdate[resolveSession.sessionId];
             return sessionUpdate;
         }
 
