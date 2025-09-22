@@ -110,6 +110,8 @@ public class ResoniteLiveMonitoring : ILiveMonitoring, IDisposable
             var specifics = (ImmutableResoniteLiveSessionSpecifics)userUpdate.sessionSpecifics!;
             if (specifics.userHashSalt != null)
             {
+                var modifiedUserUpdate = userUpdate;
+                
                 string rehash = null;
                 if (userUpdate.mainSession?.knowledge == LiveUserSessionKnowledge.KnownButNoData)
                 {
@@ -118,14 +120,19 @@ public class ResoniteLiveMonitoring : ILiveMonitoring, IDisposable
                     {
                         XYVRLogging.WriteLine(this, "Received a session for which a user had an unresolved hash for.");
 
-                        await _monitoring.MergeUser(userUpdate with { mainSession = new ImmutableLiveUserSessionState { knowledge = LiveUserSessionKnowledge.Known, sessionGuid = correspondingSession.guid } });
+                        modifiedUserUpdate = modifiedUserUpdate with { mainSession = new ImmutableLiveUserSessionState { knowledge = LiveUserSessionKnowledge.Known, sessionGuid = correspondingSession.guid } };
                     }
                 }
 
                 if (specifics.sessionHashes.Length != userUpdate.multiSessionGuids.Length && specifics.userHashSalt != null)
                 {
                     var sessionGuids = await ResolveSessionGuids(specifics);
-                    await _monitoring.MergeUser(userUpdate with { multiSessionGuids = [..sessionGuids] });
+                    modifiedUserUpdate = modifiedUserUpdate with { multiSessionGuids = [..sessionGuids] };
+                }
+
+                if (modifiedUserUpdate != userUpdate)
+                {
+                    await _monitoring.MergeUser(modifiedUserUpdate);
                 }
             }
         }
