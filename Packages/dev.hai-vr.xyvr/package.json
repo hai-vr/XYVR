@@ -7,8 +7,8 @@
     "author" : {
         "name" : "Haï~"
     },
-    "url" : "https://alleyway.hai-vr.dev/docs/products/xyvr",
-    "documentationUrl": "https://alleyway.hai-vr.dev/docs/products/xyvr",
-    "changelogUrl": "https://alleyway.hai-vr.dev/docs/products/xyvr/changelogs",
+    "url" : "https://docs.hai-vr.dev/docs/products/xyvr",
+    "documentationUrl": "https://docs.hai-vr.dev/docs/products/xyvr",
+    "changelogUrl": "https://docs.hai-vr.dev/docs/products/xyvr/changelogs",
     "license": "MIT"
 }
