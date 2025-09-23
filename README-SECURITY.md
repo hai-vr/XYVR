@@ -2,6 +2,16 @@
 
 To facilitate audits of this project, I have documented areas of concern.
 
+## Basics
+
+This application uses Microsoft WebView2 on Windows, and Photino on Linux.
+
+It consists of a .NET backend and a React frontend, both of which are hosted locally.
+- The backend establishes connections to the various APIs of the different social VR apps using a combination of HTTP requests, Websockets, and SignalR.
+- The frontend communicates with the backend using .NET integration facilities through Microsoft WebView2 or Photino, depending on the variant of the application.
+- The frontend does not communicate with the social VR apps, except for fetching thumbnail images.
+- There is no XYVR server on the Internet; all operations are done by the users' local machine, and the data is stored on the users' local machine.
+
 ## URLs in use
 
 All URLs that are used to perform requests to external services are gathered into one single file: [AuditUrls.cs](audit-urls/AuditUrls.cs)
@@ -91,7 +101,10 @@ that allows this.
 Although it is not the responsibility of the frontend to communicate with external services, the frontend will use whatever URL is provided by the backend
 as thumbnails for user profile picture and session thumbnails. This will establish a connection to an external service or CDN to retrieve the image.
 
-This is the responsibility of the frontend. The backend will not retrieve that image nor perform any image processing to it.
+Fetching the image and displaying it is the responsibility of the frontend. The backend will not retrieve that image nor perform any image processing to it.
+
+The backend will apply the following restrictions to the URLs received from the various APIs, which are then passed to the frontend:
+- For Resonite session thumbnails, the backend will only provide the URL to the frontend if the thumbnail host is equal to `resonite.com` or is a subdomain of it.
 
 ## Data storage
 

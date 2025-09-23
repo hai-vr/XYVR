@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using XYVR.API.Audit;
 using XYVR.Core;
 
 namespace XYVR.AccountAuthority.Resonite;
@@ -85,6 +86,10 @@ public class ResoniteLiveMonitoring : ILiveMonitoring, IDisposable
     private async void WhenSessionUpdated(SessionUpdateJsonObject sessionUpdate)
     {
         var sessionId = sessionUpdate.sessionId;
+
+        // As a precaution, we only accept thumbnail URLs if they point to resonite.com or any subdomain of it
+        // to prevent a possible violation of privacy as we don't know how much we can trust the incoming data.
+        var sanitizedThumbnailUrl = sessionUpdate.thumbnailUrl != null ? EnsureUrlIsResoniteDotComOrNull(sessionUpdate.thumbnailUrl) : null;
         
         var correspondingSession = await _monitoring.MergeSession(new ImmutableNonIndexedLiveSession
         {
@@ -96,7 +101,7 @@ public class ResoniteLiveMonitoring : ILiveMonitoring, IDisposable
             currentAttendance = sessionUpdate.joinedUsers,
             sessionCapacity = sessionUpdate.maxUsers,
             virtualSpaceDefaultCapacity = sessionUpdate.maxUsers,
-            thumbnailUrl = sessionUpdate.thumbnailUrl,
+            thumbnailUrl = sanitizedThumbnailUrl,
         });
         
         _hashToSession.SubmitSession(new SessionBrief
@@ -137,6 +142,24 @@ public class ResoniteLiveMonitoring : ILiveMonitoring, IDisposable
             }
         }
     }
+
+    private static string? EnsureUrlIsResoniteDotComOrNull(string thumbnailUrl)
+    {
+        if (!thumbnailUrl.StartsWith("https://")) return null;
+
+        if (Uri.TryCreate(thumbnailUrl, UriKind.Absolute, out var uri))
+        {
+            var host = uri.Host.ToLowerInvariant();
+
+            if (host == AuditUrls.ResoniteSessionThumbnailsPermittedHostAndSubdomainHost || host.EndsWith($".{AuditUrls.ResoniteSessionThumbnailsPermittedHostAndSubdomainHost}"))
+            {
+                return thumbnailUrl;
+            }
+        }
+                
+        return null;
+    }
+
 
     private async Task<List<string>> ResolveSessionGuids(ImmutableResoniteLiveSessionSpecifics specifics)
     {

@@ -151,7 +151,7 @@ internal class SessionUpdateJsonObject
     // public List<string> parentSessionIds;
     // public List<string> nestedSessionIds;
     // public List<string> sessionUsers;
-    public string thumbnailUrl;
+    public string? thumbnailUrl;
     public int joinedUsers;
     // public int activeUsers;
     // public int totalJoinedUsers;

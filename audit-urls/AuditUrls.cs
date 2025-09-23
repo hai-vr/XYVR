@@ -30,4 +30,9 @@ https://discord.com/channels/418093857394262020/418512124529344523/1413288167846
     public const string ResoniteHubUrl = "https://api.resonite.com/hub";
 
     public const string ChilloutVrApiUrlV1 = "https://api.abinteractive.net/1";
+    
+    // We're not sure how much to trust thumbnail URLs coming from Resonite API endpoints. As a precaution,
+    // only accept URLs if the host is equal to this, of if the host is a subdomain of this.
+    // Most thumbnails seem to come from skyfrost-archive.resonite.com as this time of writing.
+    public const string ResoniteSessionThumbnailsPermittedHostAndSubdomainHost = "resonite.com";
 }
