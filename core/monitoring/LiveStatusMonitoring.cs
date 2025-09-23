@@ -70,6 +70,7 @@ public class LiveStatusMonitoring
             if (inputUpdate.onlineStatus != null) modifiedUpdate = modifiedUpdate with { onlineStatus = inputUpdate.onlineStatus };
             if (inputUpdate.customStatus != null) modifiedUpdate = modifiedUpdate with { customStatus = inputUpdate.customStatus };
             if (inputUpdate.mainSession != null) modifiedUpdate = modifiedUpdate with { mainSession = inputUpdate.mainSession };
+            modifiedUpdate = modifiedUpdate with { multiSessionGuids = inputUpdate.multiSessionGuids };
 
             // Did anything actually change?
             if (modifiedUpdate != existingUpdate)
