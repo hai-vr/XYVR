@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-using XYVR.Core;
+﻿using XYVR.Core;
 
 namespace XYVR.AccountAuthority.VRChat;
 

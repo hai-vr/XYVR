@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System.Collections.Concurrent;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using XYVR.Core;
 
@@ -27,9 +28,9 @@ internal class VRChatLiveCommunicator
     private readonly WorldNameCache _worldNameCache;
 
     private readonly Lock _queueLock = new();
-    private readonly HashSet<IQueueJob> _allQueued = new();
-    private readonly Queue<IQueueJob> _queue = new();
-    private readonly Queue<IQueueJob> _highPriorityQueue = new();
+    private readonly ConcurrentDictionary<IQueueJob, bool> _allQueued = new();
+    private readonly ConcurrentQueue<IQueueJob> _queue = new();
+    private readonly ConcurrentQueue<IQueueJob> _highPriorityQueue = new();
     private Task _queueTask = Task.CompletedTask;
 
     private VRChatWebsocketClient _wsClient;
@@ -86,8 +87,8 @@ internal class VRChatLiveCommunicator
         
         while (_queue.Count > 0 || _highPriorityQueue.Count > 0)
         {
-            var dequeued = _highPriorityQueue.Count > 0 ? _highPriorityQueue.Dequeue() : _queue.Dequeue();
-            if (dequeued is WorldQueueJob worldQueueJob)
+            var anythingDequeued = _highPriorityQueue.TryDequeue(out var dequeued) || _queue.TryDequeue(out dequeued);
+            if (anythingDequeued && dequeued is WorldQueueJob worldQueueJob)
             {
                 var worldId = worldQueueJob.worldId;
                 var worldLenient = await _api.GetWorldLenient(DataCollectionReason.CollectSessionLocationInformation, worldId);
@@ -358,10 +359,10 @@ internal class VRChatLiveCommunicator
                 worldIdAndInstanceId = worldIdAndInstanceId,
                 useFastFetch = useFastFetch
             };
-            if (!onlyConsiderItemsInQueue && !_allQueued.Contains(queueJob)
+            if (!onlyConsiderItemsInQueue && !_allQueued.ContainsKey(queueJob)
                 || onlyConsiderItemsInQueue && !_queue.Contains(queueJob) && !_highPriorityQueue.Contains(queueJob))
             {
-                _allQueued.Add(queueJob);
+                _allQueued[queueJob] = true;
                 _queue.Enqueue(queueJob);
                 WakeUpQueue();
             }
@@ -467,9 +468,9 @@ internal class VRChatLiveCommunicator
         var shouldAttemptQueueing = cachedWorldNullable == null || cachedWorldNullable.needsRefresh;
 
         var job = new WorldQueueJob { worldId = worldId };
-        if (shouldAttemptQueueing && !_allQueued.Contains(job))
+        if (shouldAttemptQueueing && !_allQueued.ContainsKey(job))
         {
-            _allQueued.Add(job);
+            _allQueued[job] = true;
             if (cachedWorldNullable != null)
             {
                 XYVRLogging.WriteLine(this, $"We don't know world id {worldId}, will queue fetch...");
