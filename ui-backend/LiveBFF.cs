@@ -136,12 +136,16 @@ public class LiveBFF : ILiveBFF
                 return;
             }
 
-            XYVRLogging.WriteLine(this, $"All known participants have left {session.inAppVirtualSpaceName} in {session.namedApp}, so we will stop monitoring it.");
             _doWeCareAboutThisSessionGuid.Remove(session.guid);
+            XYVRLogging.WriteLine(this, $"All known participants have left {session.inAppVirtualSpaceName} in {session.namedApp}, so we will stop monitoring it (now monitoring {_doWeCareAboutThisSessionGuid.Count} sessions).");
         }
         else
         {
-            _doWeCareAboutThisSessionGuid.Add(session.guid);
+            var added = _doWeCareAboutThisSessionGuid.Add(session.guid);
+            if (added)
+            {
+                XYVRLogging.WriteLine(this, $"We have just started monitoring {session.inAppVirtualSpaceName} in {session.namedApp} (now monitoring {_doWeCareAboutThisSessionGuid.Count} sessions).");
+            }
         }
         
         await _appLifecycle.SendEventToReact(FrontEvents.EventForLiveSessionUpdated, FrontLiveSession.FromCore(session));
