@@ -1,6 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using Newtonsoft.Json;
 using XYVR.Core;
+using XYVR.Scaffold;
 
 namespace XYVR.UI.Backend;
 
@@ -9,6 +10,7 @@ public interface ILiveBFF
 {
     string GetAllExistingLiveUserData();
     string GetAllExistingLiveSessionData();
+    Task<string> GetThumbnailBase64(string thumbnailUrl);
 }
 
 [ComVisible(true)]
@@ -17,6 +19,7 @@ public class LiveBFF : ILiveBFF
 {
     private readonly AppLifecycle _appLifecycle;
     private readonly JsonSerializerSettings _serializer;
+    private readonly VRChatThumbnailCache _thumbnailCache;
 
     private List<ILiveMonitoring>? _liveMonitoringAgents;
     private HashSet<string> _doWeCareAboutThisSessionGuid = new();
@@ -25,6 +28,7 @@ public class LiveBFF : ILiveBFF
     {
         _appLifecycle = appLifecycle;
         _serializer = BFFUtils.NewSerializer();
+        _thumbnailCache = Scaffolding.ThumbnailCache();
     }
     
     public string GetAllExistingLiveUserData()
@@ -53,6 +57,17 @@ public class LiveBFF : ILiveBFF
             XYVRLogging.ErrorWriteLine(this, e);
             throw;
         }
+    }
+
+    public async Task<string> GetThumbnailBase64(string thumbnailUrl)
+    {
+        var bytes = await _thumbnailCache.GetOrNull(thumbnailUrl);
+        if (bytes == null)
+        {
+            return "";
+        }
+
+        return Convert.ToBase64String(bytes);
     }
 
     public async Task StartMonitoring()

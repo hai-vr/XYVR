@@ -23,6 +23,7 @@ public static class Scaffolding
         internal const string ResoniteUidFileName = "resonite.uid";
         internal const string ReactAppJsonFileName = "ui-preferences.json";
         internal const string WorldNameCacheFileName = ".cache_world-names.json";
+        internal const string ThumbnailCacheFolderName = ".cache_thumbnails";
     }
     
     public static string LockfileFilePath => Path.Combine(SavePath(), "XYVRLockfile");
@@ -33,6 +34,7 @@ public static class Scaffolding
     private static string ResoniteUidFilePath => Path.Combine(SavePath(), ScaffoldingFileNames.ResoniteUidFileName);
     private static string ReactAppJsonFilePath => Path.Combine(SavePath(), ScaffoldingFileNames.ReactAppJsonFileName);
     private static string WorldNameCacheJsonFilePath => Path.Combine(SavePath(), ScaffoldingFileNames.WorldNameCacheFileName);
+    private static string ThumbnailCacheFolderPath => Path.Combine(SavePath(), ScaffoldingFileNames.ThumbnailCacheFolderName);
     
     private static readonly Encoding Encoding = Encoding.UTF8;
     private static readonly JsonSerializerSettings Serializer = new()
@@ -115,6 +117,11 @@ public static class Scaffolding
         await SaveTo(serialized, CredentialsJsonFilePath, _encryptionKeyForSessionData);
     }
 
+    public static VRChatThumbnailCache ThumbnailCache()
+    {
+        Directory.CreateDirectory(ThumbnailCacheFolderPath);
+        return new VRChatThumbnailCache(ThumbnailCacheFolderPath);
+    }
 
     private static async Task<string> GetOrCreateResoniteUID()
     {

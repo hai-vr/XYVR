@@ -14,12 +14,14 @@ public class VRChatLiveMonitoring : ILiveMonitoring
     private VRChatLiveCommunicator _liveComms;
     private CancellationTokenSource _cancellationTokenSource;
     private readonly HashSet<string> _sessionsOfInterest = new();
+    private IThumbnailCache _thumbnailCache;
 
-    public VRChatLiveMonitoring(ICredentialsStorage credentialsStorage, LiveStatusMonitoring monitoring, WorldNameCache worldNameCache)
+    public VRChatLiveMonitoring(ICredentialsStorage credentialsStorage, LiveStatusMonitoring monitoring, WorldNameCache worldNameCache, IThumbnailCache thumbnailCache)
     {
         _credentialsStorage = credentialsStorage;
         _monitoring = monitoring;
         _worldNameCache = worldNameCache;
+        _thumbnailCache = thumbnailCache;
     }
 
     public async Task StartMonitoring()
@@ -31,7 +33,7 @@ public class VRChatLiveMonitoring : ILiveMonitoring
             if (_isConnected) return;
             _cancellationTokenSource = new CancellationTokenSource();
             
-            _liveComms = new VRChatLiveCommunicator(_credentialsStorage, _callerInAppIdentifier, new DoNotStoreAnythingStorage(), _worldNameCache);
+            _liveComms = new VRChatLiveCommunicator(_credentialsStorage, _callerInAppIdentifier, new DoNotStoreAnythingStorage(), _worldNameCache, _thumbnailCache);
             _liveComms.OnLiveUpdateReceived += async update =>
             {
                 // XYVRLogging.WriteLine(this, $"OnLiveUpdateReceived: {JsonConvert.SerializeObject(update, serializer)}");

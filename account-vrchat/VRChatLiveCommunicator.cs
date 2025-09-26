@@ -26,6 +26,7 @@ internal class VRChatLiveCommunicator
     private readonly string _callerInAppIdentifier;
     private readonly IResponseCollector _responseCollector;
     private readonly WorldNameCache _worldNameCache;
+    private readonly IThumbnailCache _thumbnailCache;
 
     private readonly Lock _queueLock = new();
     private readonly ConcurrentDictionary<IQueueJob, bool> _allQueued = new();
@@ -50,12 +51,13 @@ internal class VRChatLiveCommunicator
     public event SessionRetrieved? OnSessionRetrieved;
     public delegate Task SessionRetrieved(VRChatInstance world);
 
-    public VRChatLiveCommunicator(ICredentialsStorage credentialsStorage, string callerInAppIdentifier, IResponseCollector responseCollector, WorldNameCache worldNameCache)
+    public VRChatLiveCommunicator(ICredentialsStorage credentialsStorage, string callerInAppIdentifier, IResponseCollector responseCollector, WorldNameCache worldNameCache, IThumbnailCache thumbnailCache)
     {
         _credentialsStorage = credentialsStorage;
         _callerInAppIdentifier = callerInAppIdentifier;
         _responseCollector = responseCollector;
         _worldNameCache = worldNameCache;
+        _thumbnailCache = thumbnailCache;
     }
 
     private void WakeUpQueue()
@@ -106,6 +108,12 @@ internal class VRChatLiveCommunicator
                         thumbnailUrl = worldLenient.thumbnailImageUrl,
                         capacity = worldLenient.capacity,
                     };
+                    var thumbnail = await _api.DownloadThumbnailImage(worldLenient.thumbnailImageUrl);
+                    if (thumbnail != null)
+                    {
+                        await _thumbnailCache.Save(worldLenient.thumbnailImageUrl, thumbnail);
+                    }
+
                     _worldNameCache.VRCWorlds[worldId] = cache;
 
                     if (OnWorldCached != null)

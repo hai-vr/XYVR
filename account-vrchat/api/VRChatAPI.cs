@@ -488,6 +488,19 @@ internal class VRChatAPI
             _ => LogoutResponseStatus.OutsideProtocol
         };
     }
+
+    public async Task<byte[]?> DownloadThumbnailImage(string worldLenientThumbnailImageUrl)
+    {
+        var response = await _client.GetAsync(worldLenientThumbnailImageUrl);
+        if (response.StatusCode == HttpStatusCode.OK)
+        {
+            return await response.Content.ReadAsByteArrayAsync();
+        }
+        else
+        {
+            return null;
+        }
+    }
 }
 
 internal enum ListFriendsRequestType

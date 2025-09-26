@@ -7,11 +7,13 @@ public class VRChatAuthority : IAuthority
 {
     private readonly WorldNameCache _worldNameCache;
     private readonly Func<Task> _saveFn;
+    private IThumbnailCache _thumbnailCache;
 
-    public VRChatAuthority(WorldNameCache worldNameCache, Func<Task> saveFn)
+    public VRChatAuthority(WorldNameCache worldNameCache, IThumbnailCache thumbnailCache, Func<Task> saveFn)
     {
         _worldNameCache = worldNameCache;
         _saveFn = saveFn;
+        _thumbnailCache = thumbnailCache;
     }
 
     public async Task SaveWhateverNecessary()
@@ -36,7 +38,7 @@ public class VRChatAuthority : IAuthority
 
     public Task<ILiveMonitoring> NewLiveMonitoring(LiveStatusMonitoring monitoring, ICredentialsStorage credentialsStorage)
     {
-        return Task.FromResult<ILiveMonitoring>(new VRChatLiveMonitoring(credentialsStorage, monitoring, _worldNameCache));
+        return Task.FromResult<ILiveMonitoring>(new VRChatLiveMonitoring(credentialsStorage, monitoring, _worldNameCache, _thumbnailCache));
     }
 
     public async Task<ImmutableNonIndexedAccount> ResolveCallerAccount(ICredentialsStorage credentialsStorage)
