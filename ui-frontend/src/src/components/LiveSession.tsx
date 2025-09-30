@@ -6,6 +6,7 @@ import type {FrontIndividual} from "../types/CoreTypes.ts";
 import {type DebugFlags, DemonstrationMode} from "../types/DebugFlags.ts";
 import {_D, _D2} from "../haiUtils.ts";
 import {useTranslation} from "react-i18next";
+import {DotNetApi} from "../DotNetApi.ts";
 
 interface LiveSessionProps {
     liveSession: FrontLiveSession,
@@ -15,6 +16,7 @@ interface LiveSessionProps {
 }
 
 export function LiveSession({liveSession, individuals, debugMode, mini}: LiveSessionProps) {
+    const dotNetApi = new DotNetApi();
     const { t } = useTranslation();
     
     // @ts-ignore
@@ -33,13 +35,16 @@ export function LiveSession({liveSession, individuals, debugMode, mini}: LiveSes
     let capacityDisplay = actualAttendance > sesscap ? actualAttendance : Math.min(actualAttendance + showRemainingSlots, sesscap);
     const hasMore = sesscap - actualAttendance > showRemainingSlots;
 
+    let background = liveSession.thumbnailUrl && `url(${liveSession.thumbnailUrl}), var(--live-session-overlay)`
+        || liveSession.thumbnailHash && `url(${dotNetApi.HashToUrl(liveSession.thumbnailHash)}), var(--live-session-overlay)`
+        || 'var(--live-session-overlay)';
     return (<div key={liveSession.guid} className="live-session-card live-session-thumbnail-bg">
         <div style={{
             position: 'relative',
             height: '100%'
         }}>
             <div style={{
-                background: liveSession.thumbnailUrl && `url(${liveSession.thumbnailUrl}), var(--live-session-overlay)` || 'var(--live-session-overlay)',
+                background: background,
                 // filter: liveSession.isVirtualSpacePrivate || debugMode.demoMode === DemonstrationMode.Everything ? 'blur(10px)' : 'none',
                 // backdropFilter: liveSession.isVirtualSpacePrivate || debugMode.demoMode === DemonstrationMode.Everything ? 'blur(10px)' : 'none',
                 backgroundBlendMode: 'var(--live-session-blend-mode), normal',

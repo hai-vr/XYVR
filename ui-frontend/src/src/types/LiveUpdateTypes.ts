@@ -43,6 +43,7 @@ export interface FrontLiveSession {
     sessionCapacity?: number;
     currentAttendance?: number;
     thumbnailUrl?: string;
+    thumbnailHash?: string;
     isVirtualSpacePrivate?: boolean;
 }
 

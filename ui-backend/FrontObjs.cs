@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using XYVR.Core;
+using XYVR.Scaffold;
 
 namespace XYVR.UI.Backend;
 
@@ -250,10 +251,12 @@ internal record FrontLiveSession
     public int? sessionCapacity { get; init; }
     public int? currentAttendance { get; init; }
     public string? thumbnailUrl { get; init; }
+    public string? thumbnailHash { get; init; }
     public bool? isVirtualSpacePrivate { get; init; }
 
     public static FrontLiveSession FromCore(ImmutableLiveSession liveSession)
     {
+        var isVrc = liveSession.namedApp == NamedApp.VRChat;
         return new FrontLiveSession
         {
             guid = liveSession.guid,
@@ -267,7 +270,8 @@ internal record FrontLiveSession
             virtualSpaceDefaultCapacity = liveSession.virtualSpaceDefaultCapacity,
             sessionCapacity = liveSession.sessionCapacity,
             currentAttendance = liveSession.currentAttendance,
-            thumbnailUrl = liveSession.thumbnailUrl,
+            thumbnailUrl = isVrc ? null : liveSession.thumbnailUrl,
+            thumbnailHash = liveSession.thumbnailUrl != null && isVrc ? VRChatThumbnailCache.Sha(liveSession.thumbnailUrl) : null,
             isVirtualSpacePrivate = liveSession.isVirtualSpacePrivate,
         };
     }

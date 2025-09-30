@@ -18,6 +18,10 @@
         return ((!!(window.external as any).sendMessage) || (!!(window.chrome?.webview)) || false);
     }
 
+    public HashToUrl(thumbnailHash: string) {
+        return `thumbcache://${thumbnailHash}`; 
+    }
+
     // noinspection JSDeprecatedSymbols
     private _isPhotino: boolean = !!(window.external as any).sendMessage;
 

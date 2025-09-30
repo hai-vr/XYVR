@@ -10,7 +10,6 @@ public interface ILiveBFF
 {
     string GetAllExistingLiveUserData();
     string GetAllExistingLiveSessionData();
-    Task<string> GetThumbnailBase64(string thumbnailUrl);
 }
 
 [ComVisible(true)]
@@ -35,7 +34,9 @@ public class LiveBFF : ILiveBFF
     {
         try
         {
-            var liveData = _appLifecycle.LiveStatusMonitoring.GetAllUserData();
+            var liveData = _appLifecycle.LiveStatusMonitoring.GetAllUserData()
+                .Select(update => FrontLiveUserUpdate.FromCore(update, _appLifecycle.LiveStatusMonitoring))
+                .ToList();
             return JsonConvert.SerializeObject(liveData, _serializer);
         }
         catch (Exception e)
@@ -49,7 +50,9 @@ public class LiveBFF : ILiveBFF
     {
         try
         {
-            var liveData = _appLifecycle.LiveStatusMonitoring.GetAllSessions();
+            var liveData = _appLifecycle.LiveStatusMonitoring.GetAllSessions()
+                .Select(FrontLiveSession.FromCore)
+                .ToList();
             return JsonConvert.SerializeObject(liveData, _serializer);
         }
         catch (Exception e)
@@ -59,15 +62,9 @@ public class LiveBFF : ILiveBFF
         }
     }
 
-    public async Task<string> GetThumbnailBase64(string thumbnailUrl)
+    public async Task<byte[]?> GetThumbnailBytesOrNull(string sha__mustNotContainPathTraversal)
     {
-        var bytes = await _thumbnailCache.GetOrNull(thumbnailUrl);
-        if (bytes == null)
-        {
-            return "";
-        }
-
-        return Convert.ToBase64String(bytes);
+        return await _thumbnailCache.GetByShaOrNull(sha__mustNotContainPathTraversal);
     }
 
     public async Task StartMonitoring()

@@ -21,7 +21,7 @@ public class VRChatThumbnailCache : IThumbnailCache
         await File.WriteAllBytesAsync(path, data);
     }
 
-    private string Sha(string thumbnailUrl)
+    public static string Sha(string thumbnailUrl)
     {
         using (var sha256 = SHA256.Create())
         {
@@ -30,12 +30,22 @@ public class VRChatThumbnailCache : IThumbnailCache
         }
     }
 
-    public async Task<byte[]?> GetOrNull(string thumbnailUrl)
+    public async Task<byte[]?> GetByShaOrNull(string sha__mustNotContainPathTraversal)
     {
-        var sha__mustNotContainPathTraversal = Sha(thumbnailUrl);
+        if (ContainsPathTraversalElements(sha__mustNotContainPathTraversal))
+        {
+            throw new ArgumentException("Sha must not contain path traversal characters.");
+        }
         var path = Path.Combine(_thumbnailCacheFolderPath, sha__mustNotContainPathTraversal);
 
         if (!File.Exists(path)) return null;
         return await File.ReadAllBytesAsync(path);
+    }
+
+    public static bool ContainsPathTraversalElements(string mustNotContainPathTraversal)
+    {
+        return mustNotContainPathTraversal.Contains("/")
+               || mustNotContainPathTraversal.Contains("\\")
+               || mustNotContainPathTraversal.Contains(".");
     }
 }

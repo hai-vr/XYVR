@@ -6,9 +6,11 @@ using Newtonsoft.Json.Linq;
 using XYVR.UI.Backend;
 using Photino.NET.Server;
 using XYVR.Core;
+using XYVR.Scaffold;
 
 namespace XYVR.UI.Photino
 {
+    // Based on https://github.com/tryphotino/photino.Samples/blob/master/Photino.HelloPhotino.StaticFileServer/Program.cs
     class Program
     {
         private const string LoadBearingSpace = " "; // This space is load-bearing, it makes the icon work in Windows 11 ¯\_(ツ)_/¯
@@ -34,7 +36,7 @@ namespace XYVR.UI.Photino
                 PhotinoServer
                     .CreateStaticFileServer(args, out string baseUrl)
                     .RunAsync();
-            
+
                 _window = new PhotinoWindow()
                     .SetLogVerbosity(0)
                     .SetTitle(windowTitle)
@@ -48,7 +50,7 @@ namespace XYVR.UI.Photino
                     .RegisterWebMessageReceivedHandler((sender, message__sensitive) =>
                     {
                         if (sender == null) throw new InvalidOperationException("Got null sender");
-                        
+
                         var window = (PhotinoWindow)sender;
                         Task.Run(async () =>
                         {
@@ -62,6 +64,43 @@ namespace XYVR.UI.Photino
                                 throw;
                             }
                         });
+                    })
+                    .RegisterCustomSchemeHandler("thumbcache", (object sender, string scheme, string url, out string contentType) =>
+                    {
+                        var task = Task.Run(async () =>
+                        {
+                            try
+                            {
+                                XYVRLogging.WriteLine(typeof(Program), url);
+                        
+                                var thumbnailHash = url.Substring("thumbcache://".Length);
+                                if (VRChatThumbnailCache.ContainsPathTraversalElements(thumbnailHash))
+                                {
+                                    XYVRLogging.ErrorWriteLine(typeof(Program), "Hash suspiciously contains path traversal elements. We will return not found instead.");
+
+                                    return null;
+                                }
+
+                                var thumbnailData = await _appLifecycle.LiveBff.GetThumbnailBytesOrNull(thumbnailHash);
+                                if (thumbnailData == null)
+                                {
+                                    return null;
+                                }
+                        
+                                return new MemoryStream(thumbnailData);
+                            }
+                            catch (Exception e)
+                            {
+                                XYVRLogging.ErrorWriteLine(typeof(Program), e);
+                                throw;
+                            }
+                        });
+                        task.Wait();
+
+                        var result = task.Result;
+                        contentType = result != null ? "image/png" : "text/plain";
+
+                        return result;
                     });
 
                 _window.SetIconFile(RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "favicon.ico" : "icon.png");

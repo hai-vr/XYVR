@@ -98,6 +98,16 @@ that allows this.
 
 ## Frontend communication with external services
 
+### For VRChat
+
+VRChat has a policy that requires caching thumbnails. The backend will download VRChat thumbnails and store them on disk.
+
+The frontend will then ask the backend to serve the thumbnail.
+
+### For other apps
+
+*The following does not apply to VRChat:*
+
 Although it is not the responsibility of the frontend to communicate with external services, the frontend will use whatever URL is provided by the backend
 as thumbnails for user profile picture and session thumbnails. This will establish a connection to an external service or CDN to retrieve the image.
 

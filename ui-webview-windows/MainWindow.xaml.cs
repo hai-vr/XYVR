@@ -57,6 +57,9 @@ public partial class MainWindow : Window
         WebView.CoreWebView2.AddHostObjectToScript("dataCollectionApi", AppHandle.Lifecycle.DataCollectionBff);
         WebView.CoreWebView2.AddHostObjectToScript("preferencesApi", AppHandle.Lifecycle.PreferencesBff);
         WebView.CoreWebView2.AddHostObjectToScript("liveApi", AppHandle.Lifecycle.LiveBff);
+        
+        WebView.CoreWebView2.AddWebResourceRequestedFilter("thumbcache://*", CoreWebView2WebResourceContext.All);
+        WebView.CoreWebView2.WebResourceRequested += CoreWebView2_WebResourceRequested;
 
         // Intercept clicks on links
         WebView.CoreWebView2.NavigationStarting += CoreWebView2_NavigationStarting;
@@ -66,6 +69,61 @@ public partial class MainWindow : Window
         WebView.CoreWebView2.SetVirtualHostNameToFolderMapping(VirtualHost, distPath, CoreWebView2HostResourceAccessKind.Allow);
         
         WebView.Source = new Uri($"https://{VirtualHost}/index.html");
+    }
+    
+    private void CoreWebView2_WebResourceRequested(object? sender, CoreWebView2WebResourceRequestedEventArgs e)
+    {
+        var requestUri = e.Request.Uri;
+        if (!requestUri.StartsWith("thumbcache://")) return;
+        
+        var lifecycleLiveBff = AppHandle.Lifecycle.LiveBff;
+        var deferal = e.GetDeferral();
+
+        Task.Run(async () => 
+        {
+            try
+            {
+                var thumbnailHash = requestUri.Substring("thumbcache://".Length);
+                if (VRChatThumbnailCache.ContainsPathTraversalElements(thumbnailHash))
+                {
+                    XYVRLogging.ErrorWriteLine(this, "Hash suspiciously contains path traversal elements. We will return not found instead.");
+                    
+                    await Dispatcher.InvokeAsync(() => { e.Response = WebView.CoreWebView2.Environment.CreateWebResourceResponse(
+                        null,
+                        404,
+                        "Not Found",
+                        "Content-Type: text"
+                    ); deferal.Complete(); });
+                }
+                else
+                {
+                    var thumbnailData = await lifecycleLiveBff.GetThumbnailBytesOrNull(thumbnailHash);
+                    if (thumbnailData != null)
+                    {
+                        await Dispatcher.InvokeAsync(() => { e.Response = WebView.CoreWebView2.Environment.CreateWebResourceResponse(
+                            new MemoryStream(thumbnailData),
+                            200,
+                            "OK",
+                            "Content-Type: image/png"
+                        ); deferal.Complete(); });
+                    }
+                    else
+                    {
+                        await Dispatcher.InvokeAsync(() => { e.Response = WebView.CoreWebView2.Environment.CreateWebResourceResponse(
+                            null,
+                            404,
+                            "Not Found",
+                            "Content-Type: text"
+                        ); deferal.Complete(); });
+                    }
+                }
+            }
+            catch (Exception exception)
+            {
+                XYVRLogging.ErrorWriteLine(this, exception);
+                throw;
+            }
+        });
     }
 
     // Triggered especially when the user middle-clicks a link.
