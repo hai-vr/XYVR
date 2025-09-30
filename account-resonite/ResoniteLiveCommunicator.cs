@@ -193,7 +193,7 @@ internal partial class ResoniteLiveCommunicator
             }
         }
         
-        if (session != null)
+        if (session != null && sessionUpdate != null)
         {
             if (session.accessLevel == "Private")
             {
@@ -204,7 +204,7 @@ internal partial class ResoniteLiveCommunicator
             }
             else
             {
-                var sessionGuid = _trySessionIdToSessionGuidFn(sessionUpdate!.sessionId);
+                var sessionGuid = _trySessionIdToSessionGuidFn(sessionUpdate.sessionId);
                 if (sessionGuid != null)
                 {
                     return new ImmutableLiveUserSessionState
