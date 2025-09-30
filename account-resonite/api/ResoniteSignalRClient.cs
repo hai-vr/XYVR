@@ -82,46 +82,86 @@ internal class ResoniteSignalRClient
 
     private async Task OnReceiveStatusUpdate(object statusUpdate)
     {
-        var rawText = ((JsonElement)statusUpdate).GetRawText();
-        var obj = XYVRSerializationUtils.LogDeserializeOrNull<UserStatusUpdate>(this, rawText);
-        if (obj == null)
+        try
         {
-            XYVRLogging.ErrorWriteLine(this, "Failed to deserialize a status update.");
-            return;
-        }
+            var rawText = ((JsonElement)statusUpdate).GetRawText();
+            var obj = XYVRSerializationUtils.LogDeserializeOrNull<UserStatusUpdate>(this, rawText);
+            if (obj == null)
+            {
+                XYVRLogging.ErrorWriteLine(this, "Failed to deserialize a status update.");
+                return;
+            }
         
-        if (OnStatusUpdate != null) await OnStatusUpdate.Invoke(obj);
+            if (OnStatusUpdate != null) await OnStatusUpdate.Invoke(obj);
+        }
+        catch (Exception e)
+        {
+            XYVRLogging.ErrorWriteLine(this, e);
+            throw;
+        }
     }
 
     private async Task OnReceiveSessionUpdate(object sessionUpdate)
     {
-        var rawText = ((JsonElement)sessionUpdate).GetRawText();
-        var obj = XYVRSerializationUtils.LogDeserializeOrNull<SessionUpdateJsonObject>(this, rawText);
-        if (obj == null)
+        try
         {
-            XYVRLogging.ErrorWriteLine(this, "Failed to deserialize a session update.");
-            return;
-        }
+            var rawText = ((JsonElement)sessionUpdate).GetRawText();
+            var obj = XYVRSerializationUtils.LogDeserializeOrNull<SessionUpdateJsonObject>(this, rawText);
+            if (obj == null)
+            {
+                XYVRLogging.ErrorWriteLine(this, "Failed to deserialize a session update.");
+                return;
+            }
 
-        if (OnSessionUpdate != null) await OnSessionUpdate.Invoke(obj);
+            if (OnSessionUpdate != null) await OnSessionUpdate.Invoke(obj);
+        }
+        catch (Exception e)
+        {
+            XYVRLogging.ErrorWriteLine(this, e);
+            throw;
+        }
     }
 
     private Task WhenConnectionClosed(Exception? exception)
     {
-        XYVRLogging.WriteLine(this, $"Connection closed. Exception?: {exception?.Message}");
-        return Task.CompletedTask;
+        try
+        {
+            XYVRLogging.WriteLine(this, $"Connection closed. Exception?: {exception?.Message}");
+            return Task.CompletedTask;
+        }
+        catch (Exception e)
+        {
+            XYVRLogging.ErrorWriteLine(this, e);
+            throw;
+        }
     }
 
     private Task WhenReconnecting(Exception? exception)
     {
-        XYVRLogging.WriteLine(this, $"Reconnecting... Exception?: {exception?.Message}");
-        return Task.CompletedTask;
+        try
+        {
+            XYVRLogging.WriteLine(this, $"Reconnecting... Exception?: {exception?.Message}");
+            return Task.CompletedTask;
+        }
+        catch (Exception e)
+        {
+            XYVRLogging.ErrorWriteLine(this, e);
+            throw;
+        }
     }
 
     private async Task WhenReconnected(string? connectionId)
     {
-        XYVRLogging.WriteLine(this, $"Reconnected with connection ID: {connectionId}");
-        if (OnReconnected != null) await OnReconnected?.Invoke();
+        try
+        {
+            XYVRLogging.WriteLine(this, $"Reconnected with connection ID: {connectionId}");
+            if (OnReconnected != null) await OnReconnected?.Invoke();
+        }
+        catch (Exception e)
+        {
+            XYVRLogging.ErrorWriteLine(this, e);
+            throw;
+        }
     }
     
     public bool IsConnected => _connection?.State == HubConnectionState.Connected;
