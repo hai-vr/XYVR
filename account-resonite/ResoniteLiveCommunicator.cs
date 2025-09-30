@@ -40,8 +40,16 @@ internal partial class ResoniteLiveCommunicator
         _srClient.OnSessionUpdate += WhenSessionUpdate;
         _srClient.OnReconnected += async () =>
         {
-            await _srClient.SubmitRequestStatus();
-            OnReconnected?.Invoke();
+            try
+            {
+                await _srClient.SubmitRequestStatus();
+                OnReconnected?.Invoke();
+            }
+            catch (Exception e)
+            {
+                XYVRLogging.ErrorWriteLine(this, e);
+                throw;
+            }
         };
     }
 
@@ -62,33 +70,41 @@ internal partial class ResoniteLiveCommunicator
 
     private async Task WhenStatusUpdate(UserStatusUpdate statusUpdate)
     {
-        var status = ParseOnlineStatus(statusUpdate.onlineStatus);
-        var liveSessionState = await DeriveSessionState(statusUpdate, status);
-        
-        var session = SessionOrNull(statusUpdate);
-        
-        if (OnLiveUpdateReceived != null)
+        try
         {
-            var sessionHashes = statusUpdate.sessions.Select(sess => sess.sessionHash).ToList();
-            var guidified = await ResolveSessionGuids(sessionHashes, statusUpdate.hashSalt);
-            
-            await OnLiveUpdateReceived(new ImmutableLiveUserUpdate
+            var status = ParseOnlineStatus(statusUpdate.onlineStatus);
+            var liveSessionState = await DeriveSessionState(statusUpdate, status);
+        
+            var session = SessionOrNull(statusUpdate);
+        
+            if (OnLiveUpdateReceived != null)
             {
-                trigger = "SignalR-OnStatusUpdate",
-                namedApp = NamedApp.Resonite,
-                qualifiedAppName = ResoniteCommunicator.ResoniteQualifiedAppName,
-                inAppIdentifier = statusUpdate.userId,
-                onlineStatus = status,
-                mainSession = liveSessionState,
-                sessionSpecifics = new ImmutableResoniteLiveSessionSpecifics
+                var sessionHashes = statusUpdate.sessions.Select(sess => sess.sessionHash).ToList();
+                var guidified = await ResolveSessionGuids(sessionHashes, statusUpdate.hashSalt);
+            
+                await OnLiveUpdateReceived(new ImmutableLiveUserUpdate
                 {
-                    sessionHash = session?.sessionHash,
-                    userHashSalt = statusUpdate.hashSalt,
-                    sessionHashes = [..sessionHashes]
-                },
-                multiSessionGuids = [..guidified],
-                callerInAppIdentifier = _callerInAppIdentifier
-            });
+                    trigger = "SignalR-OnStatusUpdate",
+                    namedApp = NamedApp.Resonite,
+                    qualifiedAppName = ResoniteCommunicator.ResoniteQualifiedAppName,
+                    inAppIdentifier = statusUpdate.userId,
+                    onlineStatus = status,
+                    mainSession = liveSessionState,
+                    sessionSpecifics = new ImmutableResoniteLiveSessionSpecifics
+                    {
+                        sessionHash = session?.sessionHash,
+                        userHashSalt = statusUpdate.hashSalt,
+                        sessionHashes = [..sessionHashes]
+                    },
+                    multiSessionGuids = [..guidified],
+                    callerInAppIdentifier = _callerInAppIdentifier
+                });
+            }
+        }
+        catch (Exception e)
+        {
+            XYVRLogging.ErrorWriteLine(this, e);
+            throw;
         }
     }
 
@@ -109,35 +125,43 @@ internal partial class ResoniteLiveCommunicator
 
     private Task WhenSessionUpdate(SessionUpdateJsonObject sessionUpdate)
     {
-        var anySessionUpdated = false;
+        try
+        {
+            var anySessionUpdated = false;
         
-        // FIXME: Resonite sends a massive amount of session updates objects per second. This needs to be restricted further
-        var has = _sessionIdToSessionUpdate.Contains(sessionUpdate.sessionId);
-        if (!has)
-        {
-            _sessionIdToSessionUpdate.Add(sessionUpdate.sessionId, sessionUpdate, new CacheItemPolicy
+            // FIXME: Resonite sends a massive amount of session updates objects per second. This needs to be restricted further
+            var has = _sessionIdToSessionUpdate.Contains(sessionUpdate.sessionId);
+            if (!has)
             {
-                SlidingExpiration = TimeSpan.FromMinutes(5)
-            });
-            XYVRLogging.WriteLine(this, $"Storing for the first time information about {sessionUpdate.sessionId}, which is {ExtractTextFromColorTags(sessionUpdate.name)}");
-            anySessionUpdated = true;
-        }
-        else
-        {
-            if (_sessionIdsToWatch.Contains(sessionUpdate.sessionId))
-            {
-                _sessionIdToSessionUpdate[sessionUpdate.sessionId] = sessionUpdate;
+                _sessionIdToSessionUpdate.Add(sessionUpdate.sessionId, sessionUpdate, new CacheItemPolicy
+                {
+                    SlidingExpiration = TimeSpan.FromMinutes(5)
+                });
+                XYVRLogging.WriteLine(this, $"Storing for the first time information about {sessionUpdate.sessionId}, which is {ExtractTextFromColorTags(sessionUpdate.name)}");
                 anySessionUpdated = true;
             }
-        }
+            else
+            {
+                if (_sessionIdsToWatch.Contains(sessionUpdate.sessionId))
+                {
+                    _sessionIdToSessionUpdate[sessionUpdate.sessionId] = sessionUpdate;
+                    anySessionUpdated = true;
+                }
+            }
 
-        if (anySessionUpdated)
+            if (anySessionUpdated)
+            {
+                OnSessionUpdated?.Invoke(sessionUpdate);
+                // TODO: Reemit information about the users that pertains to this session.
+            }
+
+            return Task.CompletedTask;
+        }
+        catch (Exception e)
         {
-            OnSessionUpdated?.Invoke(sessionUpdate);
-            // TODO: Reemit information about the users that pertains to this session.
+            XYVRLogging.ErrorWriteLine(this, e);
+            throw;
         }
-
-        return Task.CompletedTask;
     }
 
     private async Task<ImmutableLiveUserSessionState> DeriveSessionState(UserStatusUpdate userStatusUpdate, OnlineStatus status)

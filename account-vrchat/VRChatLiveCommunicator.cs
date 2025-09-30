@@ -249,10 +249,10 @@ internal class VRChatLiveCommunicator
 
     private async Task WhenMessageReceived(string msg)
     {
-        if (OnLiveUpdateReceived == null || OnLiveSessionReceived == null) return;
-        
         try
         {
+            if (OnLiveUpdateReceived == null || OnLiveSessionReceived == null) return;
+
             var rootObj = JObject.Parse(msg);
             var type = rootObj["type"].Value<string>();
             
@@ -517,22 +517,30 @@ internal class VRChatLiveCommunicator
 
     private void WhenDisconnected(string reason)
     {
-        XYVRLogging.WriteLine(this, $"We got disconnected from the vrc ws api. Reason: {reason}");
-        if (!_hasInitiatedDisconnect)
+        try
         {
-            XYVRLogging.WriteLine(this, "Will try reconnecting.");
-            Task.Run(async () =>
+            XYVRLogging.WriteLine(this, $"We got disconnected from the vrc ws api. Reason: {reason}");
+            if (!_hasInitiatedDisconnect)
             {
-                try
+                XYVRLogging.WriteLine(this, "Will try reconnecting.");
+                Task.Run(async () =>
                 {
-                    await Connect();
-                }
-                catch (Exception e)
-                {
-                    XYVRLogging.ErrorWriteLine(this, e);
-                    throw;
-                }
-            }).Wait();
+                    try
+                    {
+                        await Connect();
+                    }
+                    catch (Exception e)
+                    {
+                        XYVRLogging.ErrorWriteLine(this, e);
+                        throw;
+                    }
+                }).Wait();
+            }
+        }
+        catch (Exception e)
+        {
+            XYVRLogging.ErrorWriteLine(this, e);
+            throw;
         }
     }
 
