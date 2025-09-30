@@ -125,10 +125,62 @@ jobs:
           name: linux-executable
           path: "${{ env.applicationNameLinux }}-${{ steps.version.outputs.prop }}-linux-x64-executable.tar.gz"
 
+  build_arch:
+    name: Build Arch Linux Package
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    outputs:
+      version: ${{ steps.version.outputs.prop }}
+      arch_file: ${{ steps.archpkg.outputs.file }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Move automation files out to root
+        run: |
+          mv automation/* .
+
+      - name: get version
+        id: version
+        uses: notiz-dev/github-action-json-property@7c8cf5cc36eb85d8d287a8086a39dac59628eb31
+        with:
+          path: "Packages/${{env.packageName}}/package.json"
+          prop_path: "version"
+
+      - name: Update PKGBUILD version
+        run: |
+          VERSION=${{ steps.version.outputs.prop }}
+          PKGVER=$(echo "$VERSION" | sed -E 's/-([a-z]+)\.([0-9]+)/\1\2/')
+          sed -i "s/9.9.9hyphenated9999/$VERSION/g" PKGBUILD
+          sed -i "s/9.9.9pkgver9999/$PKGVER/g" PKGBUILD
+
+      - name: Install base-devel and dependencies
+        run: |
+          pacman -Syu --noconfirm
+          pacman -S --noconfirm base-devel git sudo npm nodejs dotnet-sdk dotnet-runtime webkit2gtk imagemagick
+
+      - name: Build package with makepkg
+        run: |
+          useradd -m builder
+          chown -R builder ./
+          sudo -u builder makepkg -s --noconfirm --cleanbuild
+
+      - name: Detect Arch package
+        id: archpkg
+        run: echo "file=$(ls *.pkg.tar.zst)" >> $GITHUB_OUTPUT
+        
+      - name: Upload Arch package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: arch-executable
+          path: ${{ steps.archpkg.outputs.file }}
+
   release:
     name: Release
     runs-on: ubuntu-latest
-    needs: [build_windows, build_linux]
+    if: github.ref_name == 'main'
+    needs: [build_windows, build_linux, build_arch]
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
@@ -140,3 +192,4 @@ jobs:
           files: |
             windows-executable/${{ env.applicationNameWindows }}-${{ needs.build_windows.outputs.version }}-windows-x64-executable.zip
             linux-executable/${{ env.applicationNameLinux }}-${{ needs.build_linux.outputs.version }}-linux-x64-executable.tar.gz
+            arch-executable/${{ needs.build_arch.outputs.arch_file }}

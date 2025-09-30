@@ -1,0 +1,59 @@
+# Maintainer: kazu0617 <archlinux at kazu0617 dot net>
+pkgname=xyvr
+pkgver=9.9.9pkgver9999
+pkgrel=2
+pkgdesc="Address book that supports merging VRChat and Resonite contacts."
+arch=('x86_64')
+url="https://github.com/hai-vr/XYVR"
+license=('MIT')
+depends=('dotnet-runtime-9.0' 'webkit2gtk')
+makedepends=('dotnet-sdk-9.0' 'nodejs' 'npm' 'imagemagick')
+options=(!debug !lto)
+source=()
+sha256sums=()
+
+prepare() {
+    cd "$srcdir/.."
+    echo "$pkgver" > Version
+}
+
+build() {
+    cd "$srcdir/../ui-frontend/src"
+    npm install
+    npm run build-and-copy
+
+    cd "$srcdir/.."
+    dotnet publish ui-photino-linux/ui-photino-linux.csproj \
+        --runtime linux-x64 \
+        --self-contained true \
+        --configuration Release \
+        --output "build/linux-unpacked"
+}
+
+package() {
+    cd "$srcdir/.."
+
+    install -dm755 "$pkgdir/opt/xyvr"
+    cp -r build/linux-unpacked/* "$pkgdir/opt/xyvr/"
+    chmod +x "$pkgdir/opt/xyvr/xyvr"
+
+    install -dm755 "$pkgdir/usr/bin"
+    ln -s "/opt/xyvr/xyvr" "$pkgdir/usr/bin/xyvr"
+
+    install -Dm644 "$srcdir/../xyvr.desktop" "$pkgdir/usr/share/applications/xyvr.desktop"
+
+    # Install icons in multiple sizes
+    for size in 32 64 128 256 512; do
+        install -dm755 "$pkgdir/usr/share/icons/hicolor/${size}x${size}/apps"
+        convert "build/linux-unpacked/icon.png" -resize "${size}x${size}" "$pkgdir/usr/share/icons/hicolor/${size}x${size}/apps/xyvr.png"
+    done
+
+    install -Dm644 "LICENSE" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+    install -Dm644 "README.md" "$pkgdir/usr/share/doc/$pkgname/README.md"
+
+    for readme in README.*.md; do
+        if [ -f "$readme" ]; then
+            install -Dm644 "$readme" "$pkgdir/usr/share/doc/$pkgname/$readme"
+        fi
+    done
+}
