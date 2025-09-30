@@ -5,6 +5,7 @@ import type {FrontLiveSession} from "../types/LiveUpdateTypes.ts";
 import type {FrontIndividual} from "../types/CoreTypes.ts";
 import {type DebugFlags, DemonstrationMode} from "../types/DebugFlags.ts";
 import {_D, _D2} from "../haiUtils.ts";
+import {useTranslation} from "react-i18next";
 
 interface LiveSessionProps {
     liveSession: FrontLiveSession,
@@ -14,6 +15,8 @@ interface LiveSessionProps {
 }
 
 export function LiveSession({liveSession, individuals, debugMode, mini}: LiveSessionProps) {
+    const { t } = useTranslation();
+    
     // @ts-ignore
     const [showSlots, setShowSlots] = useState(false);
 
@@ -61,7 +64,7 @@ export function LiveSession({liveSession, individuals, debugMode, mini}: LiveSes
                     <div className="live-session-world" style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
                         {!mini && <AppIcon namedApp={liveSession.namedApp}/>}
                         <span
-                            title={capacityStr}>{_D2(liveSession.inAppVirtualSpaceName || '', debugMode, undefined, DemonstrationMode.EverythingButSessionNames) || 'Unknown World'}</span>
+                            title={capacityStr}>{_D2(liveSession.inAppVirtualSpaceName || '', debugMode, undefined, DemonstrationMode.EverythingButSessionNames) || t('live.session.unnamed')}</span>
                     </div>
                 </div>
                 {!mini && <div className="live-session-participants">
