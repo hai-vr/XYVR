@@ -80,7 +80,9 @@ internal partial class ResoniteLiveCommunicator
             if (OnLiveUpdateReceived != null)
             {
                 var sessionHashes = statusUpdate.sessions.Select(sess => sess.sessionHash).ToList();
-                var guidified = await ResolveSessionGuids(sessionHashes, statusUpdate.hashSalt);
+                var guidified = statusUpdate.hashSalt != null
+                    ? await ResolveSessionGuids(sessionHashes, statusUpdate.hashSalt)
+                    : [];
             
                 await OnLiveUpdateReceived(new ImmutableLiveUserUpdate
                 {
