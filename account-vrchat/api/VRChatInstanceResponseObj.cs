@@ -13,7 +13,7 @@ internal class VRChatInstance
     public int? capacity;
     // public string? clientNumber;
     // public ContentSettings? contentSettings;
-    // public string? displayName;
+    public string? displayName;
     // public bool? full;
     // public int? gameServerVersion;
     // public string? id;

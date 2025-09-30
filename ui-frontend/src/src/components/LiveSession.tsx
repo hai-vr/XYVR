@@ -63,8 +63,11 @@ export function LiveSession({liveSession, individuals, debugMode, mini}: LiveSes
                 <div className="live-session-header">
                     <div className="live-session-world" style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
                         {!mini && <AppIcon namedApp={liveSession.namedApp}/>}
-                        <span
-                            title={capacityStr}>{_D2(liveSession.inAppVirtualSpaceName || '', debugMode, undefined, DemonstrationMode.EverythingButSessionNames) || t('live.session.unnamed')}</span>
+                        <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.25rem'}}>
+                            <span title={capacityStr}>{_D2(liveSession.inAppVirtualSpaceName || '', debugMode, undefined, DemonstrationMode.EverythingButSessionNames) || t('live.session.unnamed')}</span>
+                            {liveSession.inAppSessionName &&
+                                <span className="live-session-name" title={capacityStr}>{_D2(liveSession.inAppSessionName || '', debugMode, undefined, DemonstrationMode.EverythingButSessionNames) || t('live.session.unnamed')}</span>}
+                        </div>
                     </div>
                 </div>
                 {!mini && <div className="live-session-participants">

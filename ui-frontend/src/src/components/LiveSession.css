@@ -66,6 +66,15 @@
     margin-bottom: 0.25rem;
 }
 
+.live-session-name {
+    display: block;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.8rem;
+    margin-bottom: 0.25rem;
+    font-style: italic;
+}
+
 .live-session-app {
     font-size: 0.8rem;
     color: var(--text-secondary);

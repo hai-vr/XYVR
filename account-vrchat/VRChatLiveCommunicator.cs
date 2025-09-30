@@ -137,6 +137,7 @@ internal class VRChatLiveCommunicator
                             namedApp = NamedApp.VRChat,
                             qualifiedAppName = VRChatCommunicator.VRChatQualifiedAppName,
                             inAppSessionIdentifier = instanceQueueJob.worldIdAndInstanceId,
+                            inAppSessionName = locationInformation.displayName,
                             sessionCapacity = locationInformation.capacity,
                             currentAttendance = locationInformation.userCount
                         });
