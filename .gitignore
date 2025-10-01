@@ -2,6 +2,8 @@ bin/
 obj/
 ui-frontend/src/node_modules/
 ui-frontend/src/dist/
+ui-webview-windows/src/dist
+!ui-webview-windows/src/dist/.placeholder
 ui-photino-linux/wwwroot
 .idea
 *.DotSettings.user

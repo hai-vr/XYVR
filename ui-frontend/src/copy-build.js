@@ -24,8 +24,12 @@ function copyDir(src, dest) {
 
 const sourceDir = 'dist';
 const allDestinations = [
+    // Used for near-live reload debug only:
     '../../ui-webview-windows/bin/Debug/net9.0-windows/src/dist',
     '../../ui-photino-linux/bin/Debug/net9.0/wwwroot',
+    
+    // Used for builds:
+    '../../ui-webview-windows/src/dist',
     '../../ui-photino-linux/wwwroot'
 ];
 

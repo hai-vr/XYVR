@@ -24,4 +24,10 @@
       <ProjectReference Include="..\ui-backend\ui-backend.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+        <None Update="src/dist/**\*.*">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+
 </Project>
