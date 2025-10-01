@@ -34,6 +34,9 @@ If you are a developer, feel free to read below.
   - for VRChat accounts: `https://api.vrchat.cloud/api/1` (live updates: `wss://pipeline.vrchat.cloud/`)
   - for Resonite accounts: `https://api.resonite.com/` (live updates: `https://api.resonite.com/hub`)
   - for ChilloutVR accounts: `https://api.abinteractive.net/1`
+- We fetch thumbnails:
+  - for VRChat: from any thumbnail URL provided by the VRChat API.
+  - for Resonite: only from URLs which hostname is `resonite.com`, or any subdomain of `resonite.com`.
 - There are no requests to any other server.
 - There is no telemetry, no analytics, and no cloud storage.
 
