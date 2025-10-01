@@ -104,6 +104,10 @@ VRChat has a policy that requires caching thumbnails. The backend will download 
 
 The frontend will then ask the backend to serve the thumbnail.
 
+Frontend requests are handled by the backend using a custom handler `thumbcache://THUMBNAIL_HASH`
+
+If `THUMBNAIL_HASH` contains a period, slash, or backslash, the request will return a 404 error.
+
 ### For other apps
 
 *The following does not apply to VRChat:*
