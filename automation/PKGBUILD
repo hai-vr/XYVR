@@ -1,7 +1,7 @@
 # Maintainer: kazu0617 <archlinux at kazu0617 dot net>
 pkgname=xyvr
 pkgver=9.9.9pkgver9999
-pkgrel=2
+pkgrel=1
 pkgdesc="Address book that supports merging VRChat and Resonite contacts."
 arch=('x86_64')
 url="https://github.com/hai-vr/XYVR"
