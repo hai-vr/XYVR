@@ -60,7 +60,8 @@ For more details regarding privacy and data considerations, please refer to the 
 # Developer documentation
 
 If you are a developer looking to modify or audit this software, the developer documentation can be found
-in the [README-DEVELOPER.md](README-DEVELOPER.md) file.
+in the [README-DEVELOPER.md](README-DEVELOPER.md) file, and [README-SECURITY.md](README-SECURITY.md)
+can help you conduct an audit.
 
 # Third-party acknowledgements
 

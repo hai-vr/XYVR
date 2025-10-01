@@ -23,6 +23,11 @@ There are other URLs inside the code of the application. However, there are eith
 - used to build URLs for use as links to the web profiles of the social VR accounts, or
 - used in string comparisons to check past requests.
 
+This app also performs requests to fetch thumbnail images, see [the section below](#frontend-communication-with-external-services);
+we fetch thumbnails:
+- for VRChat: from any thumbnail URL provided by the VRChat API.
+- for Resonite: only from URLs which hostname is `resonite.com`, or any subdomain of `resonite.com`.
+
 The virtual host `appassets.example` using the [.example TLD](https://en.wikipedia.org/wiki/.example) is used for serving static files
 in the Microsoft.Web.WebView2 variant of the application, as seen in [MainWindow.xaml.cs](ui-webview-windows/MainWindow.xaml.cs) near the invocation of
 `WebView.CoreWebView2.SetVirtualHostNameToFolderMapping`.
