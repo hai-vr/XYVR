@@ -1,6 +1,16 @@
 ﻿# Linux
 
-The **ui-photino-linux** is the .NET project you need to build, along with the **ui-frontend** React project.
+### Automated builds
+
+We have automated builds for Linux on the [releases](https://github.com/hai-vr/XYVR/releases/latest) page, but no .deb package yet.
+
+An Arch Linux package build is also available (.pkg.tar.zst).
+
+You will need to install `libwebkit2gtk-4.0` see [below](#install-libwebkit2gtk-40).
+
+### Manual builds
+
+If you want to build this manually, **ui-photino-linux** is the .NET project you need to build, along with the **ui-frontend** React project.
 
 To run on Linux, you need to:
 - Install [.NET 9 SDK](https://learn.microsoft.com/en-us/dotnet/core/install/linux?WT.mc_id=dotnet-35129-website).
