@@ -111,7 +111,12 @@ internal class VRChatLiveCommunicator
                     var thumbnail = await _api.DownloadThumbnailImage(worldLenient.thumbnailImageUrl);
                     if (thumbnail != null)
                     {
+                        XYVRLogging.WriteLine(this, $"Downloaded world thumbnail {worldLenient.thumbnailImageUrl}, this will be cached.");
                         await _thumbnailCache.Save(worldLenient.thumbnailImageUrl, thumbnail);
+                    }
+                    else
+                    {
+                        XYVRLogging.ErrorWriteLine(this, $"Failed to download world thumbnail {worldLenient.thumbnailImageUrl}");
                     }
 
                     _worldNameCache.VRCWorlds[worldId] = cache;
@@ -338,7 +343,7 @@ internal class VRChatLiveCommunicator
             }
             else
             {
-                XYVRLogging.WriteLine(this, $"Received UNHANDLED message of type {type} from vrc ws api");
+                XYVRLogging.WriteLine(this, $"Received UNHANDLED message of type {type} from VRC WS API");
             }
         }
         catch (Exception e)
@@ -520,20 +525,30 @@ internal class VRChatLiveCommunicator
     {
         try
         {
-            XYVRLogging.WriteLine(this, $"We got disconnected from the vrc ws api. Reason: {reason}");
+            XYVRLogging.WriteLine(this, $"We got disconnected from the VRC WS API. Reason: {reason}");
             if (!_hasInitiatedDisconnect)
             {
                 XYVRLogging.WriteLine(this, "Will try reconnecting.");
                 Task.Run(async () =>
                 {
-                    try
+                    var attempt = 0;
+                    var success = false;
+                    while (!success)
                     {
-                        await Connect();
-                    }
-                    catch (Exception e)
-                    {
-                        XYVRLogging.ErrorWriteLine(this, e);
-                        throw;
+                        try
+                        {
+                            await Connect();
+                            XYVRLogging.WriteLine(this, "Successfully reconnected to the VRC WS API.");
+                            success = true;
+                        }
+                        catch (Exception e)
+                        {
+                            XYVRLogging.ErrorWriteLine(this, e);
+                            var nextRetryDelay = NextRetryDelay(attempt);
+                            XYVRLogging.WriteLine(this, $"Failed to reconnect to the VRC WS API ({attempt + 1} times), will try again in {nextRetryDelay.TotalSeconds} seconds...");
+                            await Task.Delay(nextRetryDelay);
+                            attempt++;
+                        }
                     }
                 }).Wait();
             }
@@ -543,6 +558,18 @@ internal class VRChatLiveCommunicator
             XYVRLogging.ErrorWriteLine(this, e);
             throw;
         }
+    }
+    
+    public TimeSpan NextRetryDelay(int previousRetryCount)
+    {
+        return previousRetryCount switch
+        {
+            0 => TimeSpan.Zero,
+            1 => TimeSpan.FromSeconds(2),
+            2 => TimeSpan.FromSeconds(10),
+            3 => TimeSpan.FromSeconds(30),
+            _ => TimeSpan.FromSeconds(new Random().Next(60, 80))
+        };
     }
 
     private async Task<string> GetToken__sensitive()
