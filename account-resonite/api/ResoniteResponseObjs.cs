@@ -41,18 +41,11 @@ internal class ContactResponseElementJsonObject
     public string contactUsername;
     public string contactStatus;
     public bool isAccepted;
-    public ContactResponseElementProfileJsonObject? profile;
+    public UserProfileJsonObject? profile;
     public DateTime latestMessageTime;
     public bool isMigrated;
     public bool isCounterpartMigrated;
     public string ownerId;
-}
-
-[Serializable]
-internal class ContactResponseElementProfileJsonObject
-{
-    public string iconUrl;
-    public string[] displayBadges;
 }
 
 [Serializable]
@@ -74,12 +67,18 @@ internal class UserResponseJsonObject
     public bool isActiveSupporter;
     public MigratedDataJsonObject migratedData;
 }
+[Serializable]
+internal class DisplayBadgeJsonObject
+{
+    public string id;
+    public string ownerId;
+}
 
 [Serializable]
 internal class UserProfileJsonObject
 {
     public string iconUrl;
-    public string[] displayBadges;
+    public DisplayBadgeJsonObject[] displayBadges;
 }
 
 [Serializable]
