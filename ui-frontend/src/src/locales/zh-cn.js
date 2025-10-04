@@ -1,4 +1,5 @@
-{
+export default {
+  // V0.0.1-alpha.11
   "account.badge.bot": "机器人",
   "account.badge.contact": "联系人",
   "account.badge.friend": "好友",

@@ -1,4 +1,5 @@
-﻿{
+﻿export default {
+    // V0.0.1-alpha.11
     "account.badge.bot": "ボット",
     "account.badge.contact": "フレンド",
     "account.badge.friend": "フレンド",

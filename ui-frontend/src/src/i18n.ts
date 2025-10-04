@@ -5,10 +5,10 @@ import type {AvailableLanguages} from './types/AvailableLang';
 
 export const availableLanguages: AvailableLanguages = availableLanguagesData;
 
-const localeModules = import.meta.glob('./locales/*.json', { eager: true });
+const localeModules = import.meta.glob('./locales/*.js', { eager: true });
 
 const isValidLocaleFile = (filename: string): boolean => {
-    const validFilePattern = /^[a-zA-Z0-9-]+\.json$/;
+    const validFilePattern = /^[a-zA-Z0-9-]+\.js$/;
 
     return validFilePattern.test(filename) &&
         !filename.includes('/') &&
