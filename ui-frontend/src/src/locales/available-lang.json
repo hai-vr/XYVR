@@ -19,6 +19,16 @@
             "authors": [
                 "kazu0617"
             ]
+        },
+        {
+            "code": "zh-CN",
+            "file": "zh-cn.json",
+            "displayName": "简体中文",
+            "englishName": "Simplified Chinese",
+            "technicalCode": "schinese",
+            "authors": [
+                "modimobeikete"
+            ]
         }
     ],
     "authors": {
@@ -29,6 +39,10 @@
         "kazu0617": {
             "gitHub": "https://github.com/kazu0617",
             "introduction": "https://github.com/hai-vr/XYVR/pull/4"
+        },
+        "modimobeikete": {
+            "gitHub": "https://github.com/modimobeikete",
+            "introduction": "https://github.com/hai-vr/XYVR/pull/10"
         }
     }
 }
