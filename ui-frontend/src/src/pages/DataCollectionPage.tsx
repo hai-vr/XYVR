@@ -8,6 +8,8 @@ import {ConnectorType, type ConnectorTypeType, type FrontConnector} from "../typ
 import type {DebugFlags} from "../types/DebugFlags.ts";
 import {DotNetApi} from "../DotNetApi.ts";
 import {useTranslation} from "react-i18next";
+import {availableLanguages} from "../i18n.ts";
+import type {LanguageInfo} from "../types/AvailableLang.ts";
 
 interface DataCollectionPageProps {
     isDark: boolean,
@@ -176,10 +178,11 @@ function DataCollectionPage({isDark, setIsDark, debugMode, setLang}: DataCollect
                 {t('dataCollection.start.label')}
             </button>
 
-            <button title={t('language.english.title')}
-                    onClick={() => setLang('en')}>{t('language.english.label')}</button>
-            <button title={t('language.japanese.title')}
-                    onClick={() => setLang('ja')}>{t('language.japanese.label')}</button>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {availableLanguages.availableLanguages.map((lang: LanguageInfo) => (
+                    <button key={lang.code} title={lang.englishName} onClick={() => setLang(lang.code)}>{lang.displayName}</button>
+                ))}
+            </div>
         </div>
     )
 }

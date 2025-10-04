@@ -1,0 +1,34 @@
+﻿{
+    "availableLanguages": [
+        {
+            "code": "en",
+            "file": "en.json",
+            "displayName": "English",
+            "englishName": "English",
+            "technicalCode": "english",
+            "authors": [
+                "hai-vr"
+            ]
+        },
+        {
+            "code": "ja",
+            "file": "ja.json",
+            "displayName": "日本語",
+            "englishName": "Japanese",
+            "technicalCode": "japanese",
+            "authors": [
+                "kazu0617"
+            ]
+        }
+    ],
+    "authors": {
+        "hai-vr" : {
+            "gitHub": "https://github.com/hai-vr",
+            "introduction": "https://github.com/hai-vr/XYVR/commit/7815af71fd5c7c71b9e6006e72fa6ea23ebb9689"
+        },
+        "kazu0617": {
+            "gitHub": "https://github.com/kazu0617",
+            "introduction": "https://github.com/hai-vr/XYVR/pull/4"
+        }
+    }
+}
