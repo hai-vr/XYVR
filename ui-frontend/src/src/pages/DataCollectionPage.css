@@ -88,6 +88,12 @@
     grid-template-columns: 1fr;
 }
 
+.settings-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
 @media (min-width: 768px) {
     .connectors-grid {
         grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));

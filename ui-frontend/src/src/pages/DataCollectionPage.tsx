@@ -140,45 +140,44 @@ function DataCollectionPage({isDark, setIsDark, debugMode, setLang}: DataCollect
                                     debugMode={debugMode}
                                 />
                             ))}
+                            <div className="connector-card">
+                                <div className="connector-add">
+                                    <button
+                                        onClick={() => createNewConnector(ConnectorType.ResoniteAPI)}
+                                        title={t('connectors.addConnection.title', {connectionName: 'Resonite'})}
+                                    >
+                                        + {t('connectors.addConnection.label', {connectionName: 'Resonite'})}
+                                    </button>
+                                    <button
+                                        onClick={() => createNewConnector(ConnectorType.VRChatAPI)}
+                                        title={t('connectors.addConnection.title', {connectionName: 'VRChat'})}
+                                    >
+                                        + {t('connectors.addConnection.label', {connectionName: 'VRChat'})}
+                                    </button>
+                                    <button
+                                        onClick={() => createNewConnector(ConnectorType.ChilloutVRAPI)}
+                                        title={t('connectors.addConnection.title', {connectionName: 'ChilloutVR'})}
+                                    >
+                                        + {t('connectors.addConnection.label', {connectionName: 'ChilloutVR'})}
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div className="connector-actions">
-                        <button
-                            onClick={() => createNewConnector(ConnectorType.ResoniteAPI)}
-                            title={t('connectors.addConnection.title', {connectionName: 'Resonite'})}
-                        >
-                            + {t('connectors.addConnection.label', {connectionName: 'Resonite'})}
-                        </button>
-                        <button
-                            onClick={() => createNewConnector(ConnectorType.VRChatAPI)}
-                            title={t('connectors.addConnection.title', {connectionName: 'VRChat'})}
-                        >
-                            + {t('connectors.addConnection.label', {connectionName: 'VRChat'})}
-                        </button>
-                        <button
-                            onClick={() => createNewConnector(ConnectorType.ChilloutVRAPI)}
-                            title={t('connectors.addConnection.title', {connectionName: 'ChilloutVR'})}
-                        >
-                            + {t('connectors.addConnection.label', {connectionName: 'ChilloutVR'})}
-                        </button>
-                        {/*<button*/}
-                        {/*    onClick={() => createNewConnector(ConnectorType.Offline)}*/}
-                        {/*    title="Create offline connection"*/}
-                        {/*>*/}
-                        {/*    + Import offline data*/}
-                        {/*</button>*/}
                     </div>
                 </>
             )}
 
-            <button
-                onClick={() => startDataCollection()}
-                title={t('dataCollection.start.title')}
-            >
-                {t('dataCollection.start.label')}
-            </button>
+            <div className="settings-buttons">
+                <button
+                    onClick={() => startDataCollection()}
+                    title={t('dataCollection.start.title')}
+                >
+                    {t('dataCollection.start.label')}
+                </button>
+            </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <h2>Languages</h2>
+            <div className="settings-buttons">
                 {availableLanguages.availableLanguages.map((lang: LanguageInfo) => (
                     <button key={lang.code} title={lang.englishName} onClick={() => setLang(lang.code)}>{lang.displayName}</button>
                 ))}
