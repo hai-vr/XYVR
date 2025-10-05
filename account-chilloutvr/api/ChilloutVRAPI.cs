@@ -49,10 +49,13 @@ internal class ChilloutVRAPI
 
     public async Task<CvrContactsResponse> GetContacts()
     {
-        var request = new HttpRequestMessage(HttpMethod.Get, $"{AuditUrls.ChilloutVrApiUrlV1}/friends");
+        var url = $"{AuditUrls.ChilloutVrApiUrlV1}/friends";
+        var request = new HttpRequestMessage(HttpMethod.Get, url);
         MakeAuthenticated(request);
 
         var response = await _client.SendAsync(request);
+        
+        XYVRLogging.WriteLine(this, $"Got {url}");
         
         return response.StatusCode switch
         {
