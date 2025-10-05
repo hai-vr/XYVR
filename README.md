@@ -29,7 +29,7 @@ If you are a developer, feel free to read below.
 
 #### Where is my data stored?
 
-All data is stored locally on your computer.
+XYVR stores all data on your computer.
 
 - **This application does not store your email and password.**
 - We store a cookie file and session tokens upon login, if requested.
@@ -51,6 +51,8 @@ XYVR does not operate any server, and it does not have analytics. The only servi
 - There is no telemetry, no analytics, and no cloud storage.
 
 #### What is the nature of the requests to those servers?
+
+XYVR is only interested in building an address book and monitoring live sessions.
 
 - This application does not modify, add, or remove any data from your VRChat, Resonite, or ChilloutVR accounts.
 - The following requests are for building an address book:
