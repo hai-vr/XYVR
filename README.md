@@ -17,7 +17,7 @@ If you are a user looking to use this software: Sorry, but this application is c
 
 Please check back at another time.
 
-- ~~**[📘 Open documentation](https://docs.hai-vr.dev/docs/products/xyvr)**~~
+- ~~**[📘 Open documentation](https://docs.hai-vr.dev/docs/xyvr)**~~
 
 If you are a developer, feel free to read below.
 
@@ -67,7 +67,7 @@ XYVR is only interested in building an address book and monitoring live sessions
 
 For more details regarding privacy and data considerations, please refer to the following page:
 
-**[📘 Privacy and data considerations](https://docs.hai-vr.dev/docs/products/xyvr/privacy)**
+**[📘 Privacy and data considerations](https://docs.hai-vr.dev/docs/xyvr/privacy)**
 
 
 &nbsp;

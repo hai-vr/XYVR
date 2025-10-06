@@ -36,7 +36,7 @@ export default {
     "addressBook.search.bio.example": "用于显示并搜索个人简介。",
     "addressBook.search.confusables.example": "搜索名称时，将一些西里尔字母和特殊字符转换为视觉上相似的拉丁字母。",
     "addressBook.search.docs.link": "在浏览器中打开搜索文档。",
-    "addressBook.search.docs.title": "在浏览器中打开 https://docs.hai-vr.dev/docs/products/xyvr/search",
+    "addressBook.search.docs.title": "在浏览器中打开 https://docs.hai-vr.dev/docs/xyvr/search",
     "addressBook.search.hasAlt.example": "用于拥有",
     "addressBook.search.links.example": "用于搜索链接。",
     "addressBook.search.multipleApps.example": "用于同时拥有 VRChat 账户的 Resonite 账户所有者。",

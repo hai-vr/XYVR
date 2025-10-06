@@ -36,7 +36,7 @@
     "addressBook.search.bio.example": "プロフィールを表示・検索する際に使用します。",
     "addressBook.search.confusables.example": "名前検索時に、キリル文字やラテン文字と視覚的に類似した特殊文字を変換します。",
     "addressBook.search.docs.link": "ブラウザで検索ドキュメントを開いてください。",
-    "addressBook.search.docs.title": "ブラウザで https://docs.hai-vr.dev/docs/products/xyvr/search を開いてください",
+    "addressBook.search.docs.title": "ブラウザで https://docs.hai-vr.dev/docs/xyvr/search を開いてください",
     "addressBook.search.hasAlt.example": "ユーザーが所有している際に使用します。",
     "addressBook.search.links.example": "リンク内を検索する際に使用します。",
     "addressBook.search.multipleApps.example": "Resoniteアカウント所有者で、VRChatアカウントも所有しているユーザーを検索する場合などに使用します。",

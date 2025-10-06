@@ -1,8 +1,8 @@
 ﻿# This is the developer documentation
 
-If you are a user looking to use this software, please view the [user documentation]((https://docs.hai-vr.dev/docs/products/xyvr)) instead:
+If you are a user looking to use this software, please view the [user documentation]((https://docs.hai-vr.dev/docs/xyvr)) instead:
 
-- **[📘 Open documentation](https://docs.hai-vr.dev/docs/products/xyvr)**
+- **[📘 Open documentation](https://docs.hai-vr.dev/docs/xyvr)**
 
 If you are a developer, read below.
 
