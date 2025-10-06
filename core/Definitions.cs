@@ -75,6 +75,8 @@ public record ImmutableAccount
     
     public ImmutableArray<string> allDisplayNames { get; init; } = ImmutableArray<string>.Empty;
     
+    public bool isLost { get; init; }
+    
     // Maintenance fields
     public bool isPendingUpdate { get; init; }
 
@@ -104,6 +106,7 @@ public record ImmutableAccount
         if (ReferenceEquals(this, other)) return true;
         return isPendingUpdate == other.isPendingUpdate &&
                isTechnical == other.isTechnical &&
+               isLost == other.isLost &&
                guid == other.guid &&
                namedApp == other.namedApp &&
                qualifiedAppName == other.qualifiedAppName &&
@@ -120,6 +123,7 @@ public record ImmutableAccount
         {
             var hashCode = isPendingUpdate.GetHashCode();
             hashCode = (hashCode * 397) ^ isTechnical.GetHashCode();
+            hashCode = (hashCode * 397) ^ isLost.GetHashCode();
             hashCode = (hashCode * 397) ^ guid.GetHashCode();
             hashCode = (hashCode * 397) ^ (int)namedApp;
             hashCode = (hashCode * 397) ^ qualifiedAppName.GetHashCode();

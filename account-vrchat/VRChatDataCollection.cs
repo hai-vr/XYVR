@@ -74,7 +74,29 @@ public class VRChatDataCollection(IndividualRepository repository, IResponseColl
         foreach (var undiscoveredUserId in undiscoveredUserIdsPrioritized)
         {
             var collectUndiscoveredLenient = await _vrChatCommunicator.CollectAllLenient([undiscoveredUserId]);
-            var whichUpdated = repository.MergeAccounts(collectUndiscoveredLenient);
+            HashSet<ImmutableAccountIdentification> whichUpdated;
+            if (collectUndiscoveredLenient.Count == 0)
+            {
+                var newlyLost = repository.MarkAccountLost(new ImmutableAccountIdentification
+                {
+                    qualifiedAppName = VRChatCommunicator.VRChatQualifiedAppName,
+                    namedApp = NamedApp.VRChat,
+                    inAppIdentifier = undiscoveredUserId
+                });
+                if (newlyLost != null)
+                {
+                    whichUpdated = [newlyLost];
+                }
+                else
+                {
+                    whichUpdated = [];
+                }
+            }
+            else
+            {
+                whichUpdated = repository.MergeAccounts(collectUndiscoveredLenient);
+            }
+            
             if (whichUpdated.Count > 0) await jobHandler.NotifyAccountUpdated(whichUpdated.ToList());
 
             soFar++;

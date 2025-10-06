@@ -159,6 +159,37 @@ public class IndividualRepository
         
         return results;
     }
+    
+    /// Marks that account as lost (e.g. it was deleted and no longer exists in that social VR app).
+    /// Returns the input if marking that account as lost has caused a change in the repository..
+    public ImmutableAccountIdentification? MarkAccountLost(ImmutableAccountIdentification immutableLostAccount)
+    {
+        var actuallyModofied = false;
+        if (_namedAppToInAppIdToIndividual[immutableLostAccount.namedApp].TryGetValue(immutableLostAccount.inAppIdentifier, out var existingIndividualRef))
+        {
+            var existingIndividual = existingIndividualRef.value;
+            var modifiedAccounts = existingIndividual.accounts.ToList();
+            for (var index = 0; index < modifiedAccounts.Count; index++)
+            {
+                var existingAccount = modifiedAccounts[index];
+                if (IsSameApp(existingAccount, immutableLostAccount))
+                {
+                    var modifiedAccount = modifiedAccounts[index] with { isLost = true };
+                    modifiedAccounts[index] = modifiedAccount!;
+                    break;
+                }
+            }
+            
+            var modifiedIndividual = ModifyIndividualBasedOnAccounts(existingIndividual with { accounts = [..modifiedAccounts] });
+            if (existingIndividual != modifiedIndividual)
+            {
+                XYVRLogging.WriteLine(this, $"Marking account {immutableLostAccount} as lost.");
+                return immutableLostAccount;
+            }
+        }
+
+        return null;
+    }
 
     /// The list of accounts may contain references to the same account but with different data.
     /// It needs to be applied sequentially without deduplication.
@@ -446,6 +477,20 @@ public class IndividualRepository
     }
 
     private static bool IsSameApp(ImmutableAccount existingAccount, ImmutableIncompleteAccount inputAccount)
+    {
+        var sameNamedApp = existingAccount.namedApp == inputAccount.namedApp;
+        if (!sameNamedApp)
+        {
+            return false;
+        }
+        if (existingAccount.namedApp == NamedApp.NotNamed)
+        {
+            return existingAccount.qualifiedAppName == inputAccount.qualifiedAppName;
+        }
+        return true;
+    }
+
+    private static bool IsSameApp(ImmutableAccount existingAccount, ImmutableAccountIdentification inputAccount)
     {
         var sameNamedApp = existingAccount.namedApp == inputAccount.namedApp;
         if (!sameNamedApp)
