@@ -1,0 +1,48 @@
+﻿{
+    "availableLanguages": [
+        {
+            "code": "en",
+            "file": "en.js",
+            "displayName": "English",
+            "englishName": "English",
+            "technicalCode": "english",
+            "authors": [
+                "hai-vr"
+            ]
+        },
+        {
+            "code": "ja",
+            "file": "ja.js",
+            "displayName": "日本語",
+            "englishName": "Japanese",
+            "technicalCode": "japanese",
+            "authors": [
+                "kazu0617"
+            ]
+        },
+        {
+            "code": "zh-CN",
+            "file": "zh-cn.js",
+            "displayName": "简体中文",
+            "englishName": "Simplified Chinese",
+            "technicalCode": "schinese",
+            "authors": [
+                "modimobeikete"
+            ]
+        }
+    ],
+    "authors": {
+        "hai-vr" : {
+            "gitHub": "https://github.com/hai-vr",
+            "introduction": "https://github.com/hai-vr/XYVR/commit/7815af71fd5c7c71b9e6006e72fa6ea23ebb9689"
+        },
+        "kazu0617": {
+            "gitHub": "https://github.com/kazu0617",
+            "introduction": "https://github.com/hai-vr/XYVR/pull/4"
+        },
+        "modimobeikete": {
+            "gitHub": "https://github.com/modimobeikete",
+            "introduction": "https://github.com/hai-vr/XYVR/pull/10"
+        }
+    }
+}

@@ -14,7 +14,12 @@
     justify-content: flex-end;
     margin-top: 1rem;
     padding-top: 1rem;
-    border-top: 1px solid var(--brd-secondary);
+}
+
+.connector-add {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
 }
 
 /* Button visuals are standardized globally in index.css (normal, icon-button, delete-button). */

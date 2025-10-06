@@ -1,14 +1,14 @@
 {
     "name": "dev.hai-vr.xyvr",
     "displayName": "dev.hai-vr.xyvr",
-    "version": "0.0.1-alpha.11",
+    "version": "0.0.1-alpha.12",
     "unity": "2019.4",
     "description": "XYVR",
     "author" : {
         "name" : "Haï~"
     },
-    "url" : "https://docs.hai-vr.dev/docs/products/xyvr",
-    "documentationUrl": "https://docs.hai-vr.dev/docs/products/xyvr",
-    "changelogUrl": "https://docs.hai-vr.dev/docs/products/xyvr/changelogs",
+    "url" : "https://docs.hai-vr.dev/docs/xyvr",
+    "documentationUrl": "https://docs.hai-vr.dev/docs/xyvr",
+    "changelogUrl": "https://docs.hai-vr.dev/docs/xyvr/changelogs",
     "license": "MIT"
 }

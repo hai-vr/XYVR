@@ -50,25 +50,7 @@ public class ChilloutVRDataCollection(IndividualRepository repository, ICredenti
             var contacts = await _api.GetContacts();
             foreach (var contact in contacts.data)
             {
-                var update = repository.MergeIncompleteAccounts([
-                    new ImmutableIncompleteAccount
-                    {
-                        namedApp = NamedApp.ChilloutVR,
-                        qualifiedAppName = ChilloutVRAuthority.QualifiedAppName,
-                        inAppIdentifier = contact.id,
-                        inAppDisplayName = contact.name,
-                        callers = [
-                            new ImmutableIncompleteCallerAccount
-                            {
-                                isAnonymous = false,
-                                inAppIdentifier = _userId,
-                                isContact = true,
-                                note = null
-                            }
-                        ]
-                    }
-                ]);
-                repository.MergeAccounts([
+                var update = repository.MergeAccounts([
                     new ImmutableNonIndexedAccount
                     {
                         namedApp = NamedApp.ChilloutVR,
@@ -110,7 +92,9 @@ public class ChilloutVRDataCollection(IndividualRepository repository, ICredenti
 
     public Task<ImmutableNonIndexedAccount?> TryGetForIncrementalUpdate__Flawed__NonContactOnly(ImmutableAccountIdentification toTryUpdate)
     {
-        throw new NotImplementedException();
+        if (toTryUpdate.namedApp != NamedApp.ChilloutVR) throw new ArgumentException("Cannot attempt incremental update on non-ChilloutVR account, it is the responsibility of the caller to invoke CanAttemptIncrementalUpdateOn beforehand");
+
+        return Task.FromResult<ImmutableNonIndexedAccount?>(null);
     }
     
 

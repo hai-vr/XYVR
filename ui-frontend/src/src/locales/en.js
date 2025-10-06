@@ -1,4 +1,5 @@
-﻿{
+﻿export default {
+    // V0.0.1-alpha.11
     "account.badge.bot": "Bot",
     "account.badge.contact": "Contact",
     "account.badge.friend": "Friend",
@@ -35,7 +36,7 @@
     "addressBook.search.bio.example": "to display and search in the bio.",
     "addressBook.search.confusables.example": "converts some cyrillic and special characters visually similar to latin when searching for names.",
     "addressBook.search.docs.link": "Open the search documentation in your browser.",
-    "addressBook.search.docs.title": "Open https://docs.hai-vr.dev/docs/products/xyvr/search in your browser",
+    "addressBook.search.docs.title": "Open https://docs.hai-vr.dev/docs/xyvr/search in your browser",
     "addressBook.search.hasAlt.example": "for users who have",
     "addressBook.search.links.example": "to search in the links.",
     "addressBook.search.multipleApps.example": "for Resonite account owners who also have a VRChat account.",
@@ -69,10 +70,6 @@
     "individual.mergeAccount.label": "Merge account",
     "individual.mergeAccount.title": "",
     "individual.moreActions.title": "More actions",
-    "language.english.label": "English",
-    "language.english.title": "",
-    "language.japanese.label": "日本語",
-    "language.japanese.title": "",
     "live.session.unnamed": "Unknown world",
     "nav.backToAddressBook.title": "Back to address book",
     "nav.configureConnections.title": "Configure connections",

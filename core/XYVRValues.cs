@@ -3,5 +3,5 @@
 public static class XYVRValues
 {
     public const string ApplicationTitle = "XYVR";
-    public static string UserAgent => $"Hai.XYVR/{VERSION.version} (docs.hai-vr.dev/docs/products/xyvr#user-agent)";
+    public static string UserAgent => $"Hai.XYVR/{VERSION.version} (docs.hai-vr.dev/docs/xyvr#user-agent)";
 }

@@ -359,7 +359,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
     };
 
     const openSearchDocs = async () => {
-        await dotNetApi.appApiOpenLink('https://docs.hai-vr.dev/docs/products/xyvr/search');
+        await dotNetApi.appApiOpenLink('https://docs.hai-vr.dev/docs/xyvr/search');
     };
 
     const online = sortedIndividuals

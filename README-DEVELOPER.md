@@ -1,8 +1,8 @@
 ﻿# This is the developer documentation
 
-If you are a user looking to use this software, please view the [user documentation]((https://docs.hai-vr.dev/docs/products/xyvr)) instead:
+If you are a user looking to use this software, please view the [user documentation]((https://docs.hai-vr.dev/docs/xyvr)) instead:
 
-- **[📘 Open documentation](https://docs.hai-vr.dev/docs/products/xyvr)**
+- **[📘 Open documentation](https://docs.hai-vr.dev/docs/xyvr)**
 
 If you are a developer, read below.
 
@@ -55,42 +55,27 @@ The following work has been done:
 - Provide a graphical UI to group accounts belonging to a single individual.
 
 The following work remains to be done:
-- Reported issues:
-    - The user does not have proper feedback on login failure.
-    - The user cannot back off of the 2FA login screen.
-    - ~~The system does not handle authenticator 2FA, only email.~~
-    - There is no feedback on the progress of data collection.
-    - The Resonite login does not support TOTP.
-    - Resonite SignalR session events occupy 50 kiloBytes per second of network usage even when idle. This is not normal, the Resonite client itself doesn't even take that much when idling.
-    - OS crash on SSD can corrupt the address book and prevent opening it.
-      - Handle this failure mode.
-      - As it was suggested to me, switch to sqlite for disk ops; mainly because of the disk-writing precautions sqlite seems to be taking.
-- Handle the lifecycle of successful newly logged-in connections with live monitoring.
-- Review the request lifecycle towards external systems.
-- Better expose the data update to the UI.
-- Provide a graphical UI to import an existing set of pre-made requests so that it does not require a direct connection.
+- https://github.com/hai-vr/XYVR/issues/9
 
 ## Technology in use
 
 The app is written in .NET 9 and uses WebView2 on Windows and [Photino on Linux](./README-LINUX.md), pointing to a React app set up with Vite.
 Offline data is stored in plain JSON.
-- As I am originally a backend developer, the WebView and React frontend are [built using heavy assistance](ui-webview-windows/src/README.md) from Claude 4 integrated
+- As I am originally a backend developer, the WebView and React frontend are [built using heavy assistance](ui-frontend/src/README.md) from Claude 4 integrated
   with Jetbrains Rider.
 - The backend is designed without much assistance.
 
 ## Executing the app as a developer
 
-*The instructions to execute this application have not been written yet.*
-
 #### Build the React app
 
 *For Linux build instructions, go to [README-LINUX.md](./README-LINUX.md) instead.*
 
-To run the desktop app, we need to generate the `ui-webview-windows/src/dist/` folder containing the React webapp
-that will be then copied to the desktop application during the .NET build process.
+To run the desktop app, we need to generate the folder containing the React webapp that will be then copied to the desktop application
+during the .NET build process.
 
 - Requires Node or something.
-- In `ui-webview-windows/src/`, run `npm install` and then `npm run build-and-copy`
+- In `ui-frontend/src/`, run `npm install` and then `npm run build-and-copy`
 
 #### Build the desktop app that shows the React app
 
@@ -110,9 +95,8 @@ Build the `ui-webview-windows/` project.
 Main application execution projects:
 
 - **ui-webview-windows**: This is a WebView2 program that shows a React app that has been built, for use on Windows.
-- **ui-photino**: This is a Photino program that shows a React app that has been built, for use on Linux.
+- **ui-photino-linux**: This is a Photino program that shows a React app that has been built, for use on Linux.
 - **ui-frontend/src/**: This is the unbuilt React app. It is meant to be built using `npm run build-and-copy` so that the .NET program will copy its contents to the desktop app.
-- **program**: This is a developer program to import the data. It is not user-friendly whatsoever.
 
 Core projects:
 
@@ -124,4 +108,9 @@ External system projects:
 
 - **account-resonite** uses HTTP and SignalR to communicate with the [Resonite API](https://wiki.resonite.com/API), and returns core objects.
 - **account-vrchat** uses HTTP and WebSockets to communicate with the [VRChat API](https://vrchat.community), and returns core objects.
-- **audit-urls** contains all the URLs that are used to perform requests to external systems (currently: the Resonite API and the VRChat API).
+- **account-chilloutvr** uses HTTP and WebSockets to communicate with the ChilloutVR API, and returns core objects.
+- **audit-urls** contains all the URLs that are used to perform requests to external systems (currently: the Resonite API, VRChat API, and ChilloutVR API).
+
+Obsolete:
+- **program**: This was a developer program to import the data. It is not user-friendly whatsoever; do not use this.
+  - This does demonstrate how to perform operations without any UI involved.

@@ -100,7 +100,7 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated, 
     }
 
     const openPrivacyDocs = async () => {
-        await dotNetApi.appApiOpenLink('https://docs.hai-vr.dev/docs/products/xyvr/privacy');
+        await dotNetApi.appApiOpenLink('https://docs.hai-vr.dev/docs/xyvr/privacy');
     };
 
     return (

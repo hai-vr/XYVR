@@ -1,4 +1,5 @@
-﻿{
+﻿export default {
+    // V0.0.1-alpha.11
     "account.badge.bot": "ボット",
     "account.badge.contact": "フレンド",
     "account.badge.friend": "フレンド",
@@ -35,7 +36,7 @@
     "addressBook.search.bio.example": "プロフィールを表示・検索する際に使用します。",
     "addressBook.search.confusables.example": "名前検索時に、キリル文字やラテン文字と視覚的に類似した特殊文字を変換します。",
     "addressBook.search.docs.link": "ブラウザで検索ドキュメントを開いてください。",
-    "addressBook.search.docs.title": "ブラウザで https://docs.hai-vr.dev/docs/products/xyvr/search を開いてください",
+    "addressBook.search.docs.title": "ブラウザで https://docs.hai-vr.dev/docs/xyvr/search を開いてください",
     "addressBook.search.hasAlt.example": "ユーザーが所有している際に使用します。",
     "addressBook.search.links.example": "リンク内を検索する際に使用します。",
     "addressBook.search.multipleApps.example": "Resoniteアカウント所有者で、VRChatアカウントも所有しているユーザーを検索する場合などに使用します。",
@@ -69,10 +70,6 @@
     "individual.mergeAccount.label": "アカウントを統合",
     "individual.mergeAccount.title": "",
     "individual.moreActions.title": "その他の操作",
-    "language.english.label": "English",
-    "language.english.title": "",
-    "language.japanese.label": "日本語",
-    "language.japanese.title": "",
     "live.session.unnamed": "不明なワールド",
     "nav.backToAddressBook.title": "アドレス帳に戻る",
     "nav.configureConnections.title": "接続を設定",
