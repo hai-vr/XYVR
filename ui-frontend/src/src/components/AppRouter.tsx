@@ -1,7 +1,7 @@
 ﻿import {HashRouter as Router, Routes, Route, Navigate} from 'react-router-dom'
 import {useState, useEffect} from 'react'
 import AddressBookPage from '../pages/AddressBookPage.tsx'
-import DataCollectionPage from '../pages/DataCollectionPage.tsx'
+import SettingsPage from '../pages/SettingsPage.tsx'
 import './AppRouter.css'
 import {Toaster} from "react-hot-toast";
 import type {ReactAppPreferences} from "../types/APITypes.ts";
@@ -138,9 +138,9 @@ const AppRouter = ({ appVersion }: { appVersion: string }) => {
                                                                               debugMode={debugMode}
                         />}/>
                         <Route path="/data-collection"
-                               element={<DataCollectionPage isDark={isDark} setIsDark={setIsDark}
-                                                            setLang={setLang}
-                                                            debugMode={debugMode}/>}/>
+                               element={<SettingsPage isDark={isDark} setIsDark={setIsDark}
+                                                      setLang={setLang}
+                                                      debugMode={debugMode}/>}/>
                     </Routes>
                 </main>
                 <Toaster

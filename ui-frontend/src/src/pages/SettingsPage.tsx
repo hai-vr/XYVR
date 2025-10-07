@@ -1,6 +1,6 @@
 ﻿import {useEffect, useState} from 'react'
 import {useNavigate} from 'react-router-dom'
-import './DataCollectionPage.css'
+import './SettingsPage.css'
 import '../Header.css'
 import Connector from "../components/Connector.tsx";
 import DarkModeToggleButton from "../components/DarkModeToggleButton.tsx";
@@ -11,7 +11,7 @@ import {useTranslation} from "react-i18next";
 import {availableLanguages} from "../i18n.ts";
 import type {LanguageInfo} from "../types/AvailableLang.ts";
 
-interface DataCollectionPageProps {
+interface SettingsPageProps {
     isDark: boolean,
     setIsDark: (isDark: boolean) => void,
     debugMode: DebugFlags,
@@ -23,7 +23,7 @@ interface DeleteStateType {
     firstClick: number;
 }
 
-function DataCollectionPage({isDark, setIsDark, debugMode, setLang}: DataCollectionPageProps) {
+function SettingsPage({isDark, setIsDark, debugMode, setLang}: SettingsPageProps) {
     const dotNetApi = new DotNetApi();
     const {t} = useTranslation();
 
@@ -186,4 +186,4 @@ function DataCollectionPage({isDark, setIsDark, debugMode, setLang}: DataCollect
     )
 }
 
-export default DataCollectionPage
+export default SettingsPage
