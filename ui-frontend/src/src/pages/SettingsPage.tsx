@@ -105,6 +105,10 @@ function SettingsPage({isDark, setIsDark, debugMode, setLang}: SettingsPageProps
         await dotNetApi.dataCollectionApiStartDataCollection();
     }
 
+    const openPrivacyDocs = async () => {
+        await dotNetApi.appApiOpenLink('https://docs.hai-vr.dev/docs/xyvr/privacy');
+    };
+
     return (
         <div className="data-collection-container">
             <div className="header-group">
@@ -168,6 +172,7 @@ function SettingsPage({isDark, setIsDark, debugMode, setLang}: SettingsPageProps
             )}
 
             <div className="settings-buttons">
+                <a className="link-pointer" title="Open privacy and data considerations docs in your browser" onClick={openPrivacyDocs} onAuxClick={(e) => e.button === 1 && openPrivacyDocs()} onMouseDown={(e) => e.preventDefault()}>Learn more about our privacy considerations.</a>
                 <button
                     onClick={() => startDataCollection()}
                     title={t('dataCollection.start.title')}

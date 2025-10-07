@@ -182,10 +182,10 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated, 
                                 {stayLoggedIn && connector.type === ConnectorType.ResoniteAPI && 'This application does not store your email and password, only a connection token that expires in 30 days. '}
                                 {stayLoggedIn && connector.type === ConnectorType.VRChatAPI && 'This application does not store your password, only a cookie. '}
                                 {stayLoggedIn && connector.type === ConnectorType.ChilloutVRAPI && 'This application does not store your email and password, only an authentication key. '}
-                                {connector.type === ConnectorType.ResoniteAPI && <>All data is stored locally. Requests are sent directly to the Resonite API from your machine. </>}
-                                {connector.type === ConnectorType.VRChatAPI && <>All data is stored locally. Requests are sent directly to the VRChat API from your machine. </>}
-                                {connector.type === ConnectorType.ChilloutVRAPI && <>All data is stored locally. Requests are sent directly to the ChilloutVR API from your machine. </>}
-                                <a className="link-pointer" title="Open privacy and data considerations docs in your browser" onClick={openPrivacyDocs} onAuxClick={(e) => e.button === 1 && openPrivacyDocs()} onMouseDown={(e) => e.preventDefault()}>Learn more</a>.
+                                {connector.type === ConnectorType.ResoniteAPI && <>All data is stored locally. Requests are sent directly to the Resonite API from your machine. XYVR does not operate any server, and data is never transmitted to a third-party. </>}
+                                {connector.type === ConnectorType.VRChatAPI && <>All data is stored locally. Requests are sent directly to the VRChat API from your machine. XYVR does not operate any server, and data is never transmitted to a third-party. </>}
+                                {connector.type === ConnectorType.ChilloutVRAPI && <>All data is stored locally. Requests are sent directly to the ChilloutVR API from your machine. XYVR does not operate any server, and data is never transmitted to a third-party. </>}
+                                <a className="link-pointer" title="Open privacy and data considerations docs in your browser" onClick={openPrivacyDocs} onAuxClick={(e) => e.button === 1 && openPrivacyDocs()} onMouseDown={(e) => e.preventDefault()}>Learn more about our privacy considerations.</a>
                             </p>
 
                         </>
