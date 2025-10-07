@@ -13,7 +13,8 @@ view your contacts as one single address book.
 
 # User documentation
 
-If you are a user looking to use this software: Sorry, but this application is currently under development.
+If you are a user looking to use this software: Sorry, but this application is currently under development. This section will become available once this
+application goes out of Alpha. 
 
 Please check back at another time.
 
