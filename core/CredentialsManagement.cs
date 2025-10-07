@@ -10,6 +10,9 @@ public class CredentialsManagement
     private readonly ConcurrentDictionary<string, bool> _isPersistent = new();
     
     private readonly Dictionary<ConnectorType, IAuthority> _authorities = new();
+    
+    public event Func<Connector, Task>? OnConnectionConfirmed;
+    public event Func<Connector, Task>? OnLoggedOut;
 
     public CredentialsManagement(SerializedCredentials serializedCredentials, List<IAuthority> inputAuthorities)
     {
@@ -93,6 +96,11 @@ public class CredentialsManagement
         {
             _isPersistent[connectionAttempt.connector.guid] = true;
         }
+
+        if (result.type == ConnectionAttemptResultType.Success)
+        {
+            if (OnConnectionConfirmed != null) await OnConnectionConfirmed.Invoke(connector);
+        }
         
         return result;
     }
@@ -111,7 +119,14 @@ public class CredentialsManagement
         }
         
         var loginService = await AuthorityFor(connector).NewLoginService();
-        return await loginService.Logout(credentialsStorage, connector.guid);
+        var result = await loginService.Logout(credentialsStorage, connector.guid);
+
+        if (result.type == ConnectionAttemptResultType.LoggedOut)
+        {
+            if (OnLoggedOut != null) await OnLoggedOut.Invoke(connector);
+        }
+        
+        return result;
     }
 
     public async Task<ILiveMonitoring?> GetConnectedLiveMonitoringOrNull(Connector connector, LiveStatusMonitoring monitoring)

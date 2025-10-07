@@ -49,8 +49,15 @@ public class ResoniteLoginService : ILoginService
 
     public async Task<ConnectionAttemptResult> Logout(ICredentialsStorage credentialsStorage, string guid)
     {
-        // TODO: implement resonite
-        // throw new NotImplementedException();
+        var communicator = new ResoniteCommunicator(
+            new DoNotStoreAnythingStorage(),
+            true,
+            await _resoniteUidProviderFn(),
+            credentialsStorage
+        );
+
+        await communicator.ResoniteLogout();
+        
         return new ConnectionAttemptResult
         {
             guid = guid,

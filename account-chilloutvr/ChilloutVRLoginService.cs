@@ -50,9 +50,16 @@ public class ChilloutVRLoginService : ILoginService
         }
     }
 
-    public Task<ConnectionAttemptResult> Logout(ICredentialsStorage credentialsStorage, string guid)
+    public async Task<ConnectionAttemptResult> Logout(ICredentialsStorage credentialsStorage, string guid)
     {
-        throw new NotImplementedException();
+        XYVRLogging.WriteLine(this, "Logging out of ChilloutVR is not implemented. The session will not be invalidated.");
+        
+        await credentialsStorage.DeleteCookieOrToken();
+        return new ConnectionAttemptResult
+        {
+            guid = guid,
+            type = ConnectionAttemptResultType.LoggedOut,
+        };
     }
 
     public async Task<bool> IsLoggedInWithoutRequest(ICredentialsStorage copyOfCredentialsStorage)

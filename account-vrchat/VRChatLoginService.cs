@@ -78,6 +78,7 @@ public class VRChatLoginService : ILoginService
             case LogoutResponseStatus.Success:
             case LogoutResponseStatus.Unauthorized:
             case LogoutResponseStatus.NotLoggedIn:
+                await credentialsStorage.DeleteCookieOrToken();
                 return new ConnectionAttemptResult { guid = guid, type = ConnectionAttemptResultType.LoggedOut };
             default:
                 throw new ArgumentOutOfRangeException();

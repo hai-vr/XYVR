@@ -8,7 +8,7 @@ public class LiveMonitoringAgent
     private readonly CredentialsManagement _credentials;
     private readonly LiveStatusMonitoring _monitoring;
     
-    private List<ILiveMonitoring>? _liveMonitoringAgents;
+    private Dictionary<string, ILiveMonitoring>? _liveMonitoringAgents;
 
     public LiveMonitoringAgent(ConnectorManagement connectors, CredentialsManagement credentials, LiveStatusMonitoring monitoring)
     {
@@ -16,6 +16,8 @@ public class LiveMonitoringAgent
         _credentials = credentials;
         _monitoring = monitoring;
     }
+    
+    private record GuidToLiveMonitoring(string guid, ILiveMonitoring? liveMonitoring);
 
     public async Task StartMonitoring()
     {
@@ -23,17 +25,19 @@ public class LiveMonitoringAgent
         {
             if (_liveMonitoringAgents != null) return;
         
-            ILiveMonitoring?[] liveMonitorings = await Task.WhenAll(_connectors.Connectors
+            GuidToLiveMonitoring[] guidToLiveMonitorings = await Task.WhenAll(_connectors.Connectors
                 .Where(connector => connector.liveMode != LiveMode.NoLiveFunction)
-                .Select(async connector => await _credentials.GetConnectedLiveMonitoringOrNull(connector, _monitoring))
+                .Select(async connector => new GuidToLiveMonitoring(connector.guid, await _credentials.GetConnectedLiveMonitoringOrNull(connector, _monitoring)))
                 .ToList());
+
+            _liveMonitoringAgents = guidToLiveMonitorings
+                .Where(guidToLiveMonitoring => guidToLiveMonitoring.liveMonitoring != null)
+                .ToDictionary(monitoring => monitoring.guid, monitoring => monitoring.liveMonitoring!);
+
+            _credentials.OnConnectionConfirmed += WhenConnectionConfirmed;
+            _credentials.OnLoggedOut += WhenLoggedOut;
         
-            _liveMonitoringAgents = liveMonitorings
-                .Where(collection => collection != null)
-                .Cast<ILiveMonitoring>()
-                .ToList();
-        
-            foreach (var agent in _liveMonitoringAgents)
+            foreach (var agent in _liveMonitoringAgents.Values)
             {
                 await agent.StartMonitoring();
             }
@@ -45,11 +49,44 @@ public class LiveMonitoringAgent
         }
     }
 
-    public async Task StopMonitoring()
+    private async Task WhenConnectionConfirmed(Connector connector)
     {
         if (_liveMonitoringAgents == null) return;
         
-        var tasks = _liveMonitoringAgents.Select(agent =>
+        if (connector.liveMode == LiveMode.NoLiveFunction) return;
+
+        if (_liveMonitoringAgents.ContainsKey(connector.guid)) return;
+        
+        XYVRLogging.WriteLine(this, $"Connection confirmed on connection GUID {connector.guid}, will attempt to start monitoring it");
+
+        var agent = await _credentials.GetConnectedLiveMonitoringOrNull(connector, _monitoring);
+        if (agent == null) return;
+        
+        _liveMonitoringAgents[connector.guid] = agent;
+        await agent.StartMonitoring();
+    }
+
+    private async Task WhenLoggedOut(Connector connector)
+    {
+        if (_liveMonitoringAgents == null) return;
+
+        if (_liveMonitoringAgents.TryGetValue(connector.guid, out var agent))
+        {
+            XYVRLogging.WriteLine(this, $"Logged out ofGUID {connector.guid}, will stop monitoring it");
+            
+            await agent.StopMonitoring();
+            _liveMonitoringAgents.Remove(connector.guid);
+        }
+    }
+
+    public async Task StopMonitoring()
+    {
+        if (_liveMonitoringAgents == null) return;
+
+        _credentials.OnConnectionConfirmed -= WhenConnectionConfirmed;
+        _credentials.OnLoggedOut -= WhenLoggedOut;
+        
+        var tasks = _liveMonitoringAgents.Values.Select(agent =>
         {
             return Task.Run(async () =>
             {

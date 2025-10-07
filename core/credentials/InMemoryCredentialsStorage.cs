@@ -20,4 +20,10 @@ public class InMemoryCredentialsStorage : ICredentialsStorage
         await Task.CompletedTask;
         _token = cookie__sensitive;
     }
+
+    public async Task DeleteCookieOrToken()
+    {
+        await Task.CompletedTask;
+        _token = null;
+    }
 }

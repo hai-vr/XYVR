@@ -70,6 +70,30 @@ internal class ResoniteAPI
         return response;
     }
 
+    public async Task Logout()
+    {
+        var url = $"{AuditUrls.ResoniteApiUrl}/users/{_myUserId}/{_token__sensitive}";
+        try
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, url);
+            request.Headers.Add("Authorization", $"res {_myUserId}:{_token__sensitive}");
+
+            var response = await _client.SendAsync(request);
+
+            if (response.IsSuccessStatusCode) return;
+            if (response.StatusCode == HttpStatusCode.NotFound) return;
+            if (response.StatusCode == HttpStatusCode.Unauthorized) return;
+            
+            throw new HttpRequestException($"Request failed with status {response.StatusCode}, reason: {response.ReasonPhrase}");
+        }
+        catch (Exception e)
+        {
+            XYVRLogging.ErrorWriteLine(this, "Failed to log out of Resonite");
+            XYVRLogging.ErrorWriteLine(this, e);
+            throw;
+        }
+    }
+
     private static StringContent ToCarefulJsonContent__Sensitive(LoginJsonObject obj__sensitive)
     {
         return new StringContent(JsonConvert.SerializeObject(obj__sensitive), Encoding.UTF8, "application/json");

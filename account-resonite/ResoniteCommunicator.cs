@@ -33,6 +33,14 @@ internal class ResoniteCommunicator
         await _credentialsStorage.StoreCookieOrToken(api.GetAllUserAndToken__Sensitive());
     }
 
+    public async Task ResoniteLogout()
+    {
+        _api ??= await InitializeApi();
+        
+        await _api.Logout();
+        await _credentialsStorage.DeleteCookieOrToken();
+    }
+
     public async Task<ImmutableNonIndexedAccount> CallerAccount()
     {
         _api ??= await InitializeApi();
