@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using XYVR.Core;
+﻿using XYVR.Core;
 using XYVR.Data.Collection;
 using XYVR.Scaffold;
 
@@ -16,6 +15,7 @@ public class AppLifecycle
     public ConnectorManagement ConnectorsMgt { get; private set; } = null!;
     public CredentialsManagement CredentialsMgt { get; private set; } = null!;
     public LiveStatusMonitoring LiveStatusMonitoring { get; private set; } = null!;
+    public LiveMonitoringAgent LiveMonitoringAgent { get; private set; } = null!;
 
     private List<IAuthority> _authorities = null!;
 
@@ -55,6 +55,7 @@ public class AppLifecycle
         ConnectorsMgt = new ConnectorManagement(await Scaffolding.OpenConnectors());
         CredentialsMgt = new CredentialsManagement(await Scaffolding.OpenCredentials(), _authorities);
         LiveStatusMonitoring = new LiveStatusMonitoring();
+        LiveMonitoringAgent = new LiveMonitoringAgent(ConnectorsMgt, CredentialsMgt, LiveStatusMonitoring);
 
         _ = Task.Run(() => LiveBff.StartMonitoring()); // don't wait this;
     }

@@ -20,7 +20,6 @@ public class LiveBFF : ILiveBFF
     private readonly JsonSerializerSettings _serializer;
     private readonly VRChatThumbnailCache _thumbnailCache;
 
-    private List<ILiveMonitoring>? _liveMonitoringAgents;
     private HashSet<string> _doWeCareAboutThisSessionGuid = new();
 
     public LiveBFF(AppLifecycle appLifecycle)
@@ -29,8 +28,8 @@ public class LiveBFF : ILiveBFF
         _serializer = BFFUtils.NewSerializer();
         _thumbnailCache = Scaffolding.ThumbnailCache();
     }
-    
-    public string GetAllExistingLiveUserData()
+
+        public string GetAllExistingLiveUserData()
     {
         try
         {
@@ -66,73 +65,25 @@ public class LiveBFF : ILiveBFF
     {
         return await _thumbnailCache.GetByShaOrNull(sha__mustNotContainPathTraversal);
     }
-
+    
     public async Task StartMonitoring()
     {
-        try
-        {
-            if (_liveMonitoringAgents != null) return;
-        
-            var connectors = _appLifecycle.ConnectorsMgt;
-            var credentials = _appLifecycle.CredentialsMgt;
-            var monitoring = _appLifecycle.LiveStatusMonitoring;
+        var monitoring = _appLifecycle.LiveStatusMonitoring;
+        monitoring.AddUserUpdateMergedListener(WhenUserUpdateMerged);
+        monitoring.AddSessionUpdatedListener(WhenSessionUpdated);
 
-            monitoring.AddUserUpdateMergedListener(WhenUserUpdateMerged);
-            monitoring.AddSessionUpdatedListener(WhenSessionUpdated);
-        
-            ILiveMonitoring?[] liveMonitorings = await Task.WhenAll(connectors.Connectors
-                .Where(connector => connector.liveMode != LiveMode.NoLiveFunction)
-                .Select(async connector => await credentials.GetConnectedLiveMonitoringOrNull(connector, monitoring))
-                .ToList());
-        
-            _liveMonitoringAgents = liveMonitorings
-                .Where(collection => collection != null)
-                .Cast<ILiveMonitoring>()
-                .ToList();
-        
-            foreach (var agent in _liveMonitoringAgents)
-            {
-                await agent.StartMonitoring();
-            }
-        }
-        catch (Exception e)
-        {
-            XYVRLogging.ErrorWriteLine(this, e);
-            throw;
-        }
+        await _appLifecycle.LiveMonitoringAgent.StartMonitoring();
     }
 
     public async Task StopMonitoring()
     {
-        if (_liveMonitoringAgents == null) return;
-
         var monitoring = _appLifecycle.LiveStatusMonitoring;
-        
         monitoring.RemoveUserUpdateMergedListener(WhenUserUpdateMerged);
         monitoring.RemoveSessionUpdatedListener(WhenSessionUpdated);
         
-        var tasks = _liveMonitoringAgents.Select(agent =>
-        {
-            return Task.Run(async () =>
-            {
-                try
-                {
-                    XYVRLogging.WriteLine(this, $"Stopping monitoring of {agent.GetType().Name}");
-                    await agent.StopMonitoring();
-                }
-                catch (Exception e)
-                {
-                    XYVRLogging.ErrorWriteLine(this, e);
-                    throw;
-                }
-            });
-        }).ToList();
-        
-        await Task.WhenAll(tasks);
-
-        _liveMonitoringAgents = null;
+        await _appLifecycle.LiveMonitoringAgent.StopMonitoring();
     }
-
+    
     private async Task WhenUserUpdateMerged(ImmutableLiveUserUpdate update)
     {
         var live = _appLifecycle.LiveStatusMonitoring;
