@@ -59,6 +59,7 @@ XYVR is only interested in building an address book and monitoring live sessions
   - Get all of your friends' usernames, bio, links, notes.
   - Get all notes. If someone who has a note is not a friend, then get their username, bio, links, notes.
 - The following requests are for live monitoring:
+  - Receive live events regarding user status changes and user sessions.
   - Get the currently active sessions. 
   - Get the session of a contact.
   - Get the world of a session and its thumbnail.
