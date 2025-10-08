@@ -64,6 +64,24 @@ internal class ChilloutVRAPI
         };
     }
 
+    public async Task<CvrInstanceResponse?> GetInstance(string instanceId)
+    {
+        var url = $"{AuditUrls.ChilloutVrApiUrlV1}/instances/{instanceId}";
+        var request = new HttpRequestMessage(HttpMethod.Get, url);
+        MakeAuthenticated(request);
+
+        var response = await _client.SendAsync(request);
+
+        XYVRLogging.WriteLine(this, $"Got {url}");
+
+        return response.StatusCode switch
+        {
+            HttpStatusCode.OK => JsonConvert.DeserializeObject<CvrInstanceResponse>(await response.Content.ReadAsStringAsync()),
+            HttpStatusCode.NotFound => null,
+            _ => throw new InvalidOperationException("Outside protocol")
+        };
+    }
+
     private void MakeAuthenticated(HttpRequestMessage request)
     {
         request.Headers.Add("Username", _username);

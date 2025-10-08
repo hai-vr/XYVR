@@ -236,7 +236,10 @@ public enum LiveUserSessionKnowledge
     // VRChat
     PrivateWorld,
     OffPlatform,
-    VRCTraveling
+    VRCTraveling,
+    // ChilloutVR
+    OfflineInstance,
+    PrivateInstance
 }
 
 public record ImmutableLiveSessionHost

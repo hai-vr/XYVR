@@ -116,16 +116,24 @@ public class CredentialsManagement
 
     public async Task<ILiveMonitoring?> GetConnectedLiveMonitoringOrNull(Connector connector, LiveStatusMonitoring monitoring)
     {
-        if (!_connectorGuidToCredentialsStorageState.TryGetValue(connector.guid, out var credentialsStorage)) return null;
+        try
+        {
+            if (!_connectorGuidToCredentialsStorageState.TryGetValue(connector.guid, out var credentialsStorage)) return null;
 
-        if (connector.type == ConnectorType.Offline) return null;
-        
-        var authority = AuthorityFor(connector);
-        var liveMonitoring = await authority.NewLiveMonitoring(monitoring, credentialsStorage);
-        
-        var caller = await authority.ResolveCallerAccount(credentialsStorage);
-        await liveMonitoring.DefineCaller(caller.inAppIdentifier);
-        
-        return liveMonitoring;
+            if (connector.type == ConnectorType.Offline) return null;
+
+            var authority = AuthorityFor(connector);
+            var liveMonitoring = await authority.NewLiveMonitoring(monitoring, credentialsStorage);
+
+            var caller = await authority.ResolveCallerAccount(credentialsStorage);
+            await liveMonitoring.DefineCaller(caller.inAppIdentifier);
+
+            return liveMonitoring;
+        }
+        catch (Exception e)
+        {
+            XYVRLogging.ErrorWriteLine(this, e);
+            return null;
+        }
     }
 }
