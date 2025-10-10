@@ -30,6 +30,7 @@ https://discord.com/channels/418093857394262020/418512124529344523/1413288167846
     public const string ResoniteHubUrl = "https://api.resonite.com/hub";
     
     public const string ChilloutVrApiUrlV1 = "https://api.chilloutvr.net/1";
+    public const string ChilloutVrWebsocketUrl = "wss://api.chilloutvr.net/1/users/ws";
     
     // We're not sure how much to trust thumbnail URLs coming from Resonite API endpoints. As a precaution,
     // only accept URLs if the host is equal to this, of if the host is a subdomain of this.

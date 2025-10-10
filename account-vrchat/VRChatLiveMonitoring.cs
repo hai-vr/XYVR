@@ -9,7 +9,7 @@ public class VRChatLiveMonitoring : ILiveMonitoring
     private readonly WorldNameCache _worldNameCache;
     private readonly SemaphoreSlim _operationLock = new(1, 1);
 
-    private string _callerInAppIdentifier;
+    private string? _callerInAppIdentifier;
     private bool _isConnected;
     private VRChatLiveCommunicator _liveComms;
     private CancellationTokenSource _cancellationTokenSource;
@@ -26,7 +26,7 @@ public class VRChatLiveMonitoring : ILiveMonitoring
 
     public async Task StartMonitoring()
     {
-        if (_callerInAppIdentifier == null) throw new InvalidOperationException("Caller must be define_d to start monitoring");
+        if (_callerInAppIdentifier == null) throw new InvalidOperationException("Caller must be defined to start monitoring");
         await _operationLock.WaitAsync();
         try
         {
