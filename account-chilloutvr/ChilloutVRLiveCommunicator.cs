@@ -56,8 +56,6 @@ internal class ChilloutVRLiveCommunicator
 
         _api ??= await InitializeAPI();
 
-        var contacts = await _api.GetContacts();
-
         var token__sensitive = await GetToken__sensitive();
         if (token__sensitive != null)
         {
