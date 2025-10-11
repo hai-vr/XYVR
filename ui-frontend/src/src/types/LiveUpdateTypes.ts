@@ -8,6 +8,8 @@ export const LiveSessionKnowledge = {
     PrivateWorld: "PrivateWorld",
     OffPlatform: "OffPlatform",
     VRCTraveling: "VRCTraveling",
+    OfflineInstance: "OfflineInstance",
+    PrivateInstance: "PrivateInstance"
 } as const;
 
 export type LiveUserSessionKnowledgeType = typeof LiveSessionKnowledge[keyof typeof LiveSessionKnowledge];
