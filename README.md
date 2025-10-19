@@ -48,6 +48,7 @@ XYVR does not operate any server, and it does not have analytics. The only servi
 - We fetch thumbnails:
   - for VRChat: from any thumbnail URL provided by the VRChat API.
   - for Resonite: only from URLs which hostname is `resonite.com`, or any subdomain of `resonite.com`.
+  - for ChilloutVR: from any thumbnail URL provided by the ChilloutVR API.
 - There are no requests to any other server.
 - There is no telemetry, no analytics, and no cloud storage.
 
