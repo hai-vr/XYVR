@@ -128,6 +128,8 @@ Fetching the image and displaying it is the responsibility of the frontend. The 
 
 The backend will apply the following restrictions to the URLs received from the various APIs, which are then passed to the frontend:
 - For Resonite session thumbnails, the backend will only provide the URL to the frontend if the thumbnail host is equal to `resonite.com` or is a subdomain of it.
+  - The reason is that some Resonite sessions are hosted by the users. It is unclear whether those session owners have authority on the thumbnail URL of their session,
+    either now or in the future; as a matter of precaution, we only allow thumbnails that pass the aforementioned hostname check.
 
 ## Data storage
 
