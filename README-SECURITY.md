@@ -97,6 +97,9 @@ and used by the backend, and they are not transmitted to the frontend in any way
 When the user logs in to a service in the Connections tab using their login and password (or access key in the case of ChilloutVR),
 they transmit sensitive information to the backend. The backend takes care of actually making the API calls to the external services; not the frontend.
 
+*To be explicit, the word "backend" here refers to the service running on the user's local machine, as previously explained in the [Basics](#basics)
+introduction of this document. It is NOT a backend server on the Internet.* 
+
 The session tokens and cookies obtained as a result of logging in are not transmitted back to the frontend upon successful login.
 
 If there is code injection in the frontend, the frontend should not be able to extract session cookies and tokens as there is no endpoint in the backend
