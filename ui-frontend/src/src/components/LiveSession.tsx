@@ -71,7 +71,7 @@ export function LiveSession({liveSession, individuals, debugMode, mini}: LiveSes
                         <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.25rem'}}>
                             <span title={capacityStr}>{_D2(liveSession.inAppVirtualSpaceName || '', debugMode, undefined, DemonstrationMode.EverythingButSessionNames) || t('live.session.unnamed')}</span>
                             {liveSession.inAppSessionName &&
-                                <span className="live-session-name" title={capacityStr}>{_D2(liveSession.inAppSessionName || '', debugMode, undefined, DemonstrationMode.EverythingButSessionNames) || t('live.session.unnamed')}</span>}
+                                <span className="live-session-name" title={capacityStr}>{_D2(liveSession.inAppSessionName || '', debugMode, undefined, DemonstrationMode.Everything) || t('live.session.unnamed')}</span>}
                         </div>
                     </div>
                 </div>
