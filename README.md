@@ -43,7 +43,7 @@ XYVR does not operate any server, and it does not have analytics. The only servi
 - We only perform requests to the following URLs:
   - for VRChat accounts: `https://api.vrchat.cloud/api/1` (live updates: `wss://pipeline.vrchat.cloud/`)
   - for Resonite accounts: `https://api.resonite.com/` (live updates: `https://api.resonite.com/hub`)
-  - for ChilloutVR accounts: `https://api.chilloutvr.net/1`
+  - for ChilloutVR accounts: `https://api.chilloutvr.net/1` (live updates: `wss://api.chilloutvr.net/1/users/ws`)
   - Information from one account is never transmitted to the service of another account (e.g., Resonite account data is never transmitted to VRChat servers, etc.)
 - We fetch thumbnails:
   - for VRChat: from any thumbnail URL provided by the VRChat API.
