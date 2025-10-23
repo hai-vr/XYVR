@@ -55,7 +55,7 @@ public class VRChatLiveMonitoring : ILiveMonitoring
                 
                 foreach (var sessionOnThisWorld in allSessionsOnThisWorld)
                 {
-                    var nonIndexedUpdate = VRChatLiveCommunicator.MakeNonIndexedBasedOnWorld(sessionOnThisWorld.inAppSessionIdentifier, world);
+                    var nonIndexedUpdate = VRChatLiveCommunicator.MakeNonIndexedBasedOnWorld(sessionOnThisWorld.inAppSessionIdentifier, world, _callerInAppIdentifier);
                     await _monitoring.MergeSession(nonIndexedUpdate);
                 }
             };
@@ -118,5 +118,13 @@ public class VRChatLiveMonitoring : ILiveMonitoring
     {
         _callerInAppIdentifier = callerInAppIdentifier;
         return Task.CompletedTask;
+    }
+
+    public async Task MakeGameClientJoinOrSelfInvite(string sessionId)
+    {
+        if (_callerInAppIdentifier == null) throw new InvalidOperationException("Caller must be defined to invite yourself");
+        
+        var comms = new VRChatLiveCommunicator(_credentialsStorage, _callerInAppIdentifier, new DoNotStoreAnythingStorage(), _worldNameCache, _thumbnailCache);
+        await comms.InviteMyselfTo(sessionId);
     }
 }

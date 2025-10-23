@@ -82,5 +82,7 @@
     "ui.showNotes.title": "Switch to show notes",
     "ui.showOnlyContacts.title": "Switch to show only contacts",
     "ui.switchToCompactMode.title": "Switch to compact mode",
-    "ui.switchToFullMode.title": "Switch to full mode"
+    "ui.switchToFullMode.title": "Switch to full mode",
+    // V0.0.1-alpha.15
+    "ui.joinSession.title": "Join session",
 }

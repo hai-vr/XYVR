@@ -111,6 +111,8 @@ public record ImmutableLiveSession
     public string? thumbnailUrl { get; init; }
     public bool? isVirtualSpacePrivate { get; init; }
 
+    public required string callerInAppIdentifier { get; init; }
+
     public virtual bool Equals(ImmutableLiveSession? other)
     {
         if (other is null) return false;
@@ -126,7 +128,8 @@ public record ImmutableLiveSession
                virtualSpaceDefaultCapacity == other.virtualSpaceDefaultCapacity &&
                sessionCapacity == other.sessionCapacity &&
                currentAttendance == other.currentAttendance &&
-               isVirtualSpacePrivate == other.isVirtualSpacePrivate;
+               isVirtualSpacePrivate == other.isVirtualSpacePrivate &&
+               callerInAppIdentifier == other.callerInAppIdentifier;
     }
 
     public override int GetHashCode()
@@ -145,6 +148,7 @@ public record ImmutableLiveSession
             hashCode = (hashCode * 397) ^ sessionCapacity.GetHashCode();
             hashCode = (hashCode * 397) ^ currentAttendance.GetHashCode();
             hashCode = (hashCode * 397) ^ (isVirtualSpacePrivate != null ? isVirtualSpacePrivate.GetHashCode() : 0);
+            hashCode = (hashCode * 397) ^ callerInAppIdentifier.GetHashCode();
             return hashCode;
         }
     }
@@ -183,6 +187,8 @@ public record ImmutableNonIndexedLiveSession
     
     public bool? isVirtualSpacePrivate { get; init; }
 
+    public required string callerInAppIdentifier { get; init; }
+
     public static ImmutableLiveSession MakeIndexed(ImmutableNonIndexedLiveSession inputSession)
     {
         return new ImmutableLiveSession
@@ -199,7 +205,8 @@ public record ImmutableNonIndexedLiveSession
             sessionCapacity = inputSession.sessionCapacity,
             currentAttendance = inputSession.currentAttendance,
             thumbnailUrl = inputSession.thumbnailUrl,
-            isVirtualSpacePrivate = inputSession.isVirtualSpacePrivate
+            isVirtualSpacePrivate = inputSession.isVirtualSpacePrivate,
+            callerInAppIdentifier = inputSession.callerInAppIdentifier
         };
     }
 }

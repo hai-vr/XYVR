@@ -44,7 +44,8 @@ public class LiveStatusMonitoringTest
                     inAppIdentifier = "U-someUserId"
                 },
                 isHost = false
-            }]
+            }],
+            callerInAppIdentifier = "U-callerUserId"
         };
     }
 

@@ -254,6 +254,8 @@ internal record FrontLiveSession
     public string? thumbnailHash { get; init; }
     public bool? isVirtualSpacePrivate { get; init; }
 
+    public required string callerInAppIdentifier { get; init; }
+
     public static FrontLiveSession FromCore(ImmutableLiveSession liveSession)
     {
         var isVrc = liveSession.namedApp == NamedApp.VRChat;
@@ -273,6 +275,7 @@ internal record FrontLiveSession
             thumbnailUrl = isVrc ? null : liveSession.thumbnailUrl,
             thumbnailHash = liveSession.thumbnailUrl != null && isVrc ? VRChatThumbnailCache.Sha(liveSession.thumbnailUrl) : null,
             isVirtualSpacePrivate = liveSession.isVirtualSpacePrivate,
+            callerInAppIdentifier = liveSession.callerInAppIdentifier
         };
     }
 }

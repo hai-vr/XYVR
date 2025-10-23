@@ -129,6 +129,7 @@ internal class ChilloutVRLiveCommunicator
 
                             thumbnailUrl = location.world.imageUrl,
 
+                            callerInAppIdentifier = _callerInAppIdentifier,
                         });
                     }
                 }
@@ -193,6 +194,8 @@ internal class ChilloutVRLiveCommunicator
                 inAppSessionIdentifier = friend.Instance.Id,
 
                 inAppSessionName = friend.Instance.Name,
+                
+                callerInAppIdentifier = _callerInAppIdentifier,
             };
             var instance = await OnLiveSessionReceived(nonIndexed);
             if (instance != null)

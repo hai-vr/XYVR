@@ -307,6 +307,14 @@ internal class VRChatAPI
         }
     }
 
+    public async Task InviteMyselfTo(string worldIdAndInstanceId)
+    {
+        ThrowIfNotLoggedIn();
+        
+        var url = $"{AuditUrls.VrcApiUrl}/invite/myself/to/{worldIdAndInstanceId}";
+        await _client.PostAsync(url, null);
+    }
+
     public async Task<VRChatInstance?> GetInstanceLenient(DataCollectionReason dataCollectionReason, string worldIdAndInstanceId, bool useFastFetch)
     {
         ThrowIfNotLoggedIn();

@@ -10,4 +10,6 @@ public interface ILiveMonitoring
     // (example: one caller is a contact of an account, but another caller is not a contact of that same account),
     // so we need some way to reconcile it.
     Task DefineCaller(string callerInAppIdentifier);
+    
+    Task MakeGameClientJoinOrSelfInvite(string sessionId);
 }

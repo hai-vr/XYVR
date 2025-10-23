@@ -10,6 +10,7 @@ public interface ILiveBFF
 {
     string GetAllExistingLiveUserData();
     string GetAllExistingLiveSessionData();
+    Task MakeGameClientJoinOrSelfInvite(string appName, string inAppIdentifier, string sessionId);
 }
 
 [ComVisible(true)]
@@ -29,7 +30,7 @@ public class LiveBFF : ILiveBFF
         _thumbnailCache = Scaffolding.ThumbnailCache();
     }
 
-        public string GetAllExistingLiveUserData()
+    public string GetAllExistingLiveUserData()
     {
         try
         {
@@ -139,5 +140,13 @@ public class LiveBFF : ILiveBFF
             }
             // Close for real
         }).Wait();
+    }
+
+    public async Task MakeGameClientJoinOrSelfInvite(string appName, string inAppIdentifier, string sessionId)
+    {
+        if (Enum.TryParse<NamedApp>(appName, out var namedApp))
+        {
+            await _appLifecycle.LiveMonitoringAgent.MakeGameClientJoinOrSelfInvite(namedApp, inAppIdentifier, sessionId);
+        }
     }
 }

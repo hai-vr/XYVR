@@ -66,6 +66,9 @@ XYVR is only interested in building an address book and monitoring live sessions
   - Get the session of a contact.
   - Get the world of a session and its thumbnail.
 
+The following are exceptions to this rule:
+  - At your request, the application may submit an invitation to yourself to join an instance (VRChat only).
+
 #### More info
 
 For more details regarding privacy and data considerations, please refer to the following page:

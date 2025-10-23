@@ -27,6 +27,7 @@
                     liveApi: {
                         GetAllExistingLiveUserData(): Promise<string>;
                         GetAllExistingLiveSessionData(): Promise<string>;
+                        MakeGameClientJoinOrSelfInvite(appName: string, inAppIdentifier: string, sessionId: string): Promise<void>;
                     }
                 };
             };

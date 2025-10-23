@@ -107,4 +107,16 @@ public class LiveMonitoringAgent
 
         _liveMonitoringAgents = null;
     }
+
+    public async Task MakeGameClientJoinOrSelfInvite(NamedApp namedApp, string inAppIdentifier, string sessionId)
+    {
+        var connector = _connectors.Connectors
+            .Where(connector => connector.liveMode != LiveMode.NoLiveFunction)
+            .FirstOrDefault(connector => connector.account?.namedApp == namedApp && connector.account?.inAppIdentifier == inAppIdentifier);
+
+        var liveMonitoring = await _credentials.GetConnectedLiveMonitoringOrNull(connector, _monitoring);
+        if (liveMonitoring == null) return;
+        
+        await liveMonitoring.MakeGameClientJoinOrSelfInvite(sessionId);
+    }
 }

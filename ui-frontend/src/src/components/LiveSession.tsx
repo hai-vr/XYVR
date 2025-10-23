@@ -7,6 +7,7 @@ import {type DebugFlags, DemonstrationMode} from "../types/DebugFlags.ts";
 import {_D, _D2} from "../haiUtils.ts";
 import {useTranslation} from "react-i18next";
 import {DotNetApi} from "../DotNetApi.ts";
+import {SquareArrowDownRight} from "lucide-react";
 
 interface LiveSessionProps {
     liveSession: FrontLiveSession,
@@ -34,6 +35,10 @@ export function LiveSession({liveSession, individuals, debugMode, mini}: LiveSes
     const capacityStr = `${actualAttendance || '?'} / ${specialCapacity}`;
     let capacityDisplay = actualAttendance > sesscap ? actualAttendance : Math.min(actualAttendance + showRemainingSlots, sesscap);
     const hasMore = sesscap - actualAttendance > showRemainingSlots;
+
+    const makeGameClientJoinOrSelfInvite = async () => {
+        await dotNetApi.liveApiMakeGameClientJoinOrSelfInvite(liveSession.namedApp, liveSession.callerInAppIdentifier, liveSession.inAppSessionIdentifier);
+    };
 
     let background = liveSession.thumbnailUrl && `url(${liveSession.thumbnailUrl}), var(--live-session-overlay)`
         || liveSession.thumbnailHash && `url(${dotNetApi.HashToUrl(liveSession.thumbnailHash)}), var(--live-session-overlay)`
@@ -148,6 +153,14 @@ export function LiveSession({liveSession, individuals, debugMode, mini}: LiveSes
                     </div>
                     <span title={capacityStr}>{actualAttendance || '?'}&nbsp;/&nbsp;{specialCapacity}</span>
                 </div>
+                <a
+                    onClick={makeGameClientJoinOrSelfInvite} onAuxClick={(e) => e.button === 1 && makeGameClientJoinOrSelfInvite()} onMouseDown={(e) => e.preventDefault()}
+                    rel="noopener noreferrer"
+                    className="icon-button link-pointer"
+                    title={t('ui.joinSession.title')}
+                >
+                    <SquareArrowDownRight size={16}/>
+                </a>
             </div>
         </div>
     </div>);

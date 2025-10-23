@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using System.Diagnostics;
+using System.Runtime.InteropServices;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using XYVR.API.Audit;
 using XYVR.Core;
@@ -102,6 +104,7 @@ public class ResoniteLiveMonitoring : ILiveMonitoring, IDisposable
             sessionCapacity = sessionUpdate.maxUsers,
             virtualSpaceDefaultCapacity = sessionUpdate.maxUsers,
             thumbnailUrl = sanitizedThumbnailUrl,
+            callerInAppIdentifier = _callerInAppIdentifier!
         });
         
         _hashToSession.SubmitSession(new SessionBrief
@@ -229,5 +232,36 @@ public class ResoniteLiveMonitoring : ILiveMonitoring, IDisposable
     public void Dispose()
     {
         _operationLock.Dispose();
+    }
+
+    public Task MakeGameClientJoinOrSelfInvite(string sessionId)
+    {
+        DANGER_OpenResoniteSession(sessionId);
+        return Task.CompletedTask;
+    }
+
+    private static void DANGER_OpenResoniteSession(string sessionId)
+    {
+        if (sessionId.Length != 38 || !sessionId.StartsWith("S-") || !Guid.TryParse(sessionId[2..], out _))
+        {
+            throw new ArgumentException("Invalid session ID format. Expected format: S-{GUID}", nameof(sessionId));
+        }
+        
+        var url = $"resonite:?session=ressession:///{sessionId}";
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                // SECURITY: Don't allow any URL here. Otherwise, this can cause a RCE.
+                FileName = url,
+                UseShellExecute = true
+            });
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            // SECURITY: URL is an argument to xdg-open. Do not modify the code to pass it to the shell or something, that would enable possible RCEs.
+            Process.Start("xdg-open", url);
+        }
     }
 }

@@ -47,6 +47,7 @@ export interface FrontLiveSession {
     thumbnailUrl?: string;
     thumbnailHash?: string;
     isVirtualSpacePrivate?: boolean;
+    callerInAppIdentifier: string;
 }
 
 export interface FrontParticipant {

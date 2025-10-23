@@ -45,6 +45,14 @@ In [Scaffolding.cs](development-scaffold/Scaffolding.cs) the function `Scaffoldi
 
 To prevent remote code execution, this function only accepts URLs that start with `http://` or `https://`, otherwise it will throw an exception.
 
+### Starting a Resonite session
+
+For the same reason as above, in [ResoniteLiveMonitoring.cs](account-resonite/ResoniteLiveMonitoring.cs), the function
+`ResoniteLiveMonitoring.DANGER_OpenResoniteSession(string sessionId)` will start a process.
+
+To prevent remote code execution, this function only accepts session IDs that start with `S-` followed by a GUID, and then concatenates it
+after `resonite:?session=ressession:///` before passing it as a process to start.
+
 ### Submitting events from .NET to the WebView2
 
 To submit backend-initiated events from .NET to WebView, [scripts are being injected into the WebView2](https://learn.microsoft.com/en-us/microsoft-edge/webview2/how-to/javascript).

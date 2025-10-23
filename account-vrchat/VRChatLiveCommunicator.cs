@@ -144,7 +144,8 @@ internal class VRChatLiveCommunicator
                             inAppSessionIdentifier = instanceQueueJob.worldIdAndInstanceId,
                             inAppSessionName = locationInformation.displayName,
                             sessionCapacity = locationInformation.capacity,
-                            currentAttendance = locationInformation.userCount
+                            currentAttendance = locationInformation.userCount,
+                            callerInAppIdentifier = _callerInAppIdentifier
                         });
                     }
                 }
@@ -194,7 +195,7 @@ internal class VRChatLiveCommunicator
                     ImmutableLiveUserSessionState sessionState;
                     if (knowledgePartial == null && cachedWorld != null)
                     {
-                        var actualSession = await OnLiveSessionReceived(MakeNonIndexedBasedOnWorld(friend.location, cachedWorld));
+                        var actualSession = await OnLiveSessionReceived(MakeNonIndexedBasedOnWorld(friend.location, cachedWorld, _callerInAppIdentifier));
                         sessionState = new ImmutableLiveUserSessionState
                         {
                             knowledge = LiveUserSessionKnowledge.Known,
@@ -203,7 +204,7 @@ internal class VRChatLiveCommunicator
                     }
                     else if (knowledgePartial == null && worldId != null)
                     {
-                        var actualSession = await OnLiveSessionReceived(MakeNonIndexedBasedOnWorld(friend.location, null));
+                        var actualSession = await OnLiveSessionReceived(MakeNonIndexedBasedOnWorld(friend.location, null, _callerInAppIdentifier));
                         sessionState = new ImmutableLiveUserSessionState
                         {
                             knowledge = LiveUserSessionKnowledge.Known,
@@ -284,7 +285,7 @@ internal class VRChatLiveCommunicator
                     ImmutableLiveSession session = null;
                     if (content.location != null && content.location.StartsWith("wrld_"))
                     {
-                        session = await OnLiveSessionReceived(MakeNonIndexedBasedOnWorld(content.location, cachedWorld));
+                        session = await OnLiveSessionReceived(MakeNonIndexedBasedOnWorld(content.location, cachedWorld, _callerInAppIdentifier));
 
                         await QueueSessionFetchIfApplicable(content.location);
                     }
@@ -389,7 +390,7 @@ internal class VRChatLiveCommunicator
         return contentLocation;
     }
 
-    public static ImmutableNonIndexedLiveSession MakeNonIndexedBasedOnWorld(string location, CachedWorld? cachedWorld)
+    public static ImmutableNonIndexedLiveSession MakeNonIndexedBasedOnWorld(string location, CachedWorld? cachedWorld, string callerInAppIdentifier)
     {
         return new ImmutableNonIndexedLiveSession
         {
@@ -400,6 +401,7 @@ internal class VRChatLiveCommunicator
             virtualSpaceDefaultCapacity = cachedWorld?.capacity,
             isVirtualSpacePrivate = cachedWorld?.releaseStatus == "private",
             thumbnailUrl = cachedWorld?.thumbnailUrl,
+            callerInAppIdentifier = callerInAppIdentifier
         };
     }
 
@@ -593,5 +595,12 @@ internal class VRChatLiveCommunicator
         }
 
         return api;
+    }
+
+    public async Task InviteMyselfTo(string worldIdAndInstanceId)
+    {
+        XYVRLogging.WriteLine(this, $"Sending an invite to join session {worldIdAndInstanceId}");
+        _api ??= await InitializeAPI();
+        await _api.InviteMyselfTo(worldIdAndInstanceId);
     }
 }

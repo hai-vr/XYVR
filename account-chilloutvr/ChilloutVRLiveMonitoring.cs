@@ -94,4 +94,10 @@ public class ChilloutVRLiveMonitoring(LiveStatusMonitoring monitoring, ICredenti
         _callerInAppIdentifier = callerInAppIdentifier;
         return Task.CompletedTask;
     }
+
+    public Task MakeGameClientJoinOrSelfInvite(string sessionId)
+    {
+        // TODO: Currently not implemented
+        return Task.CompletedTask;
+    }
 }
