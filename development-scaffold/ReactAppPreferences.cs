@@ -6,4 +6,6 @@ public record ReactAppPreferences
     public bool showOnlyContacts { get; init; } = false;
     public bool compactMode { get; init; } = false;
     public string lang { get; init; } = "en";
+    
+    public bool resoniteShowSubSessions { get; init; } = true;
 }

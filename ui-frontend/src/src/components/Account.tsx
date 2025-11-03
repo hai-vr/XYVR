@@ -12,7 +12,7 @@ import {LiveSessionKnowledge} from "../types/LiveUpdateTypes.ts";
 import {AppIcon} from "./AppIcon.tsx";
 import {LiveSession} from "./LiveSession.tsx";
 import {DotNetApi} from "../DotNetApi.ts";
-import { useTranslation } from "react-i18next";
+import {useTranslation} from "react-i18next";
 
 interface AccountProps {
     account: FrontAccount,
@@ -21,12 +21,23 @@ interface AccountProps {
     showNotes: boolean,
     debugMode: DebugFlags,
     showSession?: boolean,
-    isSessionView: boolean
+    isSessionView: boolean,
+    resoniteShowSubSessions?: boolean
 }
+
 // @ts-ignore
-const Account = ({account, imposter, showAlias, showNotes, debugMode, showSession, isSessionView}: AccountProps) => {
+const Account = ({
+                     account,
+                     imposter,
+                     showAlias,
+                     showNotes,
+                     debugMode,
+                     showSession,
+                     isSessionView,
+                     resoniteShowSubSessions = true
+                 }: AccountProps) => {
     const dotNetApi = new DotNetApi();
-    const { t } = useTranslation();
+    const {t} = useTranslation();
 
     const hasNote = account.isAnyCallerNote;
 
@@ -163,10 +174,11 @@ const Account = ({account, imposter, showAlias, showNotes, debugMode, showSessio
                     )}
                     {(account.namedApp === "VRChat" || account.namedApp === "ChilloutVR") && (
                         <a
-                            onClick={openLink} onAuxClick={(e) => e.button === 1 && openLink()} onMouseDown={(e) => e.preventDefault()}
+                            onClick={openLink} onAuxClick={(e) => e.button === 1 && openLink()}
+                            onMouseDown={(e) => e.preventDefault()}
                             rel="noopener noreferrer"
                             className="icon-button link-pointer"
-                            title={t('account.openProfile.title', { app: account.namedApp })}
+                            title={t('account.openProfile.title', {app: account.namedApp})}
                         >
                             <Globe size={16}/>
                         </a>
@@ -174,7 +186,7 @@ const Account = ({account, imposter, showAlias, showNotes, debugMode, showSessio
                     <button
                         onClick={copyInAppIdentifier}
                         className="icon-button"
-                        title={t('account.copyId.title', { id: _D(account.inAppIdentifier, debugMode) })}
+                        title={t('account.copyId.title', {id: _D(account.inAppIdentifier, debugMode)})}
                     >
                         <Clipboard size={16}/>
                     </button>
@@ -192,7 +204,7 @@ const Account = ({account, imposter, showAlias, showNotes, debugMode, showSessio
                 <div key={index} className="note-container">
                     <div className="note-text">
                         {caller.note!.startsWith('mt ')
-                            ? t('account.note.metThrough', { location: _D2(caller.note!.substring(3), debugMode) })
+                            ? t('account.note.metThrough', {location: _D2(caller.note!.substring(3), debugMode)})
                             : _D2(caller.note!, debugMode)
                         }
                     </div>
@@ -200,9 +212,11 @@ const Account = ({account, imposter, showAlias, showNotes, debugMode, showSessio
             ))}
 
             {!isConnector && !isSessionView && account.mainSession?.liveSession
-                && <LiveSession liveSession={account.mainSession.liveSession} individuals={[]} debugMode={debugMode} mini={true} />}
-            {!isConnector && account.namedApp === NamedApp.Resonite && account.multiSessions
-                .map((session) => (session.guid != account.mainSession?.sessionGuid && <LiveSession liveSession={session} individuals={[]} debugMode={debugMode} mini={true} />))}
+                && <LiveSession liveSession={account.mainSession.liveSession} individuals={[]} debugMode={debugMode}
+                                mini={true}/>}
+            {!isConnector && account.namedApp === NamedApp.Resonite && resoniteShowSubSessions && account.multiSessions
+                .map((session) => (session.guid != account.mainSession?.sessionGuid &&
+                    <LiveSession liveSession={session} individuals={[]} debugMode={debugMode} mini={true}/>))}
         </div>
     );
 };

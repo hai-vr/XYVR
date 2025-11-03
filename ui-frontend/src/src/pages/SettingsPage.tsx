@@ -15,7 +15,9 @@ interface SettingsPageProps {
     isDark: boolean,
     setIsDark: (isDark: boolean) => void,
     debugMode: DebugFlags,
-    setLang: (lang: string) => void
+    setLang: (lang: string) => void,
+    resoniteShowSubSessions: boolean,
+    setResoniteShowSubSessions: (resoniteShowSubSessions: boolean) => void
 }
 
 interface DeleteStateType {
@@ -23,7 +25,14 @@ interface DeleteStateType {
     firstClick: number;
 }
 
-function SettingsPage({isDark, setIsDark, debugMode, setLang}: SettingsPageProps) {
+function SettingsPage({
+                          isDark,
+                          setIsDark,
+                          debugMode,
+                          setLang,
+                          resoniteShowSubSessions,
+                          setResoniteShowSubSessions
+                      }: SettingsPageProps) {
     const dotNetApi = new DotNetApi();
     const {t} = useTranslation();
 
@@ -172,7 +181,9 @@ function SettingsPage({isDark, setIsDark, debugMode, setLang}: SettingsPageProps
             )}
 
             <div className="settings-buttons">
-                <a className="link-pointer" title="Open privacy and data considerations docs in your browser" onClick={openPrivacyDocs} onAuxClick={(e) => e.button === 1 && openPrivacyDocs()} onMouseDown={(e) => e.preventDefault()}>Learn more about our privacy considerations.</a>
+                <a className="link-pointer" title="Open privacy and data considerations docs in your browser"
+                   onClick={openPrivacyDocs} onAuxClick={(e) => e.button === 1 && openPrivacyDocs()}
+                   onMouseDown={(e) => e.preventDefault()}>Learn more about our privacy considerations.</a>
                 <button
                     onClick={() => startDataCollection()}
                     title={t('dataCollection.start.title')}
@@ -181,10 +192,23 @@ function SettingsPage({isDark, setIsDark, debugMode, setLang}: SettingsPageProps
                 </button>
             </div>
 
+            <h2>Resonite Settings</h2>
+            <div className="settings-section">
+                <label className="checkbox-container">
+                    <input
+                        type="checkbox"
+                        checked={resoniteShowSubSessions ?? true}
+                        onChange={(e) => setResoniteShowSubSessions(e.target.checked)}
+                    />
+                    {t('settings.resonite.showSubSessions.title')}
+                </label>
+            </div>
+
             <h2>Languages</h2>
             <div className="settings-buttons">
                 {availableLanguages.availableLanguages.map((lang: LanguageInfo) => (
-                    <button key={lang.code} title={lang.englishName} onClick={() => setLang(lang.code)}>{lang.displayName}</button>
+                    <button key={lang.code} title={lang.englishName}
+                            onClick={() => setLang(lang.code)}>{lang.displayName}</button>
                 ))}
             </div>
         </div>

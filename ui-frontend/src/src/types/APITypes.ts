@@ -3,4 +3,6 @@
     showOnlyContacts: boolean;
     compactMode: boolean;
     lang: string;
+
+    resoniteShowSubSessions: boolean;
 }

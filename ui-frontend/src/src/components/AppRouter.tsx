@@ -19,7 +19,8 @@ const AppRouter = ({ appVersion }: { appVersion: string }) => {
     const [compactMode, setCompactMode] = useState(false)
     const [lang, setLang] = useState('en')
     const [showNotes, setShowNotes] = useState(true)
-    const [preferences, setPreferences] = useState<ReactAppPreferences>({isDark: true, showOnlyContacts: false, compactMode: false, lang: 'en'})
+    const [resoniteShowSubSessions, setResoniteShowSubSessions] = useState(true)
+    const [preferences, setPreferences] = useState<ReactAppPreferences>({isDark: true, showOnlyContacts: false, compactMode: false, lang: 'en', resoniteShowSubSessions: true})
     const [isPreferencesObtained, setIsPreferencesObtained] = useState(false)
     const [debugMode, setDebugMode] = useState<DebugFlags>({debugMode: false, demoMode: DemonstrationMode.Disabled})
 
@@ -49,6 +50,12 @@ const AppRouter = ({ appVersion }: { appVersion: string }) => {
         setPreferences(updatedPreferences);
 
     }, [compactMode])
+
+    useEffect(() => {
+        const updatedPreferences = {...preferences, resoniteShowSubSessions};
+        setPreferences(updatedPreferences);
+
+    }, [resoniteShowSubSessions])
 
     useEffect(() => {
         const changeLang = async () => {
@@ -82,6 +89,7 @@ const AppRouter = ({ appVersion }: { appVersion: string }) => {
                 setShowOnlyContacts(prefs.showOnlyContacts);
                 setCompactMode(prefs.compactMode);
                 setLang(prefs.lang)
+                setResoniteShowSubSessions(prefs.resoniteShowSubSessions)
                 setIsPreferencesObtained(true);
             }
         };
@@ -135,11 +143,14 @@ const AppRouter = ({ appVersion }: { appVersion: string }) => {
                                                                               setCompactMode={setCompactMode}
                                                                               showNotes={showNotes}
                                                                               setShowNotes={setShowNotes}
+                                                                              resoniteShowSubSessions={resoniteShowSubSessions}
                                                                               debugMode={debugMode}
                         />}/>
                         <Route path="/data-collection"
                                element={<SettingsPage isDark={isDark} setIsDark={setIsDark}
                                                       setLang={setLang}
+                                                      resoniteShowSubSessions={resoniteShowSubSessions}
+                                                      setResoniteShowSubSessions={setResoniteShowSubSessions}
                                                       debugMode={debugMode}/>}/>
                     </Routes>
                 </main>

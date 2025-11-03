@@ -85,4 +85,5 @@
     "ui.switchToFullMode.title": "Switch to full mode",
     // V0.0.1-alpha.15
     "ui.joinSession.title": "Join session",
+    "settings.resonite.showSubSessions.title": "When the user is in multiple sessions, show the other sessions within the focused session",
 }

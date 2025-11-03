@@ -88,9 +88,20 @@ interface AddressBookPageProps {
     showNotes: boolean;
     setShowNotes: (showNotes: boolean) => void;
     debugMode: DebugFlags;
+    resoniteShowSubSessions: boolean,
 }
 
-function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyContacts, compactMode, setCompactMode, showNotes, setShowNotes, debugMode }: AddressBookPageProps) {
+function AddressBookPage({ isDark,
+                             setIsDark,
+                             showOnlyContacts,
+                             setShowOnlyContacts,
+                             compactMode,
+                             setCompactMode,
+                             showNotes,
+                             setShowNotes,
+                             debugMode,
+                             resoniteShowSubSessions,
+}: AddressBookPageProps) {
     const dotNetApi = new DotNetApi();
     const { t } = useTranslation();
 
@@ -522,7 +533,7 @@ function AddressBookPage({ isDark, setIsDark, showOnlyContacts, setShowOnlyConta
                                     return 0;
                                 })
                                 .map((liveSession) => (
-                                    <LiveSession liveSession={liveSession} individuals={individuals} debugMode={debugMode} mini={false} />
+                                    <LiveSession liveSession={liveSession} individuals={individuals} debugMode={debugMode} mini={false} resoniteShowSubSessions={resoniteShowSubSessions} />
                                 ))}
                         </div>
                     </div>

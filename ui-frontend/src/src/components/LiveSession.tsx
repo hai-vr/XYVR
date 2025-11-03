@@ -13,13 +13,14 @@ interface LiveSessionProps {
     liveSession: FrontLiveSession,
     individuals: FrontIndividual[],
     debugMode: DebugFlags,
-    mini: boolean
+    mini: boolean,
+    resoniteShowSubSessions?: boolean
 }
 
-export function LiveSession({liveSession, individuals, debugMode, mini}: LiveSessionProps) {
+export function LiveSession({liveSession, individuals, debugMode, mini, resoniteShowSubSessions = true}: LiveSessionProps) {
     const dotNetApi = new DotNetApi();
-    const { t } = useTranslation();
-    
+    const {t} = useTranslation();
+
     // @ts-ignore
     const [showSlots, setShowSlots] = useState(false);
 
@@ -73,10 +74,17 @@ export function LiveSession({liveSession, individuals, debugMode, mini}: LiveSes
                 <div className="live-session-header">
                     <div className="live-session-world" style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
                         {!mini && <AppIcon namedApp={liveSession.namedApp}/>}
-                        <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.25rem'}}>
-                            <span title={capacityStr}>{_D2(liveSession.inAppVirtualSpaceName || '', debugMode, undefined, DemonstrationMode.EverythingButSessionNames) || t('live.session.unnamed')}</span>
+                        <div style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'flex-start',
+                            gap: '0.25rem'
+                        }}>
+                            <span
+                                title={capacityStr}>{_D2(liveSession.inAppVirtualSpaceName || '', debugMode, undefined, DemonstrationMode.EverythingButSessionNames) || t('live.session.unnamed')}</span>
                             {liveSession.inAppSessionName &&
-                                <span className="live-session-name" title={capacityStr}>{_D2(liveSession.inAppSessionName || '', debugMode, undefined, DemonstrationMode.Everything) || t('live.session.unnamed')}</span>}
+                                <span className="live-session-name"
+                                      title={capacityStr}>{_D2(liveSession.inAppSessionName || '', debugMode, undefined, DemonstrationMode.Everything) || t('live.session.unnamed')}</span>}
                         </div>
                     </div>
                 </div>
@@ -107,6 +115,7 @@ export function LiveSession({liveSession, individuals, debugMode, mini}: LiveSes
                                             debugMode={debugMode}
                                             showSession={false}
                                             isSessionView={true}
+                                            resoniteShowSubSessions={resoniteShowSubSessions}
                                         />
                                     );
                                 }
@@ -154,7 +163,9 @@ export function LiveSession({liveSession, individuals, debugMode, mini}: LiveSes
                     <span title={capacityStr}>{actualAttendance || '?'}&nbsp;/&nbsp;{specialCapacity}</span>
                 </div>
                 <a
-                    onClick={makeGameClientJoinOrSelfInvite} onAuxClick={(e) => e.button === 1 && makeGameClientJoinOrSelfInvite()} onMouseDown={(e) => e.preventDefault()}
+                    onClick={makeGameClientJoinOrSelfInvite}
+                    onAuxClick={(e) => e.button === 1 && makeGameClientJoinOrSelfInvite()}
+                    onMouseDown={(e) => e.preventDefault()}
                     rel="noopener noreferrer"
                     className="icon-button link-pointer"
                     title={t('ui.joinSession.title')}
