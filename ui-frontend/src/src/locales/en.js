@@ -37,7 +37,7 @@
     "addressBook.search.confusables.example": "converts some cyrillic and special characters visually similar to latin when searching for names.",
     "addressBook.search.docs.link": "Open the search documentation in your browser.",
     "addressBook.search.docs.title": "Open https://docs.hai-vr.dev/docs/xyvr/search in your browser",
-    "addressBook.search.hasAlt.example": "for users who have",
+    // "addressBook.search.hasAlt.example": "for users who have", /* Removed in V0.0.1-alpha.15 */
     "addressBook.search.links.example": "to search in the links.",
     "addressBook.search.multipleApps.example": "for Resonite account owners who also have a VRChat account.",
     "addressBook.search.on.example": "for currently online users on any app.",
@@ -86,4 +86,5 @@
     // V0.0.1-alpha.15
     "ui.joinSession.title": "Join session",
     "settings.resonite.showSubSessions.title": "When the user is in multiple sessions, show the other sessions within the focused session",
+    "addressBook.search.hasAltAccount.example": "for users who have more than one account on the same app.",
 }

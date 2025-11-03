@@ -479,7 +479,7 @@ function AddressBookPage({ isDark,
                             <p><code className="inline-code-clickable" onClick={() => { setSearchField('session:'); focusSearchInput(); }}>session:<i>mmc</i></code> {t('addressBook.search.session.example')}</p>
                             <p>{t('addressBook.search.quotes.help')} <code className="inline-code-clickable" onClick={() => { setSearchField('session:"'); focusSearchInput(); }}>session:<i>"h p"</i></code></p>
                             <p><code className="inline-code-clickable" onClick={() => { setSearchField('accounts:>1 '); focusSearchInput(); }}>accounts:&gt;1</code> {t('addressBook.search.accounts.example')}</p>
-                            <p><code className="inline-code-clickable" onClick={() => { setSearchField('has:alt '); focusSearchInput(); }}>has:alt</code> {t('addressBook.search.hasAlt.example')}</p>
+                            <p><code className="inline-code-clickable" onClick={() => { setSearchField('has:alt '); focusSearchInput(); }}>has:alt</code> {t('addressBook.search.hasAltAccount.example')}</p>
                             <p><code className="inline-code-clickable" onClick={() => { setSearchField('on: '); focusSearchInput(); }}>on:</code> {t('addressBook.search.on.example')}</p>
                             {supportedApps.map(app => (
                                 <p key={app.key}>
