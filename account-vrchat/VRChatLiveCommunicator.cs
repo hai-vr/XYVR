@@ -88,6 +88,8 @@ internal class VRChatLiveCommunicator
     {
         XYVRLogging.WriteLine(this, "Processing queue");
         _api ??= await InitializeAPI();
+
+        var liveSessionsBatch = new List<ImmutableNonIndexedLiveSession>();
         
         while ((_queue.Count > 0 || _highPriorityQueue.Count > 0) && !_cancellationTokenSource.IsCancellationRequested)
         {
@@ -136,20 +138,32 @@ internal class VRChatLiveCommunicator
                 if (locationInformation != null)
                 {
                     _locationToInstance.TryAdd(instanceQueueJob.worldIdAndInstanceId, locationInformation);
-
-                    if (OnLiveSessionReceived != null)
+                    
+                    liveSessionsBatch.Add(new ImmutableNonIndexedLiveSession
                     {
-                        await OnLiveSessionReceived(new ImmutableNonIndexedLiveSession
-                        {
-                            namedApp = NamedApp.VRChat,
-                            qualifiedAppName = VRChatCommunicator.VRChatQualifiedAppName,
-                            inAppSessionIdentifier = instanceQueueJob.worldIdAndInstanceId,
-                            inAppSessionName = locationInformation.displayName,
-                            sessionCapacity = locationInformation.capacity,
-                            currentAttendance = locationInformation.userCount,
-                            callerInAppIdentifier = _callerInAppIdentifier
-                        });
+                        namedApp = NamedApp.VRChat,
+                        qualifiedAppName = VRChatCommunicator.VRChatQualifiedAppName,
+                        inAppSessionIdentifier = instanceQueueJob.worldIdAndInstanceId,
+                        inAppSessionName = locationInformation.displayName,
+                        sessionCapacity = locationInformation.capacity,
+                        currentAttendance = locationInformation.userCount,
+                        callerInAppIdentifier = _callerInAppIdentifier
+                    });
+                    XYVRLogging.WriteLine(this, $"Collected live session about {instanceQueueJob.worldIdAndInstanceId}, will batch results... ({liveSessionsBatch.Count} sessions batched so far)");
+                }
+            }
+
+            if (_queue.Count(job => job is InstanceQueueJob) == 0)
+            {
+                // We batch the session updates, so that the UI doesn't reorder every time a session updates when the queue is being processed.
+                if (liveSessionsBatch.Count > 0 && OnLiveSessionReceived != null)
+                {
+                    XYVRLogging.WriteLine(this, "Submitting batch of live sessions...");
+                    foreach (var immutableNonIndexedLiveSession in liveSessionsBatch)
+                    {
+                        await OnLiveSessionReceived(immutableNonIndexedLiveSession);
                     }
+                    liveSessionsBatch.Clear();
                 }
             }
         }
