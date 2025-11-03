@@ -22,7 +22,8 @@
     padding: 1rem;
     background: var(--bg-secondary);
     border-radius: var(--ideal-border-radius);
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--brd-primary);
+    box-shadow: 0 2px 8px var(--shadow-medium);
 }
 
 .live-sessions-title {
@@ -48,13 +49,12 @@
 
 .live-session-card {
     background: var(--bg-primary);
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--brd-primary);
     border-radius: var(--ideal-border-radius);
 }
 
 .live-session-header {
     margin-bottom: 0.75rem;
-    border-bottom: 1px solid var(--border-color);
     padding-bottom: 0.5rem;
 }
 
@@ -109,7 +109,7 @@
     padding: 0.25rem 0.5rem;
     border-radius: var(--ideal-border-radius);
     font-size: 0.75rem;
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--brd-primary);
 }
 
 .host-badge {
