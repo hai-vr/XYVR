@@ -11,7 +11,7 @@ public partial class App : Application
     {
         base.OnStartup(e);
 
-        Lifecycle = new AppLifecycle(Current.Dispatcher.Invoke);
+        Lifecycle = new AppLifecycle(Current.Dispatcher.Invoke, async voidReturningFn => await Current.Dispatcher.InvokeAsync(voidReturningFn));
         Lifecycle.WhenApplicationStarts(e.Args);
     }
 }

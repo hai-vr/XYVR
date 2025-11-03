@@ -5,9 +5,16 @@ namespace XYVR.AccountAuthority.VRChat;
 
 public class VRChatLoginService : ILoginService
 {
+    private readonly CancellationTokenSource _cancellationTokenSource;
+
+    public VRChatLoginService(CancellationTokenSource cancellationTokenSource)
+    {
+        _cancellationTokenSource = cancellationTokenSource;
+    }
+    
     public async Task<ConnectionAttemptResult> Connect(ICredentialsStorage credentialsStorage, string guid, ConnectionAttempt connectionAttempt)
     {
-        var vrcApi = new VRChatAPI(new DoNotStoreAnythingStorage());
+        var vrcApi = new VRChatAPI(new DoNotStoreAnythingStorage(), _cancellationTokenSource);
         var userinput_cookies__sensitive = await credentialsStorage.RequireCookieOrToken();
         if (userinput_cookies__sensitive != null) vrcApi.ProvideCookies(userinput_cookies__sensitive);
 
@@ -30,7 +37,7 @@ public class VRChatLoginService : ILoginService
         {
             await credentialsStorage.StoreCookieOrToken(vrcApi.GetAllCookies__Sensitive());
 
-            var callerAccount = await new VRChatCommunicator(new DoNotStoreAnythingStorage(), credentialsStorage).CallerAccount();
+            var callerAccount = await new VRChatCommunicator(new DoNotStoreAnythingStorage(), credentialsStorage, _cancellationTokenSource).CallerAccount();
             var connectorAccount = ILoginService.AsConnectorAccount(callerAccount);
 
             return new ConnectionAttemptResult
@@ -62,7 +69,7 @@ public class VRChatLoginService : ILoginService
 
     public async Task<ConnectionAttemptResult> Logout(ICredentialsStorage credentialsStorage, string guid)
     {
-        var vrcApi = new VRChatAPI(new DoNotStoreAnythingStorage());
+        var vrcApi = new VRChatAPI(new DoNotStoreAnythingStorage(), _cancellationTokenSource);
         var userinput_cookies__sensitive = await credentialsStorage.RequireCookieOrToken();
         if (userinput_cookies__sensitive != null)
         {
@@ -87,7 +94,7 @@ public class VRChatLoginService : ILoginService
 
     public async Task<bool> IsLoggedInWithoutRequest(ICredentialsStorage copyOfCredentialsStorage)
     {
-        var communicator = new VRChatCommunicator(new DoNotStoreAnythingStorage(), copyOfCredentialsStorage);
+        var communicator = new VRChatCommunicator(new DoNotStoreAnythingStorage(), copyOfCredentialsStorage, _cancellationTokenSource);
         return await communicator.SoftIsLoggedIn();
     }
 }

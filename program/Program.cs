@@ -28,11 +28,13 @@ internal class Program
             Converters = { new StringEnumConverter() }
         };
         
+        var cancellationTokenSource = new CancellationTokenSource();
+        
         var storage = new ResponseCollectionStorage();
 
         var repository = new IndividualRepository(await Scaffolding.OpenRepository());
         var connectors = new ConnectorManagement(await Scaffolding.OpenConnectors());
-        var credentials = new CredentialsManagement(await Scaffolding.OpenCredentials(), await IAuthorityScaffolder.FindAll());
+        var credentials = new CredentialsManagement(await Scaffolding.OpenCredentials(), await IAuthorityScaffolder.FindAll(cancellationTokenSource));
         var liveStatusMonitoring = new LiveStatusMonitoring();
 
         var dataCollection = new CompoundDataCollection(repository, (await Task.WhenAll(connectors.Connectors

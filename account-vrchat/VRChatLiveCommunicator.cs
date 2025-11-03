@@ -27,6 +27,7 @@ internal class VRChatLiveCommunicator
     private readonly IResponseCollector _responseCollector;
     private readonly WorldNameCache _worldNameCache;
     private readonly IThumbnailCache _thumbnailCache;
+    private readonly CancellationTokenSource _cancellationTokenSource;
 
     private readonly Lock _queueLock = new();
     private readonly ConcurrentDictionary<IQueueJob, bool> _allQueued = new();
@@ -51,13 +52,14 @@ internal class VRChatLiveCommunicator
     public event SessionRetrieved? OnSessionRetrieved;
     public delegate Task SessionRetrieved(VRChatInstance world);
 
-    public VRChatLiveCommunicator(ICredentialsStorage credentialsStorage, string callerInAppIdentifier, IResponseCollector responseCollector, WorldNameCache worldNameCache, IThumbnailCache thumbnailCache)
+    public VRChatLiveCommunicator(ICredentialsStorage credentialsStorage, string callerInAppIdentifier, IResponseCollector responseCollector, WorldNameCache worldNameCache, IThumbnailCache thumbnailCache, CancellationTokenSource cancellationTokenSource)
     {
         _credentialsStorage = credentialsStorage;
         _callerInAppIdentifier = callerInAppIdentifier;
         _responseCollector = responseCollector;
         _worldNameCache = worldNameCache;
         _thumbnailCache = thumbnailCache;
+        _cancellationTokenSource = cancellationTokenSource;
     }
 
     private void WakeUpQueue()
@@ -77,7 +79,7 @@ internal class VRChatLiveCommunicator
                         XYVRLogging.ErrorWriteLine(this, e);
                         throw;
                     }
-                });
+                }, _cancellationTokenSource.Token);
             }
         }
     }
@@ -87,7 +89,7 @@ internal class VRChatLiveCommunicator
         XYVRLogging.WriteLine(this, "Processing queue");
         _api ??= await InitializeAPI();
         
-        while (_queue.Count > 0 || _highPriorityQueue.Count > 0)
+        while ((_queue.Count > 0 || _highPriorityQueue.Count > 0) && !_cancellationTokenSource.IsCancellationRequested)
         {
             var anythingDequeued = _highPriorityQueue.TryDequeue(out var dequeued) || _queue.TryDequeue(out dequeued);
             if (anythingDequeued && dequeued is WorldQueueJob worldQueueJob)
@@ -180,6 +182,10 @@ internal class VRChatLiveCommunicator
         var contactsAsyncEnum = _api.ListFriends(ListFriendsRequestType.OnlyOnline, DataCollectionReason.FindUndiscoveredAccounts);
         await foreach (var friend in contactsAsyncEnum)
         {
+            if (_cancellationTokenSource.IsCancellationRequested)
+            {
+                throw new OperationCanceledException(_cancellationTokenSource.Token);
+            }
             if (OnLiveUpdateReceived != null && OnLiveSessionReceived != null)
             {
                 try
@@ -256,6 +262,7 @@ internal class VRChatLiveCommunicator
 
     private async Task WhenMessageReceived(string msg)
     {
+        if (_cancellationTokenSource.IsCancellationRequested) return;
         try
         {
             if (OnLiveUpdateReceived == null || OnLiveSessionReceived == null) return;
@@ -552,7 +559,7 @@ internal class VRChatLiveCommunicator
                             attempt++;
                         }
                     }
-                }).Wait();
+                }, _cancellationTokenSource.Token).Wait();
             }
         }
         catch (Exception e)
@@ -582,7 +589,7 @@ internal class VRChatLiveCommunicator
     
     private async Task<VRChatAPI> InitializeAPI()
     {
-        var api = new VRChatAPI(_responseCollector);
+        var api = new VRChatAPI(_responseCollector, _cancellationTokenSource);
         var userinput_cookies__sensitive = await _credentialsStorage.RequireCookieOrToken();
         if (userinput_cookies__sensitive != null)
         {

@@ -18,7 +18,8 @@ internal class VRChatAPI
     private const string TotpUrl = AuditUrls.VrcApiUrl + "/auth/twofactorauth/totp/verify";
 
     private readonly IResponseCollector _responseCollector;
-    
+    private readonly CancellationTokenSource _cancellationTokenSource;
+
     private readonly bool _useRateLimiting;
     private readonly Random _random = new();
     
@@ -27,9 +28,10 @@ internal class VRChatAPI
 
     public bool IsLoggedIn { get; private set; }
 
-    public VRChatAPI(IResponseCollector responseCollector, bool useRateLimiting = true)
+    public VRChatAPI(IResponseCollector responseCollector, CancellationTokenSource cancellationTokenSource, bool useRateLimiting = true)
     {
         _responseCollector = responseCollector;
+        _cancellationTokenSource = cancellationTokenSource;
         _useRateLimiting = useRateLimiting;
         
         _cookies = new CookieContainer();
@@ -106,7 +108,7 @@ internal class VRChatAPI
         var request = new HttpRequestMessage(HttpMethod.Get, AuthUrl);
         request.Headers.Authorization = new AuthenticationHeaderValue("Basic", EncodeBasicAuth__Sensitive(userinput_account__sensitive, userinput_password__sensitive));
         
-        var response = await _client.SendAsync(request);
+        var response = await _client.SendAsync(request, _cancellationTokenSource.Token);
         // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
         return response.StatusCode switch
         {
@@ -149,7 +151,7 @@ internal class VRChatAPI
             code = userinput_twoferCode__sensitive
         }).ToString(), Encoding.UTF8, MediaTypeHeaderValue.Parse("application/json"));
         
-        var response = await _client.SendAsync(request);
+        var response = await _client.SendAsync(request, _cancellationTokenSource.Token);
 
         return response.StatusCode switch
         {
@@ -196,7 +198,7 @@ internal class VRChatAPI
 
         try
         {
-            var response = await _client.GetAsync(url);
+            var response = await _client.GetAsync(url, _cancellationTokenSource.Token);
 
             await EnsureRateLimiting(url, response.StatusCode);
 
@@ -237,7 +239,7 @@ internal class VRChatAPI
         var requestGuid = XYVRGuids.ForRequest();
         try
         {
-            var response = await _client.GetAsync(url);
+            var response = await _client.GetAsync(url, _cancellationTokenSource.Token);
 
             await EnsureRateLimiting(url, response.StatusCode);
 
@@ -282,7 +284,7 @@ internal class VRChatAPI
 
         try
         {
-            var response = await _client.GetAsync(url);
+            var response = await _client.GetAsync(url, _cancellationTokenSource.Token);
 
             await EnsureRateLimiting(url, response.StatusCode);
 
@@ -312,7 +314,7 @@ internal class VRChatAPI
         ThrowIfNotLoggedIn();
         
         var url = $"{AuditUrls.VrcApiUrl}/invite/myself/to/{worldIdAndInstanceId}";
-        await _client.PostAsync(url, null);
+        await _client.PostAsync(url, null, _cancellationTokenSource.Token);
     }
 
     public async Task<VRChatInstance?> GetInstanceLenient(DataCollectionReason dataCollectionReason, string worldIdAndInstanceId, bool useFastFetch)
@@ -324,7 +326,7 @@ internal class VRChatAPI
 
         try
         {
-            var response = await _client.GetAsync(url);
+            var response = await _client.GetAsync(url, _cancellationTokenSource.Token);
 
             await EnsureRateLimiting(url, response.StatusCode, useFastFetch);
 
@@ -354,7 +356,7 @@ internal class VRChatAPI
         var hasMoreData = true;
         var offset = 0;
 
-        while (hasMoreData)
+        while (hasMoreData && !_cancellationTokenSource.IsCancellationRequested)
         {
             List<T>? results;
             string? url = null;
@@ -362,7 +364,7 @@ internal class VRChatAPI
             try
             {
                 url = await urlBuilder(offset, pageSize);
-                var response = await _client.GetAsync(url);
+                var response = await _client.GetAsync(url, _cancellationTokenSource.Token);
         
                 await EnsureRateLimiting(url, response.StatusCode);
         
@@ -400,14 +402,23 @@ internal class VRChatAPI
             }
         }
 
+        if (_cancellationTokenSource.IsCancellationRequested)
+        {
+            throw new OperationCanceledException(_cancellationTokenSource.Token);
+        }
     }
 
     private async Task EnsureRateLimiting(string urlForLogging, HttpStatusCode statusCode, bool useFastFetch = false)
     {
+        if (_cancellationTokenSource.IsCancellationRequested)
+        {
+            throw new OperationCanceledException(_cancellationTokenSource.Token);
+        }
+        
         if (statusCode == HttpStatusCode.TooManyRequests)
         {
             XYVRLogging.WriteLine(this, $"Got {urlForLogging} ; however, TooManyRequests was received. Waiting 70 seconds.");
-            await Task.Delay(TimeSpan.FromSeconds(70));
+            await Task.Delay(TimeSpan.FromSeconds(70), _cancellationTokenSource.Token);
             
             return;
         }
@@ -417,7 +428,7 @@ internal class VRChatAPI
         var millisecondsDelay = (int)(_random.Next(700, 1300) * (useFastFetch ? 0.25f : 1f)); // Introduce some irregularity
         XYVRLogging.WriteLine(this, $"Got {urlForLogging} ; Waiting {millisecondsDelay}ms...");
 
-        await Task.Delay(millisecondsDelay);
+        await Task.Delay(millisecondsDelay, _cancellationTokenSource.Token);
     }
 
     private static void EnsureSuccessOrThrowVerbose(HttpResponseMessage response)
@@ -488,7 +499,7 @@ internal class VRChatAPI
     
         var request = new HttpRequestMessage(HttpMethod.Put, LogoutUrl);
     
-        var response = await _client.SendAsync(request);
+        var response = await _client.SendAsync(request, _cancellationTokenSource.Token);
         return response.StatusCode switch
         {
             HttpStatusCode.OK => LogoutResponseStatus.Success,
@@ -499,7 +510,7 @@ internal class VRChatAPI
 
     public async Task<byte[]?> DownloadThumbnailImage(string worldLenientThumbnailImageUrl)
     {
-        var response = await _client.GetAsync(worldLenientThumbnailImageUrl);
+        var response = await _client.GetAsync(worldLenientThumbnailImageUrl, _cancellationTokenSource.Token);
         if (response.StatusCode == HttpStatusCode.OK)
         {
             return await response.Content.ReadAsByteArrayAsync();

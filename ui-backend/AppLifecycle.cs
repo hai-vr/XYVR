@@ -20,11 +20,14 @@ public class AppLifecycle
     private List<IAuthority> _authorities = null!;
 
     private readonly Action<Action> _dispatchFn;
+    private readonly Func<Func<Task>, Task> _dispatchAsyncFn;
     private Func<EventToSendToReact, Task> _scriptRunnerFn = null!;
+    private CancellationTokenSource CancellationTokenSource;
 
-    public AppLifecycle(Action<Action> dispatchFn)
+    public AppLifecycle(Action<Action> dispatchFn, Func<Func<Task>, Task> dispatchAsyncFn)
     {
         _dispatchFn = dispatchFn;
+        _dispatchAsyncFn = dispatchAsyncFn;
     }
 
     public void WhenApplicationStarts(string[] args)
@@ -44,12 +47,14 @@ public class AppLifecycle
     {
         _scriptRunnerFn = scriptRunnerFn;
         
+        CancellationTokenSource = new();
+        
         AppBff = new AppBFF(this);
         DataCollectionBff = new DataCollectionBFF(this);
         PreferencesBff = new PreferencesBFF(this);
         LiveBff = new LiveBFF(this);
         
-        _authorities = await IAuthorityScaffolder.FindAll();
+        _authorities = await IAuthorityScaffolder.FindAll(CancellationTokenSource);
         
         IndividualRepository = new IndividualRepository(await Scaffolding.OpenRepository());
         ConnectorsMgt = new ConnectorManagement(await Scaffolding.OpenConnectors());
@@ -62,27 +67,48 @@ public class AppLifecycle
 
     public async Task WhenApplicationCloses()
     {
-        try
+        Task.Run(async () =>
         {
-            XYVRLogging.WriteLine(this, "Saving...");
-            PreferencesBff.OnClosed();
-            LiveBff.OnClosed();
-            foreach (var authority in _authorities)
+            XYVRLogging.WriteLine(this, "Application is closing.");
+            try
             {
-                await authority.SaveWhateverNecessary();
+                XYVRLogging.WriteLine(this, "Saving...");
+                
+                await PreferencesBff.OnClosed();
+                XYVRLogging.WriteLine(this, "Executed PreferencesBff.OnClosed");
+                
+                // This will cause the live monitoring tokens to cancel.
+                await LiveBff.OnClosed();
+                XYVRLogging.WriteLine(this, "Executed LiveBff.OnClosed");
+                
+                foreach (var authority in _authorities)
+                {
+                    await authority.SaveWhateverNecessary();
+                    XYVRLogging.WriteLine(this, $"Saved authority of type {authority.GetType().Name}");
+                }
+                
+                XYVRLogging.WriteLine(this, "Cancelling token...");
+                await CancellationTokenSource.CancelAsync();
+
+                XYVRLogging.WriteLine(this, "WhenApplicationCloses has executed successfully");
             }
-            XYVRLogging.WriteLine(this, "Saved");
-        }
-        catch (Exception exception)
-        {
-            XYVRLogging.ErrorWriteLine(this, exception);
-            throw;
-        }
+            catch (Exception exception)
+            {
+                XYVRLogging.ErrorWriteLine(this, $"WhenApplicationCloses raised an error: {exception.Message}");
+                XYVRLogging.ErrorWriteLine(this, exception);
+                throw;
+            }
+        }).Wait();
     }
 
     public void Dispatch(Action action)
     {
         _dispatchFn.Invoke(action);
+    }
+
+    public async Task DispatchAsync(Func<Task> action)
+    {
+        await _dispatchAsyncFn.Invoke(action);
     }
 
     internal async Task SendEventToReact(string eventType__vulnerableToInjections, object obj)

@@ -26,7 +26,7 @@ namespace XYVR.UI.Photino
             {
                 _serializer = BFFUtils.NewSerializer();
             
-                var appLifecycle = new AppLifecycle(DispatchFn);
+                var appLifecycle = new AppLifecycle(DispatchFn, DispatchAsyncFn);
                 _appLifecycle = appLifecycle;
                 _appLifecycle.WhenApplicationStarts(args);
             
@@ -253,6 +253,11 @@ namespace XYVR.UI.Photino
         private static void DispatchFn(Action action)
         {
             action();
+        }
+
+        private static async Task DispatchAsyncFn(Func<Task> asyncFn)
+        {
+            await asyncFn();
         }
     }
 }

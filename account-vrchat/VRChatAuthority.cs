@@ -8,11 +8,13 @@ public class VRChatAuthority : IAuthority
     private readonly WorldNameCache _worldNameCache;
     private readonly Func<Task> _saveFn;
     private IThumbnailCache _thumbnailCache;
+    private CancellationTokenSource _cancellationTokenSource;
 
-    public VRChatAuthority(WorldNameCache worldNameCache, IThumbnailCache thumbnailCache, Func<Task> saveFn)
+    public VRChatAuthority(WorldNameCache worldNameCache, IThumbnailCache thumbnailCache, Func<Task> saveFn, CancellationTokenSource cancellationTokenSource)
     {
         _worldNameCache = worldNameCache;
         _saveFn = saveFn;
+        _cancellationTokenSource = cancellationTokenSource;
         _thumbnailCache = thumbnailCache;
     }
 
@@ -28,12 +30,12 @@ public class VRChatAuthority : IAuthority
 
     public Task<ILoginService> NewLoginService()
     {
-        return Task.FromResult<ILoginService>(new VRChatLoginService());
+        return Task.FromResult<ILoginService>(new VRChatLoginService(_cancellationTokenSource));
     }
 
     public Task<IDataCollection> NewDataCollection(IndividualRepository repository, ICredentialsStorage credentialsStorage, IResponseCollector storage)
     {
-        return Task.FromResult<IDataCollection>(new VRChatDataCollection(repository, storage, credentialsStorage));
+        return Task.FromResult<IDataCollection>(new VRChatDataCollection(repository, storage, credentialsStorage, _cancellationTokenSource));
     }
 
     public Task<ILiveMonitoring> NewLiveMonitoring(LiveStatusMonitoring monitoring, ICredentialsStorage credentialsStorage)
@@ -45,7 +47,7 @@ public class VRChatAuthority : IAuthority
     {
         // Reminder: The same authority may be used for multiple connectors (different caller accounts).
         
-        var res = new VRChatCommunicator(new DoNotStoreAnythingStorage(), credentialsStorage);
+        var res = new VRChatCommunicator(new DoNotStoreAnythingStorage(), credentialsStorage, _cancellationTokenSource);
         return await res.CallerAccount();
     }
 }

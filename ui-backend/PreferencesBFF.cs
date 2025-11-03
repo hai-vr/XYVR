@@ -42,26 +42,26 @@ public class PreferencesBFF : IPreferencesBFF
         return Task.CompletedTask;
     }
 
-    public void OnClosed()
+    public async Task OnClosed()
     {
         if (_newPrefs == null) return;
         if (_lastPrefs == null || !_newPrefs.Equals(_lastPrefs))
         {
             XYVRLogging.WriteLine(this, "Saving preferences");
             _lastPrefs = _newPrefs;
-            Task.Run(async () =>
+            await Task.Run(async () =>
+            {
+                try
                 {
-                    try
-                    {
-                        await Scaffolding.SaveReactAppPreferences(_newPrefs);
-                    }
-                    catch (Exception e)
-                    {
-                        XYVRLogging.ErrorWriteLine(this, e);
-                        throw;
-                    }
-                })
-                .Wait();
+                    await Scaffolding.SaveReactAppPreferences(_newPrefs);
+                    XYVRLogging.WriteLine(this, "Executed SaveReactAppPreferences");
+                }
+                catch (Exception e)
+                {
+                    XYVRLogging.ErrorWriteLine(this, e);
+                    throw;
+                }
+            });
         }
     }
 

@@ -33,7 +33,7 @@ public class VRChatLiveMonitoring : ILiveMonitoring
             if (_isConnected) return;
             _cancellationTokenSource = new CancellationTokenSource();
             
-            _liveComms = new VRChatLiveCommunicator(_credentialsStorage, _callerInAppIdentifier, new DoNotStoreAnythingStorage(), _worldNameCache, _thumbnailCache);
+            _liveComms = new VRChatLiveCommunicator(_credentialsStorage, _callerInAppIdentifier, new DoNotStoreAnythingStorage(), _worldNameCache, _thumbnailCache, _cancellationTokenSource);
             _liveComms.OnLiveUpdateReceived += async update =>
             {
                 // XYVRLogging.WriteLine(this, $"OnLiveUpdateReceived: {JsonConvert.SerializeObject(update, serializer)}");
@@ -95,6 +95,14 @@ public class VRChatLiveMonitoring : ILiveMonitoring
 
     public async Task StopMonitoring()
     {
+        // FIXME: We're currently doing this twice, because StartMonitoring currently does way too much
+        // and we may sometimes want to stop monitoring while StartMonitoring is still ongoing.
+        {
+            XYVRLogging.WriteLine(this, "Will try to cancel token (pre-emptive)");
+            _cancellationTokenSource?.CancelAsync();
+            XYVRLogging.WriteLine(this, "Token cancelled. Will try to disconnect (pre-emptive)");
+        }
+        
         await _operationLock.WaitAsync();
         try
         {
@@ -124,7 +132,7 @@ public class VRChatLiveMonitoring : ILiveMonitoring
     {
         if (_callerInAppIdentifier == null) throw new InvalidOperationException("Caller must be defined to invite yourself");
         
-        var comms = new VRChatLiveCommunicator(_credentialsStorage, _callerInAppIdentifier, new DoNotStoreAnythingStorage(), _worldNameCache, _thumbnailCache);
+        var comms = new VRChatLiveCommunicator(_credentialsStorage, _callerInAppIdentifier, new DoNotStoreAnythingStorage(), _worldNameCache, _thumbnailCache, _cancellationTokenSource);
         await comms.InviteMyselfTo(sessionId);
     }
 }

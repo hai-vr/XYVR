@@ -3,11 +3,12 @@ using XYVR.Core;
 
 namespace XYVR.AccountAuthority.VRChat;
 
-public class VRChatDataCollection(IndividualRepository repository, IResponseCollector responseCollectionStorage, ICredentialsStorage credentialsStorage) : IDataCollection
+public class VRChatDataCollection(IndividualRepository repository, IResponseCollector responseCollectionStorage, ICredentialsStorage credentialsStorage, CancellationTokenSource cancellationTokenSource) : IDataCollection
 {
     private readonly VRChatCommunicator _vrChatCommunicator = new(
         responseCollectionStorage,
-        credentialsStorage
+        credentialsStorage,
+        cancellationTokenSource
     );
     
     public async Task<List<ImmutableNonIndexedAccount>> RebuildFromDataCollectionStorage(List<ResponseCollectionTrail> trails)

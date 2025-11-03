@@ -122,24 +122,20 @@ public class LiveBFF : ILiveBFF
         }
     }
 
-    public void OnClosed()
+    public async Task OnClosed()
     {
-        // FIXME: We start a task because we're having an issue cancelling the task. So: stop monitoring without awaiting, wait a second, then close.
-        // FIXME: This could probably be fixed using AppLifecycle.Dispatch or something. Something to do with the main thread.
-        Task.Run(async () =>
+        await Task.Run(async () =>
         {
             try
             {
-                StopMonitoring();
-                await Task.Delay(1000);
+                await StopMonitoring();
             }
             catch (Exception e)
             {
                 XYVRLogging.ErrorWriteLine(this, e);
                 throw;
             }
-            // Close for real
-        }).Wait();
+        });
     }
 
     public async Task MakeGameClientJoinOrSelfInvite(string appName, string inAppIdentifier, string sessionId)

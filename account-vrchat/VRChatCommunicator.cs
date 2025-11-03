@@ -9,13 +9,15 @@ internal class VRChatCommunicator
     private readonly IResponseCollector _responseCollector;
 
     private readonly ICredentialsStorage _credentialsStorage;
+    private readonly CancellationTokenSource _cancellationTokenSource;
     private VRChatAPI? _api;
     private string _callerUserId;
 
-    public VRChatCommunicator(IResponseCollector responseCollector, ICredentialsStorage credentialsStorage)
+    public VRChatCommunicator(IResponseCollector responseCollector, ICredentialsStorage credentialsStorage, CancellationTokenSource cancellationTokenSource)
     {
         _responseCollector = responseCollector;
         _credentialsStorage = credentialsStorage;
+        _cancellationTokenSource = cancellationTokenSource;
     }
 
     public async Task<ImmutableNonIndexedAccount> CallerAccount()
@@ -191,7 +193,7 @@ internal class VRChatCommunicator
 
     private async Task<VRChatAPI> InitializeAPI()
     {
-        var api = new VRChatAPI(_responseCollector);
+        var api = new VRChatAPI(_responseCollector, _cancellationTokenSource);
         var userinput_cookies__sensitive = await _credentialsStorage.RequireCookieOrToken();
         if (userinput_cookies__sensitive == null)
         {
@@ -214,7 +216,7 @@ internal class VRChatCommunicator
 
     public async Task<bool> SoftIsLoggedIn()
     {
-        var api = new VRChatAPI(_responseCollector);
+        var api = new VRChatAPI(_responseCollector, _cancellationTokenSource);
         var userinput_cookies__sensitive = await _credentialsStorage.RequireCookieOrToken();
         if (userinput_cookies__sensitive != null)
         {

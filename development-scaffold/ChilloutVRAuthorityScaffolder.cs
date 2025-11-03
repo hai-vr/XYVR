@@ -5,7 +5,7 @@ namespace XYVR.Scaffold;
 
 public class ChilloutVRAuthorityScaffolder : IAuthorityScaffolder
 {
-    public Task<IAuthority> CreateAuthority()
+    public Task<IAuthority> CreateAuthority(CancellationTokenSource cancellationTokenSource)
     {
         return Task.FromResult<IAuthority>(new ChilloutVRAuthority());
     }
