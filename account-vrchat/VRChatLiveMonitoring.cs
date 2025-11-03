@@ -59,7 +59,6 @@ public class VRChatLiveMonitoring : ILiveMonitoring
                     await _monitoring.MergeSession(nonIndexedUpdate);
                 }
             };
-            await _liveComms.Connect();
             
             _ = Task.Run(BackgroundTask, _cancellationTokenSource.Token);
             _isConnected = true;
@@ -72,6 +71,25 @@ public class VRChatLiveMonitoring : ILiveMonitoring
 
     private async Task BackgroundTask()
     {
+        var successful = false;
+        do
+        {
+            try
+            {
+                await _liveComms.Connect();
+                successful = true;
+            }
+            catch (OperationCanceledException e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        } while (!successful);
+        
         try
         {
             while (true) // Canceled by token
