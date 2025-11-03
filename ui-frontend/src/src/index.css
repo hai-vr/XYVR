@@ -1,5 +1,7 @@
 
 :root {
+    --ideal-border-radius: 2px;
+    
     font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
     line-height: 1.5;
     font-weight: 400;
@@ -134,7 +136,7 @@
 
     --brd-primary: #e1e5e9;
     --brd-secondary: #dee2e6;
-    --brd-accent: #646cff;
+    --brd-accent: #27ac98;
 
     --accent-primary: #1976d2;
     --accent-secondary: #1976d2;
@@ -145,8 +147,8 @@
     --shadow-heavy: rgba(0, 0, 0, 0.2);
 
     /* Header specific colors for light theme */
-    --header-left: #667eea;
-    --header-right: #667eea;
+    --header-left: #27ac98;
+    --header-right: #27ac98;
     --header-gradient: linear-gradient(135deg, var(--header-left) 0%, var(--header-right) 100%);
     --header-text: white;
     --header-border: 1px solid var(--brd-primary);
@@ -180,7 +182,7 @@
     --status-warning-text: #856404;
 
     /* Online status colors for light theme */
-    --status-online: #22c55e;
+    --status-online: var(--header-left);
     --status-online-conflicting: #ccec95;
     --status-away: #f59e0b;
     --status-askme: #ea580c;
@@ -216,12 +218,12 @@
 
 ::-webkit-scrollbar-track {
     background: var(--bg-primary);
-    border-radius: 4px;
+    border-radius: var(--ideal-border-radius);
 }
 
 ::-webkit-scrollbar-thumb {
     background: var(--bg-quaternary);
-    border-radius: 4px;
+    border-radius: var(--ideal-border-radius);
     border: 2px solid var(--bg-primary);
 }
 
@@ -259,7 +261,7 @@ h1 {
 }
 
 button {
-    border-radius: 8px;
+    border-radius: var(--ideal-border-radius);
     border: 1px solid var(--brd-primary);
     padding: 0.6em 1.2em;
     font-size: 1em;
@@ -309,7 +311,7 @@ button:disabled:hover {
 .icon-button {
     background: var(--bg-secondary);
     border: 1px solid var(--brd-secondary);
-    border-radius: 4px;
+    border-radius: var(--ideal-border-radius);
     width: 24px !important;
     height: 24px !important;
     min-width: 24px;

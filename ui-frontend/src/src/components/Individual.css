@@ -2,7 +2,7 @@
     display: block;
     background: var(--bg-secondary);
     border: 1px solid var(--brd-primary);
-    border-radius: 12px;
+    border-radius: var(--ideal-border-radius);
     padding: 24px;
     box-shadow: 0 2px 8px var(--shadow-medium);
     cursor: pointer;
@@ -15,7 +15,7 @@
     display: block;
     background: var(--bg-secondary);
     border: 1px solid var(--brd-primary);
-    border-radius: 12px;
+    border-radius: var(--ideal-border-radius);
     padding: 6px;
     box-shadow: 0 2px 8px var(--shadow-medium);
     cursor: pointer;
@@ -70,7 +70,7 @@
     background: var(--status-contact-bg);
     color: var(--status-contact-text);
     padding: 4px 8px;
-    border-radius: 12px;
+    border-radius: var(--ideal-border-radius);
     font-size: 12px;
     font-weight: 500;
     display: flex;
@@ -90,7 +90,7 @@
     color: var(--text-secondary);
     cursor: pointer;
     padding: 8px;
-    border-radius: 4px;
+    border-radius: var(--ideal-border-radius);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -109,7 +109,7 @@
     right: 0;
     background: var(--bg-secondary);
     border: 1px solid var(--brd-primary);
-    border-radius: 8px;
+    border-radius: var(--ideal-border-radius);
     box-shadow: 0 4px 12px var(--shadow-medium);
     z-index: 1000;
     min-width: 200px;
@@ -157,14 +157,14 @@
     color: var(--text-secondary);
     font-style: italic;
     background: var(--bg-primary);
-    border-radius: 8px;
+    border-radius: var(--ideal-border-radius);
     border: 2px dashed var(--brd-secondary);
 }
 
 .vrchat-links-container {
     background: var(--vrchat-links-bg);
     border: 1px solid var(--vrchat-links-border);
-    border-radius: 8px;
+    border-radius: var(--ideal-border-radius);
     padding: 12px;
     margin-bottom: 16px;
 }
@@ -187,7 +187,7 @@
 .vrchat-link-item {
     background: var(--vrchat-link-item-bg);
     border: 1px solid var(--vrchat-link-item-border);
-    border-radius: 4px;
+    border-radius: var(--ideal-border-radius);
     padding: 6px 12px;
     display: flex;
     align-items: center;

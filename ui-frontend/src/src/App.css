@@ -47,7 +47,7 @@ html {
 .card {
     padding: 2em;
     background-color: var(--bg-secondary);
-    border-radius: 8px;
+    border-radius: var(--ideal-border-radius);
     border: 1px solid var(--brd-primary);
     color: var(--text-primary);
 }

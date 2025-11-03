@@ -1,7 +1,7 @@
 ﻿.connector-card {
     background: var(--bg-secondary);
     border: 1px solid var(--brd-primary);
-    border-radius: 12px;
+    border-radius: var(--ideal-border-radius);
     padding: 1.5rem;
     box-shadow: 0 2px 8px var(--shadow-light);
     position: relative;
@@ -39,7 +39,7 @@
 .pill-toggle {
     display: flex;
     background: var(--bg-secondary);
-    border-radius: 8px;
+    border-radius: var(--ideal-border-radius);
     padding: 2px;
     width: fit-content;
     margin: 0 auto;
@@ -52,7 +52,7 @@
     color: var(--text-secondary);
     font-size: 14px;
     cursor: pointer;
-    border-radius: 6px;
+    border-radius: var(--ideal-border-radius);
     transition: all 0.2s ease;
     white-space: nowrap;
     min-width: 80px;

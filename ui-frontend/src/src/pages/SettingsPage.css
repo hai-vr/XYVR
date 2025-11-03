@@ -20,7 +20,7 @@
     text-align: center;
     padding: 4rem 2rem;
     background-color: var(--bg-secondary);
-    border-radius: 8px;
+    border-radius: var(--ideal-border-radius);
     border: 1px solid var(--brd-primary);
     margin-top: 2rem;
     width: 100%;
@@ -60,7 +60,7 @@
     padding: 2px 4px;
     background-color: var(--bg-secondary);
     border: 1px solid var(--brd-primary);
-    border-radius: 3px;
+    border-radius: var(--ideal-border-radius);
     font-family: monospace;
     display: inline-block;
     color: var(--text-primary);

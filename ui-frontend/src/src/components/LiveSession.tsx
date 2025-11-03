@@ -60,8 +60,7 @@ export function LiveSession({liveSession, individuals, debugMode, mini, resonite
                 position: 'absolute',
                 inset: 0,
                 filter: 'var(--live-session-grayscale)',
-                borderRadius: '6px',
-            }}></div>
+            }} className="live-session-background-image"></div>
             <div style={{
                 position: 'relative',
                 display: 'flex',

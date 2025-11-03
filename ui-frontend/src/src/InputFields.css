@@ -26,7 +26,7 @@
     width: 18px;
     height: 18px;
     border: 2px solid var(--brd-primary);
-    border-radius: 4px;
+    border-radius: var(--ideal-border-radius);
     background: var(--bg-primary);
     cursor: pointer;
     position: relative;
@@ -63,7 +63,7 @@
 .password-input {
     padding: 8px 12px;
     border: 1px solid var(--brd-primary);
-    border-radius: 6px;
+    border-radius: var(--ideal-border-radius);
     background: var(--bg-primary);
     color: var(--text-primary);
     font-size: 14px;
@@ -86,7 +86,7 @@
 .password-input {
     padding: 8px 12px;
     border: 1px solid var(--brd-primary);
-    border-radius: 6px;
+    border-radius: var(--ideal-border-radius);
     background: var(--bg-primary);
     color: var(--text-primary);
     font-size: 14px;
@@ -108,7 +108,7 @@
     background: var(--status-warning-bg);
     color: var(--status-warning-text);
     border: 1px solid var(--badge-contact-border);
-    border-radius: 6px;
+    border-radius: var(--ideal-border-radius);
     padding: 8px 12px;
     font-size: 13px;
     line-height: 1.4;
@@ -127,7 +127,7 @@
     background: var(--bg-primary);
     color: var(--text-secondary);
     border: 1px solid var(--brd-secondary);
-    border-radius: 6px;
+    border-radius: var(--ideal-border-radius);
     padding: 8px 12px;
     font-size: 13px;
     line-height: 1.4;

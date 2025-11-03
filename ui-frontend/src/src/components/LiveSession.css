@@ -13,11 +13,15 @@
     --live-session-grayscale: grayscale(70%);
 }
 
+.live-session-background-image {
+    border-radius: var(--ideal-border-radius);
+}
+
 .live-sessions-section {
     margin-bottom: 2rem;
     padding: 1rem;
     background: var(--bg-secondary);
-    border-radius: 8px;
+    border-radius: var(--ideal-border-radius);
     border: 1px solid var(--border-color);
 }
 
@@ -45,12 +49,7 @@
 .live-session-card {
     background: var(--bg-primary);
     border: 1px solid var(--border-color);
-    border-radius: 6px;
-}
-
-.live-session-card:hover {
-    border-color: var(--accent-color);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: var(--ideal-border-radius);
 }
 
 .live-session-header {
@@ -108,7 +107,7 @@
     background: var(--bg-secondary);
     color: var(--text-primary);
     padding: 0.25rem 0.5rem;
-    border-radius: 12px;
+    border-radius: var(--ideal-border-radius);
     font-size: 0.75rem;
     border: 1px solid var(--border-color);
 }
@@ -117,7 +116,7 @@
     background: var(--accent-color);
     color: white;
     padding: 0.1rem 0.3rem;
-    border-radius: 6px;
+    border-radius: var(--ideal-border-radius);
     font-size: 0.6rem;
     font-weight: 600;
     text-transform: uppercase;

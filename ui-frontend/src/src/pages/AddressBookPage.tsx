@@ -449,9 +449,9 @@ function AddressBookPage({ isDark,
                         onChange={(e) => setSearchField(e.target.value)}
                         className="search-input"
                     />
-                    <span className="search-icon">
-                        <Search />
-                    </span>
+                    {/*<span className="search-icon">*/}
+                    {/*    <Search />*/}
+                    {/*</span>*/}
                     {searchField && (
                         <button
                             onClick={() => setSearchField('')}

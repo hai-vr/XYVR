@@ -9,4 +9,5 @@
     flex: 1;
     width: 100%;
     min-width: 0; /* Allow shrinking below content size */
+    padding-top: 0;
 }

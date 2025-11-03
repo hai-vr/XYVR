@@ -13,7 +13,7 @@
 .theme-toggle-btn {
     background: var(--theme-toggle-bg);
     border: 1px solid var(--theme-toggle-border);
-    border-radius: 20%;
+    border-radius: var(--ideal-border-radius);
     width: 44px;
     height: 44px;
     display: flex;
@@ -65,7 +65,7 @@
 .search-input {
     width: 100%;
     padding: 10px 40px 10px 15px;
-    border-radius: 25px;
+    border-radius: calc(var(--ideal-border-radius) * 3);
     border: 1px solid var(--search-input-border);
     font-size: 14px;
     outline: none;

@@ -1,16 +1,20 @@
 ﻿.header-group {
     display: flex;
+    margin-top: 0;
+    border-top: none;
 }
 
 .header-thin-right {
     background: var(--header-right);
     color: var(--header-text);
     padding: 0;
-    border-radius: 12px;
+    border-radius: 0 0 var(--ideal-border-radius) var(--ideal-border-radius);
     margin-bottom: 20px;
+    margin-top: 0;
     box-sizing: border-box;
     min-width: 0;
     border: var(--header-border);
+    border-top: none;
     box-shadow: 0 4px 15px var(--shadow-medium);
 
     width: 60px;
@@ -31,13 +35,15 @@
     background: var(--header-gradient);
     color: var(--header-text);
     padding: 20px;
-    border-radius: 12px;
+    border-radius: 0 0 var(--ideal-border-radius) var(--ideal-border-radius);
     margin-bottom: 20px;
+    margin-top: 0;
     box-shadow: 0 4px 15px var(--shadow-medium);
     width: 100%;
     box-sizing: border-box;
     min-width: 0;
     border: var(--header-border);
+    border-top: none;
 }
 
 .header-content {

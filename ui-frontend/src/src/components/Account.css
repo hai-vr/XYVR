@@ -1,7 +1,7 @@
 ﻿.account-container {
     background: var(--bg-primary);
     border: 1px solid var(--brd-primary);
-    border-radius: 8px;
+    border-radius: var(--ideal-border-radius);
     padding: 12px;
     display: flex;
     flex-direction: column;
@@ -11,7 +11,7 @@
 .count-container {
     background: none;
     border: 1px solid rgba(0,0,0,0);
-    border-radius: 8px;
+    border-radius: var(--ideal-border-radius);
     padding: 2px 12px;
     gap: 8px;
     margin-top: auto;
@@ -31,7 +31,7 @@
 .app-icon {
     min-width: 32px;
     min-height: 32px;
-    border-radius: 6px;
+    border-radius: var(--ideal-border-radius);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -81,7 +81,7 @@
 
 .badge {
     padding: 2px 6px;
-    border-radius: 4px;
+    border-radius: var(--ideal-border-radius);
     font-size: 11px;
     font-weight: 500;
     border: 1px solid transparent;
@@ -108,7 +108,7 @@
 .note-container {
     background: var(--note-container-bg);
     border: 1px solid var(--note-container-border);
-    border-radius: 6px;
+    border-radius: var(--ideal-border-radius);
     padding: 8px;
     margin-top: 4px;
 }
