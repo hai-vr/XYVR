@@ -242,9 +242,9 @@ public class ResoniteLiveMonitoring : ILiveMonitoring, IDisposable
 
     private static void DANGER_OpenResoniteSession(string sessionId)
     {
-        if (sessionId.Length != 38 || !sessionId.StartsWith("S-") || !Guid.TryParse(sessionId[2..], out _))
+        if (!sessionId.StartsWith("S-"))
         {
-            throw new ArgumentException("Invalid session ID format. Expected format: S-{GUID}", nameof(sessionId));
+            throw new ArgumentException("Invalid session ID format. Expected format: S-...", nameof(sessionId));
         }
         
         var url = $"resonite:?session=ressession:///{sessionId}";
