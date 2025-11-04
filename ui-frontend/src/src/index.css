@@ -15,8 +15,6 @@
     /* Dark theme colors */
     --bg-primary: #3c3f41;
     --bg-secondary: #4c5052;
-    --bg-tertiary: #3e4446;
-    --bg-quaternary: #5a5d5f;
 
     --text-primary: #bbbbbb;
     --text-secondary: #888888;
@@ -95,7 +93,7 @@
     --vrchat-links-border: var(--brd-primary);
     --vrchat-link-item-bg: var(--bg-primary);
     --vrchat-link-item-border: var(--brd-primary);
-    --vrchat-link-item-hover-bg: var(--bg-tertiary);
+    --vrchat-link-item-hover-bg: var(--bg-secondary);
     --vrchat-link-item-hover-border: var(--brd-accent);
 
     /* Copy button hover */
@@ -127,8 +125,6 @@
 :root[data-theme="light"] {
     --bg-primary: #ffffff;
     --bg-secondary: #f8f9fa;
-    --bg-tertiary: #f0f0f0;
-    --bg-quaternary: #e9ecef;
 
     --text-primary: #2c3e50;
     --text-secondary: #6c757d;
@@ -222,7 +218,7 @@
 }
 
 ::-webkit-scrollbar-thumb {
-    background: var(--bg-quaternary);
+    background: var(--bg-secondary);
     border-radius: var(--ideal-border-radius);
     border: 2px solid var(--bg-primary);
 }
@@ -274,7 +270,7 @@ button {
 
 button:hover {
     border-color: var(--accent-primary);
-    background-color: var(--bg-quaternary);
+    background-color: var(--bg-secondary);
 }
 
 button:focus {
@@ -331,7 +327,7 @@ button:disabled:hover {
 }
 
 .icon-button:hover {
-    background: var(--bg-quaternary);
+    background: var(--bg-secondary);
     border-color: var(--brd-accent);
     color: var(--text-primary);
 }
