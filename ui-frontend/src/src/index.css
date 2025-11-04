@@ -35,9 +35,8 @@
     --logo-react-glow: #61dafbaa;
 
     /* Header specific colors */
-    --header-gradient: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
-    --header-left: var(--bg-secondary);
-    --header-right: var(--bg-primary);
+    --header-gradient: var(--header-bg-color);
+    --header-bg-color: var(--bg-secondary);
     --header-text: var(--text-primary);
     --header-border: 1px solid var(--brd-primary);
 
@@ -141,9 +140,8 @@
     --shadow-heavy: rgba(0, 0, 0, 0.2);
 
     /* Header specific colors for light theme */
-    --header-left: #27ac98;
-    --header-right: #27ac98;
-    --header-gradient: linear-gradient(135deg, var(--header-left) 0%, var(--header-right) 100%);
+    --header-bg-color: #27ac98;
+    --header-gradient: var(--header-bg-color);
     --header-text: white;
     --header-border: 1px solid var(--brd-primary);
 
@@ -176,7 +174,7 @@
     --status-warning-text: #856404;
 
     /* Online status colors for light theme */
-    --status-online: var(--header-left);
+    --status-online: var(--header-bg-color);
     --status-online-conflicting: #ccec95;
     --status-away: #f59e0b;
     --status-askme: #ea580c;

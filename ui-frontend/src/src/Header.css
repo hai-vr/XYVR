@@ -5,7 +5,7 @@
 }
 
 .header-thin-right {
-    background: var(--header-right);
+    background: var(--header-bg-color);
     color: var(--header-text);
     padding: 0;
     border-radius: 0 0 var(--ideal-border-radius) var(--ideal-border-radius);
