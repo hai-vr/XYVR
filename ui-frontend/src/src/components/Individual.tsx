@@ -8,6 +8,7 @@ import type {FrontAccount, FrontIndividual} from "../types/CoreTypes.ts";
 import {type DebugFlags, DemonstrationMode} from "../types/DebugFlags.ts";
 import {DotNetApi} from "../DotNetApi.ts";
 import { useTranslation } from "react-i18next";
+import IndividualDetailsModal from "./IndividualDetailsModal.tsx";
 
 interface IndividualProps {
     individual: FrontIndividual;
@@ -17,8 +18,8 @@ interface IndividualProps {
     setMergeAccountGuidOrUnd: (guid: string | undefined) => void;
     isBeingMerged?: boolean;
     displayNameOfOtherBeingMergedOrUnd?: string;
-    fusionAccounts: (guid: string) => Promise<void>;
-    unmergeAccounts: (guid: string) => Promise<void>;
+    fusionAccounts?: (guid: string) => Promise<void>;
+    unmergeAccounts?: (guid: string) => Promise<void>;
     compactMode: boolean;
     searchField: string;
     showNotes: boolean;
@@ -45,6 +46,7 @@ function Individual({
 
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [filteredAccounts, setFilteredAccounts] = useState<FrontAccount[]>([]);
+    const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     // Get all VRChat account links and filter to only show http/https URLs
@@ -86,10 +88,10 @@ function Individual({
 
         switch (action) {
             case 'confirmMerge':
-                await fusionAccounts(individual.guid);
+                await fusionAccounts?.(individual.guid);
                 break;
             case 'unmerge':
-                await unmergeAccounts(individual.guid);
+                await unmergeAccounts?.(individual.guid);
                 break;
             case 'cancelMerge':
                 setMergeAccountGuidOrUnd(undefined);
@@ -98,12 +100,15 @@ function Individual({
                 setMergeAccountGuidOrUnd(individual.guid);
                 break;
             case 'details':
-                // TODO: Implement show details functionality
-                console.log('Show details clicked for:', individual.displayName);
+                setIsDetailsModalOpen(true);
                 break;
             default:
                 break;
         }
+    };
+
+    const handleNameClick = () => {
+        setIsDetailsModalOpen(true);
     };
 
     useEffect(() => {
@@ -163,126 +168,135 @@ function Individual({
     };
 
     return (
-        <div className={`${!compactMode ? 'individual-container' : 'individual-container-compact'} ${!isVisible ? 'hidden' : ''} ${isBeingMerged ? 'being-merged' : ''}`}>
-            {!compactMode && (<>
-                <div className="individual-header">
-                    <div className="individual-avatar">
-                        {debugMode.demoMode !== DemonstrationMode.Disabled ? '?' : getFirstNonPunctuationChar(individual.displayName)}
+        <>
+            <div className={`${!compactMode ? 'individual-container' : 'individual-container-compact'} ${!isVisible ? 'hidden' : ''} ${isBeingMerged ? 'being-merged' : ''}`}>
+                {!compactMode && (<>
+                    <div className="individual-header">
+                        <div className="individual-avatar">
+                            {debugMode.demoMode !== DemonstrationMode.Disabled ? '?' : getFirstNonPunctuationChar(individual.displayName)}
+                        </div>
+                        <h3 className="individual-name" onClick={handleNameClick}>
+                            {_D(individual.displayName, debugMode)}
+                        </h3>
+                        {individual.isAnyContact && (
+                            <span className="contact-badge">
+                                <Phone size={16} />
+                                <span>{t('individual.contact.label')}</span>
+                            </span>
+                        )}
+                        {fusionAccounts && <div className="individual-menu" ref={dropdownRef}>
+                            <button
+                                className="menu-button"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setIsDropdownOpen(!isDropdownOpen);
+                                }}
+                                title={t('individual.moreActions.title')}
+                            >
+                                ⋯
+                            </button>
+                            {isDropdownOpen && (
+                                <div className="dropdown-menu">
+                                    {displayNameOfOtherBeingMergedOrUnd !== undefined && !isBeingMerged && (<button
+                                        className="dropdown-item"
+                                        onClick={(e) => handleMenuAction('confirmMerge', e)}
+                                        title={t('individual.confirmMerge.title')}
+                                    >
+                                        {t('individual.confirmMerge.label', { name: _D(displayNameOfOtherBeingMergedOrUnd, debugMode) })}
+                                    </button>)}
+                                    {displayNameOfOtherBeingMergedOrUnd === undefined && <button
+                                        className="dropdown-item"
+                                        onClick={(e) => handleMenuAction('merge', e)}
+                                        title={t('individual.mergeAccount.title')}
+                                    >
+                                        {t('individual.mergeAccount.label')}
+                                    </button>}
+                                    {displayNameOfOtherBeingMergedOrUnd !== undefined && <button
+                                        className="dropdown-item"
+                                        onClick={(e) => handleMenuAction('cancelMerge', e)}
+                                    >
+                                        Cancel merge
+                                    </button>}
+                                    {individual.accounts.length > 1 && <button
+                                        className="dropdown-item"
+                                        onClick={(e) => handleMenuAction('unmerge', e)}
+                                    >
+                                        Unmerge accounts
+                                    </button>}
+                                    <button
+                                        className="dropdown-item"
+                                        onClick={(e) => handleMenuAction('details', e)}
+                                    >
+                                        Show details
+                                    </button>
+                                </div>
+                            )}
+                        </div>}
                     </div>
-                    <h3 className="individual-name">
-                        {_D(individual.displayName, debugMode)}
-                    </h3>
-                    {individual.isAnyContact && (
-                        <span className="contact-badge">
-                            <Phone size={16} />
-                            <span>{t('individual.contact.label')}</span>
-                        </span>
+                </>)}
+    
+                <div className="accounts-container">
+                    {filteredAccounts && filteredAccounts.length > 0 ? (
+                        <div className="accounts-grid">
+                            {filteredAccounts.map((account) => (
+                                <Account key={account.guid} account={account} showAlias={showAlias} showNotes={showNotes} debugMode={debugMode} imposter={false} showSession={true} isSessionView={false} />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="no-accounts">
+                            📭 No accounts found
+                        </div>
                     )}
-                    <div className="individual-menu" ref={dropdownRef}>
-                        <button
-                            className="menu-button"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setIsDropdownOpen(!isDropdownOpen);
-                            }}
-                            title={t('individual.moreActions.title')}
-                        >
-                            ⋯
-                        </button>
-                        {isDropdownOpen && (
-                            <div className="dropdown-menu">
-                                {displayNameOfOtherBeingMergedOrUnd !== undefined && !isBeingMerged && (<button
-                                    className="dropdown-item"
-                                    onClick={(e) => handleMenuAction('confirmMerge', e)}
-                                    title={t('individual.confirmMerge.title')}
+                </div>
+    
+                {!compactMode && vrChatLinks.length > 0 && (
+                    <div className="vrchat-links-list">
+                        {vrChatLinks.map((url, linkIndex) => (
+                            <div key={linkIndex} className="vrchat-link-item">
+                                <a
+                                    onClick={() => openLink(url)} onAuxClick={(e) => e.button === 1 && openLink(url)} onMouseDown={(e) => e.preventDefault()}
+                                    rel="noopener noreferrer"
+                                    className="vrchat-link link-pointer"
                                 >
-                                    {t('individual.confirmMerge.label', { name: _D(displayNameOfOtherBeingMergedOrUnd, debugMode) })}
-                                </button>)}
-                                {displayNameOfOtherBeingMergedOrUnd === undefined && <button
-                                    className="dropdown-item"
-                                    onClick={(e) => handleMenuAction('merge', e)}
-                                    title={t('individual.mergeAccount.title')}
-                                >
-                                    {t('individual.mergeAccount.label')}
-                                </button>}
-                                {displayNameOfOtherBeingMergedOrUnd !== undefined && <button
-                                    className="dropdown-item"
-                                    onClick={(e) => handleMenuAction('cancelMerge', e)}
-                                >
-                                    Cancel merge
-                                </button>}
-                                {individual.accounts.length > 1 && <button
-                                    className="dropdown-item"
-                                    onClick={(e) => handleMenuAction('unmerge', e)}
-                                >
-                                    Unmerge accounts
-                                </button>}
+                                    {debugMode.demoMode !== DemonstrationMode.Disabled ? 'https://' + _D2(url.replace('http://', '').replace('https://', ''), debugMode, '/') : _D2(url, debugMode, '/')}
+                                </a>
                                 <button
-                                    className="dropdown-item"
-                                    onClick={(e) => handleMenuAction('details', e)}
+                                    onClick={(e) => copyToClipboard(url, e)}
+                                    className="icon-button"
+                                    title="Copy link to clipboard"
                                 >
-                                    Show details
+                                    <Clipboard size={16} />
                                 </button>
                             </div>
-                        )}
-                    </div>
-                </div>
-            </>)}
-
-            <div className="accounts-container">
-                {filteredAccounts && filteredAccounts.length > 0 ? (
-                    <div className="accounts-grid">
-                        {filteredAccounts.map((account) => (
-                            <Account key={account.guid} account={account} showAlias={showAlias} showNotes={showNotes} debugMode={debugMode} imposter={false} showSession={true} isSessionView={false} />
                         ))}
                     </div>
-                ) : (
-                    <div className="no-accounts">
-                        📭 No accounts found
+                )}
+    
+                {vrcBios.length > 0 && showBio && (
+                    <div className="vrchat-bios-container">
+                        <div className="vrchat-links-list">
+                            {vrcBios.map((bio, bioIndex) => (
+                                <div key={bioIndex} className="vrchat-bio-item">
+                                    {bio.split('\n').map((line, lineIndex) => (
+                                        <span key={lineIndex}>
+                                            {_D(line, debugMode)}
+                                            {lineIndex < bio.split('\n').length - 1 && <br/>}
+                                        </span>
+                                    ))}
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 )}
             </div>
 
-            {!compactMode && vrChatLinks.length > 0 && (
-                <div className="vrchat-links-list">
-                    {vrChatLinks.map((url, linkIndex) => (
-                        <div key={linkIndex} className="vrchat-link-item">
-                            <a
-                                onClick={() => openLink(url)} onAuxClick={(e) => e.button === 1 && openLink(url)} onMouseDown={(e) => e.preventDefault()}
-                                rel="noopener noreferrer"
-                                className="vrchat-link link-pointer"
-                            >
-                                {debugMode.demoMode !== DemonstrationMode.Disabled ? 'https://' + _D2(url.replace('http://', '').replace('https://', ''), debugMode, '/') : _D2(url, debugMode, '/')}
-                            </a>
-                            <button
-                                onClick={(e) => copyToClipboard(url, e)}
-                                className="icon-button"
-                                title="Copy link to clipboard"
-                            >
-                                <Clipboard size={16} />
-                            </button>
-                        </div>
-                    ))}
-                </div>
-            )}
-
-            {vrcBios.length > 0 && showBio && (
-                <div className="vrchat-bios-container">
-                    <div className="vrchat-links-list">
-                        {vrcBios.map((bio, bioIndex) => (
-                            <div key={bioIndex} className="vrchat-bio-item">
-                                {bio.split('\n').map((line, lineIndex) => (
-                                    <span key={lineIndex}>
-                                        {_D(line, debugMode)}
-                                        {lineIndex < bio.split('\n').length - 1 && <br/>}
-                                    </span>
-                                ))}
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )}
-        </div>
+            <IndividualDetailsModal
+                isOpen={isDetailsModalOpen}
+                onClose={() => setIsDetailsModalOpen(false)}
+                individual={individual}
+                debugMode={debugMode}
+            />
+        </>
     );
 }
 

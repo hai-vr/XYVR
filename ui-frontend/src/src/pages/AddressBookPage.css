@@ -21,7 +21,6 @@
     justify-content: center;
     cursor: pointer;
     font-size: 20px;
-    backdrop-filter: blur(10px);
     flex-shrink: 0;
 }
 
