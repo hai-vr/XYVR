@@ -97,7 +97,7 @@
 
 .search-clear-button {
     position: absolute;
-    right: 35px;
+    right: 7px;
     top: 50%;
     transform: translateY(-50%);
 }
