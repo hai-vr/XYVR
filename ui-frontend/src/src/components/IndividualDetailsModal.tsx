@@ -23,7 +23,8 @@ function IndividualDetailsModal({isOpen, onClose, individual, debugMode}: Indivi
             <Individual individual={individual} isVisible={true} showBio={true} showAlias={true}
                         setMergeAccountGuidOrUnd={() => {}}
                         isBeingMerged={false} displayNameOfOtherBeingMergedOrUnd={undefined}
-                        compactMode={false} searchField="" showNotes={true} debugMode={debugMode} />
+                        compactMode={false} searchField="" showNotes={true} debugMode={debugMode}
+                        showCopyToClipboard={true} />
         </Modal>
     );
 }

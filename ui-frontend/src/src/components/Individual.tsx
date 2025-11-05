@@ -24,6 +24,8 @@ interface IndividualProps {
     searchField: string;
     showNotes: boolean;
     debugMode: DebugFlags;
+    setModalIndividual?: (individual: FrontIndividual) => void
+    showCopyToClipboard?: boolean;
 }
 
 function Individual({
@@ -39,7 +41,9 @@ function Individual({
                         compactMode,
                         searchField,
                         showNotes,
-                        debugMode
+                        debugMode,
+                        setModalIndividual = undefined,
+                        showCopyToClipboard
                     }: IndividualProps) {
     const dotNetApi = new DotNetApi();
     const { t } = useTranslation();
@@ -239,7 +243,18 @@ function Individual({
                     {filteredAccounts && filteredAccounts.length > 0 ? (
                         <div className="accounts-grid">
                             {filteredAccounts.map((account) => (
-                                <Account key={account.guid} account={account} showAlias={showAlias} showNotes={showNotes} debugMode={debugMode} imposter={false} showSession={true} isSessionView={false} />
+                                <Account key={account.guid}
+                                         account={account}
+                                         showAlias={showAlias}
+                                         showNotes={showNotes}
+                                         debugMode={debugMode}
+                                         imposter={false}
+                                         showSession={true}
+                                         isSessionView={false}
+                                         showCopyToClipboard={showCopyToClipboard}
+                                         setModalIndividual={fusionAccounts && setModalIndividual}
+                                         clickOpensIndividual={fusionAccounts && individual}
+                                />
                             ))}
                         </div>
                     ) : (

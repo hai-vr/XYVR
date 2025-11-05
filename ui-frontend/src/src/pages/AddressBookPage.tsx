@@ -559,6 +559,7 @@ function AddressBookPage({ isDark,
                                 searchField={debouncedSearchField}
                                 showNotes={false}
                                 debugMode={debugMode}
+                                setModalIndividual={setModalIndividual}
                             />
                     ))}
                 </div>}
@@ -581,6 +582,7 @@ function AddressBookPage({ isDark,
                                 searchField={debouncedSearchField}
                                 showNotes={showNotes}
                                 debugMode={debugMode}
+                                setModalIndividual={setModalIndividual}
                             />
                         ))}
                     </div>

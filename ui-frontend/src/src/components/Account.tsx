@@ -25,6 +25,7 @@ interface AccountProps {
     resoniteShowSubSessions?: boolean,
     clickOpensIndividual?: FrontIndividual,
     setModalIndividual?: (individual: FrontIndividual) => void
+    showCopyToClipboard?: boolean,
 }
 
 // @ts-ignore
@@ -38,7 +39,8 @@ const Account = ({
                      isSessionView,
                      resoniteShowSubSessions = true,
                      clickOpensIndividual,
-                     setModalIndividual = undefined
+                     setModalIndividual = undefined,
+                     showCopyToClipboard
                  }: AccountProps) => {
     const dotNetApi = new DotNetApi();
     const {t} = useTranslation();
@@ -193,13 +195,13 @@ const Account = ({
                                 <Globe size={16}/>
                             </a>
                         )}
-                        <button
+                        {showCopyToClipboard && <button
                             onClick={copyInAppIdentifier}
                             className="icon-button"
                             title={t('account.copyId.title', {id: _D(account.inAppIdentifier, debugMode)})}
                         >
                             <Clipboard size={16}/>
-                        </button>
+                        </button>}
                     </div>)}
                 </div>
 
