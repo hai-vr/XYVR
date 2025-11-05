@@ -5,7 +5,6 @@
     border-radius: var(--ideal-border-radius);
     padding: 24px;
     box-shadow: 0 2px 8px var(--shadow-medium);
-    cursor: pointer;
     outline: 0px solid transparent;
     outline-offset: -4px;
     transition: outline 0.3s ease;
@@ -18,7 +17,6 @@
     border-radius: var(--ideal-border-radius);
     padding: 6px;
     box-shadow: 0 2px 8px var(--shadow-medium);
-    cursor: pointer;
     outline: 0px solid transparent;
     outline-offset: -4px;
     transition: outline 0.3s ease;

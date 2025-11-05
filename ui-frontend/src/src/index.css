@@ -418,3 +418,7 @@ button:disabled:hover {
 .link-pointer {
     cursor: pointer;
 }
+
+.modal-pointer {
+    cursor: pointer;
+}

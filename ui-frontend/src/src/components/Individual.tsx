@@ -9,6 +9,7 @@ import {type DebugFlags, DemonstrationMode} from "../types/DebugFlags.ts";
 import {DotNetApi} from "../DotNetApi.ts";
 import { useTranslation } from "react-i18next";
 import IndividualDetailsModal from "./IndividualDetailsModal.tsx";
+import clsx from "clsx";
 
 interface IndividualProps {
     individual: FrontIndividual;
@@ -179,7 +180,7 @@ function Individual({
                         <div className="individual-avatar">
                             {debugMode.demoMode !== DemonstrationMode.Disabled ? '?' : getFirstNonPunctuationChar(individual.displayName)}
                         </div>
-                        <h3 className="individual-name" onClick={fusionAccounts && handleNameClick}>
+                        <h3 className={clsx('individual-name', fusionAccounts && 'modal-pointer')} onClick={fusionAccounts && handleNameClick}>
                             {_D(individual.displayName, debugMode)}
                         </h3>
                         {individual.isAnyContact && (

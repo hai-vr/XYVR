@@ -13,6 +13,7 @@ import {AppIcon} from "./AppIcon.tsx";
 import {LiveSession} from "./LiveSession.tsx";
 import {DotNetApi} from "../DotNetApi.ts";
 import {useTranslation} from "react-i18next";
+import clsx from "clsx";
 
 interface AccountProps {
     account: FrontAccount,
@@ -138,7 +139,7 @@ const Account = ({
                     <div className="account-info">
                         {!isSessionView && <AppIcon namedApp={account.namedApp}/>}
                         <div>
-                            <div className="account-display-name"
+                            <div className={clsx("account-display-name", clickOpensIndividual && 'modal-pointer')}
                                  onClick={clickOpensIndividual && handleNameClick || undefined}
                                  title={!imposter && account.allDisplayNames?.map(it => _D(it, debugMode)).join('\n') || ``}>
                                 {isSessionView && (getOnlineStatusIcon(account.onlineStatus || OnlineStatus.Offline, isKnownSession))}
