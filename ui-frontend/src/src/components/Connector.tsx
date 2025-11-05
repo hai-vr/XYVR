@@ -106,7 +106,7 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated, 
     return (
         <div className="connector-card">
             {connector.account && (
-                <Account account={connector.account as FrontAccount} debugMode={debugMode} imposter={false} showAlias={false} showNotes={false} isSessionView={false} />
+                <Account account={connector.account as FrontAccount} debugMode={debugMode} imposter={false} showAlias={false} showNotes={false} isSessionView={false} showCopyToClipboard={true} />
             )}
             {!connector.account && (
                 <Account account={tempAccount as FrontAccount} debugMode={DISABLED_DEBUG_FLAGS} imposter={true} showAlias={false} showNotes={false} isSessionView={false} />
