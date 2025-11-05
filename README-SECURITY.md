@@ -50,7 +50,7 @@ To prevent remote code execution, this function only accepts URLs that start wit
 For the same reason as above, in [ResoniteLiveMonitoring.cs](account-resonite/ResoniteLiveMonitoring.cs), the function
 `ResoniteLiveMonitoring.DANGER_OpenResoniteSession(string sessionId)` will start a process.
 
-To prevent remote code execution, this function only accepts session IDs that start with `S-` followed by a GUID, and then concatenates it
+To prevent remote code execution, this function only accepts session IDs that start with `S-`, and then concatenates it
 after `resonite:?session=ressession:///` before passing it as a process to start.
 
 ### Submitting events from .NET to the WebView2
