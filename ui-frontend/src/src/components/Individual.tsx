@@ -175,7 +175,7 @@ function Individual({
                         <div className="individual-avatar">
                             {debugMode.demoMode !== DemonstrationMode.Disabled ? '?' : getFirstNonPunctuationChar(individual.displayName)}
                         </div>
-                        <h3 className="individual-name" onClick={handleNameClick}>
+                        <h3 className="individual-name" onClick={fusionAccounts && handleNameClick}>
                             {_D(individual.displayName, debugMode)}
                         </h3>
                         {individual.isAnyContact && (
@@ -290,12 +290,12 @@ function Individual({
                 )}
             </div>
 
-            <IndividualDetailsModal
+            {fusionAccounts && <IndividualDetailsModal
                 isOpen={isDetailsModalOpen}
                 onClose={() => setIsDetailsModalOpen(false)}
                 individual={individual}
                 debugMode={debugMode}
-            />
+            />}
         </>
     );
 }

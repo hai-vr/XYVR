@@ -1,5 +1,5 @@
 ﻿import React, {useEffect, useRef} from 'react';
-import {X} from 'lucide-react';
+// import {X} from 'lucide-react';
 import './Modal.css';
 
 interface ModalProps {
@@ -10,7 +10,7 @@ interface ModalProps {
     maxWidth?: string;
 }
 
-function Modal({isOpen, onClose, title, children, maxWidth = '600px'}: ModalProps) {
+function Modal({isOpen, onClose, /*title,*/ children, maxWidth = '600px'}: ModalProps) {
     const modalRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -49,16 +49,16 @@ function Modal({isOpen, onClose, title, children, maxWidth = '600px'}: ModalProp
                 style={{maxWidth}}
                 onClick={(e) => e.stopPropagation()}
             >
-                <div className="modal-header">
-                    {title && <h2 className="modal-title">{title}</h2>}
-                    <button
-                        className="modal-close-button"
-                        onClick={onClose}
-                        aria-label="Close modal"
-                    >
-                        <X size={24}/>
-                    </button>
-                </div>
+                {/*<div className="modal-header">*/}
+                {/*    {title && <h2 className="modal-title">{title}</h2>}*/}
+                {/*    <button*/}
+                {/*        className="modal-close-button"*/}
+                {/*        onClick={onClose}*/}
+                {/*        aria-label="Close modal"*/}
+                {/*    >*/}
+                {/*        <X size={24}/>*/}
+                {/*    </button>*/}
+                {/*</div>*/}
                 <div className="modal-body">
                     {children}
                 </div>

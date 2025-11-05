@@ -8,21 +8,22 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1000;
+    z-index: 9999; /* High z-index to ensure it's on top */
     padding: 20px;
     backdrop-filter: blur(2px);
 }
 
 .modal-content {
-    background: var(--bg-primary);
-    border-radius: 12px;
-    box-shadow: 0 20px 25px -5px var(--shadow-medium), 0 10px 10px -5px var(--shadow-light);
+    /*background: var(--bg-primary);*/
+    /*border-radius: var(--ideal-border-radius);*/
+    /*box-shadow: 0 20px 25px -5px var(--shadow-medium), 0 10px 10px -5px var(--shadow-light);*/
     width: 100%;
     max-height: 90vh;
     display: flex;
     flex-direction: column;
     overflow: hidden;
     animation: modalSlideIn 0.2s ease-out;
+    z-index: 10000; /* Even higher z-index for the content */
 }
 
 @keyframes modalSlideIn {
@@ -84,7 +85,7 @@
     }
 
     .modal-content {
-        border-radius: 8px;
+        border-radius: var(--ideal-border-radius);
         max-height: 95vh;
     }
 

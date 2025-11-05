@@ -115,6 +115,7 @@ export function LiveSession({liveSession, individuals, debugMode, mini, resonite
                                             showSession={false}
                                             isSessionView={true}
                                             resoniteShowSubSessions={resoniteShowSubSessions}
+                                            clickOpensIndividual={matchingIndividual}
                                         />
                                     );
                                 }
