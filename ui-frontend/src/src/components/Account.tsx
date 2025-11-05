@@ -13,8 +13,6 @@ import {AppIcon} from "./AppIcon.tsx";
 import {LiveSession} from "./LiveSession.tsx";
 import {DotNetApi} from "../DotNetApi.ts";
 import {useTranslation} from "react-i18next";
-import IndividualDetailsModal from "./IndividualDetailsModal.tsx";
-import {useState} from "react";
 
 interface AccountProps {
     account: FrontAccount,
@@ -25,7 +23,8 @@ interface AccountProps {
     showSession?: boolean,
     isSessionView: boolean,
     resoniteShowSubSessions?: boolean,
-    clickOpensIndividual?: FrontIndividual
+    clickOpensIndividual?: FrontIndividual,
+    setModalIndividual?: (individual: FrontIndividual) => void
 }
 
 // @ts-ignore
@@ -38,12 +37,11 @@ const Account = ({
                      showSession,
                      isSessionView,
                      resoniteShowSubSessions = true,
-                     clickOpensIndividual
+                     clickOpensIndividual,
+                     setModalIndividual = undefined
                  }: AccountProps) => {
     const dotNetApi = new DotNetApi();
     const {t} = useTranslation();
-
-    const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
     const hasNote = account.isAnyCallerNote;
 
@@ -57,7 +55,7 @@ const Account = ({
     };
 
     const handleNameClick = () => {
-        setIsDetailsModalOpen(true);
+        if (setModalIndividual && clickOpensIndividual) setModalIndividual(clickOpensIndividual);
     };
 
     const getAppDisplayName = (account: FrontAccount) => {
@@ -138,7 +136,8 @@ const Account = ({
                     <div className="account-info">
                         {!isSessionView && <AppIcon namedApp={account.namedApp}/>}
                         <div>
-                            <div className="account-display-name" onClick={clickOpensIndividual && handleNameClick || undefined}
+                            <div className="account-display-name"
+                                 onClick={clickOpensIndividual && handleNameClick || undefined}
                                  title={!imposter && account.allDisplayNames?.map(it => _D(it, debugMode)).join('\n') || ``}>
                                 {isSessionView && (getOnlineStatusIcon(account.onlineStatus || OnlineStatus.Offline, isKnownSession))}
                                 {isSessionView && ' '}
@@ -203,14 +202,14 @@ const Account = ({
                         </button>
                     </div>)}
                 </div>
-    
+
                 {account.isPendingUpdate && (
                     <p className="warning-message">
                         <span className="warning-icon"><TriangleAlert/></span>
                         {t('account.pendingUpdate.message')}
                     </p>
                 )}
-    
+
                 {showNotes && account.callers && account.callers.filter(caller => caller.note).map((caller, index) => (
                     <div key={index} className="note-container">
                         <div className="note-text">
@@ -221,7 +220,7 @@ const Account = ({
                         </div>
                     </div>
                 ))}
-    
+
                 {!isConnector && !isSessionView && account.mainSession?.liveSession
                     && <LiveSession liveSession={account.mainSession.liveSession} individuals={[]} debugMode={debugMode}
                                     mini={true}/>}
@@ -229,13 +228,6 @@ const Account = ({
                     .map((session) => (session.guid != account.mainSession?.sessionGuid &&
                         <LiveSession liveSession={session} individuals={[]} debugMode={debugMode} mini={true}/>))}
             </div>
-
-            {clickOpensIndividual && <IndividualDetailsModal
-                isOpen={isDetailsModalOpen}
-                onClose={() => setIsDetailsModalOpen(false)}
-                individual={clickOpensIndividual}
-                debugMode={debugMode}
-            />}
         </>
     );
 };

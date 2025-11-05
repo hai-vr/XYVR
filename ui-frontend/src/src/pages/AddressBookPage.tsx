@@ -24,6 +24,7 @@ import {type DebugFlags, DemonstrationMode} from "../types/DebugFlags.ts";
 import {LiveSession} from "../components/LiveSession.tsx";
 import {DotNetApi} from "../DotNetApi.ts";
 import {useTranslation} from "react-i18next";
+import IndividualDetailsModal from "../components/IndividualDetailsModal.tsx";
 
 const sortIndividuals = (individuals: FrontIndividual[], unparsedSearchField: string) => {
     if (!unparsedSearchField) {
@@ -118,6 +119,7 @@ function AddressBookPage({ isDark,
     const [displayNameOfOtherBeingMergedOrUnd, setDisplayNameOfOtherBeingMergedOrUnd] = useState<string | undefined>(undefined);
 
     const [liveSessionArray, setLiveSessionArray] = useState<FrontLiveSession[]>([]);
+    const [modalIndividual, setModalIndividual] = useState<FrontIndividual | undefined>(undefined);
 
     // Infinite scrolling state
     const [displayedCount, setDisplayedCount] = useState(50); // Start with 50 items
@@ -533,7 +535,7 @@ function AddressBookPage({ isDark,
                                     return 0;
                                 })
                                 .map((liveSession) => (
-                                    <LiveSession liveSession={liveSession} individuals={individuals} debugMode={debugMode} mini={false} resoniteShowSubSessions={resoniteShowSubSessions} />
+                                    <LiveSession liveSession={liveSession} individuals={individuals} debugMode={debugMode} mini={false} resoniteShowSubSessions={resoniteShowSubSessions} setModalIndividual={setModalIndividual} />
                                 ))}
                         </div>
                     </div>
@@ -602,6 +604,13 @@ function AddressBookPage({ isDark,
                     )}
                 </>}
             </div>
+            
+            {modalIndividual && <IndividualDetailsModal
+                isOpen={true}
+                onClose={() => setModalIndividual(undefined)}
+                individual={modalIndividual}
+                debugMode={debugMode}
+            />}
         </>
     )
 }

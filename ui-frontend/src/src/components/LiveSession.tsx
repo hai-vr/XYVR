@@ -14,10 +14,18 @@ interface LiveSessionProps {
     individuals: FrontIndividual[],
     debugMode: DebugFlags,
     mini: boolean,
-    resoniteShowSubSessions?: boolean
+    resoniteShowSubSessions?: boolean,
+    setModalIndividual?: (individual: FrontIndividual) => void
 }
 
-export function LiveSession({liveSession, individuals, debugMode, mini, resoniteShowSubSessions = true}: LiveSessionProps) {
+export function LiveSession({
+                                liveSession,
+                                individuals,
+                                debugMode,
+                                mini,
+                                resoniteShowSubSessions = true,
+                                setModalIndividual = undefined
+                            }: LiveSessionProps) {
     const dotNetApi = new DotNetApi();
     const {t} = useTranslation();
 
@@ -116,6 +124,7 @@ export function LiveSession({liveSession, individuals, debugMode, mini, resonite
                                             isSessionView={true}
                                             resoniteShowSubSessions={resoniteShowSubSessions}
                                             clickOpensIndividual={matchingIndividual}
+                                            setModalIndividual={setModalIndividual}
                                         />
                                     );
                                 }
