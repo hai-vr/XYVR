@@ -59,6 +59,7 @@ public partial class MainWindow : Window
         WebView.CoreWebView2.AddHostObjectToScript("liveApi", AppHandle.Lifecycle.LiveBff);
         
         WebView.CoreWebView2.AddWebResourceRequestedFilter("thumbcache://*", CoreWebView2WebResourceContext.All);
+        WebView.CoreWebView2.AddWebResourceRequestedFilter("individualprofile://*", CoreWebView2WebResourceContext.All);
         WebView.CoreWebView2.WebResourceRequested += CoreWebView2_WebResourceRequested;
 
         // Intercept clicks on links
@@ -74,7 +75,11 @@ public partial class MainWindow : Window
     private void CoreWebView2_WebResourceRequested(object? sender, CoreWebView2WebResourceRequestedEventArgs e)
     {
         var requestUri = e.Request.Uri;
-        if (!requestUri.StartsWith("thumbcache://")) return;
+        var isAProfileRequest = requestUri.StartsWith("individualprofile://");
+        
+        if (!requestUri.StartsWith("thumbcache://") && !isAProfileRequest) return;
+
+        var tail = isAProfileRequest ? requestUri.Substring("individualprofile://".Length) : requestUri.Substring("thumbcache://".Length);
         
         var lifecycleLiveBff = AppHandle.Lifecycle.LiveBff;
         var deferal = e.GetDeferral();
@@ -83,10 +88,9 @@ public partial class MainWindow : Window
         {
             try
             {
-                var thumbnailHash = requestUri.Substring("thumbcache://".Length);
-                if (VRChatThumbnailCache.ContainsPathTraversalElements(thumbnailHash))
+                if (VRChatThumbnailCache.ContainsPathTraversalElements(tail))
                 {
-                    XYVRLogging.ErrorWriteLine(this, "Hash suspiciously contains path traversal elements. We will return not found instead.");
+                    XYVRLogging.ErrorWriteLine(this, "URL suspiciously contains path traversal elements. We will return not found instead.");
                     
                     await Dispatcher.InvokeAsync(() => { e.Response = WebView.CoreWebView2.Environment.CreateWebResourceResponse(
                         null,
@@ -97,24 +101,51 @@ public partial class MainWindow : Window
                 }
                 else
                 {
-                    var thumbnailData = await lifecycleLiveBff.GetThumbnailBytesOrNull(thumbnailHash);
-                    if (thumbnailData != null)
+                    if (!isAProfileRequest)
                     {
-                        await Dispatcher.InvokeAsync(() => { e.Response = WebView.CoreWebView2.Environment.CreateWebResourceResponse(
-                            new MemoryStream(thumbnailData),
-                            200,
-                            "OK",
-                            "Content-Type: image/png"
-                        ); deferal.Complete(); });
+                        var thumbnailHash = tail;
+                        var thumbnailData = await lifecycleLiveBff.GetThumbnailBytesOrNull(thumbnailHash);
+                        if (thumbnailData != null)
+                        {
+                            await Dispatcher.InvokeAsync(() => { e.Response = WebView.CoreWebView2.Environment.CreateWebResourceResponse(
+                                new MemoryStream(thumbnailData),
+                                200,
+                                "OK",
+                                "Content-Type: image/png"
+                            ); deferal.Complete(); });
+                        }
+                        else
+                        {
+                            await Dispatcher.InvokeAsync(() => { e.Response = WebView.CoreWebView2.Environment.CreateWebResourceResponse(
+                                null,
+                                404,
+                                "Not Found",
+                                "Content-Type: text"
+                            ); deferal.Complete(); });
+                        }
                     }
                     else
                     {
-                        await Dispatcher.InvokeAsync(() => { e.Response = WebView.CoreWebView2.Environment.CreateWebResourceResponse(
-                            null,
-                            404,
-                            "Not Found",
-                            "Content-Type: text"
-                        ); deferal.Complete(); });
+                        var individualGuid = tail;
+                        var profileIllustration = await AppHandle.Lifecycle.ProfileIllustrationRepository.GetOrNull(individualGuid);
+                        if (profileIllustration != null)
+                        {
+                            await Dispatcher.InvokeAsync(() => { e.Response = WebView.CoreWebView2.Environment.CreateWebResourceResponse(
+                                new MemoryStream(profileIllustration.data),
+                                200,
+                                "OK",
+                                $"Content-Type: {profileIllustration.type}"
+                            ); deferal.Complete(); });
+                        }
+                        else
+                        {
+                            await Dispatcher.InvokeAsync(() => { e.Response = WebView.CoreWebView2.Environment.CreateWebResourceResponse(
+                                null,
+                                404,
+                                "Not Found",
+                                "Content-Type: text"
+                            ); deferal.Complete(); });
+                        }
                     }
                 }
             }

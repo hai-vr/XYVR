@@ -101,6 +101,43 @@ namespace XYVR.UI.Photino
                         contentType = result != null ? "image/png" : "text/plain";
 
                         return result;
+                    })
+                    .RegisterCustomSchemeHandler("individualprofile", (object sender, string scheme, string url, out string contentType) =>
+                    {
+                        var task = Task.Run(async () =>
+                        {
+                            try
+                            {
+                                XYVRLogging.WriteLine(typeof(Program), url);
+                        
+                                var individualGuid = url.Substring("individualprofile://".Length);
+                                if (VRChatThumbnailCache.ContainsPathTraversalElements(individualGuid))
+                                {
+                                    XYVRLogging.ErrorWriteLine(typeof(Program), "URL suspiciously contains path traversal elements. We will return not found instead.");
+
+                                    return null;
+                                }
+
+                                var data = await _appLifecycle.ProfileIllustrationRepository.GetOrNull(individualGuid);
+                                if (data == null)
+                                {
+                                    return null;
+                                }
+                        
+                                return data;
+                            }
+                            catch (Exception e)
+                            {
+                                XYVRLogging.ErrorWriteLine(typeof(Program), e);
+                                throw;
+                            }
+                        });
+                        task.Wait();
+
+                        var result = task.Result;
+                        contentType = result != null ? result.type : "text/plain";
+
+                        return result != null ? new MemoryStream(result.data) : null;
                     });
 
                 _window.SetIconFile(RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "favicon.ico" : "icon.png");

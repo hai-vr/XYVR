@@ -50,7 +50,7 @@ export function LiveSession({
     };
 
     let background = liveSession.thumbnailUrl && `url(${liveSession.thumbnailUrl}), var(--live-session-overlay)`
-        || liveSession.thumbnailHash && `url(${dotNetApi.HashToUrl(liveSession.thumbnailHash)}), var(--live-session-overlay)`
+        || liveSession.thumbnailHash && `url(${dotNetApi.WorldThumbnailHashToUrl(liveSession.thumbnailHash)}), var(--live-session-overlay)`
         || 'var(--live-session-overlay)';
     return (<div key={liveSession.guid} className="live-session-card live-session-thumbnail-bg">
         <div style={{

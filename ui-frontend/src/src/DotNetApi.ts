@@ -18,8 +18,12 @@
         return ((!!(window.external as any).sendMessage) || (!!(window.chrome?.webview)) || false);
     }
 
-    public HashToUrl(thumbnailHash: string) {
+    public WorldThumbnailHashToUrl(thumbnailHash: string) {
         return `thumbcache://${thumbnailHash}`; 
+    }
+
+    public IndividualProfileIllustrationToUrl(individualGuid: string) {
+        return `individualprofile://${individualGuid}`; 
     }
 
     // noinspection JSDeprecatedSymbols
@@ -30,6 +34,8 @@
     async appApiFusionIndividuals(toAugment: string, toDestroy: string): Promise<string> { return this.dispatch('appApi', 'FusionIndividuals', [toAugment, toDestroy]); }
     async appApiDesolidarizeIndividuals(toDesolidarize: string): Promise<string> { return this.dispatch('appApi', 'DesolidarizeIndividuals', [toDesolidarize]); }
     async appApiOpenLink(url: string): Promise<string> { return this.dispatch('appApi', 'OpenLink', [url]); }
+    
+    async appApiAssignProfileIllustration(data: string): Promise<string> { return this.dispatch('appApi', 'AssignProfileIllustration', [data]); }
 
     async liveApiGetAllExistingLiveSessionData(): Promise<string> { return this.dispatch('liveApi', 'GetAllExistingLiveSessionData'); }
     async liveApiMakeGameClientJoinOrSelfInvite(appName: string, inAppIdentifier: string, sessionId: string): Promise<string> { return this.dispatch('liveApi', 'MakeGameClientJoinOrSelfInvite', [appName, inAppIdentifier, sessionId]); }

@@ -13,6 +13,7 @@ public interface IAppBFF
     Task FusionIndividuals(string toDesolidarize, string toDestroy);
     Task DesolidarizeIndividuals(string toDesolidarize);
     void OpenLink(string url);
+    Task AssignProfileIllustration(string data);
 }
 
 [ComVisible(true)]
@@ -79,4 +80,31 @@ public class AppBFF : IAppBFF
         _appLifecycle.IndividualRepository.DesolidarizeIndividualAccounts(individual);
         await Scaffolding.SaveRepository(_appLifecycle.IndividualRepository);
     }
+
+    public async Task AssignProfileIllustration(string data)
+    {
+        var profileIllustration = JsonConvert.DeserializeObject<ProfileIllustrationRequest>(data);
+        XYVRLogging.WriteLine(this, $"Assign profile illustration was called: {profileIllustration.individualGuid}");
+
+        // This is just to check that it exists
+        _ = _appLifecycle.IndividualRepository.GetByGuid(profileIllustration.individualGuid);
+
+        var byteData = Convert.FromBase64String(profileIllustration.file.base64Content);
+        await _appLifecycle.ProfileIllustrationRepository.AssignIllustration(profileIllustration.individualGuid, byteData, profileIllustration.file.type);
+    }
+}
+
+public class ProfileIllustrationRequest
+{
+    public string individualGuid;
+    public ProfileIllustrationFile file;
+}
+
+public class ProfileIllustrationFile
+{
+    public string name;
+    public long size;
+    public string type;
+    public long lastModified;
+    public string base64Content;
 }

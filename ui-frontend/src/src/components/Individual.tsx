@@ -177,6 +177,7 @@ function Individual({
             <div className={`${!compactMode ? 'individual-container' : 'individual-container-compact'} ${!isVisible ? 'hidden' : ''} ${isBeingMerged ? 'being-merged' : ''}`}>
                 {!compactMode && (<>
                     <div className="individual-header">
+                        <img src={`individualprofile://${individual.guid}`}  alt="" />
                         <div className="individual-avatar">
                             {debugMode.demoMode !== DemonstrationMode.Disabled ? '?' : getFirstNonPunctuationChar(individual.displayName)}
                         </div>

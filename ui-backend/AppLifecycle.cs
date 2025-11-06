@@ -1,6 +1,7 @@
 ﻿using XYVR.Core;
 using XYVR.Data.Collection;
 using XYVR.Scaffold;
+using XYVR.UI.Backend.AuxiliaryRepositories;
 
 namespace XYVR.UI.Backend;
 
@@ -16,6 +17,8 @@ public class AppLifecycle
     public CredentialsManagement CredentialsMgt { get; private set; } = null!;
     public LiveStatusMonitoring LiveStatusMonitoring { get; private set; } = null!;
     public LiveMonitoringAgent LiveMonitoringAgent { get; private set; } = null!;
+    
+    public ProfileIllustrationRepository ProfileIllustrationRepository { get; private set; } = null!;
 
     private List<IAuthority> _authorities = null!;
 
@@ -61,6 +64,8 @@ public class AppLifecycle
         CredentialsMgt = new CredentialsManagement(await Scaffolding.OpenCredentials(), _authorities);
         LiveStatusMonitoring = new LiveStatusMonitoring();
         LiveMonitoringAgent = new LiveMonitoringAgent(ConnectorsMgt, CredentialsMgt, LiveStatusMonitoring);
+        
+        ProfileIllustrationRepository = new ProfileIllustrationRepository();
 
         _ = Task.Run(() => LiveBff.StartMonitoring()); // don't wait this;
     }
