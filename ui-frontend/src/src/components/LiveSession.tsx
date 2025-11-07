@@ -80,7 +80,7 @@ export function LiveSession({
             }}>
                 <div className="live-session-header">
                     <div className="live-session-world" style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
-                        {!mini && <AppIcon namedApp={liveSession.namedApp}/>}
+                        {!mini && <div style={{marginRight: '12px'}}><AppIcon namedApp={liveSession.namedApp}/></div>}
                         <div style={{
                             display: 'flex',
                             flexDirection: 'column',

@@ -40,12 +40,26 @@
 .app-icon {
     min-width: 32px;
     min-height: 32px;
+    max-width: 32px;
+    max-height: 32px;
     border-radius: var(--ideal-border-radius);
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-right: 12px;
     font-size: 14px;
+    background: var(--app-default);
+}
+
+.app-icon-mini {
+    min-width: 16px;
+    min-height: 24px;
+    max-width: 16px;
+    max-height: 24px;
+    font-size: 10px;
+}
+
+.app-icon-mini img {
+    transform: scale(0.5);
 }
 
 .app-icon.resonite {
@@ -62,10 +76,6 @@
 
 .app-icon.chilloutvr {
     background: var(--app-chilloutvr);
-}
-
-.app-icon.default {
-    background: var(--app-default);
 }
 
 .account-display-name {

@@ -27,7 +27,8 @@ interface AccountProps {
     clickOpensIndividual?: FrontIndividual,
     setModalIndividual?: (individual: FrontIndividual) => void,
     showCopyToClipboard?: boolean,
-    illustrativeDisplay?: boolean
+    illustrativeDisplay?: boolean,
+    showAccountIcon?: boolean
 }
 
 // @ts-ignore
@@ -43,7 +44,8 @@ const Account = ({
                      clickOpensIndividual,
                      setModalIndividual = undefined,
                      showCopyToClipboard,
-                     illustrativeDisplay
+                     illustrativeDisplay,
+                     showAccountIcon
                  }: AccountProps) => {
     const dotNetApi = new DotNetApi();
     const {t} = useTranslation();
@@ -136,7 +138,8 @@ const Account = ({
 
     return (
         <>
-            <div className={clsx("account-container", illustrativeDisplay && 'account-illustrative')} style={{position: 'relative'}}>
+            <div className={clsx("account-container", illustrativeDisplay && 'account-illustrative')}
+                 style={{position: 'relative'}}>
                 {illustrativeDisplay && clickOpensIndividual && <div style={{
                     background: `var(--account-illustrative-overlay), url("individualprofile://${clickOpensIndividual.guid}"), var(--bg-primary)`,
                     backgroundBlendMode: 'normal',
@@ -146,9 +149,14 @@ const Account = ({
                     position: 'absolute',
                     inset: 0,
                 }}></div>}
+                {illustrativeDisplay && clickOpensIndividual && showAccountIcon &&
+                    <div style={{position: 'absolute', bottom: 0, right: 0}}>
+                        <AppIcon namedApp={account.namedApp} mini={true}/>
+                    </div>}
                 <div className="account-header" style={{zIndex: 1}}>
                     <div className="account-info">
-                        {!isSessionView && <AppIcon namedApp={account.namedApp}/>}
+                        {!isSessionView &&
+                            <div style={{marginRight: '12px'}}><AppIcon namedApp={account.namedApp}/></div>}
                         <div>
                             <div className={clsx("account-display-name", clickOpensIndividual && 'modal-pointer')}
                                  onClick={clickOpensIndividual && handleNameClick || undefined}

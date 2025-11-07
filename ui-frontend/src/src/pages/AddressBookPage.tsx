@@ -572,7 +572,10 @@ function AddressBookPage({ isDark,
                             individual.accounts
                                 .filter(account => account.onlineStatus !== OnlineStatus.Offline && account.mainSession && account.mainSession.knowledge !== LiveSessionKnowledge.Known)
                                 .map((account) => (
-                                    <Account account={account} imposter={false} showAlias={false} showNotes={false} debugMode={debugMode} isSessionView={true} clickOpensIndividual={individual} setModalIndividual={setModalIndividual} showSession={false} illustrativeDisplay={true}/>)
+                                    <Account account={account} imposter={false} showAlias={false} showNotes={false}
+                                             debugMode={debugMode} isSessionView={true}
+                                             clickOpensIndividual={individual} setModalIndividual={setModalIndividual}
+                                             showSession={false} illustrativeDisplay={true} showAccountIcon={true} />)
                                 )
                             
                             // <Individual

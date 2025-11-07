@@ -2,29 +2,16 @@
 import {NamedApp, type NamedAppType} from "../types/CoreTypes.ts";
 import resoniteIcon from "../assets/Resonite_Wiki-Icon.png";
 import cvrIcon from "../assets/cvr_logo_small.png";
+import clsx from "clsx";
 
 interface AppIconProps {
-    namedApp: NamedAppType
+    namedApp: NamedAppType,
+    mini?: boolean
 }
 
 export class AppIcon extends Component<AppIconProps> {
     render() {
-        const { namedApp } = this.props;
-
-        const getAppIconClass = (namedApp: NamedAppType) => {
-            switch (namedApp) {
-                case NamedApp.Resonite:
-                    return "app-icon resonite";
-                case NamedApp.VRChat:
-                    return "app-icon vrchat";
-                case NamedApp.Cluster:
-                    return "app-icon cluster";
-                case NamedApp.ChilloutVR:
-                    return "app-icon chilloutvr";
-                default:
-                    return "app-icon default";
-            }
-        };
+        const {namedApp, mini} = this.props;
 
         const getAppIcon = (namedApp: NamedAppType) => {
             switch (namedApp) {
@@ -41,7 +28,13 @@ export class AppIcon extends Component<AppIconProps> {
             }
         };
 
-        return (<div className={getAppIconClass(namedApp)}>
+        return (<div className={clsx('app-icon', {
+            'resonite': namedApp === NamedApp.Resonite,
+            'vrchat': namedApp === NamedApp.VRChat,
+            'cluster': namedApp === NamedApp.Cluster,
+            'chilloutvr': namedApp === NamedApp.ChilloutVR,
+            'app-icon-mini': mini
+        })}>
             {getAppIcon(namedApp)}
         </div>)
     }
