@@ -83,14 +83,31 @@ public class AppBFF : IAppBFF
 
     public async Task AssignProfileIllustration(string data)
     {
-        var profileIllustration = JsonConvert.DeserializeObject<ProfileIllustrationRequest>(data);
-        XYVRLogging.WriteLine(this, $"Assign profile illustration was called: {profileIllustration.individualGuid}");
+        try
+        {
+            var profileIllustration = JsonConvert.DeserializeObject<ProfileIllustrationRequest>(data);
+            XYVRLogging.WriteLine(this, $"Assign profile illustration was called: {profileIllustration.individualGuid}");
 
-        // This is just to check that it exists
-        _ = _appLifecycle.IndividualRepository.GetByGuid(profileIllustration.individualGuid);
+            var fileType = profileIllustration.file.type;
+            var isValidFileType = fileType.Contains("/gif") || fileType.Contains("/png") || fileType.Contains("/webp") || fileType.Contains("/jpg") || fileType.Contains("/jpeg");
+            if (!isValidFileType)
+            {
+                throw new ArgumentException($"Not accepted file type: {fileType}");
+            }
 
-        var byteData = Convert.FromBase64String(profileIllustration.file.base64Content);
-        await _appLifecycle.ProfileIllustrationRepository.AssignIllustration(profileIllustration.individualGuid, byteData, profileIllustration.file.type);
+            // This is just to check that it exists
+            _ = _appLifecycle.IndividualRepository.GetByGuid(profileIllustration.individualGuid);
+
+            var byteData = Convert.FromBase64String(profileIllustration.file.base64Content);
+            await _appLifecycle.ProfileIllustrationRepository.AssignIllustration(profileIllustration.individualGuid, byteData, fileType);
+            await Scaffolding.SaveProfileIllustrationStorage(_appLifecycle.ProfileIllustrationRepository.SerializeStorage());
+
+        }
+        catch (Exception e)
+        {
+            XYVRLogging.ErrorWriteLine(this, e);
+            throw;
+        }
     }
 }
 

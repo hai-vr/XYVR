@@ -65,7 +65,7 @@ public class AppLifecycle
         LiveStatusMonitoring = new LiveStatusMonitoring();
         LiveMonitoringAgent = new LiveMonitoringAgent(ConnectorsMgt, CredentialsMgt, LiveStatusMonitoring);
         
-        ProfileIllustrationRepository = new ProfileIllustrationRepository();
+        ProfileIllustrationRepository = new ProfileIllustrationRepository(await Scaffolding.OpenProfileIllustrationStorage());
 
         _ = Task.Run(() => LiveBff.StartMonitoring()); // don't wait this;
     }

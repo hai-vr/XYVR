@@ -24,6 +24,8 @@ public static class Scaffolding
         internal const string ReactAppJsonFileName = "ui-preferences.json";
         internal const string WorldNameCacheFileName = ".cache_world-names.json";
         internal const string ThumbnailCacheFolderName = ".cache_thumbnails";
+        internal const string ProfileIllustrationsFolderName = "profile-illustrations";
+        internal const string ProfileIllustrationsJsonFileName = "profile-illustrations.json";
     }
     
     public static string LockfileFilePath => Path.Combine(SavePath(), "XYVRLockfile");
@@ -35,6 +37,8 @@ public static class Scaffolding
     private static string ReactAppJsonFilePath => Path.Combine(SavePath(), ScaffoldingFileNames.ReactAppJsonFileName);
     private static string WorldNameCacheJsonFilePath => Path.Combine(SavePath(), ScaffoldingFileNames.WorldNameCacheFileName);
     private static string ThumbnailCacheFolderPath => Path.Combine(SavePath(), ScaffoldingFileNames.ThumbnailCacheFolderName);
+    private static string ProfileIllustrationsFolderPath => Path.Combine(SavePath(), ScaffoldingFileNames.ProfileIllustrationsFolderName);
+    private static string ProfileIllustrationsJsonFilePath => Path.Combine(ProfileIllustrationsFolderPath, ScaffoldingFileNames.ProfileIllustrationsJsonFileName);
     
     private static readonly Encoding Encoding = Encoding.UTF8;
     private static readonly JsonSerializerSettings Serializer = new()
@@ -116,6 +120,17 @@ public static class Scaffolding
         EnsureRegistryHasEncryptionKeyForSavingSessionData();
         await SaveTo(serialized, CredentialsJsonFilePath, _encryptionKeyForSessionData);
     }
+
+    public static async Task<ProfileIllustrationStorage> OpenProfileIllustrationStorage()
+    {
+        Directory.CreateDirectory(ProfileIllustrationsFolderPath);
+        var result = await OpenIfExists<ProfileIllustrationStorage>(ProfileIllustrationsJsonFilePath, () => new ProfileIllustrationStorage());
+        result.SetPath(ProfileIllustrationsFolderPath);
+        result.PreProcess();
+        return result;
+    }
+    
+    public static async Task SaveProfileIllustrationStorage(ProfileIllustrationStorage storage) => await SaveTo(storage, ProfileIllustrationsJsonFilePath);
 
     public static VRChatThumbnailCache ThumbnailCache()
     {

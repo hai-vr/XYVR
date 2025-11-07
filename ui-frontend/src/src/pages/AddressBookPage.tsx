@@ -25,6 +25,7 @@ import {LiveSession} from "../components/LiveSession.tsx";
 import {DotNetApi} from "../DotNetApi.ts";
 import {useTranslation} from "react-i18next";
 import IndividualDetailsModal from "../components/IndividualDetailsModal.tsx";
+import Account from "../components/Account.tsx";
 
 const sortIndividuals = (individuals: FrontIndividual[], unparsedSearchField: string) => {
     if (!unparsedSearchField) {
@@ -541,26 +542,56 @@ function AddressBookPage({ isDark,
                     </div>
                 )}
 
-                {!debouncedSearchField && online.length > 0 && <div className={`individuals-grid ${compactMode ? 'compact-mode' : ''}`}>
+                {/*{!debouncedSearchField && online.length > 0 && <div className={`individuals-grid ${compactMode ? 'compact-mode' : ''}`}>*/}
+                {/*    {online*/}
+                {/*        .map((individual, index) => (*/}
+                {/*            <Individual*/}
+                {/*                key={individual.guid || index}*/}
+                {/*                individual={individual}*/}
+                {/*                isVisible={true}*/}
+                {/*                showBio={showBio}*/}
+                {/*                showAlias={showAlias}*/}
+                {/*                setMergeAccountGuidOrUnd={setMergeAccountGuidOrUnd}*/}
+                {/*                isBeingMerged={mergeAccountGuidOrUnd === individual.guid}*/}
+                {/*                displayNameOfOtherBeingMergedOrUnd={displayNameOfOtherBeingMergedOrUnd}*/}
+                {/*                fusionAccounts={fusionAccounts}*/}
+                {/*                unmergeAccounts={unmergeAccounts}*/}
+                {/*                compactMode={true}*/}
+                {/*                searchField={debouncedSearchField}*/}
+                {/*                showNotes={false}*/}
+                {/*                debugMode={debugMode}*/}
+                {/*                setModalIndividual={setModalIndividual}*/}
+                {/*            />*/}
+                {/*    ))}*/}
+                {/*</div>}*/}
+
+                {/*{!debouncedSearchField && online.length > 0 && <div className={`individuals-grid ${compactMode ? 'compact-mode' : ''}`}>*/}
+                {!debouncedSearchField && online.length > 0 && <div className={`live-session-accounts-grid ${compactMode ? 'compact-mode' : ''}`}>
                     {online
-                        .map((individual, index) => (
-                            <Individual
-                                key={individual.guid || index}
-                                individual={individual}
-                                isVisible={true}
-                                showBio={showBio}
-                                showAlias={showAlias}
-                                setMergeAccountGuidOrUnd={setMergeAccountGuidOrUnd}
-                                isBeingMerged={mergeAccountGuidOrUnd === individual.guid}
-                                displayNameOfOtherBeingMergedOrUnd={displayNameOfOtherBeingMergedOrUnd}
-                                fusionAccounts={fusionAccounts}
-                                unmergeAccounts={unmergeAccounts}
-                                compactMode={true}
-                                searchField={debouncedSearchField}
-                                showNotes={false}
-                                debugMode={debugMode}
-                                setModalIndividual={setModalIndividual}
-                            />
+                        .map((individual) => (
+                            individual.accounts
+                                .filter(account => account.onlineStatus !== OnlineStatus.Offline && account.mainSession && account.mainSession.knowledge !== LiveSessionKnowledge.Known)
+                                .map((account) => (
+                                    <Account account={account} imposter={false} showAlias={false} showNotes={false} debugMode={debugMode} isSessionView={true} clickOpensIndividual={individual} setModalIndividual={setModalIndividual} showSession={false} illustrativeDisplay={true}/>)
+                                )
+                            
+                            // <Individual
+                            //     key={individual.guid || index}
+                            //     individual={individual}
+                            //     isVisible={true}
+                            //     showBio={showBio}
+                            //     showAlias={showAlias}
+                            //     setMergeAccountGuidOrUnd={setMergeAccountGuidOrUnd}
+                            //     isBeingMerged={mergeAccountGuidOrUnd === individual.guid}
+                            //     displayNameOfOtherBeingMergedOrUnd={displayNameOfOtherBeingMergedOrUnd}
+                            //     fusionAccounts={fusionAccounts}
+                            //     unmergeAccounts={unmergeAccounts}
+                            //     compactMode={true}
+                            //     searchField={debouncedSearchField}
+                            //     showNotes={false}
+                            //     debugMode={debugMode}
+                            //     setModalIndividual={setModalIndividual}
+                            // />
                     ))}
                 </div>}
 

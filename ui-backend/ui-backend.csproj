@@ -11,4 +11,9 @@
       <ProjectReference Include="..\development-scaffold\development-scaffold.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Magick.NET-Q16-AnyCPU" Version="14.9.1" />
+      <PackageReference Include="Magick.NET.Core" Version="14.9.1" />
+    </ItemGroup>
+
 </Project>

@@ -11,6 +11,7 @@ public static class XYVRGuids
     public static string ForSession() => InternalNewGuid();
     public static string ForRequest() => InternalNewGuid();
     public static string ForTrail() => InternalNewGuid();
+    public static string ForProfileIllustrationFileName() => InternalNewGuid();
     
     public static string ForResoniteMachineId() => InternalNewGuid();
 

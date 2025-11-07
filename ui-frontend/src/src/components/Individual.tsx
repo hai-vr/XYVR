@@ -175,9 +175,19 @@ function Individual({
     return (
         <>
             <div className={`${!compactMode ? 'individual-container' : 'individual-container-compact'} ${!isVisible ? 'hidden' : ''} ${isBeingMerged ? 'being-merged' : ''}`}>
+                {!compactMode && <div style={{position: 'relative', width: 150, height: 225}}>
+                    <div style={{
+                        background: `var(--account-illustrative-overlay), url("individualprofile://${individual.guid}"), var(--bg-primary)`,
+                        backgroundBlendMode: 'normal',
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        backgroundRepeat: 'no-repeat',
+                        position: 'absolute',
+                        inset: 0,
+                    }}></div>
+                </div>}
                 {!compactMode && (<>
                     <div className="individual-header">
-                        <img src={`individualprofile://${individual.guid}`}  alt="" />
                         <div className="individual-avatar">
                             {debugMode.demoMode !== DemonstrationMode.Disabled ? '?' : getFirstNonPunctuationChar(individual.displayName)}
                         </div>

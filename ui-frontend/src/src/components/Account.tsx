@@ -25,8 +25,9 @@ interface AccountProps {
     isSessionView: boolean,
     resoniteShowSubSessions?: boolean,
     clickOpensIndividual?: FrontIndividual,
-    setModalIndividual?: (individual: FrontIndividual) => void
+    setModalIndividual?: (individual: FrontIndividual) => void,
     showCopyToClipboard?: boolean,
+    illustrativeDisplay?: boolean
 }
 
 // @ts-ignore
@@ -41,7 +42,8 @@ const Account = ({
                      resoniteShowSubSessions = true,
                      clickOpensIndividual,
                      setModalIndividual = undefined,
-                     showCopyToClipboard
+                     showCopyToClipboard,
+                     illustrativeDisplay
                  }: AccountProps) => {
     const dotNetApi = new DotNetApi();
     const {t} = useTranslation();
@@ -134,8 +136,17 @@ const Account = ({
 
     return (
         <>
-            <div className="account-container">
-                <div className="account-header">
+            <div className={clsx("account-container", illustrativeDisplay && 'account-illustrative')} style={{position: 'relative'}}>
+                {illustrativeDisplay && clickOpensIndividual && <div style={{
+                    background: `var(--account-illustrative-overlay), url("individualprofile://${clickOpensIndividual.guid}"), var(--bg-primary)`,
+                    backgroundBlendMode: 'normal',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    backgroundRepeat: 'no-repeat',
+                    position: 'absolute',
+                    inset: 0,
+                }}></div>}
+                <div className="account-header" style={{zIndex: 1}}>
                     <div className="account-info">
                         {!isSessionView && <AppIcon namedApp={account.namedApp}/>}
                         <div>
@@ -185,7 +196,7 @@ const Account = ({
                                 {t('account.badge.bot')}
                             </span>
                         )}
-                        {(account.namedApp === "VRChat" || account.namedApp === "ChilloutVR") && (
+                        {!illustrativeDisplay && (account.namedApp === "VRChat" || account.namedApp === "ChilloutVR") && (
                             <a
                                 onClick={openLink} onAuxClick={(e) => e.button === 1 && openLink()}
                                 onMouseDown={(e) => e.preventDefault()}

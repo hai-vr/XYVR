@@ -97,7 +97,7 @@ export function LiveSession({
                 </div>
                 {!mini && <div className="live-session-participants">
                     <div className="session-accounts-container">
-                        <div className="accounts-grid">
+                        <div className="live-session-accounts-grid">
                             {liveSession.participants.filter(value => value.isKnown).map((participant, pIndex) => {
                                 const matchingIndividual = individuals.find(ind =>
                                     ind.accounts?.some(acc =>
@@ -125,6 +125,7 @@ export function LiveSession({
                                             resoniteShowSubSessions={resoniteShowSubSessions}
                                             clickOpensIndividual={matchingIndividual}
                                             setModalIndividual={setModalIndividual}
+                                            illustrativeDisplay={true}
                                         />
                                     );
                                 }

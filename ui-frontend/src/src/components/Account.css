@@ -8,6 +8,15 @@
     gap: 8px;
 }
 
+.account-illustrative {
+    height: 200px;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    box-shadow: 0 2px 8px var(--shadow-heavy);
+}
+
 .count-container {
     background: none;
     border: 1px solid rgba(0,0,0,0);
