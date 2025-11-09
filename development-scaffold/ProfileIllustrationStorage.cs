@@ -69,10 +69,23 @@ public class ProfileIllustrationStorage
 
         if (illustrations.TryGetValue(individualGuid, out var entry))
         {
-            return (entry.type, await File.ReadAllBytesAsync(Path.Combine(_profileIllustrationsFolderPath, entry.fileGuid)));
+            var fileGuid = entry.fileGuid;
+            
+            // For security purposes:
+            // We check if the Guid is valid to prevent weird path traversal, as if the stored data could contain untrusted input.
+            // Not sure what kind of attacks this may prevent, but might as well do a check here.
+            if (IsValidFileGuid(fileGuid))
+            {
+                return (entry.type, await File.ReadAllBytesAsync(Path.Combine(_profileIllustrationsFolderPath, fileGuid)));
+            }
         }
 
         return (null, null);
+    }
+
+    private static bool IsValidFileGuid(string fileGuid)
+    {
+        return Guid.TryParse(fileGuid, out _);
     }
 }
 
