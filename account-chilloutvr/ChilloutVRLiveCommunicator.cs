@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Collections.Concurrent;
+using System.Collections.Immutable;
 using XYVR.Core;
 
 namespace XYVR.AccountAuthority.ChilloutVR;
@@ -122,12 +123,16 @@ internal class ChilloutVRLiveCommunicator
                                 inAppHostIdentifier = location.owner.id,
                                 inAppHostDisplayName = location.owner.name
                             },
-                            
+
                             virtualSpaceDefaultCapacity = location.maxPlayer,
                             sessionCapacity = location.maxPlayer,
                             currentAttendance = location.currentPlayerCount,
 
                             thumbnailUrl = location.world.imageUrl,
+
+                            allParticipants = location.members
+                                .Select(x => new ImmutableParticipant { isHost = location.owner.id == x.id, isKnown = false, unknownAccount = new() { inAppDisplayName = x.name, inAppIdentifier = x.id} }
+                            ).ToImmutableArray(),
 
                             callerInAppIdentifier = _callerInAppIdentifier,
                         });

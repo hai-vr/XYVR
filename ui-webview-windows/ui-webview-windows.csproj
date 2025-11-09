@@ -18,7 +18,7 @@
 		<PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3477-prerelease" />
 	</ItemGroup>
 
-	<Target Name="BuildReactApp" BeforeTargets="Build" Condition="false">
+	<Target Name="BuildReactApp" BeforeTargets="Build" Condition="true">
 		<Exec Command="npm run build-and-copy" WorkingDirectory="../ui-frontend/src" />
 	</Target>
 

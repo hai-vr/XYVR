@@ -110,7 +110,9 @@ public record ImmutableLiveSession
     
     public string? thumbnailUrl { get; init; }
     public bool? isVirtualSpacePrivate { get; init; }
-
+    
+    public bool? ageGated { get; init; }
+    public ImmutableArray<ImmutableParticipant> allParticipants { get; init; } = ImmutableArray<ImmutableParticipant>.Empty;
     public required string callerInAppIdentifier { get; init; }
 
     public virtual bool Equals(ImmutableLiveSession? other)
@@ -187,6 +189,8 @@ public record ImmutableNonIndexedLiveSession
     
     public bool? isVirtualSpacePrivate { get; init; }
 
+    public bool? ageGated { get; init; }
+    public ImmutableArray<ImmutableParticipant>? allParticipants { get; init; }
     public required string callerInAppIdentifier { get; init; }
 
     public static ImmutableLiveSession MakeIndexed(ImmutableNonIndexedLiveSession inputSession)
@@ -206,6 +210,8 @@ public record ImmutableNonIndexedLiveSession
             currentAttendance = inputSession.currentAttendance,
             thumbnailUrl = inputSession.thumbnailUrl,
             isVirtualSpacePrivate = inputSession.isVirtualSpacePrivate,
+            ageGated = inputSession.ageGated,
+            allParticipants = inputSession.allParticipants ?? ImmutableArray<ImmutableParticipant>.Empty,
             callerInAppIdentifier = inputSession.callerInAppIdentifier
         };
     }

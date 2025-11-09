@@ -66,6 +66,7 @@ internal class UserResponseJsonObject
     public EntitlementJsonObject[] entitlements;
     public bool isActiveSupporter;
     public MigratedDataJsonObject migratedData;
+    public string? email;
 }
 [Serializable]
 internal class DisplayBadgeJsonObject
@@ -149,7 +150,7 @@ internal class SessionUpdateJsonObject
     // public List<string> sessionURLs;
     // public List<string> parentSessionIds;
     // public List<string> nestedSessionIds;
-    // public List<string> sessionUsers;
+    public List<SessionUpdateUser> sessionUsers;
     public string? thumbnailUrl;
     public int joinedUsers;
     // public int activeUsers;
@@ -166,6 +167,15 @@ internal class SessionUpdateJsonObject
     // public int awayKickMinutes;
     // public bool hasEnded;
     // public bool isValid;
+}
+
+internal class SessionUpdateUser
+{
+    public string username;
+    public string userID;
+    public string userSessionId;
+    public bool isPresent;
+    public string outputDevice;
 }
 
 internal class CorrespondingWorldIdJsonObject

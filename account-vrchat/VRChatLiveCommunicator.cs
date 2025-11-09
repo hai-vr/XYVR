@@ -147,6 +147,7 @@ internal class VRChatLiveCommunicator
                         inAppSessionName = locationInformation.displayName,
                         sessionCapacity = locationInformation.capacity,
                         currentAttendance = locationInformation.userCount,
+                        ageGated = locationInformation.ageGate,
                         callerInAppIdentifier = _callerInAppIdentifier
                     });
                     XYVRLogging.WriteLine(this, $"Collected live session about {instanceQueueJob.worldIdAndInstanceId}, will batch results... ({liveSessionsBatch.Count} sessions batched so far)");

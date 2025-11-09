@@ -31,6 +31,7 @@ export function LiveSession({
 
     // @ts-ignore
     const [showSlots, setShowSlots] = useState(false);
+    const [showParticipants, setShowParticipants] = useState(false);
 
     let specialCapacity = liveSession.sessionCapacity || liveSession.virtualSpaceDefaultCapacity || '?';
     const vscap = liveSession.virtualSpaceDefaultCapacity || liveSession.sessionCapacity || 0;
@@ -41,13 +42,54 @@ export function LiveSession({
 
     const showRemainingSlots = 5;
     const actualAttendance = Math.max(liveSession.currentAttendance || 0, liveSession.participants.length);
-    const capacityStr = `${actualAttendance || '?'} / ${specialCapacity}`;
+    // Replace all spaces with NBSP
+    const capacityStr = `${actualAttendance || '?'} / ${specialCapacity}`.replaceAll(" ", "\u00a0");
     let capacityDisplay = actualAttendance > sesscap ? actualAttendance : Math.min(actualAttendance + showRemainingSlots, sesscap);
     const hasMore = sesscap - actualAttendance > showRemainingSlots;
 
     const makeGameClientJoinOrSelfInvite = async () => {
         await dotNetApi.liveApiMakeGameClientJoinOrSelfInvite(liveSession.namedApp, liveSession.callerInAppIdentifier, liveSession.inAppSessionIdentifier);
     };
+
+    const participationSquares = (
+    <>
+        <div style={{
+            textWrap: 'nowrap',
+            textAlign: 'left',
+            lineHeight: '13px',
+            margin: '0 auto',
+            marginBottom: '5px',
+            width: 'fit-content'
+        }}>
+            {Array.from({length: capacityDisplay}, (_, index) => (
+                <>
+                    {index % 20 == 0 && index != 0 && <br/>}
+                    {index < actualAttendance && <span key={index} style={{
+                        width: '10px',
+                        height: '10px',
+                        display: 'inline-block',
+                        background: index < liveSession.participants.length ? 'var(--status-online)' : 'var(--text-primary)',
+                        margin: '1px',
+                        marginRight: '2px',
+                        marginBottom: '-1px',
+                        lineHeight: 0
+                    }}></span>}
+                    {showSlots && index >= actualAttendance && <span key={index} style={{
+                        opacity: hasMore ? `${100 - (index - actualAttendance) / showRemainingSlots * 100}%` : '100%',
+                        width: '10px',
+                        height: '10px',
+                        display: 'inline-block',
+                        margin: '1px',
+                        marginRight: '2px',
+                        marginBottom: '-1px',
+                        lineHeight: 0,
+                        textAlign: 'center'
+                    }}>&#183;</span>}
+                </>
+            ))}
+        </div>
+        <span title={capacityStr}>{capacityStr}</span>
+    </>);
 
     let background = liveSession.thumbnailUrl && `url(${liveSession.thumbnailUrl}), var(--live-session-overlay)`
         || liveSession.thumbnailHash && `url(${dotNetApi.WorldThumbnailHashToUrl(liveSession.thumbnailHash)}), var(--live-session-overlay)`
@@ -93,9 +135,16 @@ export function LiveSession({
                                 <span className="live-session-name"
                                       title={capacityStr}>{_D2(liveSession.inAppSessionName || '', debugMode, undefined, DemonstrationMode.Everything) || t('live.session.unnamed')}</span>}
                         </div>
+                        {liveSession.ageGated === true && <span>🔞</span>}
                     </div>
                 </div>
                 {!mini && <div className="live-session-participants">
+                    {showParticipants && 
+                    <div className="live-session-all-participants-outer">
+                        <div className="live-session-all-participants">
+                            {liveSession.allParticipants.filter(x=> x.unknownAccount != null).map(p => <span>{p.unknownAccount?.inAppDisplayName ?? p.unknownAccount?.inAppIdentifier}</span>)}
+                        </div>
+                    </div>}
                     <div className="session-accounts-container">
                         <div className="live-session-accounts-grid">
                             {liveSession.participants.filter(value => value.isKnown).map((participant, pIndex) => {
@@ -134,44 +183,23 @@ export function LiveSession({
                     </div>
                 </div>}
 
-                <div className="count-container">
-                    <div style={{
-                        textWrap: 'nowrap',
-                        textAlign: 'left',
-                        lineHeight: '13px',
-                        margin: '0 auto',
-                        marginBottom: '5px',
-                        width: 'fit-content'
-                    }}>
-                        {Array.from({length: capacityDisplay}, (_, index) => (
-                            <>
-                                {index % 20 == 0 && index != 0 && <br/>}
-                                {index < actualAttendance && <span key={index} style={{
-                                    width: '10px',
-                                    height: '10px',
-                                    display: 'inline-block',
-                                    background: index < liveSession.participants.length ? 'var(--status-online)' : 'var(--text-primary)',
-                                    margin: '1px',
-                                    marginRight: '2px',
-                                    marginBottom: '-1px',
-                                    lineHeight: 0
-                                }}></span>}
-                                {showSlots && index >= actualAttendance && <span key={index} style={{
-                                    opacity: hasMore ? `${100 - (index - actualAttendance) / showRemainingSlots * 100}%` : '100%',
-                                    width: '10px',
-                                    height: '10px',
-                                    display: 'inline-block',
-                                    margin: '1px',
-                                    marginRight: '2px',
-                                    marginBottom: '-1px',
-                                    lineHeight: 0,
-                                    textAlign: 'center'
-                                }}>&#183;</span>}
-                            </>
-                        ))}
-                    </div>
-                    <span title={capacityStr}>{actualAttendance || '?'}&nbsp;/&nbsp;{specialCapacity}</span>
-                </div>
+                {!mini && liveSession.allParticipants.length > 0 ?
+                    <button onClick={() => setShowParticipants(!showParticipants)} className="count-container">
+                        {participationSquares}
+                    </button>
+                    :
+                    <div className="count-container">
+                        <div style={{
+                            textWrap: 'nowrap',
+                            textAlign: 'left',
+                            lineHeight: '13px',
+                            margin: '0 auto',
+                            marginBottom: '5px',
+                            width: 'fit-content'
+                        }}>
+                            {participationSquares}
+                        </div>
+                    </div>}
                 <a
                     onClick={makeGameClientJoinOrSelfInvite}
                     onAuxClick={(e) => e.button === 1 && makeGameClientJoinOrSelfInvite()}
