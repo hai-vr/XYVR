@@ -3,11 +3,33 @@
 public static class XYVRLogging
 {
     public static event ErrorLog? OnErrorLog;
-    public delegate void ErrorLog(string message); 
-    
+    public delegate void ErrorLog(string message);
+
+    public const string LogFile = "Latest.log";
+    public static object _lock = new object(); 
+    static XYVRLogging()
+    {
+        lock (_lock)
+        {
+            File.WriteAllText(LogFile, "");
+        }
+        OnErrorLog += (msg) => {
+            lock (_lock)
+            {
+                File.AppendAllLines(LogFile, ["ERROR: " + msg]);
+            }  
+        };
+    }
+
     public static void WriteLine(object caller, string str)
     {
-        Console.WriteLine($"{Header(caller)} {str}");
+        var msg = $"{Header(caller)} {str}";
+        Console.WriteLine(msg);
+
+        lock (_lock)
+        {
+            File.AppendAllLines(LogFile, ["INFO: " + msg]);
+        }
     }
 
     public static void ErrorWriteLine(object caller, Exception e)
