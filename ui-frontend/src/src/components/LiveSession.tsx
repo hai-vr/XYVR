@@ -94,7 +94,7 @@ export function LiveSession({
     let background = liveSession.thumbnailUrl && `url(${liveSession.thumbnailUrl}), var(--live-session-overlay)`
         || liveSession.thumbnailHash && `url(${dotNetApi.WorldThumbnailHashToUrl(liveSession.thumbnailHash)}), var(--live-session-overlay)`
         || 'var(--live-session-overlay)';
-    return (<div key={liveSession.guid} className="live-session-card live-session-thumbnail-bg">
+    return (<div key={liveSession.guid} className={`live-session-card live-session-thumbnail-bg ${liveSession.participants.length > 4 ? 'full-width' : ''}`}>
         <div style={{
             position: 'relative',
             height: '100%'

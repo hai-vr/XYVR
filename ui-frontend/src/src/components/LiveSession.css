@@ -73,6 +73,10 @@
     border-radius: var(--ideal-border-radius);
 }
 
+.live-session-card.full-width {
+    grid-column: 1 / -1;
+}
+
 .live-session-header {
     margin-bottom: 0.75rem;
     padding-bottom: 0.5rem;
