@@ -110,7 +110,9 @@ public record ImmutableLiveSession
     
     public string? thumbnailUrl { get; init; }
     public bool? isVirtualSpacePrivate { get; init; }
-
+    
+    public bool? ageGated { get; init; }
+    public ImmutableArray<ImmutableParticipant> allParticipants { get; init; } = ImmutableArray<ImmutableParticipant>.Empty;
     public required string callerInAppIdentifier { get; init; }
 
     public virtual bool Equals(ImmutableLiveSession? other)
@@ -129,6 +131,8 @@ public record ImmutableLiveSession
                sessionCapacity == other.sessionCapacity &&
                currentAttendance == other.currentAttendance &&
                isVirtualSpacePrivate == other.isVirtualSpacePrivate &&
+               ageGated == other.ageGated &&
+               allParticipants.SequenceEqual(other.allParticipants) &&
                callerInAppIdentifier == other.callerInAppIdentifier;
     }
 
@@ -148,6 +152,8 @@ public record ImmutableLiveSession
             hashCode = (hashCode * 397) ^ sessionCapacity.GetHashCode();
             hashCode = (hashCode * 397) ^ currentAttendance.GetHashCode();
             hashCode = (hashCode * 397) ^ (isVirtualSpacePrivate != null ? isVirtualSpacePrivate.GetHashCode() : 0);
+            hashCode = (hashCode * 397) ^ ageGated.GetHashCode();
+            hashCode = (hashCode * 397) ^ XYVRSequenceHash.HashCodeOf(allParticipants);
             hashCode = (hashCode * 397) ^ callerInAppIdentifier.GetHashCode();
             return hashCode;
         }
@@ -187,6 +193,8 @@ public record ImmutableNonIndexedLiveSession
     
     public bool? isVirtualSpacePrivate { get; init; }
 
+    public bool? ageGated { get; init; }
+    public ImmutableArray<ImmutableParticipant>? allParticipants { get; init; }
     public required string callerInAppIdentifier { get; init; }
 
     public static ImmutableLiveSession MakeIndexed(ImmutableNonIndexedLiveSession inputSession)
@@ -206,6 +214,8 @@ public record ImmutableNonIndexedLiveSession
             currentAttendance = inputSession.currentAttendance,
             thumbnailUrl = inputSession.thumbnailUrl,
             isVirtualSpacePrivate = inputSession.isVirtualSpacePrivate,
+            ageGated = inputSession.ageGated,
+            allParticipants = inputSession.allParticipants ?? ImmutableArray<ImmutableParticipant>.Empty,
             callerInAppIdentifier = inputSession.callerInAppIdentifier
         };
     }

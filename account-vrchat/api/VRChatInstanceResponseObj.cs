@@ -8,7 +8,7 @@ namespace XYVR.AccountAuthority.VRChat;
 internal class VRChatInstance
 {
     // public bool? active;
-    // public bool? ageGate;
+     public bool? ageGate;
     // public bool? canRequestInvite;
     public int? capacity;
     // public string? clientNumber;

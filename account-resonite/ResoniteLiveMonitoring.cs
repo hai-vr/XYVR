@@ -2,6 +2,7 @@
 using System.Runtime.InteropServices;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using System.Collections.Immutable;
 using XYVR.API.Audit;
 using XYVR.Core;
 
@@ -92,7 +93,7 @@ public class ResoniteLiveMonitoring : ILiveMonitoring, IDisposable
         // As a precaution, we only accept thumbnail URLs if they point to resonite.com or any subdomain of it
         // to prevent a possible violation of privacy as we don't know how much we can trust the incoming data.
         var sanitizedThumbnailUrl = sessionUpdate.thumbnailUrl != null ? EnsureUrlIsResoniteDotComOrNull(sessionUpdate.thumbnailUrl) : null;
-        
+
         var correspondingSession = await _monitoring.MergeSession(new ImmutableNonIndexedLiveSession
         {
             namedApp = NamedApp.Resonite,
@@ -104,6 +105,20 @@ public class ResoniteLiveMonitoring : ILiveMonitoring, IDisposable
             sessionCapacity = sessionUpdate.maxUsers,
             virtualSpaceDefaultCapacity = sessionUpdate.maxUsers,
             thumbnailUrl = sanitizedThumbnailUrl,
+
+            allParticipants = sessionUpdate.sessionUsers
+                .Select(x=>new ImmutableParticipant {
+                    isHost = sessionUpdate.hostUserId != null ? 
+                        sessionUpdate.hostUserId == x.userID
+                        : sessionUpdate.hostUsername == x.username,
+                    isKnown = false, 
+                    unknownAccount = new() { 
+                        inAppDisplayName = x.username,
+                        inAppIdentifier = x.userID
+                    } 
+                }
+            ).ToImmutableArray(),
+
             callerInAppIdentifier = _callerInAppIdentifier!
         });
         

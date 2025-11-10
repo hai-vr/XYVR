@@ -1,33 +1,35 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFramework>net9.0-windows</TargetFramework>
-        <RootNamespace>ui_webview</RootNamespace>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
+	<PropertyGroup>
+		<TargetFramework>net9.0-windows</TargetFramework>
+		<RootNamespace>ui_webview</RootNamespace>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
 
-        <OutputType>WinExe</OutputType>
-        <UseWPF>true</UseWPF>
-        <ApplicationIcon>favicon.ico</ApplicationIcon>
-        <AssemblyName>XYVR</AssemblyName>
-    </PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<UseWPF>true</UseWPF>
+		<ApplicationIcon>favicon.ico</ApplicationIcon>
+		<AssemblyName>XYVR</AssemblyName>
+		<OutputPath>$(MSBuildThisFileDirectory)/../build</OutputPath>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+	</PropertyGroup>
 
-    <ItemGroup>
-      <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3477-prerelease" />
-    </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3477-prerelease" />
+	</ItemGroup>
 
-    <Target Name="BuildReactApp" BeforeTargets="Build">
-        <Exec Command="npm run build-and-copy" WorkingDirectory="../ui-frontend/src" />
-    </Target>
+	<Target Name="BuildReactApp" BeforeTargets="Build" Condition="true">
+		<Exec Command="npm run build-and-copy" WorkingDirectory="../ui-frontend/src" />
+	</Target>
 
-    <ItemGroup>
-      <ProjectReference Include="..\ui-backend\ui-backend.csproj" />
-    </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\ui-backend\ui-backend.csproj" />
+	</ItemGroup>
 
-    <ItemGroup>
-        <None Update="src/dist/**\*.*">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
-    </ItemGroup>
+	<ItemGroup>
+		<None Update="src/dist/**\*.*">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
 
 </Project>

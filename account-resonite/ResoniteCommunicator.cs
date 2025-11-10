@@ -175,6 +175,12 @@ internal class ResoniteCommunicator
         api.ProvideUserAndToken(userAndToken__sensitive);
         
         var user = await api.GetUser__self(DataCollectionReason.CollectCallerAccount);
+
+        if (user.email == null)
+        {
+            throw new ArgumentException("Api response does not contain email. This means your token expired.");
+        }
+
         _callerUserId = user.id;
         _callerDisplayName = user.username;
             

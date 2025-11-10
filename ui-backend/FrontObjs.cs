@@ -253,6 +253,8 @@ internal record FrontLiveSession
     public string? thumbnailUrl { get; init; }
     public string? thumbnailHash { get; init; }
     public bool? isVirtualSpacePrivate { get; init; }
+    public bool? ageGated { get; init; }
+    public ImmutableArray<FrontParticipant> allParticipants { get; init; } = ImmutableArray<FrontParticipant>.Empty;
 
     public required string callerInAppIdentifier { get; init; }
 
@@ -268,13 +270,15 @@ internal record FrontLiveSession
             inAppSessionName = liveSession.inAppSessionName,
             inAppVirtualSpaceName = liveSession.inAppVirtualSpaceName,
             inAppHost = liveSession.inAppHost != null ? FrontLiveSessionHost.FromCore(liveSession.inAppHost) : null,
-            participants = [..liveSession.participants.Select(FrontParticipant.FromCore)],
+            participants = [.. liveSession.participants.Select(FrontParticipant.FromCore)],
             virtualSpaceDefaultCapacity = liveSession.virtualSpaceDefaultCapacity,
             sessionCapacity = liveSession.sessionCapacity,
             currentAttendance = liveSession.currentAttendance,
             thumbnailUrl = isVrc ? null : liveSession.thumbnailUrl,
             thumbnailHash = liveSession.thumbnailUrl != null && isVrc ? VRChatThumbnailCache.Sha(liveSession.thumbnailUrl) : null,
             isVirtualSpacePrivate = liveSession.isVirtualSpacePrivate,
+            ageGated = liveSession.ageGated,
+            allParticipants = [.. liveSession.allParticipants.Select(FrontParticipant.FromCore)],
             callerInAppIdentifier = liveSession.callerInAppIdentifier
         };
     }

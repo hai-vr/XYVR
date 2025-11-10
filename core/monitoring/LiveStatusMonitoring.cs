@@ -201,6 +201,8 @@ public class LiveStatusMonitoring
             if (inputSession.currentAttendance != null) modifiedSession = modifiedSession with { currentAttendance = inputSession.currentAttendance };
             if (inputSession.thumbnailUrl != null) modifiedSession = modifiedSession with { thumbnailUrl = inputSession.thumbnailUrl };
             if (inputSession.isVirtualSpacePrivate != null) modifiedSession = modifiedSession with { isVirtualSpacePrivate = inputSession.isVirtualSpacePrivate };
+            if (inputSession.ageGated != null) modifiedSession = modifiedSession with { ageGated = inputSession.ageGated };
+            if (inputSession.allParticipants != null) modifiedSession = modifiedSession with { allParticipants = inputSession.allParticipants.Value };
             
             if (usingParticipant != null && !modifiedSession.participants.Contains(usingParticipant))
                 modifiedSession = modifiedSession with { participants = [..modifiedSession.participants.Append(usingParticipant)] };

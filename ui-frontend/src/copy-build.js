@@ -30,7 +30,10 @@ const allDestinations = [
     
     // Used for builds:
     '../../ui-webview-windows/src/dist',
-    '../../ui-photino-linux/wwwroot'
+    '../../ui-photino-linux/wwwroot',
+
+    // Used for build script:
+    '../../build/src/dist',
 ];
 
 const destinations = os.platform() === 'win32'
