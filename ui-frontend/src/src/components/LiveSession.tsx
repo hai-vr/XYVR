@@ -71,6 +71,7 @@ export function LiveSession({
         return '';
     }
 
+    const isHeadless = liveSession.markers.includes('Headless');
     const accessLevel = ParseAccessLevel(liveSession.markers);
 
     const participationSquares = (
@@ -233,8 +234,7 @@ export function LiveSession({
                     >
                         <SquareArrowDownRight size={16}/>
                     </a>
-                    
-                    {accessLevel}
+                    <span>{isHeadless && <span>Headless</span>} {accessLevel}</span>
                 </div>
             </div>
         </div>

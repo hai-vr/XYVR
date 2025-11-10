@@ -146,7 +146,7 @@ internal class SessionUpdateJsonObject
     // public List<DataModelAssemblyJsonObject> dataModelAssemblies;
     // public string universeId;
     // public string appVersion;
-    // public bool headlessHost;
+    public bool headlessHost;
     // public List<string> sessionURLs;
     // public List<string> parentSessionIds;
     // public List<string> nestedSessionIds;
