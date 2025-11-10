@@ -160,7 +160,7 @@ internal class SessionUpdateJsonObject
     // public bool mobileFriendly;
     // public DateTime sessionBeginTime;
     // public DateTime lastUpdate;
-    // public string accessLevel;
+    public string accessLevel;
     // public bool hideFromListing;
     public string broadcastKey;
     // public bool awayKickEnabled;

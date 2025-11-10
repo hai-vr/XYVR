@@ -94,6 +94,8 @@ public class ResoniteLiveMonitoring : ILiveMonitoring, IDisposable
         // to prevent a possible violation of privacy as we don't know how much we can trust the incoming data.
         var sanitizedThumbnailUrl = sessionUpdate.thumbnailUrl != null ? EnsureUrlIsResoniteDotComOrNull(sessionUpdate.thumbnailUrl) : null;
 
+        var accessLevel = sessionUpdate.accessLevel;
+
         var correspondingSession = await _monitoring.MergeSession(new ImmutableNonIndexedLiveSession
         {
             namedApp = NamedApp.Resonite,
@@ -118,6 +120,8 @@ public class ResoniteLiveMonitoring : ILiveMonitoring, IDisposable
                     } 
                 }
             ).ToImmutableArray(),
+            
+            markers = [accessLevel],
 
             callerInAppIdentifier = _callerInAppIdentifier!
         });

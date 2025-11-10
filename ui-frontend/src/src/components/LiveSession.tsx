@@ -51,7 +51,7 @@ export function LiveSession({
         await dotNetApi.liveApiMakeGameClientJoinOrSelfInvite(liveSession.namedApp, liveSession.callerInAppIdentifier, liveSession.inAppSessionIdentifier);
     };
 
-    function ParseInstanceType(markers: string[]) {
+    function ParseAccessLevel(markers: string[]) {
         if (markers.includes('Public')) return "Public";
         if (markers.includes('InvitePlus')) return "Invite+";
         if (markers.includes('Invite')) return "Invite";
@@ -60,10 +60,18 @@ export function LiveSession({
         if (markers.includes('Group')) return "Group";
         if (markers.includes('GroupPublic')) return "Group Public";
         if (markers.includes('GroupPlus')) return "Group+";
+
+        if (markers.includes('Anyone')) return "Anyone";
+        if (markers.includes('RegisteredUsers')) return "Registered Users";
+        if (markers.includes('ContactsPlus')) return "Contacts+";
+        if (markers.includes('Contacts')) return "Contacts";
+        if (markers.includes('LAN')) return "LAN";
+        if (markers.includes('Private')) return "Private";
+        
         return '';
     }
 
-    const instanceType = ParseInstanceType(liveSession.markers);
+    const accessLevel = ParseAccessLevel(liveSession.markers);
 
     const participationSquares = (
     <>
@@ -226,7 +234,7 @@ export function LiveSession({
                         <SquareArrowDownRight size={16}/>
                     </a>
                     
-                    {instanceType}
+                    {accessLevel}
                 </div>
             </div>
         </div>

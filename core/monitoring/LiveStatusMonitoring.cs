@@ -1,4 +1,6 @@
-﻿namespace XYVR.Core;
+﻿using System.Collections.Immutable;
+
+namespace XYVR.Core;
 
 public class LiveStatusMonitoring
 {
@@ -202,6 +204,7 @@ public class LiveStatusMonitoring
             if (inputSession.thumbnailUrl != null) modifiedSession = modifiedSession with { thumbnailUrl = inputSession.thumbnailUrl };
             if (inputSession.isVirtualSpacePrivate != null) modifiedSession = modifiedSession with { isVirtualSpacePrivate = inputSession.isVirtualSpacePrivate };
             if (inputSession.ageGated != null) modifiedSession = modifiedSession with { ageGated = inputSession.ageGated };
+            if (inputSession.markers != null) modifiedSession = modifiedSession with { markers = (ImmutableArray<string>)inputSession.markers };
             if (inputSession.allParticipants != null) modifiedSession = modifiedSession with { allParticipants = inputSession.allParticipants.Value };
             
             if (usingParticipant != null && !modifiedSession.participants.Contains(usingParticipant))
