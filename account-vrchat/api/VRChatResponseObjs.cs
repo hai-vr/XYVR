@@ -68,7 +68,7 @@ internal class VRChatUser
     public string friendRequestStatus;
     public string id;
     public string instanceId;
-    public bool isFriend;
+    public bool isFriend; // NOTE: This is unreliable. This can be false despite the ID existing in GetAuthUser friends array.
     public string last_activity;
     public string last_login;
     public string last_mobile;

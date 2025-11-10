@@ -1,4 +1,5 @@
-﻿using XYVR.Core;
+﻿using System.Collections.Immutable;
+using XYVR.Core;
 
 namespace XYVR.AccountAuthority.VRChat;
 
@@ -27,7 +28,7 @@ internal class VRChatCommunicator
         var user = await _api.GetUserLenient(_callerUserId, DataCollectionReason.CollectCallerAccount);
         if (user == null) throw new Exception("Unable to get the caller's account data"); // FIXME: Get a better exception type.
 
-        return UserAsAccount((VRChatUser)user, _callerUserId);
+        return UserAsAccount((VRChatUser)user, _callerUserId, true);
     }
     
     /// This lists the friends and then the notes. Some notes may refer to friends that have already been returned, so there may be multiple references to the same account.
@@ -37,7 +38,8 @@ internal class VRChatCommunicator
         _api ??= await InitializeAPI();
 
         var contactsAsyncAll = await _api.GetAuthUser(DataCollectionReason.FindUndiscoveredAccounts);
-        
+
+        var friends = contactsAsyncAll.friends.ToImmutableHashSet();
         var missingFriends = contactsAsyncAll.friends.ToHashSet();
 
         var contactsAsyncEnum = _api.ListFriends(ListFriendsRequestType.OnlyOnline, DataCollectionReason.FindUndiscoveredAccounts)
@@ -118,7 +120,7 @@ internal class VRChatCommunicator
                         {
                             isAnonymous = false,
                             inAppIdentifier = _callerUserId,
-                            isContact = user.isFriend,
+                            isContact = friends.Contains(user.id),
                             note = ExtractNoteFromUser(user)
                         }
                     ]
@@ -130,7 +132,7 @@ internal class VRChatCommunicator
     /// Given a list of user IDs that may or may not exist, return a list of accounts.<br/>
     /// The returned list may be smaller than the input list, especially if some accounts no longer exist.<br/>
     /// User IDs do not necessarily start with usr_ as this supports some oldschool accounts.
-    public async Task<List<ImmutableNonIndexedAccount>> CollectAllLenient(List<string> notNecessarilyValidUserIds)
+    public async Task<List<ImmutableNonIndexedAccount>> CollectAllLenient(List<string> notNecessarilyValidUserIds, HashSet<string> friendIds)
     {
         var distinctNotNecessarilyValidUserIds = notNecessarilyValidUserIds
             .Distinct() // Get rid of duplicates
@@ -144,19 +146,19 @@ internal class VRChatCommunicator
             var user = await _api.GetUserLenient(userId, DataCollectionReason.CollectExistingAccount);
             if (user != null)
             {
-                accounts.Add(UserAsAccount((VRChatUser)user, _callerUserId));
+                accounts.Add(UserAsAccount((VRChatUser)user, _callerUserId, friendIds.Contains(userId)));
             }
         }
 
         return accounts;
     }
 
-    public ImmutableNonIndexedAccount ConvertUserAsAccount(VRChatUser user, string callerUserId)
+    public ImmutableNonIndexedAccount ConvertUserAsAccount_FromRebuilding(VRChatUser user, string callerUserId)
     {
-        return UserAsAccount(user, callerUserId);
+        return UserAsAccount(user, callerUserId, user.isFriend);
     }
 
-    private static ImmutableNonIndexedAccount UserAsAccount(VRChatUser user, string callerUserId)
+    private static ImmutableNonIndexedAccount UserAsAccount(VRChatUser user, string callerUserId, bool isFriend)
     {
         return new ImmutableNonIndexedAccount
         {
@@ -175,7 +177,7 @@ internal class VRChatCommunicator
                 {
                     isAnonymous = false,
                     inAppIdentifier = callerUserId,
-                    isContact = user.isFriend,
+                    isContact = isFriend,
                     note = ExtractNoteFromUser(user)
                 }
             ]

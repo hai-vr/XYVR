@@ -33,7 +33,7 @@ public class VRChatDataCollection(IndividualRepository repository, IResponseColl
                             && trail.apiSource == "vrchat_web_api"
                             && trail.route.StartsWith("https://api.vrchat.cloud/api/1/users/"))
             .Select(trail => JsonConvert.DeserializeObject<VRChatUser>((string)trail.responseObject))
-            .Select(user => _vrChatCommunicator.ConvertUserAsAccount(user, vrchatCallerInAppIdentifier))
+            .Select(user => _vrChatCommunicator.ConvertUserAsAccount_FromRebuilding(user, vrchatCallerInAppIdentifier))
             .GroupBy(account => account.inAppIdentifier)
             .Select(accounts => accounts.Last())
             .ToList();
@@ -52,10 +52,12 @@ public class VRChatDataCollection(IndividualRepository repository, IResponseColl
         
         var undiscoveredUserIds = new HashSet<string>();
         var incompleteAccounts = new HashSet<ImmutableAccountIdentification>();
+        var friends = new HashSet<string>();
         await foreach (var incompleteAccount in _vrChatCommunicator.FindIncompleteAccountsMayIncludeDuplicateReferences())
         {
             undiscoveredUserIds.Add(incompleteAccount.inAppIdentifier);
             incompleteAccounts.Add(incompleteAccount.AsIdentification());
+            if (incompleteAccount.callers.Any(caller => caller.isContact ?? false)) friends.Add(incompleteAccount.inAppIdentifier);
             
             var whichIncompleteUpdated = repository.MergeIncompleteAccounts([incompleteAccount]);
             if (whichIncompleteUpdated.Count > 0) await jobHandler.NotifyAccountUpdated(whichIncompleteUpdated.ToList());
@@ -70,11 +72,11 @@ public class VRChatDataCollection(IndividualRepository repository, IResponseColl
             .Where(inAppIdentifier => undiscoveredUserIds.Contains(inAppIdentifier))
             .ToHashSet();
         undiscoveredUserIdsPrioritized.UnionWith(undiscoveredUserIds);
-
+        
         var soFar = 0;
         foreach (var undiscoveredUserId in undiscoveredUserIdsPrioritized)
         {
-            var collectUndiscoveredLenient = await _vrChatCommunicator.CollectAllLenient([undiscoveredUserId]);
+            var collectUndiscoveredLenient = await _vrChatCommunicator.CollectAllLenient([undiscoveredUserId], friends);
             HashSet<ImmutableAccountIdentification> whichUpdated;
             if (collectUndiscoveredLenient.Count == 0)
             {
@@ -119,7 +121,7 @@ public class VRChatDataCollection(IndividualRepository repository, IResponseColl
     {
         if (toTryUpdate.namedApp != NamedApp.VRChat) throw new ArgumentException("Cannot attempt incremental update on non-VRChat account, it is the responsibility of the caller to invoke CanAttemptIncrementalUpdateOn beforehand");
         
-        var collected = await _vrChatCommunicator.CollectAllLenient([toTryUpdate.inAppIdentifier]);
+        var collected = await _vrChatCommunicator.CollectAllLenient([toTryUpdate.inAppIdentifier], []);
         
         return collected.Count == 0 ? null : collected.First();
     }
