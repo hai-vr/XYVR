@@ -5,20 +5,34 @@ public static class XYVRLogging
     public static event ErrorLog? OnErrorLog;
     public delegate void ErrorLog(string message);
 
-    public const string LogFile = "Latest.log";
-    public static object _lock = new object(); 
-    static XYVRLogging()
+    public static TextWriter? LogFile;
+    public static object _lock = new object();
+
+    public static void SetupLogFile()
     {
-        lock (_lock)
+        if (LogFile != null) return;
+        try
         {
-            File.WriteAllText(LogFile, "");
+            var logPath = Path.Combine(Path.GetDirectoryName(typeof(XYVRLogging).Assembly.Location)!, "Latest.log");
+            LogFile = new StreamWriter(logPath);
+            
+            OnErrorLog += (msg) => {
+                lock (_lock)
+                {
+                    LogFile.WriteLine("ERROR: " + msg);
+                }
+            };
         }
-        OnErrorLog += (msg) => {
-            lock (_lock)
-            {
-                File.AppendAllLines(LogFile, ["ERROR: " + msg]);
-            }  
-        };
+        catch (Exception e)
+        {
+            ErrorWriteLine(typeof(XYVRLogging), e);
+        }
+    }
+    public static void CleanupLogFile()
+    {
+        LogFile?.Flush();
+        LogFile?.Close();
+        LogFile = null;
     }
 
     public static void WriteLine(object caller, string str)
@@ -26,9 +40,12 @@ public static class XYVRLogging
         var msg = $"{Header(caller)} {str}";
         Console.WriteLine(msg);
 
-        lock (_lock)
+        if(LogFile != null)
         {
-            File.AppendAllLines(LogFile, ["INFO: " + msg]);
+            lock (_lock)
+            {
+                LogFile.WriteLine("INFO: " + msg);
+            }
         }
     }
 

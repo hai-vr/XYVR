@@ -42,6 +42,7 @@ public class AppLifecycle
         var lockfile = new FileLock(Scaffolding.LockfileFilePath);
         lockfile.AcquireLock();
 
+        XYVRLogging.SetupLogFile();
         XYVRLogging.WriteLine(this, "Application startup");
         XYVRLogging.WriteLine(this, $"Version is {VERSION.version}");
     }
@@ -104,6 +105,7 @@ public class AppLifecycle
                 throw;
             }
         }).Wait();
+        XYVRLogging.CleanupLogFile();
     }
 
     public void Dispatch(Action action)
