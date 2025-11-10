@@ -105,3 +105,7 @@ The communication with the APIs is a custom implementation, with the requests ba
 - The community-maintained VRChat API documentation at [vrchat.community](https://vrchat.community/) maintained by [github.com/vrchatapi](https://github.com/vrchatapi).
 - Due to the absence of documentation, the [CVRX](https://github.com/AstroDogeDX/CVRX/blob/472cceec651abbeff9c76ae8412522d27015bfd9/server/api_cvr_http.js) app ([MIT License](https://github.com/AstroDogeDX/CVRX/blob/472cceec651abbeff9c76ae8412522d27015bfd9/LICENSE))
   maintained by [github.com/AstroDogeDX](https://github.com/AstroDogeDX/CVRX) was used as a reference for the API endpoints.
+
+The following sources were also used:
+- [`parseLocation` function of VRCX](https://github.com/vrcx-team/VRCX/blob/master/src/shared/utils/location.js#L35C1-L145C2)
+  ([MIT License](https://github.com/vrcx-team/VRCX/blob/dda3d2dda9c8f4c840f230072f2ebefb72d58623/LICENSE)) maintained by the [VRCX Team](https://github.com/vrcx-team).

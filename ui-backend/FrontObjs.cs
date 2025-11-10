@@ -254,6 +254,7 @@ internal record FrontLiveSession
     public string? thumbnailHash { get; init; }
     public bool? isVirtualSpacePrivate { get; init; }
     public bool? ageGated { get; init; }
+    public ImmutableArray<string> markers { get; init; } = ImmutableArray<string>.Empty;
     public ImmutableArray<FrontParticipant> allParticipants { get; init; } = ImmutableArray<FrontParticipant>.Empty;
 
     public required string callerInAppIdentifier { get; init; }
@@ -278,6 +279,7 @@ internal record FrontLiveSession
             thumbnailHash = liveSession.thumbnailUrl != null && isVrc ? VRChatThumbnailCache.Sha(liveSession.thumbnailUrl) : null,
             isVirtualSpacePrivate = liveSession.isVirtualSpacePrivate,
             ageGated = liveSession.ageGated,
+            markers = liveSession.markers,
             allParticipants = [.. liveSession.allParticipants.Select(FrontParticipant.FromCore)],
             callerInAppIdentifier = liveSession.callerInAppIdentifier
         };

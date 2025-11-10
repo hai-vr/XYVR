@@ -51,6 +51,20 @@ export function LiveSession({
         await dotNetApi.liveApiMakeGameClientJoinOrSelfInvite(liveSession.namedApp, liveSession.callerInAppIdentifier, liveSession.inAppSessionIdentifier);
     };
 
+    function ParseInstanceType(markers: string[]) {
+        if (markers.includes('Public')) return "Public";
+        if (markers.includes('InvitePlus')) return "Invite+";
+        if (markers.includes('Invite')) return "Invite";
+        if (markers.includes('Friends')) return "Friends";
+        if (markers.includes('FriendsPlus')) return "Friends+";
+        if (markers.includes('Group')) return "Group";
+        if (markers.includes('GroupPublic')) return "Group Public";
+        if (markers.includes('GroupPlus')) return "Group+";
+        return '';
+    }
+
+    const instanceType = ParseInstanceType(liveSession.markers);
+
     const participationSquares = (
     <>
         <div style={{
@@ -200,16 +214,20 @@ export function LiveSession({
                             {participationSquares}
                         </div>
                     </div>}
-                <a
-                    onClick={makeGameClientJoinOrSelfInvite}
-                    onAuxClick={(e) => e.button === 1 && makeGameClientJoinOrSelfInvite()}
-                    onMouseDown={(e) => e.preventDefault()}
-                    rel="noopener noreferrer"
-                    className="icon-button link-pointer"
-                    title={t('ui.joinSession.title')}
-                >
-                    <SquareArrowDownRight size={16}/>
-                </a>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'space-between' }}>
+                    <a
+                        onClick={makeGameClientJoinOrSelfInvite}
+                        onAuxClick={(e) => e.button === 1 && makeGameClientJoinOrSelfInvite()}
+                        onMouseDown={(e) => e.preventDefault()}
+                        rel="noopener noreferrer"
+                        className="icon-button link-pointer"
+                        title={t('ui.joinSession.title')}
+                    >
+                        <SquareArrowDownRight size={16}/>
+                    </a>
+                    
+                    {instanceType}
+                </div>
             </div>
         </div>
     </div>);

@@ -48,6 +48,7 @@ export interface FrontLiveSession {
     thumbnailHash?: string;
     isVirtualSpacePrivate?: boolean;
     ageGated?: boolean;
+    markers: string[];
     allParticipants: FrontParticipant[];
     callerInAppIdentifier: string;
 }

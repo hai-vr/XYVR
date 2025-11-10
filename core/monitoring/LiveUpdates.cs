@@ -112,6 +112,8 @@ public record ImmutableLiveSession
     public bool? isVirtualSpacePrivate { get; init; }
     
     public bool? ageGated { get; init; }
+    public ImmutableArray<string> markers { get; init; }
+    
     public ImmutableArray<ImmutableParticipant> allParticipants { get; init; } = ImmutableArray<ImmutableParticipant>.Empty;
     public required string callerInAppIdentifier { get; init; }
 
@@ -132,6 +134,7 @@ public record ImmutableLiveSession
                currentAttendance == other.currentAttendance &&
                isVirtualSpacePrivate == other.isVirtualSpacePrivate &&
                ageGated == other.ageGated &&
+               markers.SequenceEqual(other.markers) &&
                allParticipants.SequenceEqual(other.allParticipants) &&
                callerInAppIdentifier == other.callerInAppIdentifier;
     }
@@ -153,6 +156,7 @@ public record ImmutableLiveSession
             hashCode = (hashCode * 397) ^ currentAttendance.GetHashCode();
             hashCode = (hashCode * 397) ^ (isVirtualSpacePrivate != null ? isVirtualSpacePrivate.GetHashCode() : 0);
             hashCode = (hashCode * 397) ^ ageGated.GetHashCode();
+            hashCode = (hashCode * 397) ^ XYVRSequenceHash.HashCodeOf(markers);
             hashCode = (hashCode * 397) ^ XYVRSequenceHash.HashCodeOf(allParticipants);
             hashCode = (hashCode * 397) ^ callerInAppIdentifier.GetHashCode();
             return hashCode;
@@ -194,7 +198,10 @@ public record ImmutableNonIndexedLiveSession
     public bool? isVirtualSpacePrivate { get; init; }
 
     public bool? ageGated { get; init; }
+    public ImmutableArray<string>? markers { get; init; }
+    
     public ImmutableArray<ImmutableParticipant>? allParticipants { get; init; }
+    
     public required string callerInAppIdentifier { get; init; }
 
     public static ImmutableLiveSession MakeIndexed(ImmutableNonIndexedLiveSession inputSession)
@@ -216,7 +223,8 @@ public record ImmutableNonIndexedLiveSession
             isVirtualSpacePrivate = inputSession.isVirtualSpacePrivate,
             ageGated = inputSession.ageGated,
             allParticipants = inputSession.allParticipants ?? ImmutableArray<ImmutableParticipant>.Empty,
-            callerInAppIdentifier = inputSession.callerInAppIdentifier
+            callerInAppIdentifier = inputSession.callerInAppIdentifier,
+            markers = inputSession.markers ?? [],
         };
     }
 }

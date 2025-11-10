@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using XYVR.AccountAuthority.VRChat.ThirdParty;
 using XYVR.Core;
 
 namespace XYVR.AccountAuthority.VRChat;
@@ -426,6 +427,8 @@ internal class VRChatLiveCommunicator
 
     public static ImmutableNonIndexedLiveSession MakeNonIndexedBasedOnWorld(string location, CachedWorld? cachedWorld, string callerInAppIdentifier)
     {
+        var vrcxLocationContext = VRCXLocation.ParseLocation(location);
+        
         return new ImmutableNonIndexedLiveSession
         {
             namedApp = NamedApp.VRChat,
@@ -435,7 +438,10 @@ internal class VRChatLiveCommunicator
             virtualSpaceDefaultCapacity = cachedWorld?.capacity,
             isVirtualSpacePrivate = cachedWorld?.releaseStatus == "private",
             thumbnailUrl = cachedWorld?.thumbnailUrl,
-            callerInAppIdentifier = callerInAppIdentifier
+            callerInAppIdentifier = callerInAppIdentifier,
+            markers = vrcxLocationContext.AccessType != VRCXLocationInferredAccessType.Indeterminate
+                ? [vrcxLocationContext.AccessType.ToString()]
+                : null
         };
     }
 
