@@ -1,7 +1,7 @@
 ﻿import {useState} from "react";
 import {AppIcon} from "./AppIcon.tsx";
 import Account from "./Account.tsx";
-import type {FrontLiveSession} from "../types/LiveUpdateTypes.ts";
+import {type FrontLiveSession, LiveSessionMarker, type LiveSessionMarkerType} from "../types/LiveUpdateTypes.ts";
 import type {FrontIndividual} from "../types/CoreTypes.ts";
 import {type DebugFlags, DemonstrationMode} from "../types/DebugFlags.ts";
 import {_D, _D2} from "../haiUtils.ts";
@@ -51,28 +51,28 @@ export function LiveSession({
         await dotNetApi.liveApiMakeGameClientJoinOrSelfInvite(liveSession.namedApp, liveSession.callerInAppIdentifier, liveSession.inAppSessionIdentifier);
     };
 
-    function ParseAccessLevel(markers: string[]) {
-        if (markers.includes('Public')) return "Public";
-        if (markers.includes('InvitePlus')) return "Invite+";
-        if (markers.includes('Invite')) return "Invite";
-        if (markers.includes('Friends')) return "Friends";
-        if (markers.includes('FriendsPlus')) return "Friends+";
-        if (markers.includes('Group')) return "Group";
-        if (markers.includes('GroupPublic')) return "Group Public";
-        if (markers.includes('GroupPlus')) return "Group+";
+    function LocalizeAccessLevel(markers: LiveSessionMarkerType[]) {
+        if (markers.includes(LiveSessionMarker.VRCPublic)) return t('live.session.markers.vrcPublic');
+        if (markers.includes(LiveSessionMarker.VRCInvitePlus)) return t('live.session.markers.vrcInvitePlus');
+        if (markers.includes(LiveSessionMarker.VRCInvite)) return t('live.session.markers.vrcInvite');
+        if (markers.includes(LiveSessionMarker.VRCFriends)) return t('live.session.markers.vrcFriends');
+        if (markers.includes(LiveSessionMarker.VRCFriendsPlus)) return t('live.session.markers.vrcFriendsPlus');
+        if (markers.includes(LiveSessionMarker.VRCGroup)) return t('live.session.markers.vrcGroup');
+        if (markers.includes(LiveSessionMarker.VRCGroupPublic)) return t('live.session.markers.vrcGroupPublic');
+        if (markers.includes(LiveSessionMarker.VRCGroupPlus)) return t('live.session.markers.vrcGroupPlus');
 
-        if (markers.includes('Anyone')) return "Anyone";
-        if (markers.includes('RegisteredUsers')) return "Registered Users";
-        if (markers.includes('ContactsPlus')) return "Contacts+";
-        if (markers.includes('Contacts')) return "Contacts";
-        if (markers.includes('LAN')) return "LAN";
-        if (markers.includes('Private')) return "Private";
+        if (markers.includes(LiveSessionMarker.ResoniteAnyone)) return t('live.session.markers.resoniteAnyone');
+        if (markers.includes(LiveSessionMarker.ResoniteRegisteredUsers)) return t('live.session.markers.resoniteRegisteredUsers');
+        if (markers.includes(LiveSessionMarker.ResoniteContactsPlus)) return t('live.session.markers.resoniteContactsPlus');
+        if (markers.includes(LiveSessionMarker.ResoniteContacts)) return t('live.session.markers.resoniteContacts');
+        if (markers.includes(LiveSessionMarker.ResoniteLAN)) return t('live.session.markers.resoniteLAN');
+        if (markers.includes(LiveSessionMarker.ResonitePrivate)) return t('live.session.markers.resonitePrivate');
         
         return '';
     }
 
-    const isHeadless = liveSession.markers.includes('Headless');
-    const accessLevel = ParseAccessLevel(liveSession.markers);
+    const isHeadless = liveSession.markers.includes(LiveSessionMarker.ResoniteHeadless);
+    const accessLevel = LocalizeAccessLevel(liveSession.markers);
 
     const participationSquares = (
     <>

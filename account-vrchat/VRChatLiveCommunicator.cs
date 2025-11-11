@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Collections.Immutable;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using XYVR.AccountAuthority.VRChat.ThirdParty;
@@ -439,9 +440,24 @@ internal class VRChatLiveCommunicator
             isVirtualSpacePrivate = cachedWorld?.releaseStatus == "private",
             thumbnailUrl = cachedWorld?.thumbnailUrl,
             callerInAppIdentifier = callerInAppIdentifier,
-            markers = vrcxLocationContext.AccessType != VRCXLocationInferredAccessType.Indeterminate
-                ? [vrcxLocationContext.AccessType.ToString()]
-                : null
+            markers = ToMarker(vrcxLocationContext.AccessType)
+        };
+    }
+
+    private static ImmutableArray<LiveSessionMarker>? ToMarker(VRCXLocationInferredAccessType accessType)
+    {
+        return accessType switch
+        {
+            VRCXLocationInferredAccessType.Indeterminate => [],
+            VRCXLocationInferredAccessType.Public => [LiveSessionMarker.VRCPublic],
+            VRCXLocationInferredAccessType.InvitePlus => [LiveSessionMarker.VRCInvitePlus],
+            VRCXLocationInferredAccessType.Invite => [LiveSessionMarker.VRCInvite],
+            VRCXLocationInferredAccessType.Friends => [LiveSessionMarker.VRCFriends],
+            VRCXLocationInferredAccessType.FriendsPlus => [LiveSessionMarker.VRCFriendsPlus],
+            VRCXLocationInferredAccessType.Group => [LiveSessionMarker.VRCGroup],
+            VRCXLocationInferredAccessType.GroupPublic => [LiveSessionMarker.VRCGroupPublic],
+            VRCXLocationInferredAccessType.GroupPlus => [LiveSessionMarker.VRCGroupPlus],
+            _ => throw new ArgumentOutOfRangeException(nameof(accessType), accessType, null)
         };
     }
 

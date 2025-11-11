@@ -254,7 +254,7 @@ internal record FrontLiveSession
     public string? thumbnailHash { get; init; }
     public bool? isVirtualSpacePrivate { get; init; }
     public bool? ageGated { get; init; }
-    public ImmutableArray<string> markers { get; init; } = ImmutableArray<string>.Empty;
+    public ImmutableArray<LiveSessionMarker> markers { get; init; } = ImmutableArray<LiveSessionMarker>.Empty;
     public ImmutableArray<FrontParticipant> allParticipants { get; init; } = ImmutableArray<FrontParticipant>.Empty;
 
     public required string callerInAppIdentifier { get; init; }

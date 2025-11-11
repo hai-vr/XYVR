@@ -112,7 +112,7 @@ public record ImmutableLiveSession
     public bool? isVirtualSpacePrivate { get; init; }
     
     public bool? ageGated { get; init; }
-    public ImmutableArray<string> markers { get; init; }
+    public ImmutableArray<LiveSessionMarker> markers { get; init; }
     
     public ImmutableArray<ImmutableParticipant> allParticipants { get; init; } = ImmutableArray<ImmutableParticipant>.Empty;
     public required string callerInAppIdentifier { get; init; }
@@ -198,7 +198,7 @@ public record ImmutableNonIndexedLiveSession
     public bool? isVirtualSpacePrivate { get; init; }
 
     public bool? ageGated { get; init; }
-    public ImmutableArray<string>? markers { get; init; }
+    public ImmutableArray<LiveSessionMarker>? markers { get; init; }
     
     public ImmutableArray<ImmutableParticipant>? allParticipants { get; init; }
     
@@ -265,6 +265,29 @@ public enum LiveUserSessionKnowledge
     // ChilloutVR
     OfflineInstance,
     PrivateInstance
+}
+
+public enum LiveSessionMarker
+{
+    Indeterminate,
+    // VRChat
+    VRCPublic,
+    VRCInvitePlus,
+    VRCInvite,
+    VRCFriends,
+    VRCFriendsPlus,
+    VRCGroup,
+    VRCGroupPublic,
+    VRCGroupPlus,
+    // Resonite
+    ResoniteAnyone,
+    ResoniteRegisteredUsers,
+    ResoniteContactsPlus,
+    ResoniteContacts,
+    ResoniteLAN,
+    ResonitePrivate,
+    // Resonite non-access
+    ResoniteHeadless,
 }
 
 public record ImmutableLiveSessionHost

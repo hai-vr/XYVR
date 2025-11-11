@@ -14,6 +14,30 @@ export const LiveSessionKnowledge = {
 
 export type LiveUserSessionKnowledgeType = typeof LiveSessionKnowledge[keyof typeof LiveSessionKnowledge];
 
+export const LiveSessionMarker = {
+    Indeterminate: "Indeterminate",
+    // VRChat
+    VRCPublic: "VRCPublic",
+    VRCInvitePlus: "VRCInvitePlus",
+    VRCInvite: "VRCInvite",
+    VRCFriends: "VRCFriends",
+    VRCFriendsPlus: "VRCFriendsPlus",
+    VRCGroup: "VRCGroup",
+    VRCGroupPublic: "VRCGroupPublic",
+    VRCGroupPlus: "VRCGroupPlus",
+    // Resonite
+    ResoniteAnyone: "ResoniteAnyone",
+    ResoniteRegisteredUsers: "ResoniteRegisteredUsers",
+    ResoniteContactsPlus: "ResoniteContactsPlus",
+    ResoniteContacts: "ResoniteContacts",
+    ResoniteLAN: "ResoniteLAN",
+    ResonitePrivate: "ResonitePrivate",
+    // Resonite non-access
+    ResoniteHeadless: "ResoniteHeadless",
+} as const;
+
+export type LiveSessionMarkerType = typeof LiveSessionMarker[keyof typeof LiveSessionMarker];
+
 export interface FrontLiveUserUpdate {
     namedApp: NamedAppType;
     trigger: string;
@@ -48,7 +72,7 @@ export interface FrontLiveSession {
     thumbnailHash?: string;
     isVirtualSpacePrivate?: boolean;
     ageGated?: boolean;
-    markers: string[];
+    markers: LiveSessionMarkerType[];
     allParticipants: FrontParticipant[];
     callerInAppIdentifier: string;
 }

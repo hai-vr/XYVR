@@ -94,8 +94,8 @@ public class ResoniteLiveMonitoring : ILiveMonitoring, IDisposable
         // to prevent a possible violation of privacy as we don't know how much we can trust the incoming data.
         var sanitizedThumbnailUrl = sessionUpdate.thumbnailUrl != null ? EnsureUrlIsResoniteDotComOrNull(sessionUpdate.thumbnailUrl) : null;
 
-        List<string> markers = [sessionUpdate.accessLevel];
-        if (sessionUpdate.headlessHost) markers.Add("Headless");
+        var markers = ToMarker(sessionUpdate.accessLevel);
+        if (sessionUpdate.headlessHost) markers.Add(LiveSessionMarker.ResoniteHeadless);
         
         var correspondingSession = await _monitoring.MergeSession(new ImmutableNonIndexedLiveSession
         {
@@ -164,6 +164,20 @@ public class ResoniteLiveMonitoring : ILiveMonitoring, IDisposable
                 }
             }
         }
+    }
+
+    private List<LiveSessionMarker> ToMarker(string sessionUpdateAccessLevel)
+    {
+        return sessionUpdateAccessLevel switch
+        {
+            "Anyone" => [LiveSessionMarker.ResoniteAnyone],
+            "RegisteredUsers" => [LiveSessionMarker.ResoniteRegisteredUsers],
+            "ContactsPlus" => [LiveSessionMarker.ResoniteContactsPlus],
+            "Contacts" => [LiveSessionMarker.ResoniteContacts],
+            "LAN" => [LiveSessionMarker.ResoniteLAN],
+            "Private" => [LiveSessionMarker.ResonitePrivate],
+            _ => []
+        };
     }
 
     private static string? EnsureUrlIsResoniteDotComOrNull(string thumbnailUrl)
