@@ -111,7 +111,7 @@ export function LiveSession({
                 </>
             ))}
         </div>
-        <span title={capacityStr}>{capacityStr}</span>
+        <div style={{textAlign: "center"}} title={capacityStr}>{capacityStr}</div>
     </>);
 
     let background = liveSession.thumbnailUrl && `url(${liveSession.thumbnailUrl}), var(--live-session-overlay)`
