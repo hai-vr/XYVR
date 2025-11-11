@@ -25,7 +25,7 @@ If you are a developer, read below.
 *For the purposes of this README, the words "friend" and "contact" refer to the same social VR concept.*
 
 This app has the following goals:
-- Create an address book that can handle friends who are playing across **several different social VR platforms**.
+- Create an address book that can handle friends who are playing across **several different social VR apps and platforms**.
 - Create an **offline** address book that remains functional even when access to the original account is lost for any reason.
 - Remain least intrusive as possible.
 

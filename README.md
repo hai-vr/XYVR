@@ -6,7 +6,7 @@
 Once data is retrieved, it is stored offline, no Internet connection needed.
 The address book remains fully functional even if access to the original account is lost for any reason.
 
-If you have multiple accounts on different social VR platforms (or even on the same platform), you can
+If you have multiple accounts on different social VR apps and platforms (or even on the same platform), you can
 view your contacts as one single address book.
 
 It also shows the currently active sessions of your contacts and friends, all social VR applications mixed together.
