@@ -40,20 +40,6 @@ At first, this app is under development as a personal application tailored for m
 
 It is not readily usable by non-developer users without significant additional work.
 
-The following work has been done:
-- Fetch the contact and friend user data directly from Resonite and VRChat into a custom account data structure.
-- Expose code APIs to fusion accounts belonging to the same individual.
-- Expose backend APIs to a React application frontend.
-- Create an address book frontend UI.
-- Improve the data structure used to store the original API responses from the various social VR applications.
-- Improve data handling when the owner of the address book has multiple accounts on the same social VR platform with different friend lists.
-- Provide a graphical UI to login into the various social VR applications.
-- Provide a graphical UI to update the data.
-- Make the connection code easily auditable.
-- Set up workflow automation to build the React app and the .NET app.
-- Write the necessary API connectors to fetch live session data and display the current social VR application that a user is playing.
-- Provide a graphical UI to group accounts belonging to a single individual.
-
 The following work remains to be done:
 - https://github.com/hai-vr/XYVR/issues/9
 
