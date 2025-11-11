@@ -38,10 +38,22 @@ public class AppLifecycle
         // Order matters
         Scaffolding.DefineSavePathFromArgsOrUseDefault(args);
         Scaffolding.CreateDirectoriesPertainingToSavePath();
-        
-        var lockfile = new FileLock(Scaffolding.LockfileFilePath);
-        lockfile.AcquireLock();
 
+        try
+        {
+            var lockfile = new FileLock(Scaffolding.LockfileFilePath);
+            lockfile.AcquireLock();
+        }
+        catch (InvalidOperationException e)
+        {
+            // Do not use XYVRLogging here, this error is special.
+            var error = "XYVR is already running on this save folder. To prevent data corruption, only one instance of XYVR can run at a time per save folder.";
+            Console.Error.WriteLine(error);
+            
+            throw new InvalidOperationException(error, e);
+        }
+
+        // Setting up the log file must be done after the lock has been acquired.
         XYVRLogging.SetupLogFile();
         XYVRLogging.WriteLine(this, "Application startup");
         XYVRLogging.WriteLine(this, $"Version is {VERSION.version}");
