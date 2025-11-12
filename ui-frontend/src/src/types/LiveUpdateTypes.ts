@@ -32,6 +32,15 @@ export const LiveSessionMarker = {
     ResoniteContacts: "ResoniteContacts",
     ResoniteLAN: "ResoniteLAN",
     ResonitePrivate: "ResonitePrivate",
+    // ChilloutVR
+    CVRPublic: "CVRPublic",
+    CVRFriendsOfFriends: "CVRFriendsOfFriends",
+    CVRFriends: "CVRFriends",
+    CVRGroup: "CVRGroup",
+    CVREveryoneCanInvite: "CVREveryoneCanInvite",
+    CVROwnerMustInvite: "CVROwnerMustInvite",
+    CVRGroupPlus: "CVRGroupPlus",
+    CVRGroupPublic: "CVRGroupPublic",
     // Resonite non-access
     ResoniteHeadless: "ResoniteHeadless",
 } as const;

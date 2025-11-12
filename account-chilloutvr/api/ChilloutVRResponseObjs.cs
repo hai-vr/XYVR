@@ -1,5 +1,34 @@
 ﻿namespace XYVR.AccountAuthority.ChilloutVR;
 
+// Portions of this file is based on prior work by AstroDogeDX on the CVRX project located at ( https://github.com/AstroDogeDX/CVRX )
+// The LICENSE of CVRX has been copied into this file to acknowledge the original work.
+// 
+// [[[
+
+// MIT License
+// 
+// Copyright (c) 2023 AstroDogeDX
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+// ]]]
+
 #pragma warning disable CS8618
 #pragma warning disable 0649
 [Serializable]
@@ -108,6 +137,18 @@ internal class CvrWebsocketInstance
     public string Id;
     public string Name;
     public int Privacy;
+}
+
+internal class CvrPrivacyLevel
+{
+    internal const int Public = 0;
+    internal const int FriendsOfFriends = 1;
+    internal const int Friends = 2;
+    internal const int Group = 3; // ChilloutVR defines this as Members Only.
+    internal const int EveryoneCanInvite = 4;
+    internal const int OwnerMustInvite = 5;
+    internal const int GroupPlus = 6; // CVRX defines this as GroupsPlus (plural groups), ChilloutVR defines this as Friends of Members
+    internal const int GroupPublic = 7;
 }
 #pragma warning restore 0649
 #pragma warning restore CS8618

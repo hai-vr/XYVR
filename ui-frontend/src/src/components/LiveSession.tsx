@@ -68,6 +68,15 @@ export function LiveSession({
         if (markers.includes(LiveSessionMarker.ResoniteLAN)) return t('live.session.markers.resoniteLAN');
         if (markers.includes(LiveSessionMarker.ResonitePrivate)) return t('live.session.markers.resonitePrivate');
         
+        if (markers.includes(LiveSessionMarker.CVRPublic)) return t('live.session.markers.cvrPublic');
+        if (markers.includes(LiveSessionMarker.CVRFriendsOfFriends)) return t('live.session.markers.cvrFriendsOfFriends');
+        if (markers.includes(LiveSessionMarker.CVRFriends)) return t('live.session.markers.cvrFriends');
+        if (markers.includes(LiveSessionMarker.CVRGroup)) return t('live.session.markers.cvrGroup');
+        if (markers.includes(LiveSessionMarker.CVREveryoneCanInvite)) return t('live.session.markers.cvrEveryoneCanInvite');
+        if (markers.includes(LiveSessionMarker.CVROwnerMustInvite)) return t('live.session.markers.cvrOwnerMustInvite');
+        if (markers.includes(LiveSessionMarker.CVRGroupPlus)) return t('live.session.markers.cvrGroupPlus');
+        if (markers.includes(LiveSessionMarker.CVRGroupPublic)) return t('live.session.markers.cvrGroupPublic');
+        
         return '';
     }
 

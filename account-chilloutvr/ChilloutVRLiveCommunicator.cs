@@ -199,6 +199,7 @@ internal class ChilloutVRLiveCommunicator
                 inAppSessionIdentifier = friend.Instance.Id,
 
                 inAppSessionName = friend.Instance.Name,
+                markers = ToMarkers(friend.Instance.Privacy),
                 
                 callerInAppIdentifier = _callerInAppIdentifier,
             };
@@ -210,6 +211,22 @@ internal class ChilloutVRLiveCommunicator
             }
         }
         return new ImmutableLiveUserSessionState() { knowledge = LiveUserSessionKnowledge.PrivateInstance };
+    }
+
+    private ImmutableArray<LiveSessionMarker>? ToMarkers(int instancePrivacy)
+    {
+        return instancePrivacy switch
+        {
+            CvrPrivacyLevel.Public => [ LiveSessionMarker.CVRPublic ],
+            CvrPrivacyLevel.FriendsOfFriends => [ LiveSessionMarker.CVRFriendsOfFriends ],
+            CvrPrivacyLevel.Friends => [ LiveSessionMarker.CVRFriends ],
+            CvrPrivacyLevel.Group => [ LiveSessionMarker.CVRGroup ],
+            CvrPrivacyLevel.EveryoneCanInvite => [ LiveSessionMarker.CVREveryoneCanInvite ],
+            CvrPrivacyLevel.OwnerMustInvite => [ LiveSessionMarker.CVROwnerMustInvite ],
+            CvrPrivacyLevel.GroupPlus => [ LiveSessionMarker.CVRGroupPlus ],
+            CvrPrivacyLevel.GroupPublic => [ LiveSessionMarker.CVRGroupPublic ],
+            _ => []
+        };
     }
 
     private void WhenConnected()

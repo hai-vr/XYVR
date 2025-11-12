@@ -286,6 +286,15 @@ public enum LiveSessionMarker
     ResoniteContacts,
     ResoniteLAN,
     ResonitePrivate,
+    // ChilloutVR
+    CVRPublic,
+    CVRFriendsOfFriends,
+    CVRFriends,
+    CVRGroup,
+    CVREveryoneCanInvite,
+    CVROwnerMustInvite,
+    CVRGroupPlus,
+    CVRGroupPublic,
     // Resonite non-access
     ResoniteHeadless,
 }
