@@ -268,7 +268,7 @@ public class ResoniteLiveMonitoring : ILiveMonitoring, IDisposable
         _operationLock.Dispose();
     }
 
-    public Task MakeGameClientJoinOrSelfInvite(string sessionId)
+    public Task MakeGameClientJoinOrSelfInvite(string sessionId, CancellationTokenSource cancellationTokenSource)
     {
         DANGER_OpenResoniteSession(sessionId);
         return Task.CompletedTask;

@@ -311,10 +311,23 @@ internal class VRChatAPI
 
     public async Task InviteMyselfTo(string worldIdAndInstanceId)
     {
-        ThrowIfNotLoggedIn();
+        try
+        {
+            ThrowIfNotLoggedIn();
         
-        var url = $"{AuditUrls.VrcApiUrl}/invite/myself/to/{worldIdAndInstanceId}";
-        await _client.PostAsync(url, null, _cancellationTokenSource.Token);
+            var url = $"{AuditUrls.VrcApiUrl}/invite/myself/to/{worldIdAndInstanceId}";
+            var request = new HttpRequestMessage(HttpMethod.Post, url);
+            request.Content = new StringContent("{}", Encoding.UTF8, MediaTypeHeaderValue.Parse("application/json"));
+
+            var response = await _client.SendAsync(request, _cancellationTokenSource.Token);
+
+            await EnsureRateLimiting(url, response.StatusCode);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
     }
 
     public async Task<VRChatInstance?> GetInstanceLenient(DataCollectionReason dataCollectionReason, string worldIdAndInstanceId, bool useFastFetch)

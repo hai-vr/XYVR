@@ -7,14 +7,16 @@ public class LiveMonitoringAgent
     private readonly ConnectorManagement _connectors;
     private readonly CredentialsManagement _credentials;
     private readonly LiveStatusMonitoring _monitoring;
-    
+    private readonly CancellationTokenSource _cancellationTokenSource;
+
     private Dictionary<string, ILiveMonitoring>? _liveMonitoringAgents;
 
-    public LiveMonitoringAgent(ConnectorManagement connectors, CredentialsManagement credentials, LiveStatusMonitoring monitoring)
+    public LiveMonitoringAgent(ConnectorManagement connectors, CredentialsManagement credentials, LiveStatusMonitoring monitoring, CancellationTokenSource cancellationTokenSource)
     {
         _connectors = connectors;
         _credentials = credentials;
         _monitoring = monitoring;
+        _cancellationTokenSource = cancellationTokenSource;
     }
     
     private record GuidToLiveMonitoring(string guid, ILiveMonitoring? liveMonitoring);
@@ -117,6 +119,6 @@ public class LiveMonitoringAgent
         var liveMonitoring = await _credentials.GetConnectedLiveMonitoringOrNull(connector, _monitoring);
         if (liveMonitoring == null) return;
         
-        await liveMonitoring.MakeGameClientJoinOrSelfInvite(sessionId);
+        await liveMonitoring.MakeGameClientJoinOrSelfInvite(sessionId, _cancellationTokenSource);
     }
 }

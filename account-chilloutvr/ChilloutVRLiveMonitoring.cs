@@ -95,7 +95,7 @@ public class ChilloutVRLiveMonitoring(LiveStatusMonitoring monitoring, ICredenti
         return Task.CompletedTask;
     }
 
-    public Task MakeGameClientJoinOrSelfInvite(string sessionId)
+    public Task MakeGameClientJoinOrSelfInvite(string sessionId, CancellationTokenSource cancellationTokenSource)
     {
         // TODO: Currently not implemented
         return Task.CompletedTask;

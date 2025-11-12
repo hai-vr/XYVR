@@ -76,7 +76,7 @@ public class AppLifecycle
         ConnectorsMgt = new ConnectorManagement(await Scaffolding.OpenConnectors());
         CredentialsMgt = new CredentialsManagement(await Scaffolding.OpenCredentials(), _authorities);
         LiveStatusMonitoring = new LiveStatusMonitoring();
-        LiveMonitoringAgent = new LiveMonitoringAgent(ConnectorsMgt, CredentialsMgt, LiveStatusMonitoring);
+        LiveMonitoringAgent = new LiveMonitoringAgent(ConnectorsMgt, CredentialsMgt, LiveStatusMonitoring, CancellationTokenSource);
         
         ProfileIllustrationRepository = new ProfileIllustrationRepository(await Scaffolding.OpenProfileIllustrationStorage());
 

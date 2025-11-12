@@ -11,5 +11,5 @@ public interface ILiveMonitoring
     // so we need some way to reconcile it.
     Task DefineCaller(string callerInAppIdentifier);
     
-    Task MakeGameClientJoinOrSelfInvite(string sessionId);
+    Task MakeGameClientJoinOrSelfInvite(string sessionId, CancellationTokenSource cancellationTokenSource);
 }

@@ -146,11 +146,11 @@ public class VRChatLiveMonitoring : ILiveMonitoring
         return Task.CompletedTask;
     }
 
-    public async Task MakeGameClientJoinOrSelfInvite(string sessionId)
+    public async Task MakeGameClientJoinOrSelfInvite(string sessionId, CancellationTokenSource cancellationTokenSource)
     {
         if (_callerInAppIdentifier == null) throw new InvalidOperationException("Caller must be defined to invite yourself");
         
-        var comms = new VRChatLiveCommunicator(_credentialsStorage, _callerInAppIdentifier, new DoNotStoreAnythingStorage(), _worldNameCache, _thumbnailCache, _cancellationTokenSource);
+        var comms = new VRChatLiveCommunicator(_credentialsStorage, _callerInAppIdentifier, new DoNotStoreAnythingStorage(), _worldNameCache, _thumbnailCache, cancellationTokenSource);
         await comms.InviteMyselfTo(sessionId);
     }
 }

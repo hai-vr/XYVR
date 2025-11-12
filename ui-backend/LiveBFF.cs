@@ -140,9 +140,17 @@ public class LiveBFF : ILiveBFF
 
     public async Task MakeGameClientJoinOrSelfInvite(string appName, string inAppIdentifier, string sessionId)
     {
-        if (Enum.TryParse<NamedApp>(appName, out var namedApp))
+        try
         {
-            await _appLifecycle.LiveMonitoringAgent.MakeGameClientJoinOrSelfInvite(namedApp, inAppIdentifier, sessionId);
+            if (Enum.TryParse<NamedApp>(appName, out var namedApp))
+            {
+                await _appLifecycle.LiveMonitoringAgent.MakeGameClientJoinOrSelfInvite(namedApp, inAppIdentifier, sessionId);
+            }
+        }
+        catch (Exception e)
+        {
+            XYVRLogging.ErrorWriteLine(this, e);
+            throw;
         }
     }
 }
