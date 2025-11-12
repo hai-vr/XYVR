@@ -158,7 +158,6 @@ export function LiveSession({
                                 <span className="live-session-name"
                                       title={capacityStr}>{_D2(liveSession.inAppSessionName || '', debugMode, undefined, DemonstrationMode.Everything) || t('live.session.unnamed')}</span>}
                         </div>
-                        {liveSession.ageGated === true && <span>🔞</span>}
                     </div>
                 </div>
                 {!mini && <div className="live-session-participants">
@@ -234,7 +233,7 @@ export function LiveSession({
                     >
                         <SquareArrowDownRight size={16}/>
                     </a>
-                    <span>{isHeadless && <span>Headless</span>} {accessLevel}</span>
+                    <span>{liveSession.ageGated === true && <span title={t('live.session.markers.vrcAgeVerificationRequired')}>🔞</span>} {isHeadless && <span>{t('live.session.markers.resoniteHeadless')}</span>} {accessLevel}</span>
                 </div>
             </div>
         </div>

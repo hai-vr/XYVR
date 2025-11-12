@@ -102,4 +102,6 @@
     "live.session.markers.resoniteContacts": "Contacts",
     "live.session.markers.resoniteLAN": "LAN",
     "live.session.markers.resonitePrivate": "Private",
+    "live.session.markers.vrcAgeVerificationRequired": "Age Verification Required",
+    "live.session.markers.resoniteHeadless": "Headless",
 }
