@@ -246,7 +246,7 @@ const Account = ({
                 {!isConnector && !isSessionView && account.mainSession?.liveSession
                     && <LiveSession liveSession={account.mainSession.liveSession} individuals={[]} debugMode={debugMode}
                                     mini={true}/>}
-                {!isConnector && account.namedApp === NamedApp.Resonite && resoniteShowSubSessions && account.multiSessions
+                {!illustrativeDisplay && !isConnector && account.namedApp === NamedApp.Resonite && resoniteShowSubSessions && account.multiSessions
                     .map((session) => (session.guid != account.mainSession?.sessionGuid &&
                         <LiveSession liveSession={session} individuals={[]} debugMode={debugMode} mini={true}/>))}
             </div>
