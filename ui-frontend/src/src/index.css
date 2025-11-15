@@ -446,3 +446,7 @@ button:disabled:hover {
     border-radius: 6px;
     font-weight: bold;
 }
+
+.marker-age-verification-required {
+    color: red;
+}
