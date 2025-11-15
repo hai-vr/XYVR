@@ -1,7 +1,7 @@
 ﻿import Account from "./Account.tsx";
 import "./Individual.css";
 import React, { useState, useRef, useEffect } from "react";
-import {Clipboard, Phone} from "lucide-react";
+import {Clipboard/*, Phone*/} from "lucide-react";
 import {accountMatchesFromRegularTerms, anyAccountMatchesSpecialTerms, parseSearchField} from "../pages/searchUtils.ts";
 import {_D, _D2} from "../haiUtils.ts";
 import type {FrontAccount, FrontIndividual} from "../types/CoreTypes.ts";
@@ -174,12 +174,12 @@ function Individual({
                                 <h3 className={clsx('individual-name', fusionAccounts && 'modal-pointer')} onClick={fusionAccounts && handleNameClick}>
                                     {_D(individual.displayName, debugMode)}
                                 </h3>
-                                {individual.isAnyContact && (
-                                    <span className="contact-badge">
-                                    <Phone size={16} />
-                                    <span>{t('individual.contact.label')}</span>
-                                </span>
-                                )}
+                                {/*{individual.isAnyContact && (*/}
+                                {/*    <span className="contact-badge">*/}
+                                {/*    <Phone size={16} />*/}
+                                {/*    <span>{t('individual.contact.label')}</span>*/}
+                                {/*</span>*/}
+                                {/*)}*/}
                                 {!isModalPresentation && <div className="individual-menu" ref={dropdownRef}>
                                     <button
                                         className="menu-button"
