@@ -1,15 +1,19 @@
 ﻿XYVR
 ====
 
-*XYVR* is an address book application that lets you search through your VRChat, Resonite, and ChilloutVR contacts.
+*XYVR* is an address book application that lets you search through your VRChat, Resonite, and ChilloutVR contacts, including live sessions.
 
 Once data is retrieved, it is stored offline, no Internet connection needed.
 The address book remains fully functional even if access to the original account is lost for any reason.
 
-If you have multiple accounts on different social VR apps and platforms (or even on the same platform), you can
-view your contacts as one single address book.
+If you or your contacts have multiple accounts on different social VR apps and platforms (or even on the same platform), you can
+view them as one single address book.
 
-It also shows the currently active sessions of your contacts and friends, all social VR applications mixed together.
+XYVR is designed to be [least intrusive as possible](https://github.com/hai-vr/XYVR/blob/main/CONTRIBUTING.md#prohibited-features):
+- We do not expose an event log to track the addition or removal from contact lists.
+- This application does not modify any data on your VRChat, Resonite, or ChilloutVR accounts through the API, and it does not read
+nor modify any VRChat, Resonite, or ChilloutVR files, log files, nor screenshots on your computer.
+- There is no telemetry, no calls to third-party services, and we do not have servers. Read our [Privacy and Data considerations](#privacy-and-data-considerations) below.
 
 <img width="416" height="499" alt="XYVR_164tRkiXkB" src="https://github.com/user-attachments/assets/76dcca6a-d428-4739-ace8-bb10add4b2e4" />
 
@@ -69,6 +73,7 @@ XYVR is only interested in building an address book and monitoring live sessions
   - Get the currently active sessions. 
   - Get the session of a contact.
   - Get the world of a session and its thumbnail.
+- Typing on the search bar or opening a users' profile in the UI does not perform any API request to the VRChat, Resonite, or ChilloutVR servers.
 
 The following are exceptions to this rule:
   - At your request, the application may submit an invitation to yourself to join an instance (VRChat only).
