@@ -452,3 +452,7 @@ button:disabled:hover {
     align-items: center;
     gap: 8px;
 }
+
+.marker-age-verification-required {
+    color: red;
+}

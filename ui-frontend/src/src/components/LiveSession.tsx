@@ -7,7 +7,7 @@ import {type DebugFlags, DemonstrationMode} from "../types/DebugFlags.ts";
 import {_D, _D2} from "../haiUtils.ts";
 import {useTranslation} from "react-i18next";
 import {DotNetApi} from "../DotNetApi.ts";
-import {Clipboard, Globe, Mail, SquareArrowDownRight} from "lucide-react";
+import {IdCard, Server, Clipboard, Globe, Mail, SquareArrowDownRight} from "lucide-react";
 
 interface LiveSessionProps {
     liveSession: FrontLiveSession,
@@ -264,7 +264,9 @@ export function LiveSession({
                         </div>
                     </div>}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'space-between' }}>
-                    <span>{liveSession.ageGated === true && <span title={t('live.session.markers.vrcAgeVerificationRequired')}>🔞</span>} {isHeadless && <span>{t('live.session.markers.resoniteHeadless')}</span>} {accessLevel}</span>
+                    <span>{liveSession.ageGated === true && <span title={t('live.session.markers.vrcAgeVerificationRequired')}><IdCard className="marker-age-verification-required" size={16} style={{marginRight: '6px'}} /></span>}
+                        {isHeadless && <span title={t('live.session.markers.resoniteHeadless')}><Server size={16} style={{marginRight: '6px'}} /></span>}
+                        {accessLevel}</span>
                     <div className="row-of-buttons">
                         {(liveSession.namedApp === NamedApp.VRChat || liveSession.namedApp === NamedApp.Resonite) && <button
                             onClick={copyLinkToProfileIdentifier}
