@@ -1,5 +1,5 @@
 ﻿import './Account.css';
-import {CircleDot, CircleOff, Clipboard, DiamondMinus, Globe, TriangleAlert} from "lucide-react";
+import {CircleDot, CircleOff, DiamondMinus, Clipboard, Globe, Hash, TriangleAlert} from "lucide-react";
 import {_D, _D2} from "../haiUtils.ts";
 import {
     type FrontAccount, type FrontIndividual, NamedApp,
@@ -14,6 +14,7 @@ import {LiveSession} from "./LiveSession.tsx";
 import {DotNetApi} from "../DotNetApi.ts";
 import {useTranslation} from "react-i18next";
 import clsx from "clsx";
+import {useEffect, useState} from "react";
 
 interface AccountProps {
     account: FrontAccount,
@@ -50,14 +51,47 @@ const Account = ({
     const dotNetApi = new DotNetApi();
     const {t} = useTranslation();
 
+    const [isAltDown, setIsAltDown] = useState(false);
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Alt" || e.altKey) {
+                setIsAltDown(true);
+            }
+        };
+
+        const handleKeyUp = (e: KeyboardEvent) => {
+            if (e.key === "Alt" || !e.altKey) {
+                setIsAltDown(false);
+            }
+        };
+
+        window.addEventListener("keydown", handleKeyDown);
+        window.addEventListener("keyup", handleKeyUp);
+
+        return () => {
+            window.removeEventListener("keydown", handleKeyDown);
+            window.removeEventListener("keyup", handleKeyUp);
+        };
+    }, []);
+
     const hasNote = account.isAnyCallerNote;
 
     const copyInAppIdentifier = async () => {
         await navigator.clipboard.writeText(account.inAppIdentifier);
     };
 
+    function getProfileLink() {
+        return `${account.namedApp === "VRChat" && 'https://vrchat.com/home/user/' || 'https://hub.chilloutvr.net/social/profile?guid='}${account.inAppIdentifier}`;
+    }
+
+    const copyLinkToProfileIdentifier = async () => {
+        const link = getProfileLink();
+        await navigator.clipboard.writeText(link);
+    };
+
     const openLink = async () => {
-        var link = `${account.namedApp === "VRChat" && 'https://vrchat.com/home/user/' || 'https://hub.chilloutvr.net/social/profile?guid='}${account.inAppIdentifier}`
+        const link = getProfileLink();
         await dotNetApi.appApiOpenLink(link);
     };
 
@@ -204,6 +238,20 @@ const Account = ({
                                 {t('account.badge.bot')}
                             </span>
                         )}
+                        {showCopyToClipboard && (isAltDown || account.namedApp === "Resonite") && <button
+                            onClick={copyInAppIdentifier}
+                            className="icon-button"
+                            title={t('account.copyId.title', {id: _D(account.inAppIdentifier, debugMode)})}
+                        >
+                            <Hash size={16}/>
+                        </button>}
+                        {showCopyToClipboard && (account.namedApp === "VRChat" || account.namedApp === "ChilloutVR") && <button
+                            onClick={copyLinkToProfileIdentifier}
+                            className="icon-button"
+                            title={t('account.copyLinkToProfile.title', {app: account.namedApp})}
+                        >
+                            <Clipboard size={16}/>
+                        </button>}
                         {!illustrativeDisplay && (account.namedApp === "VRChat" || account.namedApp === "ChilloutVR") && (
                             <a
                                 onClick={openLink} onAuxClick={(e) => e.button === 1 && openLink()}
@@ -215,13 +263,6 @@ const Account = ({
                                 <Globe size={16}/>
                             </a>
                         )}
-                        {showCopyToClipboard && <button
-                            onClick={copyInAppIdentifier}
-                            className="icon-button"
-                            title={t('account.copyId.title', {id: _D(account.inAppIdentifier, debugMode)})}
-                        >
-                            <Clipboard size={16}/>
-                        </button>}
                     </div>)}
                 </div>
 

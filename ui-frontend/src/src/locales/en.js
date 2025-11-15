@@ -112,4 +112,5 @@
     "live.session.markers.cvrGroupPublic": "Group Public",
     "live.session.markers.vrcAgeVerificationRequired": "Age Verification Required",
     "live.session.markers.resoniteHeadless": "Headless",
+    "account.copyLinkToProfile.title": "Copy link to {{app}} Profile",
 }
