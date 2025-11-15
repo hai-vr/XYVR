@@ -53,6 +53,8 @@ function Individual({
     const [filteredAccounts, setFilteredAccounts] = useState<FrontAccount[]>([]);
     const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
+    
+    const isModalPresentation: boolean = fusionAccounts === undefined;
 
     // Get all VRChat account links and filter to only show http/https URLs
     const vrChatLinks = individual.accounts
@@ -63,10 +65,9 @@ function Individual({
         ?.filter(url => url && (url.startsWith('http://') || url.startsWith('https://'))) || [];
 
     // Get all VRChat account bios
-    const vrcBios: string[] = showBio && individual.accounts
-        ?.filter(account => account.namedApp === "VRChat" && account.specifics?.bio)
-        ?.map(account => account.specifics.bio)
-        ?.filter(bio => bio.trim() !== '') || [];
+    const vrcBios = showBio && individual.accounts
+        ?.filter(account => account.namedApp === "VRChat" && account.specifics?.bio && account.specifics.bio.trim() !== '')
+        || [];
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -146,26 +147,6 @@ function Individual({
         }
     }, [individual, searchField, compactMode])
 
-    // Helper function to get the first non-punctuation character
-    const getFirstNonPunctuationChar = (str: string) => {
-        if (!str) return '?';
-
-        // Regular expression to match various punctuation marks including:
-        // - Basic ASCII punctuation
-        // - Unicode punctuation categories (Pc, Pd, Pe, Pf, Pi, Po, Ps)
-        // - Common CJK punctuation symbols like 【】「」〈〉《》etc.
-        const punctuationRegex = /[\p{P}\u3000-\u303F\uFF00-\uFFEF\u2000-\u206F\u2E00-\u2E7F]/u;
-
-        for (let i = 0; i < str.length; i++) {
-            const char = str.charAt(i);
-            if (!punctuationRegex.test(char) && char.trim() !== '') {
-                return char.toUpperCase();
-            }
-        }
-
-        // If all characters are punctuation or whitespace, return the first character or '?'
-        return str.charAt(0).toUpperCase() || '?';
-    };
 
     const openLink = async (url: string) => {
         const realUrl = debugMode.demoMode !== DemonstrationMode.Disabled ? 'https://example.com' : url
@@ -175,82 +156,115 @@ function Individual({
     return (
         <>
             <div className={`${!compactMode ? 'individual-container' : 'individual-container-compact'} ${!isVisible ? 'hidden' : ''} ${isBeingMerged ? 'being-merged' : ''}`}>
-                {!compactMode && <div style={{position: 'relative', width: 150, height: 225}}>
-                    <div style={{
-                        background: `var(--account-illustrative-overlay), url("individualprofile://${individual.guid}"), var(--bg-primary)`,
-                        backgroundBlendMode: 'normal',
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
-                        backgroundRepeat: 'no-repeat',
-                        position: 'absolute',
-                        inset: 0,
-                    }}></div>
-                </div>}
-                {!compactMode && (<>
-                    <div className="individual-header">
-                        <div className="individual-avatar">
-                            {debugMode.demoMode !== DemonstrationMode.Disabled ? '?' : getFirstNonPunctuationChar(individual.displayName)}
-                        </div>
-                        <h3 className={clsx('individual-name', fusionAccounts && 'modal-pointer')} onClick={fusionAccounts && handleNameClick}>
-                            {_D(individual.displayName, debugMode)}
-                        </h3>
-                        {individual.isAnyContact && (
-                            <span className="contact-badge">
-                                <Phone size={16} />
-                                <span>{t('individual.contact.label')}</span>
-                            </span>
-                        )}
-                        {fusionAccounts && <div className="individual-menu" ref={dropdownRef}>
-                            <button
-                                className="menu-button"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setIsDropdownOpen(!isDropdownOpen);
-                                }}
-                                title={t('individual.moreActions.title')}
-                            >
-                                ⋯
-                            </button>
-                            {isDropdownOpen && (
-                                <div className="dropdown-menu">
-                                    {displayNameOfOtherBeingMergedOrUnd !== undefined && !isBeingMerged && (<button
-                                        className="dropdown-item"
-                                        onClick={(e) => handleMenuAction('confirmMerge', e)}
-                                        title={t('individual.confirmMerge.title')}
-                                    >
-                                        {t('individual.confirmMerge.label', { name: _D(displayNameOfOtherBeingMergedOrUnd, debugMode) })}
-                                    </button>)}
-                                    {displayNameOfOtherBeingMergedOrUnd === undefined && <button
-                                        className="dropdown-item"
-                                        onClick={(e) => handleMenuAction('merge', e)}
-                                        title={t('individual.mergeAccount.title')}
-                                    >
-                                        {t('individual.mergeAccount.label')}
-                                    </button>}
-                                    {displayNameOfOtherBeingMergedOrUnd !== undefined && <button
-                                        className="dropdown-item"
-                                        onClick={(e) => handleMenuAction('cancelMerge', e)}
-                                    >
-                                        Cancel merge
-                                    </button>}
-                                    {individual.accounts.length > 1 && <button
-                                        className="dropdown-item"
-                                        onClick={(e) => handleMenuAction('unmerge', e)}
-                                    >
-                                        Unmerge accounts
-                                    </button>}
+                <div className="individual-top">
+                    {!compactMode && <div style={{position: 'relative', width: 150, height: 225}}>
+                        <div style={{
+                            background: `var(--account-illustrative-overlay), url("individualprofile://${individual.guid}"), var(--bg-primary)`,
+                            backgroundBlendMode: 'normal',
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center',
+                            backgroundRepeat: 'no-repeat',
+                            position: 'absolute',
+                            inset: 0,
+                        }}></div>
+                    </div>}
+                    {!compactMode && (<>
+                        <div style={{position: 'relative', width: "calc(100% - 150px)", top: 0, right: 0}}>
+                            <div className="individual-header">
+                                <h3 className={clsx('individual-name', fusionAccounts && 'modal-pointer')} onClick={fusionAccounts && handleNameClick}>
+                                    {_D(individual.displayName, debugMode)}
+                                </h3>
+                                {individual.isAnyContact && (
+                                    <span className="contact-badge">
+                                    <Phone size={16} />
+                                    <span>{t('individual.contact.label')}</span>
+                                </span>
+                                )}
+                                {!isModalPresentation && <div className="individual-menu" ref={dropdownRef}>
                                     <button
-                                        className="dropdown-item"
-                                        onClick={(e) => handleMenuAction('details', e)}
+                                        className="menu-button"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setIsDropdownOpen(!isDropdownOpen);
+                                        }}
+                                        title={t('individual.moreActions.title')}
                                     >
-                                        Show details
+                                        ⋯
                                     </button>
+                                    {isDropdownOpen && (
+                                        <div className="dropdown-menu">
+                                            {displayNameOfOtherBeingMergedOrUnd !== undefined && !isBeingMerged && (<button
+                                                className="dropdown-item"
+                                                onClick={(e) => handleMenuAction('confirmMerge', e)}
+                                                title={t('individual.confirmMerge.title')}
+                                            >
+                                                {t('individual.confirmMerge.label', { name: _D(displayNameOfOtherBeingMergedOrUnd, debugMode) })}
+                                            </button>)}
+                                            {displayNameOfOtherBeingMergedOrUnd === undefined && <button
+                                                className="dropdown-item"
+                                                onClick={(e) => handleMenuAction('merge', e)}
+                                                title={t('individual.mergeAccount.title')}
+                                            >
+                                                {t('individual.mergeAccount.label')}
+                                            </button>}
+                                            {displayNameOfOtherBeingMergedOrUnd !== undefined && <button
+                                                className="dropdown-item"
+                                                onClick={(e) => handleMenuAction('cancelMerge', e)}
+                                            >
+                                                Cancel merge
+                                            </button>}
+                                            {individual.accounts.length > 1 && <button
+                                                className="dropdown-item"
+                                                onClick={(e) => handleMenuAction('unmerge', e)}
+                                            >
+                                                Unmerge accounts
+                                            </button>}
+                                            <button
+                                                className="dropdown-item"
+                                                onClick={(e) => handleMenuAction('details', e)}
+                                            >
+                                                Show details
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>}
+                            </div>
+
+                            {vrChatLinks.length > 0 && (
+                                <div className="vrchat-links-list">
+                                    {vrChatLinks.map((url, linkIndex) => {
+                                        let presentedUrl = url.replace('https://', '');
+                                        
+                                        // Remove trailing slash from the displayed URL, but ONLY if the URL is a hostname.
+                                        if (presentedUrl.includes('/') && presentedUrl.split('/').length === 2 && presentedUrl.endsWith('/')) presentedUrl = presentedUrl.slice(0, -1);
+                                        return (
+                                            <div key={linkIndex} className="vrchat-link-item">
+                                                <a
+                                                    onClick={() => openLink(url)}
+                                                    onAuxClick={(e) => e.button === 1 && openLink(url)}
+                                                    onMouseDown={(e) => e.preventDefault()}
+                                                    rel="noopener noreferrer"
+                                                    className="vrchat-link link-pointer"
+                                                >
+                                                    {debugMode.demoMode !== DemonstrationMode.Disabled ? 'https://' + _D2(url.replace('http://', '').replace('https://', ''), debugMode, '/') : _D2(presentedUrl, debugMode, '/')}
+                                                </a>
+                                                <button
+                                                    onClick={(e) => copyToClipboard(url, e)}
+                                                    className="icon-button"
+                                                    title="Copy link to clipboard"
+                                                >
+                                                    <Clipboard size={16}/>
+                                                </button>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             )}
-                        </div>}
-                    </div>
-                </>)}
+                        </div>
+                    </>)}
+                </div>
     
+                <div className="individual-underside">
                 <div className="accounts-container">
                     {filteredAccounts && filteredAccounts.length > 0 ? (
                         <div className="accounts-grid">
@@ -264,8 +278,8 @@ function Individual({
                                          showSession={true}
                                          isSessionView={false}
                                          showCopyToClipboard={showCopyToClipboard}
-                                         setModalIndividual={fusionAccounts && setModalIndividual}
-                                         clickOpensIndividual={fusionAccounts && individual}
+                                         setModalIndividual={!isModalPresentation && setModalIndividual || undefined}
+                                         clickOpensIndividual={!isModalPresentation && individual || undefined}
                                 />
                             ))}
                         </div>
@@ -276,48 +290,25 @@ function Individual({
                     )}
                 </div>
     
-                {!compactMode && vrChatLinks.length > 0 && (
-                    <div className="vrchat-links-list">
-                        {vrChatLinks.map((url, linkIndex) => (
-                            <div key={linkIndex} className="vrchat-link-item">
-                                <a
-                                    onClick={() => openLink(url)} onAuxClick={(e) => e.button === 1 && openLink(url)} onMouseDown={(e) => e.preventDefault()}
-                                    rel="noopener noreferrer"
-                                    className="vrchat-link link-pointer"
-                                >
-                                    {debugMode.demoMode !== DemonstrationMode.Disabled ? 'https://' + _D2(url.replace('http://', '').replace('https://', ''), debugMode, '/') : _D2(url, debugMode, '/')}
-                                </a>
-                                <button
-                                    onClick={(e) => copyToClipboard(url, e)}
-                                    className="icon-button"
-                                    title="Copy link to clipboard"
-                                >
-                                    <Clipboard size={16} />
-                                </button>
+                {vrcBios.length > 0 && showBio && (
+                    <div className="vrchat-bios-container">
+                        {vrcBios.map((account, bioIndex) => (
+                            <div key={bioIndex} className="vrchat-bio-item">
+                                {vrcBios.length >= 2 && <Account account={account} imposter={false} showAlias={false} showNotes={false} debugMode={debugMode} isSessionView={true} resoniteShowSubSessions={false} />}
+                                {account.specifics.bio.split('\n').map((line: string, lineIndex: number) => (
+                                    <span key={lineIndex}>
+                                        {_D(line, debugMode)}
+                                        {lineIndex < account.specifics.bio.split('\n').length - 1 && <br/>}
+                                    </span>
+                                ))}
                             </div>
                         ))}
                     </div>
                 )}
-    
-                {vrcBios.length > 0 && showBio && (
-                    <div className="vrchat-bios-container">
-                        <div className="vrchat-links-list">
-                            {vrcBios.map((bio, bioIndex) => (
-                                <div key={bioIndex} className="vrchat-bio-item">
-                                    {bio.split('\n').map((line, lineIndex) => (
-                                        <span key={lineIndex}>
-                                            {_D(line, debugMode)}
-                                            {lineIndex < bio.split('\n').length - 1 && <br/>}
-                                        </span>
-                                    ))}
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
+            </div>
             </div>
 
-            {fusionAccounts && <IndividualDetailsModal
+            {!isModalPresentation && <IndividualDetailsModal
                 isOpen={isDetailsModalOpen}
                 onClose={() => setIsDetailsModalOpen(false)}
                 individual={individual}
