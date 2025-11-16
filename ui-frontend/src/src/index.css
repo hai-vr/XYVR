@@ -446,3 +446,9 @@ button:disabled:hover {
     border-radius: 6px;
     font-weight: bold;
 }
+
+.row-of-buttons {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}

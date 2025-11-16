@@ -7,7 +7,7 @@ import {type DebugFlags, DemonstrationMode} from "../types/DebugFlags.ts";
 import {_D, _D2} from "../haiUtils.ts";
 import {useTranslation} from "react-i18next";
 import {DotNetApi} from "../DotNetApi.ts";
-import {SquareArrowDownRight} from "lucide-react";
+import {Clipboard, Globe, Mail, SquareArrowDownRight} from "lucide-react";
 
 interface LiveSessionProps {
     liveSession: FrontLiveSession,
@@ -82,6 +82,29 @@ export function LiveSession({
 
     const isHeadless = liveSession.markers.includes(LiveSessionMarker.ResoniteHeadless);
     const accessLevel = LocalizeAccessLevel(liveSession.markers);
+
+    function getProfileLink() {
+        if (liveSession.namedApp === "VRChat") {
+            const separator = liveSession.inAppSessionIdentifier.indexOf(':');
+            if (separator === -1) {
+                return `https://vrchat.com/home/launch?worldId=${liveSession.inAppSessionIdentifier}`;
+            }
+            else {
+                return `https://vrchat.com/home/launch?worldId=${liveSession.inAppSessionIdentifier.substring(0, separator)}&instanceId=${liveSession.inAppSessionIdentifier.substring(separator + 1)}`;
+            }
+        } 
+        return '';
+    }
+
+    const copyLinkToProfileIdentifier = async () => {
+        const link = getProfileLink();
+        await navigator.clipboard.writeText(link);
+    };
+
+    const openLink = async () => {
+        const link = getProfileLink();
+        await dotNetApi.appApiOpenLink(link);
+    };
 
     const participationSquares = (
     <>
@@ -233,16 +256,36 @@ export function LiveSession({
                     </div>}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'space-between' }}>
                     <span>{liveSession.ageGated === true && <span title={t('live.session.markers.vrcAgeVerificationRequired')}>🔞</span>} {isHeadless && <span>{t('live.session.markers.resoniteHeadless')}</span>} {accessLevel}</span>
-                    <a
-                        onClick={makeGameClientJoinOrSelfInvite}
-                        onAuxClick={(e) => e.button === 1 && makeGameClientJoinOrSelfInvite()}
-                        onMouseDown={(e) => e.preventDefault()}
-                        rel="noopener noreferrer"
-                        className="icon-button link-pointer"
-                        title={t('ui.joinSession.title')}
-                    >
-                        <SquareArrowDownRight size={16}/>
-                    </a>
+                    <div className="row-of-buttons">
+                        {liveSession.namedApp === "VRChat" && <button
+                            onClick={copyLinkToProfileIdentifier}
+                            className="icon-button"
+                            title={t('account.copyLinkToSession.title', {app: liveSession.namedApp})}
+                        >
+                            <Clipboard size={16}/>
+                        </button>}
+                        {liveSession.namedApp === "VRChat" && (
+                            <a
+                                onClick={openLink} onAuxClick={(e) => e.button === 1 && openLink()}
+                                onMouseDown={(e) => e.preventDefault()}
+                                rel="noopener noreferrer"
+                                className="icon-button link-pointer"
+                                title={t('account.openSession.title', {app: liveSession.namedApp})}
+                            >
+                                <Globe size={16}/>
+                            </a>
+                        )}
+                        <a
+                            onClick={makeGameClientJoinOrSelfInvite}
+                            onAuxClick={(e) => e.button === 1 && makeGameClientJoinOrSelfInvite()}
+                            onMouseDown={(e) => e.preventDefault()}
+                            rel="noopener noreferrer"
+                            className="icon-button link-pointer"
+                            title={t(liveSession.namedApp === 'VRChat' ? 'ui.inviteYourself.title' : 'ui.joinSession.title')}
+                        >
+                            {liveSession.namedApp === 'VRChat' && <Mail size={16} /> || <SquareArrowDownRight size={16}/>}
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>

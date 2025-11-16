@@ -113,4 +113,7 @@
     "live.session.markers.vrcAgeVerificationRequired": "Age Verification Required",
     "live.session.markers.resoniteHeadless": "Headless",
     "account.copyLinkToProfile.title": "Copy link to {{app}} Profile",
+    "account.openSession.title": "Open {{app}} Session web page",
+    "account.copyLinkToSession.title": "Copy link to {{app}} Session",
+    "ui.inviteYourself.title": "Invite yourself to this session",
 }
