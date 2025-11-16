@@ -28,7 +28,7 @@
 }
 
 .individual-underside {
-    padding: 24px;
+    padding: 12px;
 }
 
 .individual-container-compact {
@@ -157,7 +157,7 @@
 }
 
 .individual-container .accounts-container {
-    margin-bottom: 20px;
+    margin-bottom: 0;
 }
 
 .individual-container-compact .accounts-container {
