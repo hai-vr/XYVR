@@ -3,7 +3,7 @@ import "./Individual.css";
 import React, { useState, useRef, useEffect } from "react";
 import {Clipboard/*, Phone*/} from "lucide-react";
 import {accountMatchesFromRegularTerms, anyAccountMatchesSpecialTerms, parseSearchField} from "../pages/searchUtils.ts";
-import {_D, _D2} from "../haiUtils.ts";
+import {_D, _D2, makePersonalLinkPresentable} from "../haiUtils.ts";
 import type {FrontAccount, FrontIndividual} from "../types/CoreTypes.ts";
 import {type DebugFlags, DemonstrationMode} from "../types/DebugFlags.ts";
 import {DotNetApi} from "../DotNetApi.ts";
@@ -233,21 +233,26 @@ function Individual({
                             {vrChatLinks.length > 0 && (
                                 <div className="vrchat-links-list">
                                     {vrChatLinks.map((url, linkIndex) => {
-                                        let presentedUrl = url.replace('https://', '');
-                                        
-                                        // Remove trailing slash from the displayed URL, but ONLY if the URL is a hostname.
-                                        if (presentedUrl.includes('/') && presentedUrl.split('/').length === 2 && presentedUrl.endsWith('/')) presentedUrl = presentedUrl.slice(0, -1);
+                                        let presentedUrl = makePersonalLinkPresentable(url);
                                         return (
                                             <div key={linkIndex} className="vrchat-link-item">
+                                                <span>
+                                                {debugMode.demoMode !== DemonstrationMode.Disabled
+                                                    ? ''
+                                                    : presentedUrl.length === 2 ? <span style={{paddingRight: '4px'}}>{presentedUrl[1]}</span> : ''}
                                                 <a
                                                     onClick={() => openLink(url)}
                                                     onAuxClick={(e) => e.button === 1 && openLink(url)}
                                                     onMouseDown={(e) => e.preventDefault()}
                                                     rel="noopener noreferrer"
                                                     className="vrchat-link link-pointer"
+                                                    title={url}
                                                 >
-                                                    {debugMode.demoMode !== DemonstrationMode.Disabled ? 'https://' + _D2(url.replace('http://', '').replace('https://', ''), debugMode, '/') : _D2(presentedUrl, debugMode, '/')}
+                                                    {debugMode.demoMode !== DemonstrationMode.Disabled
+                                                        ? 'https://' + _D2(url.replace('http://', '').replace('https://', ''), debugMode, '/')
+                                                        : presentedUrl.length === 2 ? _D2(presentedUrl[0], debugMode, '/') : _D2(presentedUrl[0], debugMode, '/')}
                                                 </a>
+                                                </span>
                                                 <button
                                                     onClick={(e) => copyToClipboard(url, e)}
                                                     className="icon-button"
