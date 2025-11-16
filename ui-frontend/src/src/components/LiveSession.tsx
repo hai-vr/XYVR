@@ -232,6 +232,7 @@ export function LiveSession({
                         </div>
                     </div>}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'space-between' }}>
+                    <span>{liveSession.ageGated === true && <span title={t('live.session.markers.vrcAgeVerificationRequired')}>🔞</span>} {isHeadless && <span>{t('live.session.markers.resoniteHeadless')}</span>} {accessLevel}</span>
                     <a
                         onClick={makeGameClientJoinOrSelfInvite}
                         onAuxClick={(e) => e.button === 1 && makeGameClientJoinOrSelfInvite()}
@@ -242,7 +243,6 @@ export function LiveSession({
                     >
                         <SquareArrowDownRight size={16}/>
                     </a>
-                    <span>{liveSession.ageGated === true && <span title={t('live.session.markers.vrcAgeVerificationRequired')}>🔞</span>} {isHeadless && <span>{t('live.session.markers.resoniteHeadless')}</span>} {accessLevel}</span>
                 </div>
             </div>
         </div>
