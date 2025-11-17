@@ -42,8 +42,9 @@ export function LiveSession({
 
     const showRemainingSlots = 5;
     const actualAttendance = Math.max(liveSession.currentAttendance || 0, liveSession.participants.length);
+    const attendenceUnknownMarker = liveSession.currentAttendance ? '' : '?';
     // Replace all spaces with NBSP
-    const capacityStr = `${actualAttendance || '?'} / ${specialCapacity}`.replaceAll(" ", "\u00a0");
+    const capacityStr = `${actualAttendance}${attendenceUnknownMarker} / ${specialCapacity}`.replaceAll(" ", "\u00a0");
     let capacityDisplay = actualAttendance > sesscap ? actualAttendance : Math.min(actualAttendance + showRemainingSlots, sesscap);
     const hasMore = sesscap - actualAttendance > showRemainingSlots;
 
