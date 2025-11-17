@@ -84,7 +84,7 @@ export function LiveSession({
     const isHeadless = liveSession.markers.includes(LiveSessionMarker.ResoniteHeadless);
     const accessLevel = LocalizeAccessLevel(liveSession.markers);
 
-    function getProfileLink() {
+    function getSessionLink() {
         if (liveSession.namedApp === "VRChat") {
             const separator = liveSession.inAppSessionIdentifier.indexOf(':');
             if (separator === -1) {
@@ -93,17 +93,20 @@ export function LiveSession({
             else {
                 return `https://vrchat.com/home/launch?worldId=${liveSession.inAppSessionIdentifier.substring(0, separator)}&instanceId=${liveSession.inAppSessionIdentifier.substring(separator + 1)}`;
             }
-        } 
+        }
+        else if (liveSession.namedApp === "Resonite") {
+            return `https://api.resonite.com/open/session/${liveSession.inAppSessionIdentifier}`
+        }
         return '';
     }
 
     const copyLinkToProfileIdentifier = async () => {
-        const link = getProfileLink();
+        const link = getSessionLink();
         await navigator.clipboard.writeText(link);
     };
 
     const openLink = async () => {
-        const link = getProfileLink();
+        const link = getSessionLink();
         await dotNetApi.appApiOpenLink(link);
     };
 
@@ -258,14 +261,14 @@ export function LiveSession({
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'space-between' }}>
                     <span>{liveSession.ageGated === true && <span title={t('live.session.markers.vrcAgeVerificationRequired')}>🔞</span>} {isHeadless && <span>{t('live.session.markers.resoniteHeadless')}</span>} {accessLevel}</span>
                     <div className="row-of-buttons">
-                        {liveSession.namedApp === "VRChat" && <button
+                        {(liveSession.namedApp === "VRChat" || liveSession.namedApp === "Resonite") && <button
                             onClick={copyLinkToProfileIdentifier}
                             className="icon-button"
                             title={t('account.copyLinkToSession.title', {app: liveSession.namedApp})}
                         >
                             <Clipboard size={16}/>
                         </button>}
-                        {liveSession.namedApp === "VRChat" && (
+                        {(liveSession.namedApp === "VRChat" || liveSession.namedApp === "Resonite") && (
                             <a
                                 onClick={openLink} onAuxClick={(e) => e.button === 1 && openLink()}
                                 onMouseDown={(e) => e.preventDefault()}
