@@ -15,6 +15,81 @@ export const _D2 = (inputStr: string, debugFlags: DebugFlags, character = ' ', s
     }
 }
 
+type TLDHandler = {
+    displayName: string;
+    domain: string;
+    showFullUrl?: boolean;
+};
+
+type DomainHandler = {
+    prefixes: string[];
+    displayName: string;
+    // By default, it's allowed. We specified this value in the entries below explicitly for the cases where a slash was spotted in the wild.
+    // This may be removed entirely.
+    allowTrailingEmpty?: boolean;
+    // Calculated based on the number of slashes in the first prefix.
+    extractIndex?: number;
+    minPathParts?: number;
+};
+
+const USER_IN_SUBDOMAIN_HANDLERS: TLDHandler[] = [
+    { displayName: 'Booth.pm', domain: 'booth.pm' },
+    { displayName: 'Gumroad', domain: 'gumroad.com' },
+    { displayName: 'Bluesky', domain: 'bsky.social', showFullUrl: true },
+    { displayName: 'Carrd', domain: 'carrd.co' },
+    { displayName: 'pixivFANBOX', domain: 'fanbox.cc' },
+    { displayName: 'Bandcamp', domain: 'bandcamp.com' },
+];
+
+const USER_IN_PATH_HANDLERS: DomainHandler[] = [
+    { displayName: 'Twitter', prefixes: ['twitter.com/', 'www.twitter.com/', 'mobile.twitter.com/'], allowTrailingEmpty: true },
+    { displayName: 'X', prefixes: ['x.com/'], allowTrailingEmpty: true },
+    { displayName: 'Twitch', prefixes: ['twitch.tv/', 'www.twitch.tv/'], allowTrailingEmpty: true },
+    { displayName: 'Bluesky', prefixes: ['bsky.app/profile/'] },
+    { displayName: 'Misskey.niri.la', prefixes: ['misskey.niri.la/'] },
+    { displayName: 'Misskey.io', prefixes: ['misskey.io/'] },
+    { displayName: 'Facebook', prefixes: ['facebook.com/'], allowTrailingEmpty: true },
+    { displayName: 'Linktree', prefixes: ['linktr.ee/'] },
+    { displayName: 'lit.link', prefixes: ['lit.link/'] },
+    { displayName: 'YouTube', prefixes: ['www.youtube.com/c/'] }, // Because the number of slashes is different in the prefix, we must not merge those.
+    { displayName: 'YouTube', prefixes: ['www.youtube.com/@'] }, // Because the number of slashes is different in the prefix, we must not merge those.
+    { displayName: 'Instagram', prefixes: ['www.instagram.com/'], allowTrailingEmpty: true },
+    { displayName: 'TikTok', prefixes: ['www.tiktok.com/'] },
+    { displayName: 'Artstation', prefixes: ['artstation.com/', 'www.artstation.com/'], allowTrailingEmpty: true },
+    { displayName: 'SoundCloud', prefixes: ['soundcloud.com/'], allowTrailingEmpty: true },
+    { displayName: 'Mixcloud', prefixes: ['www.mixcloud.com/'], allowTrailingEmpty: true },
+    { displayName: 'Steam', prefixes: ['steamcommunity.com/id/'], allowTrailingEmpty: true },
+    { displayName: 'GitHub', prefixes: ['github.com/'], allowTrailingEmpty: true },
+    { displayName: 'GitLab', prefixes: ['gitlab.com/'], allowTrailingEmpty: true },
+    { displayName: 'cluster.mu', prefixes: ['cluster.mu/u/'] },
+    { displayName: 'Ko-fi', prefixes: ['ko-fi.com/'] },
+    { displayName: 'Patreon', prefixes: ['patreon.com/', 'www.patreon.com/'], allowTrailingEmpty: true },
+    { displayName: 'Fantia', prefixes: ['fantia.jp/'] },
+    { displayName: 'Fansly', prefixes: ['fansly.com/'], allowTrailingEmpty: true },
+    { displayName: 'Booth.pm', prefixes: ['booth.pm/'] },
+    { displayName: 'Skeb', prefixes: ['skeb.jp/'] },
+    { displayName: 'Jinxxy', prefixes: ['jinxxy.com/'] },
+];
+
+for (const value of USER_IN_PATH_HANDLERS) {
+    // We assume that the number of slashes is the same for all prefixes in the array
+    let numberOfSlashes = value.prefixes[0].split('/').length - 1;
+    value.extractIndex = numberOfSlashes;
+    value.minPathParts = numberOfSlashes + 1;
+}
+
+const matchesSplitCriteria = (splitLength: number, handler: DomainHandler): boolean => {
+    const min = handler.minPathParts ?? splitLength;
+    const max = splitLength;
+
+    let allowTrailingEmpty = handler.allowTrailingEmpty === undefined ? true : handler.allowTrailingEmpty;
+    if (allowTrailingEmpty && splitLength === max + 1 && !splitLength.toString().endsWith('')) {
+        return true;
+    }
+
+    return splitLength === min || (allowTrailingEmpty && splitLength === min + 1);
+};
+
 export const makePersonalLinkPresentable = (url: string) => {
     let presentedUrl = url.replace('https://', '');
 
@@ -23,145 +98,43 @@ export const makePersonalLinkPresentable = (url: string) => {
         presentedUrl = presentedUrl.slice(0, -1);
     }
 
-    if (presentedUrl.includes('?')) return [presentedUrl];
-    if (presentedUrl.includes('#')) return [presentedUrl];
-
-    const split = presentedUrl.split('/');
-
-    // TLDs
-    if (split.length === 1 && split[0].toLowerCase().endsWith('.booth.pm')) {
-        let dotSplit = split[0].split('.');
-        if (dotSplit.length === 3) {
-            return [dotSplit[0], 'Booth.pm'];
-        }
-    }
-    if (split.length === 1 && split[0].toLowerCase().endsWith('.gumroad.com')) {
-        let dotSplit = split[0].split('.');
-        if (dotSplit.length === 3) {
-            return [dotSplit[0], 'Gumroad'];
-        }
-    }
-    if (split.length === 1 && split[0].toLowerCase().endsWith('.bsky.social')) {
-        let dotSplit = split[0].split('.');
-        if (dotSplit.length === 3) {
-            return [split[0], 'Bluesky']; // NOTE: We intentionally show the entire URL here.
-        }
-    }
-    if (split.length === 1 && split[0].toLowerCase().endsWith('.carrd.co')) {
-        let dotSplit = split[0].split('.');
-        if (dotSplit.length === 3) {
-            return [dotSplit[0], 'Carrd'];
-        }
-    }
-    if (split.length === 1 && split[0].toLowerCase().endsWith('.fanbox.cc')) {
-        let dotSplit = split[0].split('.');
-        if (dotSplit.length === 3) {
-            return [dotSplit[0], 'pixivFANBOX'];
-        }
-    }
-    if (split.length === 1 && split[0].toLowerCase().endsWith('.bandcamp.com')) {
-        let dotSplit = split[0].split('.');
-        if (dotSplit.length === 3) {
-            return [dotSplit[0], 'Bandcamp'];
-        }
-    }
-
-    if (split.length === 1) {
+    if (presentedUrl.includes('?') || presentedUrl.includes('#')) {
         return [presentedUrl];
     }
 
-    // Order matters (presentedUrl is mutated throughout)
-    let lowercaseUrl = presentedUrl.toLowerCase();
-
-    // Social Media
-    if (lowercaseUrl.startsWith('twitter.com/') || lowercaseUrl.startsWith('www.twitter.com/') || lowercaseUrl.startsWith('mobile.twitter.com/')) {
-        if (split.length === 2 || split.length === 3 && split[2] === '') return [split[1], 'Twitter'];
-    }
-    if (lowercaseUrl.startsWith('x.com/')) {
-        if (split.length === 2 || split.length === 3 && split[2] === '') return [split[1], 'X'];
-    }
-    if (lowercaseUrl.startsWith('twitch.tv/') || lowercaseUrl.startsWith('www.twitch.tv/')) {
-        if (split.length === 2 || split.length === 3 && split[2] === '') return [split[1], 'Twitch'];
-    }
-    if (lowercaseUrl.startsWith('bsky.app/profile/')) {
-        if (split.length === 3) return [split[2], 'Bluesky'];
-    }
-    if (lowercaseUrl.startsWith('misskey.niri.la/')) {
-        if (split.length === 2) return [split[1], 'Misskey.niri.la'];
-    }
-    if (lowercaseUrl.startsWith('misskey.io/')) {
-        if (split.length === 2) return [split[1], 'Misskey.io'];
-    }
-    if (lowercaseUrl.startsWith('linktr.ee/')) {
-        if (split.length === 2) return [split[1], 'Linktree'];
-    }
-    if (lowercaseUrl.startsWith('lit.link/')) {
-        if (split.length === 2) return [split[1], 'lit.link'];
-    }
-    if (lowercaseUrl.startsWith('www.youtube.com/c/')) {
-        if (split.length === 3) return [split[2], 'YouTube'];
-    }
-    if (lowercaseUrl.startsWith('www.youtube.com/@')) { // Note: YouTube links that don't start with @ are sort of legacy, don't use those.
-        if (split.length === 2) return [split[1], 'YouTube'];
-    }
-    if (lowercaseUrl.startsWith('www.instagram.com/')) {
-        if (split.length === 2 || split.length === 3 && split[2] === '') return [split[1], 'Instagram'];
-    }
-    if (lowercaseUrl.startsWith('www.tiktok.com/')) {
-        if (split.length === 2) return [split[1], 'TikTok'];
-    }
-    if (lowercaseUrl.startsWith('artstation.com/') || lowercaseUrl.startsWith('www.artstation.com/')) {
-        if (split.length === 2 || split.length === 3 && split[2] === '') return [split[1], 'Artstation'];
-    }
-    if (lowercaseUrl.startsWith('soundcloud.com/')) {
-        if (split.length === 2 || split.length === 3 && split[2] === '') return [split[1], 'SoundCloud'];
-    }
-    if (lowercaseUrl.startsWith('www.mixcloud.com/')) {
-        if (split.length === 2 || split.length === 3 && split[2] === '') return [split[1], 'Mixcloud'];
-    }
-    if (lowercaseUrl.startsWith('steamcommunity.com/id/')) {
-        // Notice how this is different from the others
-        if (split.length === 3 || split.length === 4 && split[3] === '') return [split[2], 'Steam'];
-    }
-    if (lowercaseUrl.startsWith('facebook.com/') || lowercaseUrl.startsWith('facebook.com/')) {
-        if (split.length === 2 || split.length === 3 && split[2] === '') return [split[1], 'Facebook'];
+    const slashSplit = presentedUrl.split('/');
+    const lowercaseUrl = presentedUrl.toLowerCase();
+    
+    if (slashSplit.length === 1) {
+        const dotSplit = slashSplit[0].split('.');
+        if (dotSplit.length === 3) {
+            // The hostname of a link can end with a dot (e.g. "booth.pm."); we are deliberately ignoring links that use those
+            // because practically no one uses that other than in internal enterprise systems.
+            // See: https://en.wikipedia.org/wiki/Fully_qualified_domain_name
+            if (dotSplit[2] !== '') {
+                const domain = slashSplit[0].toLowerCase();
+                for (const handler of USER_IN_SUBDOMAIN_HANDLERS) {
+                    // We need to do the dot concatenation because things like "notbooth.pm" should not be mapped to "booth.pm"
+                    // Example: If "x.com" used subdomains (it doesn't), then "netflix.com" would also cause this issue.
+                    if (domain.endsWith('.' + handler.domain)) {
+                        const identifier = handler.showFullUrl ? slashSplit[0] : dotSplit[0];
+                        return [identifier, handler.displayName];
+                    }
+                }
+            }
+        }
+        return [presentedUrl];
     }
 
-    // Development
-    if (lowercaseUrl.startsWith('github.com/')) {
-        if (split.length === 2 || split.length === 3 && split[2] === '') return [split[1], 'GitHub'];
+    for (const handler of USER_IN_PATH_HANDLERS) {
+        for (const prefix of handler.prefixes) {
+            if (lowercaseUrl.startsWith(prefix)) {
+                if (matchesSplitCriteria(slashSplit.length, handler)) {
+                    return [slashSplit[handler.extractIndex!], handler.displayName];
+                }
+            }
+        }
     }
-    if (lowercaseUrl.startsWith('gitlab.com/')) {
-        if (split.length === 2 || split.length === 3 && split[2] === '') return [split[1], 'GitLab'];
-    }
-
-    // Social VR
-    if (lowercaseUrl.startsWith('cluster.mu/u/')) {
-        if (split.length === 3) return [split[2], 'cluster.mu'];
-    }
-
-    // Crowdfunding
-    if (lowercaseUrl.startsWith('ko-fi.com/')) {
-        if (split.length === 2) return [split[1], 'Ko-fi'];
-    }
-    if (lowercaseUrl.startsWith('patreon.com/') || lowercaseUrl.startsWith('www.patreon.com/')) {
-        if (split.length === 2 || split.length === 3 && split[2] === '') return [split[1], 'Patreon'];
-    }
-    if (lowercaseUrl.startsWith('fantia.jp/')) {
-        if (split.length === 2) return [split[1], 'Fantia'];
-    }
-    if (lowercaseUrl.startsWith('fansly.com/')) {
-        if (split.length === 2 || split.length === 3 && split[2] === '') return [split[1], 'Fansly'];
-    }
-
-    // Other stores
-    if (lowercaseUrl.startsWith('booth.pm/')) {
-        if (split.length === 2) return [split[1], 'Booth.pm'];
-    }
-    if (lowercaseUrl.startsWith('skeb.jp/')) {
-        if (split.length === 2) return [split[1], 'Skeb'];
-    }
-    // Note: I haven't seen a single Jinxxy link on my contact list that isn't also a product link, so I don't have working examples to test with
 
     return [presentedUrl];
 };
