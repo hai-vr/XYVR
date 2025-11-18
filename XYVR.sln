@@ -24,6 +24,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ui-photino-linux", "ui-phot
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ui-frontend", "ui-frontend\ui-frontend.csproj", "{859CD08F-7D1B-4D5D-85C1-0C95596A75DA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "account-cluster", "account-cluster\account-cluster.csproj", "{A94F3B09-0067-4910-B40C-D6A30FB21575}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -78,5 +80,9 @@ Global
 		{859CD08F-7D1B-4D5D-85C1-0C95596A75DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{859CD08F-7D1B-4D5D-85C1-0C95596A75DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{859CD08F-7D1B-4D5D-85C1-0C95596A75DA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A94F3B09-0067-4910-B40C-D6A30FB21575}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A94F3B09-0067-4910-B40C-D6A30FB21575}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A94F3B09-0067-4910-B40C-D6A30FB21575}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A94F3B09-0067-4910-B40C-D6A30FB21575}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
