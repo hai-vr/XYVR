@@ -30,9 +30,20 @@ public class PreferencesBFF : IPreferencesBFF
     public async Task<string> GetPreferences()
     {
         XYVRLogging.WriteLine(this, "Getting preferences");
-        _lastPrefs = await Scaffolding.OpenReactAppPreferences();
+        if (_lastPrefs == null)
+        {
+            _lastPrefs = await Scaffolding.OpenReactAppPreferences();
+            _newPrefs = _lastPrefs;
+        }
         
-        return ToJson(_lastPrefs);
+        return ToJson(_newPrefs!);
+    }
+
+    public async Task EditPrefs(Func<ReactAppPreferences, ReactAppPreferences> editFn)
+    {
+        if (_newPrefs == null) await GetPreferences();
+        
+        _newPrefs = editFn(_newPrefs);
     }
 
     public Task SetPreferences(string preferences)

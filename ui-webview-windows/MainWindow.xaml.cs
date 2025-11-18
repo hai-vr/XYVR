@@ -29,6 +29,13 @@ public partial class MainWindow : Window
 
     private async Task OnClosed(object? sender, EventArgs e)
     {
+        await AppHandle.Lifecycle.PreferencesBff.EditPrefs(preferences => preferences with
+        {
+            windowWidth = Width,
+            windowHeight = Height,
+            windowTop = Top,
+            windowLeft = Left
+        });
         await AppHandle.Lifecycle.WhenApplicationCloses();
     }
 
@@ -50,7 +57,16 @@ public partial class MainWindow : Window
         XYVRLogging.WriteLine(this, "WebView: Main window loaded.");
         
         AppHandle = (App)Application.Current;
+        
         await AppHandle.Lifecycle.WhenWindowLoaded(SendScriptToReact);
+        await AppHandle.Lifecycle.PreferencesBff.EditPrefs(preferences =>
+        {
+            Width = preferences.windowWidth;
+            Height = preferences.windowHeight;
+            Top = preferences.windowTop;
+            Left = preferences.windowLeft;
+            return preferences;
+        });
         
         await WebView.EnsureCoreWebView2Async();
         WebView.CoreWebView2.AddHostObjectToScript("appApi", AppHandle.Lifecycle.AppBff);

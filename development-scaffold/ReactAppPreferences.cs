@@ -8,4 +8,9 @@ public record ReactAppPreferences
     public string lang { get; init; } = "en";
     
     public bool resoniteShowSubSessions { get; init; } = true;
+    
+    public double windowWidth { get; init; } = 600;
+    public double windowHeight { get; init; } = 1000;
+    public double windowLeft { get; init; } = 100;
+    public double windowTop { get; init; } = 100;
 }

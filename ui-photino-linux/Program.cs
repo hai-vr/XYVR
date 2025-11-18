@@ -18,6 +18,11 @@ namespace XYVR.UI.Photino
         private static JsonSerializerSettings _serializer = null!;
         private static PhotinoWindow _window = null!;
         private static AppLifecycle _appLifecycle = null!;
+        
+        private static double Width = new ReactAppPreferences().windowWidth;
+        private static double Height = new ReactAppPreferences().windowHeight;
+        private static double Top = new ReactAppPreferences().windowTop;
+        private static double Left = new ReactAppPreferences().windowLeft;
 
         [STAThread]
         static void Main(string[] args)
@@ -42,7 +47,8 @@ namespace XYVR.UI.Photino
                     .SetTitle(windowTitle)
                     // Resize to a percentage of the main monitor work area
                     .SetUseOsDefaultSize(false)
-                    .SetSize(new Size(600, 1000))
+                    .SetSize(new Size((int)Width, (int)Height))
+                    .SetLocation(new Point((int)Left, (int)Top))
                     .Center()
                     // Users can resize windows by default.
                     // Let's make this one fixed instead.
@@ -145,10 +151,40 @@ namespace XYVR.UI.Photino
                 _window.Load($"{baseUrl}/index.html");
                 
                 _appLifecycle.WhenWindowLoaded(SendEventToReact).Wait();
+                _appLifecycle.PreferencesBff.EditPrefs(preferences =>
+                {
+                    Width = preferences.windowWidth;
+                    Height = preferences.windowHeight;
+                    Top = preferences.windowTop;
+                    Left = preferences.windowLeft;
+                    return preferences;
+                }).Wait();
+                _window
+                    .SetSize(new Size((int)Width, (int)Height))
+                    // This isn't working
+                    .MoveTo((int)Left, (int)Top, false);
+
+                _window.WindowLocationChangedHandler += (sender, location) =>
+                {
+                    Top = location.Y;
+                    Left = location.X;
+                };
+                _window.RegisterSizeChangedHandler((sender, size) =>
+                {
+                    Width = _window.Size.Width;
+                    Height = _window.Size.Height;
+                });
             
                 // Starts the application event loop
                 _window.WaitForClose();
-            
+
+                _appLifecycle.PreferencesBff.EditPrefs(preferences => preferences with
+                {
+                    windowWidth = Width,
+                    windowHeight = Height,
+                    windowTop = Top,
+                    windowLeft = Left
+                }).Wait();
                 appLifecycle.WhenApplicationCloses().Wait();
             }
             catch (Exception e)
