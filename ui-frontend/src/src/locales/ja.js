@@ -1,7 +1,7 @@
 ﻿export default {
     // V0.0.1-alpha.11
     "account.badge.bot": "ボット",
-    "account.badge.contact": "フレンド",
+    "account.badge.contact": "フレンド", // In japanese, contact translated as "friend" in resonite for historical reasons.
     "account.badge.friend": "フレンド",
     "account.badge.note": "メモ",
     "account.copyId.title": "コピーするID: {{id}}",
