@@ -159,7 +159,7 @@ function Individual({
                 <div className="individual-top">
                     {!compactMode && <div style={{position: 'relative', width: 150, height: 225}}>
                         <div style={{
-                            background: `var(--account-illustrative-overlay), url("individualprofile://${individual.guid}"), var(--bg-primary)`,
+                            background: `url("individualprofile://${individual.guid}"), var(--bg-primary)`,
                             backgroundBlendMode: 'normal',
                             backgroundSize: 'cover',
                             backgroundPosition: 'center',
