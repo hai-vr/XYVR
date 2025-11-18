@@ -2,7 +2,7 @@
 import {convertConfusablesToLatin} from "./confusables.ts";
 import {
     type FrontAccount,
-    type FrontIndividual,
+    type FrontIndividual, NamedApp,
     OnlineStatus,
     type OnlineStatusType
 } from "../types/CoreTypes.ts";
@@ -252,31 +252,31 @@ export const anyAccountMatchesSpecialTerms = (accounts: FrontAccount[], specialT
 
         switch (term) {
             case 'app:resonite':
-                return accounts?.some(account => account.namedApp === "Resonite") || false;
+                return accounts?.some(account => account.namedApp === NamedApp.Resonite) || false;
 
             case 'app:vrchat':
-                return accounts?.some(account => account.namedApp === "VRChat") || false;
+                return accounts?.some(account => account.namedApp === NamedApp.VRChat) || false;
 
             case 'app:cluster':
-                return accounts?.some(account => account.namedApp === "Cluster") || false;
+                return accounts?.some(account => account.namedApp === NamedApp.Cluster) || false;
 
             case 'app:chilloutvr':
-                return accounts?.some(account => account.namedApp === "ChilloutVR") || false;
+                return accounts?.some(account => account.namedApp === NamedApp.ChilloutVR) || false;
 
             case 'on:':
                 return accounts?.some(account => account.onlineStatus && account.onlineStatus !== 'Offline') || false;
 
             case 'on:resonite':
-                return accounts?.some(account => account.namedApp === "Resonite" && account.onlineStatus && account.onlineStatus !== 'Offline') || false;
+                return accounts?.some(account => account.namedApp === NamedApp.Resonite && account.onlineStatus && account.onlineStatus !== 'Offline') || false;
 
             case 'on:vrchat':
-                return accounts?.some(account => account.namedApp === "VRChat" && account.onlineStatus && account.onlineStatus !== 'Offline') || false;
+                return accounts?.some(account => account.namedApp === NamedApp.VRChat && account.onlineStatus && account.onlineStatus !== 'Offline') || false;
 
             case 'on:cluster':
-                return accounts?.some(account => account.namedApp === "Cluster" && account.onlineStatus && account.onlineStatus !== 'Offline') || false;
+                return accounts?.some(account => account.namedApp === NamedApp.Cluster && account.onlineStatus && account.onlineStatus !== 'Offline') || false;
 
             case 'on:chilloutvr':
-                return accounts?.some(account => account.namedApp === "ChilloutVR" && account.onlineStatus && account.onlineStatus !== 'Offline') || false;
+                return accounts?.some(account => account.namedApp === NamedApp.ChilloutVR && account.onlineStatus && account.onlineStatus !== 'Offline') || false;
 
             case 'has:bot':
                 return accounts?.some(account => account.isTechnical) || false;

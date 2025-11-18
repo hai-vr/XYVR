@@ -82,7 +82,7 @@ const Account = ({
     };
 
     function getProfileLink() {
-        return `${account.namedApp === "VRChat" && 'https://vrchat.com/home/user/' || 'https://hub.chilloutvr.net/social/profile?guid='}${account.inAppIdentifier}`;
+        return `${account.namedApp === NamedApp.VRChat && 'https://vrchat.com/home/user/' || 'https://hub.chilloutvr.net/social/profile?guid='}${account.inAppIdentifier}`;
     }
 
     const copyLinkToProfileIdentifier = async () => {
@@ -101,13 +101,13 @@ const Account = ({
 
     const getAppDisplayName = (account: FrontAccount) => {
         switch (account.namedApp) {
-            case "Resonite":
+            case NamedApp.Resonite:
                 return 'Resonite';
-            case "VRChat":
+            case NamedApp.VRChat:
                 return 'VRChat';
-            case "Cluster":
+            case NamedApp.Cluster:
                 return `Cluster (@${account.inAppIdentifier})`;
-            case "ChilloutVR":
+            case NamedApp.ChilloutVR:
                 return 'ChilloutVR';
             default:
                 return account.qualifiedAppName;
@@ -230,7 +230,7 @@ const Account = ({
                         )}
                         {!isSessionView && account.isAnyCallerContact && (
                             <span className="badge contact">
-                                {account.namedApp === "VRChat" || account.namedApp === "ChilloutVR" ? t('account.badge.friend') : t('account.badge.contact')}
+                                {account.namedApp === NamedApp.VRChat || account.namedApp === NamedApp.ChilloutVR ? t('account.badge.friend') : t('account.badge.contact')}
                             </span>
                         )}
                         {account.isTechnical && (
@@ -238,21 +238,21 @@ const Account = ({
                                 {t('account.badge.bot')}
                             </span>
                         )}
-                        {showCopyToClipboard && (isAltDown || account.namedApp === "Resonite") && <button
+                        {showCopyToClipboard && (isAltDown || account.namedApp === NamedApp.Resonite) && <button
                             onClick={copyInAppIdentifier}
                             className="icon-button"
                             title={t('account.copyId.title', {id: _D(account.inAppIdentifier, debugMode)})}
                         >
                             <Hash size={16}/>
                         </button>}
-                        {showCopyToClipboard && (account.namedApp === "VRChat" || account.namedApp === "ChilloutVR") && <button
+                        {showCopyToClipboard && (account.namedApp === NamedApp.VRChat || account.namedApp === NamedApp.ChilloutVR) && <button
                             onClick={copyLinkToProfileIdentifier}
                             className="icon-button"
                             title={t('account.copyLinkToProfile.title', {app: account.namedApp})}
                         >
                             <Clipboard size={16}/>
                         </button>}
-                        {!illustrativeDisplay && (account.namedApp === "VRChat" || account.namedApp === "ChilloutVR") && (
+                        {!illustrativeDisplay && (account.namedApp === NamedApp.VRChat || account.namedApp === NamedApp.ChilloutVR) && (
                             <a
                                 onClick={openLink} onAuxClick={(e) => e.button === 1 && openLink()}
                                 onMouseDown={(e) => e.preventDefault()}

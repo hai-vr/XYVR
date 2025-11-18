@@ -2,7 +2,7 @@
 import {AppIcon} from "./AppIcon.tsx";
 import Account from "./Account.tsx";
 import {type FrontLiveSession, LiveSessionMarker, type LiveSessionMarkerType} from "../types/LiveUpdateTypes.ts";
-import type {FrontIndividual} from "../types/CoreTypes.ts";
+import {type FrontIndividual, NamedApp} from "../types/CoreTypes.ts";
 import {type DebugFlags, DemonstrationMode} from "../types/DebugFlags.ts";
 import {_D, _D2} from "../haiUtils.ts";
 import {useTranslation} from "react-i18next";
@@ -85,7 +85,7 @@ export function LiveSession({
     const accessLevel = LocalizeAccessLevel(liveSession.markers);
 
     function getSessionLink() {
-        if (liveSession.namedApp === "VRChat") {
+        if (liveSession.namedApp === NamedApp.VRChat) {
             const separator = liveSession.inAppSessionIdentifier.indexOf(':');
             if (separator === -1) {
                 return `https://vrchat.com/home/launch?worldId=${liveSession.inAppSessionIdentifier}`;
@@ -94,7 +94,7 @@ export function LiveSession({
                 return `https://vrchat.com/home/launch?worldId=${liveSession.inAppSessionIdentifier.substring(0, separator)}&instanceId=${liveSession.inAppSessionIdentifier.substring(separator + 1)}`;
             }
         }
-        else if (liveSession.namedApp === "Resonite") {
+        else if (liveSession.namedApp === NamedApp.Resonite) {
             return `https://api.resonite.com/open/session/${liveSession.inAppSessionIdentifier}`
         }
         return '';
@@ -261,14 +261,14 @@ export function LiveSession({
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'space-between' }}>
                     <span>{liveSession.ageGated === true && <span title={t('live.session.markers.vrcAgeVerificationRequired')}>🔞</span>} {isHeadless && <span>{t('live.session.markers.resoniteHeadless')}</span>} {accessLevel}</span>
                     <div className="row-of-buttons">
-                        {(liveSession.namedApp === "VRChat" || liveSession.namedApp === "Resonite") && <button
+                        {(liveSession.namedApp === NamedApp.VRChat || liveSession.namedApp === NamedApp.Resonite) && <button
                             onClick={copyLinkToProfileIdentifier}
                             className="icon-button"
                             title={t('account.copyLinkToSession.title', {app: liveSession.namedApp})}
                         >
                             <Clipboard size={16}/>
                         </button>}
-                        {(liveSession.namedApp === "VRChat" || liveSession.namedApp === "Resonite") && (
+                        {(liveSession.namedApp === NamedApp.VRChat || liveSession.namedApp === NamedApp.Resonite) && (
                             <a
                                 onClick={openLink} onAuxClick={(e) => e.button === 1 && openLink()}
                                 onMouseDown={(e) => e.preventDefault()}
@@ -285,9 +285,9 @@ export function LiveSession({
                             onMouseDown={(e) => e.preventDefault()}
                             rel="noopener noreferrer"
                             className="icon-button link-pointer"
-                            title={t(liveSession.namedApp === 'VRChat' ? 'ui.inviteYourself.title' : 'ui.joinSession.title')}
+                            title={t(liveSession.namedApp === NamedApp.VRChat ? 'ui.inviteYourself.title' : 'ui.joinSession.title')}
                         >
-                            {liveSession.namedApp === 'VRChat' && <Mail size={16} /> || <SquareArrowDownRight size={16}/>}
+                            {liveSession.namedApp === NamedApp.VRChat && <Mail size={16} /> || <SquareArrowDownRight size={16}/>}
                         </a>
                     </div>
                 </div>

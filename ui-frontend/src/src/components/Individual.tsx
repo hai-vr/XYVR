@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import {Clipboard/*, Phone*/} from "lucide-react";
 import {accountMatchesFromRegularTerms, anyAccountMatchesSpecialTerms, parseSearchField} from "../pages/searchUtils.ts";
 import {_D, _D2, makePersonalLinkPresentable} from "../haiUtils.ts";
-import type {FrontAccount, FrontIndividual} from "../types/CoreTypes.ts";
+import {type FrontAccount, type FrontIndividual, NamedApp} from "../types/CoreTypes.ts";
 import {type DebugFlags, DemonstrationMode} from "../types/DebugFlags.ts";
 import {DotNetApi} from "../DotNetApi.ts";
 import { useTranslation } from "react-i18next";
@@ -58,7 +58,7 @@ function Individual({
 
     // Get all VRChat account links and filter to only show http/https URLs
     const vrChatLinks = individual.accounts
-        ?.filter(account => account.namedApp === "VRChat" && account.specifics?.urls?.length > 0)
+        ?.filter(account => account.namedApp === NamedApp.VRChat && account.specifics?.urls?.length > 0)
         ?.flatMap(account => account.specifics.urls)
         // Some users have links that are an empty string. We don't want this because clicking it causes the page to reload.
         // Generally, prevent links that aren't http:// nor https://
@@ -66,7 +66,7 @@ function Individual({
 
     // Get all VRChat account bios
     const vrcBios = showBio && individual.accounts
-        ?.filter(account => account.namedApp === "VRChat" && account.specifics?.bio && account.specifics.bio.trim() !== '')
+        ?.filter(account => account.namedApp === NamedApp.VRChat && account.specifics?.bio && account.specifics.bio.trim() !== '')
         || [];
 
     // Close dropdown when clicking outside
