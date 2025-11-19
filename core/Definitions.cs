@@ -184,6 +184,12 @@ public record ImmutableVRChatSpecifics
     }
 }
 
+public record ImmutableClusterSpecifics
+{
+    public required string bio { get; init; }
+    public required string username { get; init; }
+}
+
 public record ImmutableNote
 {
     public NoteState status { get; init; } = NoteState.NeverHad;

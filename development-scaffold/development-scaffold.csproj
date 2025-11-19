@@ -11,6 +11,7 @@
       <ProjectReference Include="..\account-chilloutvr\account-chilloutvr.csproj" />
       <ProjectReference Include="..\account-resonite\account-resonite.csproj" />
       <ProjectReference Include="..\account-vrchat\account-vrchat.csproj" />
+      <ProjectReference Include="..\account-cluster\account-cluster.csproj" />
       <ProjectReference Include="..\core\core.csproj" />
     </ItemGroup>
 

@@ -12,7 +12,8 @@ public interface IAuthorityScaffolder
         List<IAuthorityScaffolder> scaffolders = [
             new ResoniteAuthorityScaffolder(),
             new VRChatAuthorityScaffolder(),
-            new ChilloutVRAuthorityScaffolder()
+            new ChilloutVRAuthorityScaffolder(),
+            new ClusterAuthorityScaffolder()
         ];
         return (await Task.WhenAll(scaffolders.Select(x => x.CreateAuthority(cancellationTokenSource)))).ToList();
     }
