@@ -36,12 +36,17 @@ public class ClusterAuthority : IAuthority
 
     public Task<ILiveMonitoring> NewLiveMonitoring(LiveStatusMonitoring monitoring, ICredentialsStorage credentialsStorage)
     {
-        return Task.FromResult<ILiveMonitoring>(new ClusterLiveMonitoring(monitoring, credentialsStorage));
+        return Task.FromResult<ILiveMonitoring>(new ClusterLiveMonitoring(monitoring, credentialsStorage, _cancellationTokenSource));
     }
 
     public Task<ImmutableNonIndexedAccount> ResolveCallerAccount(ICredentialsStorage credentialsStorage)
     {
-        throw new NotImplementedException();
+        return Task.FromResult(new ImmutableNonIndexedAccount
+        {
+            qualifiedAppName = QualifiedAppName,
+            inAppIdentifier = "todo_identifier",
+            inAppDisplayName = "todo_displayname"
+        });
     }
 
     public Task SaveWhateverNecessary()

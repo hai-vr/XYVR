@@ -77,6 +77,8 @@ export function LiveSession({
         if (markers.includes(LiveSessionMarker.CVROwnerMustInvite)) return t('live.session.markers.cvrOwnerMustInvite');
         if (markers.includes(LiveSessionMarker.CVRGroupPlus)) return t('live.session.markers.cvrGroupPlus');
         if (markers.includes(LiveSessionMarker.CVRGroupPublic)) return t('live.session.markers.cvrGroupPublic');
+
+        if (markers.includes(LiveSessionMarker.ClusterEvent)) return t('live.session.markers.clusterEvent');
         
         return '';
     }

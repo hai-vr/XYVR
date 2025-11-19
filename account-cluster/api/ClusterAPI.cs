@@ -68,7 +68,7 @@ internal class ClusterAPI
         };
     }
 
-    public async Task<List<ClusterUserInfo>> GetFriends(DataCollectionReason dataCollectionReason, int pageSize = 30)
+    public async Task<List<ClusterUserState>> GetFriends(DataCollectionReason dataCollectionReason, int pageSize = 30)
     {
         string UrlBuilder(int page) => $"{AuditUrls.ClusterApiUrlV1}/user_friends_all?page_Sze={pageSize}";
 
@@ -85,7 +85,25 @@ internal class ClusterAPI
         DataCollectSuccess(url, requestGuid, responseStr, dataCollectionReason);
 
         var deserialized = JsonConvert.DeserializeObject<ClusterPaginatedUsersResponse>(responseStr)!;
-        return deserialized.users.Select(state => state.user).ToList();
+        return deserialized.users.ToList();
+    }
+
+    public async Task<ClusterHotsResponse> GetHots(DataCollectionReason dataCollectionReason, int pageSize = 100)
+    {
+        string UrlBuilder(int page) => $"{AuditUrls.ClusterApiUrlV1}/live_activity/friend_hots?page_Sze={pageSize}";
+
+        var url = UrlBuilder(pageSize);
+        var request = new HttpRequestMessage(HttpMethod.Get, url);
+        AddAuthHeader(request);
+        var requestGuid = XYVRGuids.ForRequest();
+
+        var response = await _client.SendAsync(request, _cancellationTokenSource.Token);
+        await EnsureSuccessOrThrowVerbose(response);
+
+        var responseStr = await response.Content.ReadAsStringAsync();
+        DataCollectSuccess(url, requestGuid, responseStr, dataCollectionReason);
+
+        return JsonConvert.DeserializeObject<ClusterHotsResponse>(responseStr)!;
     }
 
     private static async Task EnsureSuccessOrThrowVerbose(HttpResponseMessage response)

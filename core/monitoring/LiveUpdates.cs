@@ -264,7 +264,9 @@ public enum LiveUserSessionKnowledge
     VRCTraveling,
     // ChilloutVR
     OfflineInstance,
-    PrivateInstance
+    PrivateInstance,
+    // Cluster
+    ClusterOnlinePrivate,
 }
 
 public enum LiveSessionMarker
@@ -297,6 +299,8 @@ public enum LiveSessionMarker
     CVRGroupPublic,
     // Resonite non-access
     ResoniteHeadless,
+    // Cluster
+    ClusterEvent
 }
 
 public record ImmutableLiveSessionHost

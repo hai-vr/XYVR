@@ -31,7 +31,7 @@ public class ClusterDataCollection : IDataCollection
 
         var caller = await _api.GetCallerAccount(DataCollectionReason.CollectCallerAccount);
         
-        var friends = await _api.GetFriends(DataCollectionReason.FindUndiscoveredAccounts);
+        var friends = (await _api.GetFriends(DataCollectionReason.FindUndiscoveredAccounts)).Select(state => state.user).ToList();
         var accounts = friends
             .Select(friend => ToAccount(friend, new ImmutableCallerAccount
             {

@@ -38,4 +38,5 @@ https://discord.com/channels/418093857394262020/418512124529344523/1413288167846
     // only accept URLs if the host is equal to this, of if the host is a subdomain of this.
     // Most thumbnails seem to come from skyfrost-archive.resonite.com as this time of writing.
     public const string ResoniteSessionThumbnailsPermittedHostAndSubdomainHost = "resonite.com";
+    public const string ClusterAllowedThumbnailUrl = "https://cluster-file-storage.imgix.net/";
 }

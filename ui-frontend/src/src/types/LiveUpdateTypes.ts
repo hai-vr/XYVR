@@ -9,7 +9,8 @@ export const LiveSessionKnowledge = {
     OffPlatform: "OffPlatform",
     VRCTraveling: "VRCTraveling",
     OfflineInstance: "OfflineInstance",
-    PrivateInstance: "PrivateInstance"
+    PrivateInstance: "PrivateInstance",
+    ClusterOnlinePrivate: "ClusterOnlinePrivate"
 } as const;
 
 export type LiveUserSessionKnowledgeType = typeof LiveSessionKnowledge[keyof typeof LiveSessionKnowledge];
@@ -43,6 +44,7 @@ export const LiveSessionMarker = {
     CVRGroupPublic: "CVRGroupPublic",
     // Resonite non-access
     ResoniteHeadless: "ResoniteHeadless",
+    ClusterEvent: "ClusterEvent",
 } as const;
 
 export type LiveSessionMarkerType = typeof LiveSessionMarker[keyof typeof LiveSessionMarker];
