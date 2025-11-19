@@ -173,6 +173,12 @@ function SettingsPage({
                                     >
                                         + {t('connectors.addConnection.label', {connectionName: 'ChilloutVR'})}
                                     </button>
+                                    <button
+                                        onClick={() => createNewConnector(ConnectorType.ClusterAPI)}
+                                        title={t('connectors.addConnection.title', {connectionName: 'cluster.mu'})}
+                                    >
+                                        + {t('connectors.addConnection.label', {connectionName: 'cluster.mu'})}
+                                    </button>
                                 </div>
                             </div>
                         </div>

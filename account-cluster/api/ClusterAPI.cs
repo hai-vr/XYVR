@@ -33,11 +33,11 @@ internal class ClusterAPI
         var url = $"{AuditUrls.ClusterApiUrlV1}/login";
         
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add("Bearer", _bearer__sensitive);
+        AddAuthHeader(request);
         var requestGuid = XYVRGuids.ForRequest();
 
         var response = await _client.SendAsync(request, _cancellationTokenSource.Token);
-        EnsureSuccessOrThrowVerbose(response);
+        await EnsureSuccessOrThrowVerbose(response);
 
         var responseStr = await response.Content.ReadAsStringAsync();
         DataCollectSuccess(url, requestGuid, responseStr, dataCollectionReason);
@@ -74,12 +74,12 @@ internal class ClusterAPI
 
         var url = UrlBuilder(pageSize);
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add("Bearer", _bearer__sensitive);
+        AddAuthHeader(request);
         var requestGuid = XYVRGuids.ForRequest();
 
         // TODO: Pagination using "next" contained in the response
         var response = await _client.SendAsync(request, _cancellationTokenSource.Token);
-        EnsureSuccessOrThrowVerbose(response);
+        await EnsureSuccessOrThrowVerbose(response);
 
         var responseStr = await response.Content.ReadAsStringAsync();
         DataCollectSuccess(url, requestGuid, responseStr, dataCollectionReason);
@@ -88,11 +88,12 @@ internal class ClusterAPI
         return deserialized.users.Select(state => state.user).ToList();
     }
 
-    private static void EnsureSuccessOrThrowVerbose(HttpResponseMessage response)
+    private static async Task EnsureSuccessOrThrowVerbose(HttpResponseMessage response)
     {
         if (!response.IsSuccessStatusCode)
         {
-            throw new HttpRequestException($"Request failed with status {response.StatusCode}, reason: {response.ReasonPhrase}");
+            var errorMessage = await response.Content.ReadAsStringAsync();
+            throw new HttpRequestException($"Request failed with status {response.StatusCode}, reason: {response.ReasonPhrase}, body: {errorMessage}");
         }
     }
 
@@ -110,6 +111,11 @@ internal class ClusterAPI
             responseObject = responseStr,
             metaObject = null,
         });
+    }
+
+    private void AddAuthHeader(HttpRequestMessage request)
+    {
+        request.Headers.Add("Authorization", $"Bearer {_bearer__sensitive}");
     }
 
     public void Provide(ClusterAuthStorage authStorage__sensitive)
