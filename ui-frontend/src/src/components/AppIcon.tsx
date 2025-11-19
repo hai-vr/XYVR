@@ -21,7 +21,7 @@ export class AppIcon extends Component<AppIconProps> {
                 case NamedApp.VRChat:
                     return '💬';
                 case NamedApp.Cluster:
-                    return <img src={clusterIcon} alt="cluster" className="app-icon-img" title="Resonite"/>;
+                    return <img src={clusterIcon} alt="cluster" className="app-icon-img" title="Cluster"/>;
                 case NamedApp.ChilloutVR:
                     return <img src={cvrIcon} alt="ChilloutVR" className="app-icon-img" title="ChilloutVR"/>;
                 default:
