@@ -11,7 +11,7 @@ public class ClusterLiveMonitoring : ILiveMonitoring
     private readonly CancellationTokenSource _cancellationTokenSource;
     private string _caller;
     private CancellationTokenSource _ourCancellationTokenSource;
-    private ClusterAPI _api;
+    private ClusterAPI? _api;
 
     public ClusterLiveMonitoring(LiveStatusMonitoring monitoring, ICredentialsStorage credentialsStorage, CancellationTokenSource cancellationTokenSource)
     {
@@ -23,7 +23,18 @@ public class ClusterLiveMonitoring : ILiveMonitoring
     public Task StartMonitoring()
     {
         _ourCancellationTokenSource = new CancellationTokenSource();
-        Task.Run(RunFunction, _ourCancellationTokenSource.Token);
+        Task.Run(() =>
+        {
+            try
+            {
+                return RunFunction();
+            }
+            catch (Exception e)
+            {
+                XYVRLogging.ErrorWriteLine(this, e);
+                throw;
+            }
+        }, _ourCancellationTokenSource.Token);
         
         return Task.CompletedTask;
     }
@@ -37,16 +48,20 @@ public class ClusterLiveMonitoring : ILiveMonitoring
             var hots = await _api.GetHots(DataCollectionReason.CollectSessionLocationInformation);
             foreach (var hot in hots.contents)
             {
-                await _monitoring.MergeSession(new ImmutableNonIndexedLiveSession
+                var sessionIdentifier = hot.eventInfo?.worldRoomSetId ?? hot.spaceInfo?.worldRoomSetId;
+                if (sessionIdentifier != null)
                 {
-                    namedApp = NamedApp.Cluster,
-                    qualifiedAppName = ClusterAuthority.QualifiedAppName,
-                    inAppSessionIdentifier = hot.eventInfo.worldRoomSetId,
-                    callerInAppIdentifier = _caller,
-                    inAppVirtualSpaceName = hot.title,
-                    currentAttendance = hot.playerCount,
-                    thumbnailUrl = hot.thumbnailUrl.StartsWith(AuditUrls.ClusterAllowedThumbnailUrl) ? hot.thumbnailUrl : null,
-                });
+                    await _monitoring.MergeSession(new ImmutableNonIndexedLiveSession
+                    {
+                        namedApp = NamedApp.Cluster,
+                        qualifiedAppName = ClusterAuthority.QualifiedAppName,
+                        inAppSessionIdentifier = sessionIdentifier,
+                        callerInAppIdentifier = _caller,
+                        inAppVirtualSpaceName = hot.title,
+                        currentAttendance = hot.playerCount,
+                        thumbnailUrl = hot.thumbnailUrl.StartsWith(AuditUrls.ClusterAllowedThumbnailUrl) ? hot.thumbnailUrl : null,
+                    });
+                }
             }
 
             var friends = await _api.GetFriends(DataCollectionReason.CollectSessionLocationInformation);

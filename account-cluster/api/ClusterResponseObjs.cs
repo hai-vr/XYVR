@@ -76,7 +76,8 @@ internal class ClusterContent
     public string betaFeature;
     public string contentType;
     public string deepLink;
-    public ClusterEventInfo eventInfo;
+    public ClusterEventInfo? eventInfo;
+    public ClusterSpaceInfo? spaceInfo;
     public bool isTicketing;
     public string originalImageUrl;
     public ClusterUserInfo owner;
@@ -94,6 +95,17 @@ internal class ClusterEventInfo
     public string eventStatus;
     public string openDatetime;
     public ClusterRequestUserStatus requestUserStatus;
+    public string worldRoomSetId;
+}
+
+[Serializable]
+internal class ClusterSpaceInfo
+{
+    public string displayUseLanguage;
+    public string roomId;
+    public string roomServerType;
+    public string[] tags;
+    public string useLanguage;
     public string worldRoomSetId;
 }
 
