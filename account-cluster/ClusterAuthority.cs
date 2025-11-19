@@ -5,6 +5,13 @@ namespace XYVR.AccountAuthority.Cluster;
 
 public class ClusterAuthority : IAuthority
 {
+    // TODO: Paginated friends
+    // TODO: Live monitoring
+    // TODO: Better login, if feasible
+    // TODO: Button that links to cluster username
+    // TODO: Specialized serialization of cluster bio
+    // TODO: Display cluster bio in individual
+    
     private readonly CancellationTokenSource _cancellationTokenSource;
 
     public ClusterAuthority(CancellationTokenSource cancellationTokenSource)
