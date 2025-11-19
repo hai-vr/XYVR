@@ -14,6 +14,13 @@ internal class ClusterPagingInfo
 }
 
 [Serializable]
+internal enum ClusterOnlineStatus
+{
+    Offline,
+    OnlinePrivate,
+}
+
+[Serializable]
 internal class ClusterUserState
 {
     public string onlineStatus;
