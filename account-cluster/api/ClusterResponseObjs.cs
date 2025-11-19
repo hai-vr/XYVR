@@ -17,7 +17,7 @@ internal class ClusterPagingInfo
 internal enum ClusterOnlineStatus
 {
     Offline,
-    OnlinePrivate,
+    OnlinePrivate, // In the web UI, they show this as "Friend |> Playing" or "フレンド |> プレイ中"
 }
 
 [Serializable]
