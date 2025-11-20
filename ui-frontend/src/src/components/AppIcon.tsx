@@ -1,6 +1,7 @@
 ﻿import {Component} from "react";
 import {NamedApp, type NamedAppType} from "../types/CoreTypes.ts";
 import resoniteIcon from "../assets/Resonite_Wiki-Icon.png";
+import clusterIcon from "../assets/cluster.png";
 import cvrIcon from "../assets/cvr_logo_small.png";
 import clsx from "clsx";
 
@@ -20,7 +21,7 @@ export class AppIcon extends Component<AppIconProps> {
                 case NamedApp.VRChat:
                     return '💬';
                 case NamedApp.Cluster:
-                    return '☁️';
+                    return <img src={clusterIcon} alt="cluster" className="app-icon-img" title="Cluster"/>;
                 case NamedApp.ChilloutVR:
                     return <img src={cvrIcon} alt="ChilloutVR" className="app-icon-img" title="ChilloutVR"/>;
                 default:

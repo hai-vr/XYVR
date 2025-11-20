@@ -42,6 +42,7 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated, 
     let virtualApp = connector.type === ConnectorType.VRChatAPI && NamedApp.VRChat
         || connector.type === ConnectorType.ResoniteAPI && NamedApp.Resonite
         || connector.type === ConnectorType.ChilloutVRAPI && NamedApp.ChilloutVR
+        || connector.type === ConnectorType.ClusterAPI && NamedApp.Cluster
         || NamedApp.NotNamed;
 
     const tempAccount: FrontConnectorAccount = {
@@ -139,6 +140,7 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated, 
                                     {t('connector.accessKey.label')}
                                 </button>
                             </div>)}
+                            {(connector.type === ConnectorType.VRChatAPI || connector.type === ConnectorType.ResoniteAPI || connector.type === ConnectorType.ChilloutVRAPI) && <>
                             <input
                                 type={debugMode.demoMode !== DemonstrationMode.Disabled && 'password' || 'text'}
                                 placeholder={connector.type === ConnectorType.VRChatAPI && "Username/Email" || connector.type === ConnectorType.ChilloutVRAPI && "Email" || "Username"}
@@ -164,6 +166,15 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated, 
                                 />
                                 Stay logged in
                             </label>
+                            </>}
+                            {connector.type === ConnectorType.ClusterAPI && <input
+                                type="password"
+                                placeholder="Bearer token"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                className="password-input"
+                                disabled={isRequestInProgress}
+                            />}
                             {connector.type === 'ResoniteAPI' && login.toLowerCase().startsWith('u-')
                                 && <p className="warning-message">
                                     <span className="warning-icon">⚠️</span>
@@ -177,7 +188,7 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated, 
                                     If your username has a @ symbol in it, ignore this message and continue to login.
                                 </p>
                             }
-                            <button title={t('connector.login.title', { app: virtualApp })} onClick={() => tryLogin()} disabled={!login || !password || isRequestInProgress}>{t('connector.login.label', { app: virtualApp })}</button>
+                            <button title={t('connector.login.title', { app: virtualApp })} onClick={() => tryLogin()} disabled={(connector.type !== ConnectorType.ClusterAPI && !login) || !password || isRequestInProgress}>{t('connector.login.label', { app: virtualApp })}</button>
                             <p className="info-message">
                                 {stayLoggedIn && connector.type === ConnectorType.ResoniteAPI && 'This application does not store your email and password, only a connection token that expires in 30 days. '}
                                 {stayLoggedIn && connector.type === ConnectorType.VRChatAPI && 'This application does not store your password, only a cookie. '}

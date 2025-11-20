@@ -106,7 +106,7 @@ const Account = ({
             case NamedApp.VRChat:
                 return 'VRChat';
             case NamedApp.Cluster:
-                return `Cluster (@${account.inAppIdentifier})`;
+                return `Cluster`;
             case NamedApp.ChilloutVR:
                 return 'ChilloutVR';
             default:
@@ -230,7 +230,7 @@ const Account = ({
                         )}
                         {!isSessionView && account.isAnyCallerContact && (
                             <span className="badge contact">
-                                {account.namedApp === NamedApp.VRChat || account.namedApp === NamedApp.ChilloutVR ? t('account.badge.friend') : t('account.badge.contact')}
+                                {account.namedApp === NamedApp.VRChat || account.namedApp === NamedApp.ChilloutVR || account.namedApp === NamedApp.Cluster ? t('account.badge.friend') : t('account.badge.contact')}
                             </span>
                         )}
                         {account.isTechnical && (

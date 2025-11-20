@@ -28,7 +28,8 @@ public enum ConnectorType
     Offline,
     ResoniteAPI,
     VRChatAPI,
-    ChilloutVRAPI
+    ChilloutVRAPI,
+    ClusterAPI
 }
 
 public enum RefreshMode

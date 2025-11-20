@@ -29,7 +29,7 @@ public class ChilloutVRAuthority : IAuthority
     {
         return Task.FromResult(new ImmutableNonIndexedAccount
         {
-            qualifiedAppName = "chilloutvr",
+            qualifiedAppName = QualifiedAppName,
             inAppIdentifier = "todo_identifier",
             inAppDisplayName = "todo_displayname"
         });
