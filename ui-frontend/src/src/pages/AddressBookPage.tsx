@@ -608,7 +608,7 @@ function AddressBookPage({ isDark,
                 {/*</div>}*/}
 
                 {/*{!debouncedSearchField && online.length > 0 && <div className={`individuals-grid ${compactMode ? 'compact-mode' : ''}`}>*/}
-                {!debouncedSearchField && online.length > 0 && <div className={`live-session-accounts-grid ${compactMode ? 'compact-mode' : ''}`}>
+                {online.length > 0 && <div className={`live-session-accounts-grid ${compactMode ? 'compact-mode' : ''}`}>
                     {online
                         .map((individual) => (
                             individual.accounts
