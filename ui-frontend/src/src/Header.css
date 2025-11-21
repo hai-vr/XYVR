@@ -69,6 +69,14 @@
     color: var(--header-text);
 }
 
+.header-search {
+    margin-right: 1rem;
+    display: flex;
+    align-items: center;
+    margin-top: 0;
+    border-top: none;
+}
+
 .header-buttons {
     display: flex;
     align-items: center;

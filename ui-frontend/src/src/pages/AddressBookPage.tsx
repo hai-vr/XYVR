@@ -111,6 +111,7 @@ function AddressBookPage({ isDark,
 
     const navigate = useNavigate()
     const searchInputRef = useRef<HTMLInputElement>(null)
+    // @ts-ignore
     const [initialized, setInitialized] = useState(false);
     const [individuals, setIndividuals] = useState<FrontIndividual[]>([]);
     const [sortedIndividuals, setSortedIndividuals] = useState<FrontIndividual[]>([]);
@@ -414,9 +415,31 @@ function AddressBookPage({ isDark,
                 <div className="header-group">
                     <div className="header-section">
                         <div className="header-content">
-                            <h2 className="header-title">
-                                {showOnlyContacts && t('section.contacts') || t('section.contactsAndNotes')} {initialized && <>({totalFilteredCount})</> || <>(...)</>}
-                            </h2>
+                            {/*<h2 className="header-title">*/}
+                            {/*    {showOnlyContacts && t('section.contacts') || t('section.contactsAndNotes')} {initialized && <>({totalFilteredCount})</> || <>(...)</>}*/}
+                            {/*</h2>*/}
+
+                            <div className="header-title header-search search-container">
+                                <>
+                                    <input
+                                        ref={searchInputRef}
+                                        type={debugMode.demoMode !== DemonstrationMode.Disabled ? 'password' : 'text'}
+                                        placeholder={t('addressBook.search.placeholder')}
+                                        value={searchField}
+                                        onChange={(e) => setSearchField(e.target.value)}
+                                        className="search-input"
+                                    />
+                                    {searchField && (
+                                        <button
+                                            onClick={() => setSearchField('')}
+                                            className="icon-button search-clear-button"
+                                            title={t('search.clear.title')}
+                                        >
+                                            <X size={16} />
+                                        </button>
+                                    )}
+                                </>
+                            </div>
 
                             <div className="header-buttons">
                                 <button
@@ -452,29 +475,6 @@ function AddressBookPage({ isDark,
                             <button className="header-nav" title={t('nav.configureConnections.title')} onClick={() => navigate('/data-collection')}><Settings /></button>
                         </h2>
                     </div>
-                </div>
-
-                <div className="search-container">
-                    <input
-                        ref={searchInputRef}
-                        type={debugMode.demoMode !== DemonstrationMode.Disabled ? 'password' : 'text'}
-                        placeholder={t('addressBook.search.placeholder')}
-                        value={searchField}
-                        onChange={(e) => setSearchField(e.target.value)}
-                        className="search-input"
-                    />
-                    {/*<span className="search-icon">*/}
-                    {/*    <Search />*/}
-                    {/*</span>*/}
-                    {searchField && (
-                        <button
-                            onClick={() => setSearchField('')}
-                            className="icon-button search-clear-button"
-                            title={t('search.clear.title')}
-                        >
-                            <X size={16} />
-                        </button>
-                    )}
                 </div>
 
                 {(() => {
