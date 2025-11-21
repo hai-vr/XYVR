@@ -346,6 +346,8 @@ function AddressBookPage({ isDark,
 
     // Show load more button helper
     const hasMoreItems = displayedCount < totalFilteredCount;
+    
+    const isSimpleSearch = !debouncedSearchField.includes(' ') && debouncedSearchField.startsWith('on:');
 
     useEffect(() => {
         mergeAccountGuidOrUndRef.current = mergeAccountGuidOrUnd;
@@ -640,7 +642,7 @@ function AddressBookPage({ isDark,
                     ))}
                 </div>}
 
-                {debouncedSearchField && <>
+                {!isSimpleSearch && debouncedSearchField && <>
                     <div className={`individuals-grid ${compactMode ? 'compact-mode' : ''}`}>
                         {displayedIndividuals.map((individual, index) => (
                             <Individual
