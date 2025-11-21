@@ -1,7 +1,7 @@
-﻿import {NamedApp} from "./types/CoreTypes.ts";
+﻿import {NamedApp, type NamedAppType} from "./types/CoreTypes.ts";
 
 export interface SupportedApp {
-    namedApp: string;
+    namedApp: NamedAppType;
     displayName: string;
     searchTerm: string;
     isSessionCapacityKnowable: boolean;
@@ -51,3 +51,5 @@ export const SupportedAppsByNamedApp: Record<string, SupportedApp> = {
     [NamedApp.ChilloutVR]: ChilloutVRApp,
     [NamedApp.Cluster]: ClusterVRApp,
 };
+
+export const SupportedApps: SupportedApp[] = Object.values(SupportedAppsByNamedApp);

@@ -18,7 +18,7 @@ import {
 import {Binoculars, Glasses, Notebook, NotebookText, Search, Settings, UserPen, UserStar, X} from 'lucide-react'
 import DarkModeToggleButton from "../components/DarkModeToggleButton.tsx";
 import {_D2} from "../haiUtils.ts";
-import {type FrontIndividual, NamedApp, type NamedAppType, OnlineStatus} from "../types/CoreTypes.ts";
+import {type FrontIndividual, type NamedAppType, OnlineStatus} from "../types/CoreTypes.ts";
 import {type FrontLiveSession, type FrontLiveUserUpdate, LiveSessionKnowledge} from "../types/LiveUpdateTypes.ts";
 import {type DebugFlags, DemonstrationMode} from "../types/DebugFlags.ts";
 import {LiveSession} from "../components/LiveSession.tsx";
@@ -27,7 +27,7 @@ import {DotNetApi} from "../DotNetApi.ts";
 import {useTranslation} from "react-i18next";
 import IndividualDetailsModal from "../components/IndividualDetailsModal.tsx";
 import Account from "../components/Account.tsx";
-import {SupportedAppsByNamedApp} from "../supported-apps.ts";
+import {SupportedApps, SupportedAppsByNamedApp} from "../supported-apps.ts";
 
 const sortIndividuals = (individuals: FrontIndividual[], unparsedSearchField: string) => {
     if (!unparsedSearchField) {
@@ -392,13 +392,6 @@ function AddressBookPage({ isDark,
             )
         ));
 
-    const supportedApps = [
-        { key: 'resonite', display: 'Resonite' },
-        { key: 'vrchat', display: 'VRChat' },
-        { key: 'cluster', display: 'Cluster' },
-        { key: 'chilloutvr', display: 'ChilloutVR' }
-    ];
-    
     // Calculate online user counts per named app
     const onlineUserCountPerApp = useMemo(() => {
         const counts = new Map<NamedAppType, number>();
@@ -485,9 +478,9 @@ function AddressBookPage({ isDark,
                 </div>
                 
                 <div className="search-filters">
-                    {Object.values(NamedApp).map(namedApp => {
-                        if (namedApp === NamedApp.NotNamed) return null;
-
+                    {SupportedApps.map(supportedApp => {
+                        const namedApp = supportedApp.namedApp;
+                        
                         const userCount = onlineUserCountPerApp.get(namedApp) || 0;
                         if (userCount === 0) return null;
                         
@@ -520,11 +513,15 @@ function AddressBookPage({ isDark,
                             <p><code className="inline-code-clickable" onClick={() => { setSearchField('accounts:>1 '); focusSearchInput(); }}>accounts:&gt;1</code> {t('addressBook.search.accounts.example')}</p>
                             <p><code className="inline-code-clickable" onClick={() => { setSearchField('has:alt '); focusSearchInput(); }}>has:alt</code> {t('addressBook.search.hasAltAccount.example')}</p>
                             <p><code className="inline-code-clickable" onClick={() => { setSearchField('on: '); focusSearchInput(); }}>on:</code> {t('addressBook.search.on.example')}</p>
-                            {supportedApps.map(app => (
-                                <p key={app.key}>
-                                    <code className="inline-code-clickable" onClick={() => { setSearchField(`app:${app.key} `); focusSearchInput(); }}>app:{app.key}</code> {t('addressBook.search.app.example', { app: app.display })} <code className="inline-code-clickable" onClick={() => { setSearchField(`on:${app.key} `); focusSearchInput(); }}>on:{app.key}</code> {t('addressBook.search.online.example')}
-                                </p>
-                            ))}
+                            {SupportedApps
+                                .map(app => {
+                                    return (
+                                        <p key={app.namedApp}>
+                                            <code className="inline-code-clickable" onClick={() => { setSearchField(`app:${app.searchTerm} `); focusSearchInput(); }}>app:{app.searchTerm}</code> {t('addressBook.search.app.example', { app: app.displayName })} <code className="inline-code-clickable" onClick={() => { setSearchField(`on:${app.searchTerm} `); focusSearchInput(); }}>on:{app.searchTerm}</code> {t('addressBook.search.online.example')}
+                                        </p>
+                                    );
+                                })
+                            }
                             <p><code className="inline-code-clickable" onClick={() => { setSearchField('app:resonite app:vrchat '); focusSearchInput(); }}>app:resonite app:vrchat</code> {t('addressBook.search.multipleApps.example')}</p>
                             <p><code className="inline-code-clickable" onClick={() => { setSearchField(':confusables ' + searchField); focusSearchInput(); }}>:confusables</code> {t('addressBook.search.confusables.example')}</p>
 
