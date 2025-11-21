@@ -476,24 +476,33 @@ function AddressBookPage({ isDark,
                         </button>
                     )}
                 </div>
-                
-                <div className="search-filters">
-                    {SupportedApps.map(supportedApp => {
-                        const namedApp = supportedApp.namedApp;
-                        
-                        const userCount = onlineUserCountPerApp.get(namedApp) || 0;
-                        if (userCount === 0) return null;
-                        
-                        return (
-                            <SearchFilter
-                                key={namedApp}
-                                namedApp={namedApp}
-                                userCount={userCount}
-                                onClick={() => { setSearchField(`on:${SupportedAppsByNamedApp[namedApp].searchTerm}`); focusSearchInput(); }}
-                            />
-                        );
-                    })}
-                </div>
+
+                {(() => {
+                    const appsWithUsers = SupportedApps.filter(supportedApp => {
+                        const userCount = onlineUserCountPerApp.get(supportedApp.namedApp) || 0;
+                        return userCount > 0;
+                    });
+
+                    if (appsWithUsers.length <= 1) return null;
+
+                    return (
+                        <div className="search-filters">
+                            {appsWithUsers.map(supportedApp => {
+                                const namedApp = supportedApp.namedApp;
+                                const userCount = onlineUserCountPerApp.get(namedApp) || 0;
+
+                                return (
+                                    <SearchFilter
+                                        key={namedApp}
+                                        namedApp={namedApp}
+                                        userCount={userCount}
+                                        onClick={() => { setSearchField(`on:${SupportedAppsByNamedApp[namedApp].searchTerm}`); focusSearchInput(); }}
+                                    />
+                                );
+                            })}
+                        </div>
+                    );
+                })()}
 
                 {debouncedSearchField && (totalFilteredCount === 0 || showHelp) && (
                     <div className="no-results-message">
