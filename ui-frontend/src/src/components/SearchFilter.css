@@ -1,0 +1,25 @@
+﻿.search-filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.2rem;
+    padding-right: 0.4rem;
+    border-radius: var(--ideal-border-radius);
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--brd-secondary);
+    cursor: pointer;
+    user-select: none;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    transition: all 0.2s ease;
+}
+
+.search-filter:hover {
+    background-color: var(--bg-secondary);
+    border-color: var(--brd-accent);
+    color: var(--accent-primary);
+}
+
+.search-filter span {
+    white-space: nowrap;
+}

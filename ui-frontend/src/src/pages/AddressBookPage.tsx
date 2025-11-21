@@ -18,14 +18,16 @@ import {
 import {Binoculars, Glasses, Notebook, NotebookText, Search, Settings, UserPen, UserStar, X} from 'lucide-react'
 import DarkModeToggleButton from "../components/DarkModeToggleButton.tsx";
 import {_D2} from "../haiUtils.ts";
-import {type FrontIndividual, OnlineStatus} from "../types/CoreTypes.ts";
+import {type FrontIndividual, NamedApp, type NamedAppType, OnlineStatus} from "../types/CoreTypes.ts";
 import {type FrontLiveSession, type FrontLiveUserUpdate, LiveSessionKnowledge} from "../types/LiveUpdateTypes.ts";
 import {type DebugFlags, DemonstrationMode} from "../types/DebugFlags.ts";
 import {LiveSession} from "../components/LiveSession.tsx";
+import {SearchFilter} from "../components/SearchFilter.tsx";
 import {DotNetApi} from "../DotNetApi.ts";
 import {useTranslation} from "react-i18next";
 import IndividualDetailsModal from "../components/IndividualDetailsModal.tsx";
 import Account from "../components/Account.tsx";
+import {SupportedAppsByNamedApp} from "../supported-apps.ts";
 
 const sortIndividuals = (individuals: FrontIndividual[], unparsedSearchField: string) => {
     if (!unparsedSearchField) {
@@ -396,6 +398,22 @@ function AddressBookPage({ isDark,
         { key: 'cluster', display: 'Cluster' },
         { key: 'chilloutvr', display: 'ChilloutVR' }
     ];
+    
+    // Calculate online user counts per named app
+    const onlineUserCountPerApp = useMemo(() => {
+        const counts = new Map<NamedAppType, number>();
+
+        individuals.forEach(individual => {
+            individual.accounts?.forEach(account => {
+                if (account.onlineStatus && account.onlineStatus !== OnlineStatus.Offline && account.onlineStatus !== OnlineStatus.Indeterminate) {
+                    const currentCount = counts.get(account.namedApp) || 0;
+                    counts.set(account.namedApp, currentCount + 1);
+                }
+            });
+        });
+
+        return counts;
+    }, [individuals]);
 
     return (
         <>
@@ -464,6 +482,24 @@ function AddressBookPage({ isDark,
                             <X size={16} />
                         </button>
                     )}
+                </div>
+                
+                <div className="search-filters">
+                    {Object.values(NamedApp).map(namedApp => {
+                        if (namedApp === NamedApp.NotNamed) return null;
+
+                        const userCount = onlineUserCountPerApp.get(namedApp) || 0;
+                        if (userCount === 0) return null;
+                        
+                        return (
+                            <SearchFilter
+                                key={namedApp}
+                                namedApp={namedApp}
+                                userCount={userCount}
+                                onClick={() => { setSearchField(`on:${SupportedAppsByNamedApp[namedApp].searchTerm}`); focusSearchInput(); }}
+                            />
+                        );
+                    })}
                 </div>
 
                 {debouncedSearchField && (totalFilteredCount === 0 || showHelp) && (

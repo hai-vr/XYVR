@@ -117,4 +117,5 @@
     "account.copyLinkToSession.title": "Copy link to {{app}} Session",
     "ui.inviteYourself.title": "Invite yourself to this session",
     "live.session.markers.clusterEvent": "Event",
+    "searchFilter.onlineCount": "{{count}} online",
 }
