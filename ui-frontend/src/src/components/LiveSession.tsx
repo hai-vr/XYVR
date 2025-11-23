@@ -2,12 +2,13 @@
 import {AppIcon} from "./AppIcon.tsx";
 import Account from "./Account.tsx";
 import {type FrontLiveSession, LiveSessionMarker, type LiveSessionMarkerType} from "../types/LiveUpdateTypes.ts";
-import {type FrontIndividual, NamedApp} from "../types/CoreTypes.ts";
+import {type FrontIndividual} from "../types/CoreTypes.ts";
 import {type DebugFlags, DemonstrationMode} from "../types/DebugFlags.ts";
 import {_D, _D2} from "../haiUtils.ts";
 import {useTranslation} from "react-i18next";
 import {DotNetApi} from "../DotNetApi.ts";
 import {IdCard, Server, Clipboard, Globe, Mail, SquareArrowDownRight} from "lucide-react";
+import {SupportedAppsByNamedApp} from "../supported-apps.tsx";
 
 interface LiveSessionProps {
     liveSession: FrontLiveSession,
@@ -35,6 +36,8 @@ export function LiveSession({
     const [showSlots, setShowSlots] = useState(false);
     const [showParticipants, setShowParticipants] = useState(false);
 
+    const supportedApp = SupportedAppsByNamedApp[liveSession.namedApp];
+
     let specialCapacity = liveSession.sessionCapacity || liveSession.virtualSpaceDefaultCapacity || '?';
     const vscap = liveSession.virtualSpaceDefaultCapacity || liveSession.sessionCapacity || 0;
     const sesscap = liveSession.sessionCapacity || 0;
@@ -55,62 +58,19 @@ export function LiveSession({
     };
 
     function LocalizeAccessLevel(markers: LiveSessionMarkerType[]) {
-        if (markers.includes(LiveSessionMarker.VRCPublic)) return t('live.session.markers.vrcPublic');
-        if (markers.includes(LiveSessionMarker.VRCInvitePlus)) return t('live.session.markers.vrcInvitePlus');
-        if (markers.includes(LiveSessionMarker.VRCInvite)) return t('live.session.markers.vrcInvite');
-        if (markers.includes(LiveSessionMarker.VRCFriends)) return t('live.session.markers.vrcFriends');
-        if (markers.includes(LiveSessionMarker.VRCFriendsPlus)) return t('live.session.markers.vrcFriendsPlus');
-        if (markers.includes(LiveSessionMarker.VRCGroup)) return t('live.session.markers.vrcGroup');
-        if (markers.includes(LiveSessionMarker.VRCGroupPublic)) return t('live.session.markers.vrcGroupPublic');
-        if (markers.includes(LiveSessionMarker.VRCGroupPlus)) return t('live.session.markers.vrcGroupPlus');
-
-        if (markers.includes(LiveSessionMarker.ResoniteAnyone)) return t('live.session.markers.resoniteAnyone');
-        if (markers.includes(LiveSessionMarker.ResoniteRegisteredUsers)) return t('live.session.markers.resoniteRegisteredUsers');
-        if (markers.includes(LiveSessionMarker.ResoniteContactsPlus)) return t('live.session.markers.resoniteContactsPlus');
-        if (markers.includes(LiveSessionMarker.ResoniteContacts)) return t('live.session.markers.resoniteContacts');
-        if (markers.includes(LiveSessionMarker.ResoniteLAN)) return t('live.session.markers.resoniteLAN');
-        if (markers.includes(LiveSessionMarker.ResonitePrivate)) return t('live.session.markers.resonitePrivate');
-        
-        if (markers.includes(LiveSessionMarker.CVRPublic)) return t('live.session.markers.cvrPublic');
-        if (markers.includes(LiveSessionMarker.CVRFriendsOfFriends)) return t('live.session.markers.cvrFriendsOfFriends');
-        if (markers.includes(LiveSessionMarker.CVRFriends)) return t('live.session.markers.cvrFriends');
-        if (markers.includes(LiveSessionMarker.CVRGroup)) return t('live.session.markers.cvrGroup');
-        if (markers.includes(LiveSessionMarker.CVREveryoneCanInvite)) return t('live.session.markers.cvrEveryoneCanInvite');
-        if (markers.includes(LiveSessionMarker.CVROwnerMustInvite)) return t('live.session.markers.cvrOwnerMustInvite');
-        if (markers.includes(LiveSessionMarker.CVRGroupPlus)) return t('live.session.markers.cvrGroupPlus');
-        if (markers.includes(LiveSessionMarker.CVRGroupPublic)) return t('live.session.markers.cvrGroupPublic');
-
-        if (markers.includes(LiveSessionMarker.ClusterEvent)) return t('live.session.markers.clusterEvent');
-        
-        return '';
+        return supportedApp?.getAccessLevelText(markers) || '';
     }
 
     const isHeadless = liveSession.markers.includes(LiveSessionMarker.ResoniteHeadless);
     const accessLevel = LocalizeAccessLevel(liveSession.markers);
 
-    function getSessionLink() {
-        if (liveSession.namedApp === NamedApp.VRChat) {
-            const separator = liveSession.inAppSessionIdentifier.indexOf(':');
-            if (separator === -1) {
-                return `https://vrchat.com/home/launch?worldId=${liveSession.inAppSessionIdentifier}`;
-            }
-            else {
-                return `https://vrchat.com/home/launch?worldId=${liveSession.inAppSessionIdentifier.substring(0, separator)}&instanceId=${liveSession.inAppSessionIdentifier.substring(separator + 1)}`;
-            }
-        }
-        else if (liveSession.namedApp === NamedApp.Resonite) {
-            return `https://api.resonite.com/open/session/${liveSession.inAppSessionIdentifier}`
-        }
-        return '';
-    }
-
     const copyLinkToProfileIdentifier = async () => {
-        const link = getSessionLink();
+        const link = supportedApp?.getSessionLink(liveSession.inAppSessionIdentifier) || '';
         await navigator.clipboard.writeText(link);
     };
 
     const openLink = async () => {
-        const link = getSessionLink();
+        const link = supportedApp?.getSessionLink(liveSession.inAppSessionIdentifier) || '';
         await dotNetApi.appApiOpenLink(link);
     };
 
@@ -268,14 +228,14 @@ export function LiveSession({
                         {isHeadless && <span title={t('live.session.markers.resoniteHeadless')}><Server size={16} style={{marginRight: '6px'}} /></span>}
                         {accessLevel}</span>
                     <div className="row-of-buttons">
-                        {(liveSession.namedApp === NamedApp.VRChat || liveSession.namedApp === NamedApp.Resonite) && <button
+                        {supportedApp?.isSessionOpenableOnWeb && <button
                             onClick={copyLinkToProfileIdentifier}
                             className="icon-button"
                             title={t('account.copyLinkToSession.title', {app: liveSession.namedApp})}
                         >
                             <Clipboard size={16}/>
                         </button>}
-                        {(liveSession.namedApp === NamedApp.VRChat || liveSession.namedApp === NamedApp.Resonite) && (
+                        {supportedApp?.isSessionOpenableOnWeb && (
                             <a
                                 onClick={openLink} onAuxClick={(e) => e.button === 1 && openLink()}
                                 onMouseDown={(e) => e.preventDefault()}
@@ -292,9 +252,9 @@ export function LiveSession({
                             onMouseDown={(e) => e.preventDefault()}
                             rel="noopener noreferrer"
                             className="icon-button link-pointer"
-                            title={t(liveSession.namedApp === NamedApp.VRChat ? 'ui.inviteYourself.title' : 'ui.joinSession.title')}
+                            title={t(supportedApp?.isJoinButtonMessage ? 'ui.inviteYourself.title' : 'ui.joinSession.title')}
                         >
-                            {liveSession.namedApp === NamedApp.VRChat && <Mail size={16} /> || <SquareArrowDownRight size={16}/>}
+                            {supportedApp?.isJoinButtonMessage && <Mail size={16} /> || <SquareArrowDownRight size={16}/>}
                         </a>
                     </div>
                 </div>

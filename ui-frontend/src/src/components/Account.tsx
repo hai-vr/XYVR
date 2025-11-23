@@ -2,7 +2,7 @@
 import {CircleDot, CircleOff, DiamondMinus, Clipboard, Globe, Hash, TriangleAlert} from "lucide-react";
 import {_D, _D2} from "../haiUtils.ts";
 import {
-    type FrontAccount, type FrontIndividual, NamedApp,
+    type FrontAccount, type FrontIndividual,
     OnlineStatus,
     type OnlineStatusType
 } from "../types/CoreTypes.ts";
@@ -15,6 +15,7 @@ import {DotNetApi} from "../DotNetApi.ts";
 import {useTranslation} from "react-i18next";
 import clsx from "clsx";
 import {useEffect, useState} from "react";
+import {SupportedAppsByNamedApp} from "../supported-apps.tsx";
 
 interface AccountProps {
     account: FrontAccount,
@@ -78,22 +79,20 @@ const Account = ({
     }, []);
 
     const hasNote = account.isAnyCallerNote;
+    
+    const supportedApp = SupportedAppsByNamedApp[account.namedApp];
 
     const copyInAppIdentifier = async () => {
         await navigator.clipboard.writeText(account.inAppIdentifier);
     };
 
-    function getProfileLink() {
-        return `${account.namedApp === NamedApp.VRChat && 'https://vrchat.com/home/user/' || 'https://hub.chilloutvr.net/social/profile?guid='}${account.inAppIdentifier}`;
-    }
-
     const copyLinkToProfileIdentifier = async () => {
-        const link = getProfileLink();
+        const link = supportedApp.getProfileLink(account.inAppIdentifier);
         await navigator.clipboard.writeText(link);
     };
 
     const openLink = async () => {
-        const link = getProfileLink();
+        const link = supportedApp.getProfileLink(account.inAppIdentifier);
         await dotNetApi.appApiOpenLink(link);
     };
 
@@ -102,18 +101,7 @@ const Account = ({
     };
 
     const getAppDisplayName = (account: FrontAccount) => {
-        switch (account.namedApp) {
-            case NamedApp.Resonite:
-                return 'Resonite';
-            case NamedApp.VRChat:
-                return 'VRChat';
-            case NamedApp.Cluster:
-                return `Cluster`;
-            case NamedApp.ChilloutVR:
-                return 'ChilloutVR';
-            default:
-                return account.qualifiedAppName;
-        }
+        return supportedApp?.displayName || account.qualifiedAppName
     };
 
     const getOnlineStatusIcon = (onlineStatus: OnlineStatusType, isKnownSession: boolean) => {
@@ -234,7 +222,7 @@ const Account = ({
                         )}
                         {!isSessionView && account.isAnyCallerContact && (
                             <span className="badge contact">
-                                {account.namedApp === NamedApp.VRChat || account.namedApp === NamedApp.ChilloutVR || account.namedApp === NamedApp.Cluster ? t('account.badge.friend') : t('account.badge.contact')}
+                                {supportedApp?.areFriendsCalledFriendsInsteadOfContact ? t('account.badge.friend') : t('account.badge.contact')}
                             </span>
                         )}
                         {account.isTechnical && (
@@ -242,21 +230,21 @@ const Account = ({
                                 {t('account.badge.bot')}
                             </span>
                         )}
-                        {showCopyToClipboard && (isAltDown || account.namedApp === NamedApp.Resonite) && <button
+                        {showCopyToClipboard && (isAltDown || supportedApp?.isKnowingInAppIdentifierRelevantForInAppFunctions) && <button
                             onClick={copyInAppIdentifier}
                             className="icon-button"
                             title={t('account.copyId.title', {id: _D(account.inAppIdentifier, debugMode)})}
                         >
                             <Hash size={16}/>
                         </button>}
-                        {showCopyToClipboard && (account.namedApp === NamedApp.VRChat || account.namedApp === NamedApp.ChilloutVR) && <button
+                        {showCopyToClipboard && supportedApp?.hasLinkToProfile && <button
                             onClick={copyLinkToProfileIdentifier}
                             className="icon-button"
                             title={t('account.copyLinkToProfile.title', {app: account.namedApp})}
                         >
                             <Clipboard size={16}/>
                         </button>}
-                        {!illustrativeDisplay && (account.namedApp === NamedApp.VRChat || account.namedApp === NamedApp.ChilloutVR) && (
+                        {!illustrativeDisplay && supportedApp?.hasLinkToProfile && (
                             <a
                                 onClick={openLink} onAuxClick={(e) => e.button === 1 && openLink()}
                                 onMouseDown={(e) => e.preventDefault()}
@@ -291,7 +279,7 @@ const Account = ({
                 {!isConnector && !isSessionView && account.mainSession?.liveSession
                     && <LiveSession liveSession={account.mainSession.liveSession} individuals={[]} debugMode={debugMode}
                                     mini={true}/>}
-                {!illustrativeDisplay && !isConnector && account.namedApp === NamedApp.Resonite && resoniteShowSubSessions && account.multiSessions
+                {!illustrativeDisplay && !isConnector && supportedApp?.canUserBeInMultipleSessionsSimultaneously && resoniteShowSubSessions && account.multiSessions
                     .map((session) => (session.guid != account.mainSession?.sessionGuid &&
                         <LiveSession liveSession={session} individuals={[]} debugMode={debugMode} mini={true}/>))}
             </div>

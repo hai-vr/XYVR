@@ -38,7 +38,7 @@ import {DotNetApi} from "../DotNetApi.ts";
 import {useTranslation} from "react-i18next";
 import IndividualDetailsModal from "../components/IndividualDetailsModal.tsx";
 import Account from "../components/Account.tsx";
-import {SupportedApps, SupportedAppsByNamedApp} from "../supported-apps.ts";
+import {SupportedApps, SupportedAppsByNamedApp} from "../supported-apps.tsx";
 
 const sortIndividuals = (individuals: FrontIndividual[], unparsedSearchField: string) => {
     if (!unparsedSearchField) {
