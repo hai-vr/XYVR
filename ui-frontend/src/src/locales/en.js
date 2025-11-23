@@ -118,4 +118,6 @@
     "ui.inviteYourself.title": "Invite yourself to this session",
     "live.session.markers.clusterEvent": "Event",
     "searchFilter.onlineCount": "{{count}} online",
+    "ui.showPortraits.title": "Switch to Show portraits",
+    "ui.hidePortraits.title": "Switch to Hide portraits",
 }

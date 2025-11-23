@@ -15,7 +15,8 @@ interface LiveSessionProps {
     debugMode: DebugFlags,
     mini: boolean,
     resoniteShowSubSessions?: boolean,
-    setModalIndividual?: (individual: FrontIndividual) => void
+    setModalIndividual?: (individual: FrontIndividual) => void,
+    portraits?: boolean
 }
 
 export function LiveSession({
@@ -24,7 +25,8 @@ export function LiveSession({
                                 debugMode,
                                 mini,
                                 resoniteShowSubSessions = true,
-                                setModalIndividual = undefined
+                                setModalIndividual = undefined,
+                                portraits
                             }: LiveSessionProps) {
     const dotNetApi = new DotNetApi();
     const {t} = useTranslation();
@@ -235,6 +237,7 @@ export function LiveSession({
                                             clickOpensIndividual={matchingIndividual}
                                             setModalIndividual={setModalIndividual}
                                             illustrativeDisplay={true}
+                                            portrait={portraits}
                                         />
                                     );
                                 }

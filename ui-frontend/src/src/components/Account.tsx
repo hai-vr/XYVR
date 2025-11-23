@@ -29,6 +29,7 @@ interface AccountProps {
     setModalIndividual?: (individual: FrontIndividual) => void,
     showCopyToClipboard?: boolean,
     illustrativeDisplay?: boolean,
+    portrait?: boolean,
     showAccountIcon?: boolean
 }
 
@@ -46,6 +47,7 @@ const Account = ({
                      setModalIndividual = undefined,
                      showCopyToClipboard,
                      illustrativeDisplay,
+                     portrait = true,
                      showAccountIcon
                  }: AccountProps) => {
     const dotNetApi = new DotNetApi();
@@ -172,17 +174,19 @@ const Account = ({
 
     return (
         <>
-            <div className={clsx("account-container", illustrativeDisplay && 'account-illustrative')}
+            <div className={clsx("account-container", illustrativeDisplay && 'account-illustrative', illustrativeDisplay && !portrait && 'account-illustrative-not-portrait')}
                  style={{position: 'relative'}}>
                 {illustrativeDisplay && clickOpensIndividual && <div style={{
-                    background: `var(--account-illustrative-overlay), url("individualprofile://${clickOpensIndividual.guid}"), var(--bg-primary)`,
+                    background: portrait
+                        ? `var(--account-illustrative-overlay), url("individualprofile://${clickOpensIndividual.guid}"), var(--bg-primary)`
+                        : `var(--account-illustrative-overlay-not-portrait), url("individualprofile://${clickOpensIndividual.guid}"), var(--bg-primary)`,
                     backgroundBlendMode: 'normal',
                     backgroundSize: 'cover',
-                    backgroundPosition: 'center',
+                    backgroundPosition: portrait ? '50% 50%' : '50% 33%',
                     backgroundRepeat: 'no-repeat',
                     position: 'absolute',
                     inset: 0,
-                }}></div>}
+                }} className="account-illustrative-display"></div>}
                 {illustrativeDisplay && clickOpensIndividual && showAccountIcon &&
                     <div style={{position: 'absolute', bottom: 0, right: 0}}>
                         <AppIcon namedApp={account.namedApp} mini={true}/>

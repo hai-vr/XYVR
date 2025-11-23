@@ -17,10 +17,11 @@ const AppRouter = ({ appVersion }: { appVersion: string }) => {
     const [isDark, setIsDark] = useState(true)
     const [showOnlyContacts, setShowOnlyContacts] = useState(false)
     const [compactMode, setCompactMode] = useState(false)
+    const [portraits, setPortraits] = useState(true)
     const [lang, setLang] = useState('en')
     const [showNotes, setShowNotes] = useState(true)
     const [resoniteShowSubSessions, setResoniteShowSubSessions] = useState(true)
-    const [preferences, setPreferences] = useState<ReactAppPreferences>({isDark: true, showOnlyContacts: false, compactMode: false, lang: 'en', resoniteShowSubSessions: true})
+    const [preferences, setPreferences] = useState<ReactAppPreferences>({isDark: true, showOnlyContacts: false, compactMode: false, portraits: true, lang: 'en', resoniteShowSubSessions: true})
     const [isPreferencesObtained, setIsPreferencesObtained] = useState(false)
     const [debugMode, setDebugMode] = useState<DebugFlags>({debugMode: false, demoMode: DemonstrationMode.Disabled})
 
@@ -50,6 +51,12 @@ const AppRouter = ({ appVersion }: { appVersion: string }) => {
         setPreferences(updatedPreferences);
 
     }, [compactMode])
+
+    useEffect(() => {
+        const updatedPreferences = {...preferences, portraits};
+        setPreferences(updatedPreferences);
+
+    }, [portraits])
 
     useEffect(() => {
         const updatedPreferences = {...preferences, resoniteShowSubSessions};
@@ -88,6 +95,7 @@ const AppRouter = ({ appVersion }: { appVersion: string }) => {
                 setIsDark(prefs.isDark);
                 setShowOnlyContacts(prefs.showOnlyContacts);
                 setCompactMode(prefs.compactMode);
+                setPortraits(prefs.portraits)
                 setLang(prefs.lang)
                 setResoniteShowSubSessions(prefs.resoniteShowSubSessions)
                 setIsPreferencesObtained(true);
@@ -141,6 +149,8 @@ const AppRouter = ({ appVersion }: { appVersion: string }) => {
                                                                               setShowOnlyContacts={setShowOnlyContacts}
                                                                               compactMode={compactMode}
                                                                               setCompactMode={setCompactMode}
+                                                                              portraits={portraits}
+                                                                              setPortraits={setPortraits}
                                                                               showNotes={showNotes}
                                                                               setShowNotes={setShowNotes}
                                                                               resoniteShowSubSessions={resoniteShowSubSessions}

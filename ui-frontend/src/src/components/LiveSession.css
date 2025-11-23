@@ -6,6 +6,8 @@
     --live-session-grayscale: grayscale(40%);
     --account-illustrative-overlay: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0) 65%, rgba(255, 255, 255, 0.8) 70%, rgba(255, 255, 255, 1) 100%);
     --account-illustrative-blend-mode: overlay;
+
+    --account-illustrative-overlay-not-portrait: linear-gradient(180deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.8) 100%);
 }
 
 [data-theme="dark"] {
@@ -15,6 +17,8 @@
     --live-session-grayscale: grayscale(70%);
     --account-illustrative-overlay: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, 0.5) 70%, rgba(0, 0, 0, 0.7) 100%);
     --account-illustrative-blend-mode: overlay;
+
+    --account-illustrative-overlay-not-portrait: linear-gradient(180deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.7) 100%);
 }
 
 .live-session-accounts-grid {

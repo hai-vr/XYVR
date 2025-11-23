@@ -15,7 +15,18 @@ import {
     shouldShowBio,
     shouldShowHelp
 } from './searchUtils.ts'
-import {Binoculars, Glasses, Notebook, NotebookText, Search, Settings, UserPen, UserStar, X} from 'lucide-react'
+import {
+    Binoculars,
+    Glasses, Image,
+    ImageOff,
+    Notebook,
+    NotebookText,
+    Search,
+    Settings,
+    UserPen,
+    UserStar,
+    X
+} from 'lucide-react'
 import DarkModeToggleButton from "../components/DarkModeToggleButton.tsx";
 import {_D2} from "../haiUtils.ts";
 import {type FrontIndividual, type NamedAppType, OnlineStatus} from "../types/CoreTypes.ts";
@@ -89,6 +100,8 @@ interface AddressBookPageProps {
     setShowOnlyContacts: (showOnlyContacts: boolean) => void;
     compactMode: boolean;
     setCompactMode: (compactMode: boolean) => void;
+    portraits: boolean;
+    setPortraits: (portraits: boolean) => void;
     showNotes: boolean;
     setShowNotes: (showNotes: boolean) => void;
     debugMode: DebugFlags;
@@ -101,6 +114,8 @@ function AddressBookPage({ isDark,
                              setShowOnlyContacts,
                              compactMode,
                              setCompactMode,
+                             portraits,
+                             setPortraits,
                              showNotes,
                              setShowNotes,
                              debugMode,
@@ -454,6 +469,14 @@ function AddressBookPage({ isDark,
                                 </button>
                                 <button
                                     className="theme-toggle-btn"
+                                    onClick={() => setPortraits(!portraits)}
+                                    aria-pressed={portraits}
+                                    title={portraits ? t('ui.hidePortraits.title') : t('ui.showPortraits.title')}
+                                >
+                                    {portraits ? <Image /> : <ImageOff />}
+                                </button>
+                                <button
+                                    className="theme-toggle-btn"
                                     onClick={() => setShowNotes(!showNotes)}
                                     aria-pressed={showNotes}
                                     title={showNotes ? t('ui.hideNotes.title') : t('ui.showNotes.title')}
@@ -580,7 +603,7 @@ function AddressBookPage({ isDark,
                                     return 0;
                                 })
                                 .map((liveSession) => (
-                                    <LiveSession liveSession={liveSession} individuals={individuals} debugMode={debugMode} mini={false} resoniteShowSubSessions={resoniteShowSubSessions} setModalIndividual={setModalIndividual} />
+                                    <LiveSession liveSession={liveSession} individuals={individuals} debugMode={debugMode} mini={false} resoniteShowSubSessions={resoniteShowSubSessions} setModalIndividual={setModalIndividual} portraits={portraits} />
                                 ))}
                         </div>
                     </div>
@@ -619,7 +642,7 @@ function AddressBookPage({ isDark,
                                     <Account account={account} imposter={false} showAlias={false} showNotes={false}
                                              debugMode={debugMode} isSessionView={true}
                                              clickOpensIndividual={individual} setModalIndividual={setModalIndividual}
-                                             showSession={false} illustrativeDisplay={true} showAccountIcon={true} />)
+                                             showSession={false} illustrativeDisplay={true} showAccountIcon={true} portrait={portraits} />)
                                 )
                             
                             // <Individual
