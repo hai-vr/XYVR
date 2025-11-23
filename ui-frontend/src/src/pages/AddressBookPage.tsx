@@ -471,7 +471,7 @@ function AddressBookPage({ isDark,
                                     className="theme-toggle-btn"
                                     onClick={() => setPortraits(!portraits)}
                                     aria-pressed={portraits}
-                                    title={portraits ? t('ui.hidePortraits.title') : t('ui.showPortraits.title')}
+                                    title={portraits ? t('ui.switchToHidePortraits.title') : t('ui.switchToShowPortraits.title')}
                                 >
                                     {portraits ? <Image /> : <ImageOff />}
                                 </button>
