@@ -70,22 +70,53 @@ internal class ClusterAPI
 
     public async Task<List<ClusterUserState>> GetFriends(DataCollectionReason dataCollectionReason, int pageSize = 30)
     {
-        string UrlBuilder(int page) => $"{AuditUrls.ClusterApiUrlV1}/user_friends_all?page_Sze={pageSize}";
+        string UrlBuilder(int page, string? nextToken)
+        {
+            if (nextToken == null)
+            {
+                return $"{AuditUrls.ClusterApiUrlV1}/user_friends_all?pageSize={pageSize}";
+            }
+            
+            return $"{AuditUrls.ClusterApiUrlV1}/user_friends_all?pageSize={pageSize}&pageToken={nextToken}";
+        }
+        var allResults = new List<ClusterUserState>();
+        
+        string? nextToken = null;
+        ClusterPaginatedUsersResponse deserialized;
+        try
+        {
+            do
+            {
+                var url = UrlBuilder(pageSize, nextToken);
+                var request = new HttpRequestMessage(HttpMethod.Get, url);
+                AddAuthHeader(request);
+                var requestGuid = XYVRGuids.ForRequest();
 
-        var url = UrlBuilder(pageSize);
-        var request = new HttpRequestMessage(HttpMethod.Get, url);
-        AddAuthHeader(request);
-        var requestGuid = XYVRGuids.ForRequest();
+                var response = await _client.SendAsync(request, _cancellationTokenSource.Token);
+                await EnsureSuccessOrThrowVerbose(response);
 
-        // TODO: Pagination using "next" contained in the response
-        var response = await _client.SendAsync(request, _cancellationTokenSource.Token);
-        await EnsureSuccessOrThrowVerbose(response);
+                var responseStr = await response.Content.ReadAsStringAsync();
+                XYVRLogging.WriteLine(this, $"Got {url}");
+                DataCollectSuccess(url, requestGuid, responseStr, dataCollectionReason);
+            
+                deserialized = JsonConvert.DeserializeObject<ClusterPaginatedUsersResponse>(responseStr)!;
+                allResults.AddRange(deserialized.users.ToList());
 
-        var responseStr = await response.Content.ReadAsStringAsync();
-        DataCollectSuccess(url, requestGuid, responseStr, dataCollectionReason);
+                if (deserialized.paging.nextToken != "")
+                {
+                    nextToken = deserialized.paging.nextToken;
+                    await Task.Delay(200);
+                }
 
-        var deserialized = JsonConvert.DeserializeObject<ClusterPaginatedUsersResponse>(responseStr)!;
-        return deserialized.users.ToList();
+            } while (deserialized.paging.nextToken != "");
+        }
+        catch (Exception e)
+        {
+            XYVRLogging.ErrorWriteLine(this, e);
+            throw;
+        }
+        
+        return allResults;
     }
 
     public async Task<ClusterHotsResponse> GetHots(DataCollectionReason dataCollectionReason, int pageSize = 100)
@@ -133,7 +164,14 @@ internal class ClusterAPI
 
     private void AddAuthHeader(HttpRequestMessage request)
     {
-        request.Headers.Add("Authorization", $"Bearer {_bearer__sensitive}");
+        if (_bearer__sensitive.StartsWith("Bearer ", StringComparison.InvariantCultureIgnoreCase))
+        {
+            request.Headers.Add("Authorization", $"{_bearer__sensitive}");
+        }
+        else
+        {
+            request.Headers.Add("Authorization", $"Bearer {_bearer__sensitive}");
+        }
     }
 
     public void Provide(ClusterAuthStorage authStorage__sensitive)
