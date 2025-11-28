@@ -18,7 +18,7 @@ internal class ResoniteAPI
     private readonly bool _useRateLimiting;
 
     private readonly CookieContainer _cookies;
-    private readonly HttpClient _client;
+    private readonly RetryHttpClientHelper _client;
     private readonly Random _random = new();
 
     private string _myUserId;
@@ -36,8 +36,9 @@ internal class ResoniteAPI
         {
             CookieContainer = _cookies
         };
-        _client = new HttpClient(handler);
-        _client.DefaultRequestHeaders.UserAgent.ParseAdd(XYVRValues.UserAgent);
+        var client = new HttpClient(handler);
+        client.DefaultRequestHeaders.UserAgent.ParseAdd(XYVRValues.UserAgent);
+        _client = new RetryHttpClientHelper(client);
     }
 
     public async Task<LoginResponseJsonObject> Login(string username__sensitive, string password__sensitive, bool stayLoggedIn, string? twoferTotp = null)
@@ -282,7 +283,7 @@ internal class ResoniteAPI
     {
         if (!_useRateLimiting) return;
 
-        var millisecondsDelay = _random.Next(400, 600); // Introduce some irregularity
+        var millisecondsDelay = _random.Next(800, 1200); // Introduce some irregularity
         XYVRLogging.WriteLine(this, $"Got {urlForLogging} ; Waiting {millisecondsDelay}ms...");
 
         await Task.Delay(millisecondsDelay);
