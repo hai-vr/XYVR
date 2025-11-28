@@ -30,13 +30,21 @@ public record ImmutableIndividual
     
     // This field is up to the app users' judgement
     public string? customName { get; init; }
+    public ImmutableArray<string> customTags { get; init; } = [];
     public ImmutableNote note { get; init; } = new();
 
     public virtual bool Equals(ImmutableIndividual? other)
     {
         if (other is null) return false;
         if (ReferenceEquals(this, other)) return true;
-        return guid == other.guid && accounts.SequenceEqual(other.accounts) && displayName == other.displayName && isAnyContact == other.isAnyContact && isExposed == other.isExposed && customName == other.customName && note.Equals(other.note);
+        return guid == other.guid &&
+               accounts.SequenceEqual(other.accounts) &&
+               displayName == other.displayName &&
+               isAnyContact == other.isAnyContact &&
+               isExposed == other.isExposed &&
+               customName == other.customName &&
+               customTags.SequenceEqual(other.customTags) &&
+               note.Equals(other.note);
     }
 
     public override int GetHashCode()
@@ -49,6 +57,7 @@ public record ImmutableIndividual
             hashCode = (hashCode * 397) ^ isAnyContact.GetHashCode();
             hashCode = (hashCode * 397) ^ isExposed.GetHashCode();
             hashCode = (hashCode * 397) ^ (customName != null ? customName.GetHashCode() : 0);
+            hashCode = (hashCode * 397) ^ XYVRSequenceHash.HashCodeOf(customTags);
             hashCode = (hashCode * 397) ^ note.GetHashCode();
             return hashCode;
         }
@@ -82,6 +91,8 @@ public record ImmutableAccount
 
     // This field is up to the app users' judgement
     public bool isTechnical { get; init; }
+
+    public DateTime lastCompleteUpdate { get; init; } = DateTime.Now;
 
     public bool IsAnyCallerContact()
     {

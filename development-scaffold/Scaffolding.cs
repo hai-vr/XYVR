@@ -43,7 +43,8 @@ public static class Scaffolding
     private static readonly Encoding Encoding = Encoding.UTF8;
     private static readonly JsonSerializerSettings Serializer = new()
     {
-        Converters = { new StringEnumConverter() }
+        Converters = { new StringEnumConverter() },
+        DateFormatHandling = DateFormatHandling.IsoDateFormat,
     };
     
     private static readonly SemaphoreSlim DataCollectionFileLock = new(1, 1);

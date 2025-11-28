@@ -86,6 +86,11 @@ public class IndividualRepository
             }
             modifiedIndividual = modifiedIndividual with { accounts = [..modifiedAccounts] };
 
+            if (modifiedIndividual.customTags == null)
+            {
+                modifiedIndividual = modifiedIndividual with { customTags = [] };
+            }
+
             if (originalIndividual != modifiedIndividual)
             {
                 _individualRefs[i].value = modifiedIndividual;
@@ -361,7 +366,8 @@ public class IndividualRepository
                 specifics = inputAccount.specifics, // Specifics are always replaced entirely
                 callers = [..modifiedCallers],
                 allDisplayNames = BuildDisplayNames(existingAccount, inputAccount.inAppDisplayName),
-                isPendingUpdate = false // Merging a complete inputAccount means it's no longer pending update.
+                isPendingUpdate = false, // Merging a complete inputAccount means it's no longer pending update.
+                lastCompleteUpdate = DateTime.Now
             };
             
             return true;
@@ -580,6 +586,25 @@ public class IndividualRepository
         }
         
         _individualRefs.RemoveAt(indexToDestroy);
+    }
+    
+
+    public bool OverwriteTags(ImmutableIndividual toModify)
+    {
+        var indexToModify = IndexOfGuid(toModify.guid);
+        if (indexToModify == -1) throw new ArgumentException("Individual to modify not found in this repository");
+
+        var previous = _individualRefs[indexToModify].value;
+        var augmented = previous with
+        {
+            customTags = toModify.customTags
+        };
+
+        if (augmented == previous) return false;
+
+        _individualRefs[indexToModify].value = augmented;
+        
+        return true;
     }
 
     public ImmutableIndividual GetIndividualByAccount(ImmutableAccountIdentification accountIdentification)

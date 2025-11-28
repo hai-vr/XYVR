@@ -68,6 +68,7 @@ public class VRChatDataCollection(IndividualRepository repository, IResponseColl
         var undiscoveredUserIdsPrioritized = repository.Individuals
             .SelectMany(individual => individual.accounts)
             .Where(account => account is { namedApp: NamedApp.VRChat, isPendingUpdate: true })
+            .OrderBy(account => account.lastCompleteUpdate)
             .Select(account => account.inAppIdentifier)
             .Where(inAppIdentifier => undiscoveredUserIds.Contains(inAppIdentifier))
             .ToHashSet();

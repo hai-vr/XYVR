@@ -13,7 +13,7 @@ public class SpecificsConverter : JsonConverter
         {
             return null;
         }
-    
+
         return token.ToObject<ImmutableVRChatSpecifics>(serializer);
     }
 
