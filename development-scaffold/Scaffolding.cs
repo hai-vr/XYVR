@@ -6,6 +6,7 @@ using Microsoft.Win32;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using XYVR.Core;
+using XYVR.Sqlite;
 
 namespace XYVR.Scaffold;
 
@@ -13,6 +14,8 @@ public static class Scaffolding
 {
     private const string DefaultAppSaveFolder = "XYVR";
     private const string DefaultSubProfileFolder = "MainProfile";
+    
+    private static XYVRSqliteContainer _sqlite;
 
     private static class ScaffoldingFileNames
     {
@@ -27,6 +30,8 @@ public static class Scaffolding
         internal const string ProfileIllustrationsFolderName = "profile-illustrations";
         internal const string ProfileIllustrationsJsonFileName = "profile-illustrations.json";
     }
+    
+    internal const string IndividualsTableName = "data_individuals";
     
     public static string LockfileFilePath => Path.Combine(SavePath(), "XYVRLockfile");
     private static string IndividualsJsonFilePath => Path.Combine(SavePath(), ScaffoldingFileNames.IndividualsJsonFileName);
@@ -110,34 +115,34 @@ public static class Scaffolding
         _pathLateInit = savePath;
     }
 
-    public static async Task<ImmutableIndividual[]> OpenRepository() => await OpenIfExists<ImmutableIndividual[]>(IndividualsJsonFilePath, () => []);
-    public static async Task SaveRepository(IndividualRepository repository) => await SaveTo(repository.Individuals, IndividualsJsonFilePath);
+    public static async Task<ImmutableIndividual[]> OpenRepository() => await OpenIfExists<ImmutableIndividual[]>(IndividualsJsonFilePath, IndividualsTableName, () => []);
+    public static async Task SaveRepository(IndividualRepository repository) => await SaveTo(repository.Individuals, IndividualsJsonFilePath, null);
     
-    public static async Task<Connector[]> OpenConnectors() => await OpenIfExists<Connector[]>(ConnectorsJsonFilePath, () => []);
-    public static async Task SaveConnectors(ConnectorManagement management) => await SaveTo(management.Connectors, ConnectorsJsonFilePath);
+    public static async Task<Connector[]> OpenConnectors() => await OpenIfExists<Connector[]>(ConnectorsJsonFilePath, null, () => []);
+    public static async Task SaveConnectors(ConnectorManagement management) => await SaveTo(management.Connectors, ConnectorsJsonFilePath, null);
     
     public static async Task<SerializedCredentials> OpenCredentials()
     {
         EnsureRegistryHasEncryptionKeyForSavingSessionData();
-        return await OpenIfExists<SerializedCredentials>(CredentialsJsonFilePath, () => new SerializedCredentials(), _encryptionKeyForSessionData);
+        return await OpenIfExists<SerializedCredentials>(CredentialsJsonFilePath, null, () => new SerializedCredentials(), _encryptionKeyForSessionData);
     }
 
     public static async Task SaveCredentials(SerializedCredentials serialized)
     {
         EnsureRegistryHasEncryptionKeyForSavingSessionData();
-        await SaveTo(serialized, CredentialsJsonFilePath, _encryptionKeyForSessionData);
+        await SaveTo(serialized, CredentialsJsonFilePath, null, _encryptionKeyForSessionData);
     }
 
     public static async Task<ProfileIllustrationStorage> OpenProfileIllustrationStorage()
     {
         Directory.CreateDirectory(ProfileIllustrationsFolderPath);
-        var result = await OpenIfExists<ProfileIllustrationStorage>(ProfileIllustrationsJsonFilePath, () => new ProfileIllustrationStorage());
+        var result = await OpenIfExists<ProfileIllustrationStorage>(ProfileIllustrationsJsonFilePath, null, () => new ProfileIllustrationStorage());
         result.SetPath(ProfileIllustrationsFolderPath);
         result.PreProcess();
         return result;
     }
     
-    public static async Task SaveProfileIllustrationStorage(ProfileIllustrationStorage storage) => await SaveTo(storage, ProfileIllustrationsJsonFilePath);
+    public static async Task SaveProfileIllustrationStorage(ProfileIllustrationStorage storage) => await SaveTo(storage, ProfileIllustrationsJsonFilePath, null);
 
     public static VRChatThumbnailCache ThumbnailCache()
     {
@@ -155,21 +160,21 @@ public static class Scaffolding
         }
 
         var ret = defaultGen();
-        await SaveTo(ret, ResoniteUidFilePath);
+        await SaveTo(ret, ResoniteUidFilePath, null);
         return ret;
     }
     
-    public static async Task<ReactAppPreferences> OpenReactAppPreferences() => await OpenIfExists<ReactAppPreferences>(ReactAppJsonFilePath, () => new ReactAppPreferences());
-    public static async Task SaveReactAppPreferences(ReactAppPreferences serialized) => await SaveTo(serialized, ReactAppJsonFilePath);
+    public static async Task<ReactAppPreferences> OpenReactAppPreferences() => await OpenIfExists<ReactAppPreferences>(ReactAppJsonFilePath, null, () => new ReactAppPreferences());
+    public static async Task SaveReactAppPreferences(ReactAppPreferences serialized) => await SaveTo(serialized, ReactAppJsonFilePath, IndividualsTableName, null);
     
     public static async Task<WorldNameCache> OpenWorldNameCache()
     {
-        var result = await OpenIfExists<WorldNameCache>(WorldNameCacheJsonFilePath, () => new WorldNameCache());
+        var result = await OpenIfExists<WorldNameCache>(WorldNameCacheJsonFilePath, null, () => new WorldNameCache());
         result.PreProcess();
         return result;
     }
 
-    public static async Task SaveWorldNameCache(WorldNameCache serialized) => await SaveTo(serialized, WorldNameCacheJsonFilePath);
+    public static async Task SaveWorldNameCache(WorldNameCache serialized) => await SaveTo(serialized, WorldNameCacheJsonFilePath, null);
 
     public static async Task<List<ResponseCollectionTrail>> RebuildTrail()
     {
@@ -189,23 +194,44 @@ public static class Scaffolding
         return results;
     }
 
-    private static async Task<T> OpenIfExists<T>(string fileName, Func<T> defaultGen, string? encryptionKey = null)
+    private static async Task<T> OpenIfExists<T>(string fileName, string? tableName, Func<T> defaultGen, string? encryptionKey = null)
     {
-        if (File.Exists(fileName))
+        try
         {
-            var text = await File.ReadAllTextAsync(fileName, Encoding);
-            if (encryptionKey != null)
+            if (File.Exists(fileName))
             {
-                text = EncryptionOfSessionData.DecryptString(text, encryptionKey);
-            }
+                var text = await File.ReadAllTextAsync(fileName, Encoding);
+                if (encryptionKey != null)
+                {
+                    text = EncryptionOfSessionData.DecryptString(text, encryptionKey);
+                }
             
-            return JsonConvert.DeserializeObject<T>(text, Serializer)!;
+                return JsonConvert.DeserializeObject<T>(text, Serializer)!;
+            }
+        }
+        catch (Exception e)
+        {
+            XYVRLogging.ErrorWriteLine(typeof(Scaffolding), e);
+            XYVRLogging.WriteLine(typeof(Scaffolding), "Failed to read file.");
+            if (tableName != null)
+            {
+                XYVRLogging.WriteLine(typeof(Scaffolding), "Will try to read from SQLite instead.");
+            }
+        }
+
+        if (tableName != null)
+        {
+            var sqlResult = _sqlite.GetString(tableName);
+            if (sqlResult != null)
+            {
+                return JsonConvert.DeserializeObject<T>(sqlResult, Serializer)!;
+            }
         }
 
         return defaultGen();
     }
 
-    private static async Task SaveTo(object element, string fileName, string? encryptionKey = null)
+    private static async Task SaveTo(object element, string fileName, string? tableName, string? encryptionKey = null)
     {
         EnsureFolderCreated();
         
@@ -218,6 +244,10 @@ public static class Scaffolding
         
         // FIXME: If the disk is full, this WILL corrupt the data that already exists, causing irrepairable loss.
         await File.WriteAllTextAsync(fileName, serialized, Encoding);
+        if (tableName != null)
+        {
+            _sqlite.SetString(tableName, serialized);
+        }
     }
 
     public static void DANGER_OpenUrl(string url)
@@ -366,5 +396,22 @@ public static class Scaffolding
                 throw new Exception($"Failed to access or create encryption key file: {ex.Message}", ex);
             }
         }
+    }
+
+    public static void OpenDatabase()
+    {
+        if (_pathLateInit == null) throw new InvalidOperationException("OpenDatabase() called before initialization");
+        if (_sqlite != null) throw new InvalidOperationException("Database already open");
+
+        _sqlite = new XYVRSqliteContainer(Path.Combine(_pathLateInit, "xyvr.sqlite.db"));
+        _sqlite.Open();
+    }
+
+    public static void CloseDatabase()
+    {
+        if (_sqlite == null) throw new InvalidOperationException("Database not open");
+        
+        _sqlite.Close();
+        _sqlite = null;
     }
 }

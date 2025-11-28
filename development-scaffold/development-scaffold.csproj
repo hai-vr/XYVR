@@ -13,6 +13,7 @@
       <ProjectReference Include="..\account-vrchat\account-vrchat.csproj" />
       <ProjectReference Include="..\account-cluster\account-cluster.csproj" />
       <ProjectReference Include="..\core\core.csproj" />
+      <ProjectReference Include="..\sqlite-container\sqlite-container.csproj" />
     </ItemGroup>
 
     <ItemGroup>

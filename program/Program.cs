@@ -24,6 +24,7 @@ internal class Program
     {
         Scaffolding.DefineSavePathFromArgsOrUseDefault(args);
         Scaffolding.CreateDirectoriesPertainingToSavePath();
+        Scaffolding.OpenDatabase();
 
         var serializer = new JsonSerializerSettings()
         {
@@ -119,6 +120,8 @@ internal class Program
             default:
                 throw new ArgumentOutOfRangeException();
         }
+
+        Scaffolding.CloseDatabase();
     }
 }
 

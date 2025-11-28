@@ -38,6 +38,7 @@ public class AppLifecycle
         // Order matters
         Scaffolding.DefineSavePathFromArgsOrUseDefault(args);
         Scaffolding.CreateDirectoriesPertainingToSavePath();
+        Scaffolding.OpenDatabase();
 
         try
         {
@@ -117,6 +118,7 @@ public class AppLifecycle
                 throw;
             }
         }).Wait();
+        Scaffolding.CloseDatabase();
         XYVRLogging.CleanupLogFile();
     }
 

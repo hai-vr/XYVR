@@ -57,7 +57,7 @@ public class XYVRSqliteContainer
         command.CommandText = $@"
                 INSERT OR REPLACE INTO {tableName} (Id, Content)
                 VALUES (1, @content)";
-        command.Parameters.AddWithValue("@content", content ?? string.Empty);
+        command.Parameters.AddWithValue("@content", content);
         command.ExecuteNonQuery();
     }
 
