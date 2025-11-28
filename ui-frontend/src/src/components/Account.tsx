@@ -258,7 +258,7 @@ const Account = ({
                     </div>)}
                 </div>
 
-                {account.isPendingUpdate && (
+                {!illustrativeDisplay && account.isPendingUpdate && (
                     <p className="warning-message">
                         <span className="warning-icon"><TriangleAlert/></span>
                         {t('account.pendingUpdate.message')}
