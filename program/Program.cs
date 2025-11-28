@@ -3,6 +3,7 @@ using Newtonsoft.Json.Converters;
 using XYVR.Core;
 using XYVR.Data.Collection;
 using XYVR.Scaffold;
+using XYVR.Sqlite;
 
 namespace XYVR.Program;
 
@@ -11,12 +12,13 @@ public enum Mode
     RebuildFromStorage,
     MigrateAndSave,
     Incremental,
-    Test
+    Test,
+    SqliteTest
 }
 
 internal class Program
 {
-    private static Mode mode = Mode.Test;
+    private static Mode mode = Mode.SqliteTest;
 
     public static async Task Main(string[] args)
     {
@@ -47,6 +49,21 @@ internal class Program
 
         switch (mode)
         {
+            case Mode.SqliteTest:
+            {
+                var sqlite = new XYVRSqliteContainer(Path.Combine(Scaffolding.ExposeSavePath(), "xyvr.sqlite.db"));
+                sqlite.Open();
+                sqlite.CreateSingularStringStorageTableIfNotExists("data_individuals");
+                var data = sqlite.GetString("data_individuals");
+                if (data != null)
+                {
+                    XYVRLogging.WriteLine(typeof(Program), $"Existing data_individuals: {data}");
+                }
+                sqlite.SetString("data_individuals", JsonConvert.SerializeObject(repository.Individuals, Formatting.Indented, Scaffolding.NewSerializer()));
+                sqlite.Close();
+
+                break;
+            }
             case Mode.Test:
             {
                 var firstResoniteConnector = connectors.Connectors.First(connector => connector.type == ConnectorType.ResoniteAPI);

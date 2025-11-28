@@ -41,11 +41,16 @@ public static class Scaffolding
     private static string ProfileIllustrationsJsonFilePath => Path.Combine(ProfileIllustrationsFolderPath, ScaffoldingFileNames.ProfileIllustrationsJsonFileName);
     
     private static readonly Encoding Encoding = Encoding.UTF8;
-    private static readonly JsonSerializerSettings Serializer = new()
+    private static readonly JsonSerializerSettings Serializer = NewSerializer();
+
+    public static JsonSerializerSettings NewSerializer()
     {
-        Converters = { new StringEnumConverter() }
-    };
-    
+        return new()
+        {
+            Converters = { new StringEnumConverter() }
+        };
+    }
+
     private static readonly SemaphoreSlim DataCollectionFileLock = new(1, 1);
     private static bool _folderCreated;
     
@@ -96,6 +101,8 @@ public static class Scaffolding
         if (_pathLateInit == null) throw new Exception("SavePath() called before initialization!");
         return _pathLateInit;
     }
+    
+    public static string ExposeSavePath() => SavePath();
 
     public static void DefineSavePath(string savePath)
     {

@@ -12,6 +12,7 @@
       <ProjectReference Include="..\account-vrchat\account-vrchat.csproj" />
       <ProjectReference Include="..\core\core.csproj" />
       <ProjectReference Include="..\development-scaffold\development-scaffold.csproj" />
+      <ProjectReference Include="..\sqlite-container\sqlite-container.csproj" />
     </ItemGroup>
 
 </Project>
