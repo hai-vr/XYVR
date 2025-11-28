@@ -81,7 +81,8 @@ public class ClusterLiveMonitoring : ILiveMonitoring
                         inAppSessionIdentifier = friend.liveEntry.id,
                         callerInAppIdentifier = _caller,
                         inAppVirtualSpaceName = friend.liveEntry.name,
-                        markers = isEvent ? [LiveSessionMarker.ClusterEvent] : []
+                        markers = isEvent ? [LiveSessionMarker.ClusterEvent] : [],
+                        supplementalIdentifier = friend.liveEntry.roomId,
                     });
                 }
                 

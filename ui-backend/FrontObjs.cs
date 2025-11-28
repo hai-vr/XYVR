@@ -258,6 +258,7 @@ internal record FrontLiveSession
     public ImmutableArray<FrontParticipant> allParticipants { get; init; } = ImmutableArray<FrontParticipant>.Empty;
 
     public required string callerInAppIdentifier { get; init; }
+    public string? supplementalIdentifier { get; init; }
 
     public static FrontLiveSession FromCore(ImmutableLiveSession liveSession)
     {
@@ -281,7 +282,8 @@ internal record FrontLiveSession
             ageGated = liveSession.ageGated,
             markers = liveSession.markers,
             allParticipants = [.. liveSession.allParticipants.Select(FrontParticipant.FromCore)],
-            callerInAppIdentifier = liveSession.callerInAppIdentifier
+            callerInAppIdentifier = liveSession.callerInAppIdentifier,
+            supplementalIdentifier = liveSession.supplementalIdentifier,
         };
     }
 }

@@ -23,7 +23,7 @@ export interface SupportedApp {
 
     getIcon(): React.ReactNode;
     getAccessLevelText(markers: LiveSessionMarkerType[]): string;
-    getSessionLink(inAppSessionIdentifier: string): string;
+    getSessionLink(inAppSessionIdentifier: string, supplementalIdentifier?: string): string;
     getProfileLink(inAppIdentifier: string): string
 }
 
@@ -57,7 +57,7 @@ export const ResoniteApp: SupportedApp = {
         return '';
     },
 
-    getSessionLink(inAppSessionIdentifier: string): string {
+    getSessionLink(inAppSessionIdentifier: string, _a?: string): string {
         return `https://api.resonite.com/open/session/${inAppSessionIdentifier}`;
     },
     
@@ -98,7 +98,7 @@ export const VRChatApp: SupportedApp = {
         return '';
     },
 
-    getSessionLink(inAppSessionIdentifier: string): string {
+    getSessionLink(inAppSessionIdentifier: string, _?: string): string {
         const separator = inAppSessionIdentifier.indexOf(':');
         if (separator === -1) {
             return `https://vrchat.com/home/launch?worldId=${inAppSessionIdentifier}`;
@@ -145,7 +145,7 @@ export const ChilloutVRApp: SupportedApp = {
         return '';
     },
 
-    getSessionLink(_: string): string {
+    getSessionLink(_: string, _a?: string): string {
         return '';
     },
     
@@ -163,8 +163,8 @@ export const ClusterVRApp: SupportedApp = {
     isTotalNumberOfUsersKnowable: false,
     areOtherSessionUsersKnowable: false,
     isJoinButtonMessage: false,
-    isSessionOpenableOnWeb: false,
-    hasLinkToProfile: false, // cluster profile links use the handle, not the app identifier
+    isSessionOpenableOnWeb: true,
+    hasLinkToProfile: false, // cluster profile links use the handle (e.g. @vr_hai), not the in-app identifier (e.g. 05533700-b384-41f8-a73e-040dfeec6f28)
     areFriendsCalledFriendsInsteadOfContact: true,
     isKnowingInAppIdentifierRelevantForInAppFunctions: false,
     canUserBeInMultipleSessionsSimultaneously: false,
@@ -180,9 +180,8 @@ export const ClusterVRApp: SupportedApp = {
         return '';
     },
 
-    getSessionLink(inAppSessionIdentifier: string): string {
-        // FIXME: The session link for Cluster uses the room ID of the space, not the in-app session identifier, so this doesn't work
-        return `https://cluster.mu/w/s/${inAppSessionIdentifier}/entry`;
+    getSessionLink(_: string, supplementalIdentifier?: string): string {
+        return `https://cluster.mu/w/s/${supplementalIdentifier}/entry`;
     },
     
     getProfileLink(_: string): string {

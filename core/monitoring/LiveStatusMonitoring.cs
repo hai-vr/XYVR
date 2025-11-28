@@ -206,6 +206,7 @@ public class LiveStatusMonitoring
             if (inputSession.ageGated != null) modifiedSession = modifiedSession with { ageGated = inputSession.ageGated };
             if (inputSession.markers != null) modifiedSession = modifiedSession with { markers = (ImmutableArray<LiveSessionMarker>)inputSession.markers };
             if (inputSession.allParticipants != null) modifiedSession = modifiedSession with { allParticipants = inputSession.allParticipants.Value };
+            if (inputSession.supplementalIdentifier != null) modifiedSession = modifiedSession with { supplementalIdentifier = inputSession.supplementalIdentifier };
             
             if (usingParticipant != null && !modifiedSession.participants.Contains(usingParticipant))
                 modifiedSession = modifiedSession with { participants = [..modifiedSession.participants.Append(usingParticipant)] };

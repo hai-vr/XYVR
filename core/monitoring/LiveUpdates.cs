@@ -116,6 +116,8 @@ public record ImmutableLiveSession
     
     public ImmutableArray<ImmutableParticipant> allParticipants { get; init; } = ImmutableArray<ImmutableParticipant>.Empty;
     public required string callerInAppIdentifier { get; init; }
+    
+    public required string? supplementalIdentifier { get; init; }
 
     public virtual bool Equals(ImmutableLiveSession? other)
     {
@@ -136,7 +138,8 @@ public record ImmutableLiveSession
                ageGated == other.ageGated &&
                markers.SequenceEqual(other.markers) &&
                allParticipants.SequenceEqual(other.allParticipants) &&
-               callerInAppIdentifier == other.callerInAppIdentifier;
+               callerInAppIdentifier == other.callerInAppIdentifier &&
+               supplementalIdentifier == other.supplementalIdentifier;
     }
 
     public override int GetHashCode()
@@ -159,6 +162,7 @@ public record ImmutableLiveSession
             hashCode = (hashCode * 397) ^ XYVRSequenceHash.HashCodeOf(markers);
             hashCode = (hashCode * 397) ^ XYVRSequenceHash.HashCodeOf(allParticipants);
             hashCode = (hashCode * 397) ^ callerInAppIdentifier.GetHashCode();
+            hashCode = (hashCode * 397) ^ (supplementalIdentifier != null ? supplementalIdentifier.GetHashCode() : 0);
             return hashCode;
         }
     }
@@ -203,6 +207,8 @@ public record ImmutableNonIndexedLiveSession
     public ImmutableArray<ImmutableParticipant>? allParticipants { get; init; }
     
     public required string callerInAppIdentifier { get; init; }
+    
+    public string? supplementalIdentifier { get; init; }
 
     public static ImmutableLiveSession MakeIndexed(ImmutableNonIndexedLiveSession inputSession)
     {
@@ -225,6 +231,7 @@ public record ImmutableNonIndexedLiveSession
             allParticipants = inputSession.allParticipants ?? ImmutableArray<ImmutableParticipant>.Empty,
             callerInAppIdentifier = inputSession.callerInAppIdentifier,
             markers = inputSession.markers ?? [],
+            supplementalIdentifier = inputSession.supplementalIdentifier,
         };
     }
 }

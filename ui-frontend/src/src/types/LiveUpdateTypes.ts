@@ -86,6 +86,7 @@ export interface FrontLiveSession {
     markers: LiveSessionMarkerType[];
     allParticipants: FrontParticipant[];
     callerInAppIdentifier: string;
+    supplementalIdentifier?: string;
 }
 
 export interface FrontParticipant {

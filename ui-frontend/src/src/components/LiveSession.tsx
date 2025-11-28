@@ -65,12 +65,12 @@ export function LiveSession({
     const accessLevel = LocalizeAccessLevel(liveSession.markers);
 
     const copyLinkToProfileIdentifier = async () => {
-        const link = supportedApp?.getSessionLink(liveSession.inAppSessionIdentifier) || '';
+        const link = supportedApp?.getSessionLink(liveSession.inAppSessionIdentifier, liveSession.supplementalIdentifier) || '';
         await navigator.clipboard.writeText(link);
     };
 
     const openLink = async () => {
-        const link = supportedApp?.getSessionLink(liveSession.inAppSessionIdentifier) || '';
+        const link = supportedApp?.getSessionLink(liveSession.inAppSessionIdentifier, liveSession.supplementalIdentifier) || '';
         await dotNetApi.appApiOpenLink(link);
     };
 
