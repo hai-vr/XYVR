@@ -180,8 +180,9 @@ export const ClusterVRApp: SupportedApp = {
         return '';
     },
 
-    getSessionLink(_: string): string {
-        return '';
+    getSessionLink(inAppSessionIdentifier: string): string {
+        // FIXME: The session link for Cluster uses the room ID of the space, not the in-app session identifier, so this doesn't work
+        return `https://cluster.mu/w/s/${inAppSessionIdentifier}/entry`;
     },
     
     getProfileLink(_: string): string {
