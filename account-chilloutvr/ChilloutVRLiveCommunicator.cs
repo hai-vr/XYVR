@@ -256,7 +256,7 @@ internal class ChilloutVRLiveCommunicator
                         catch (Exception e)
                         {
                             XYVRLogging.ErrorWriteLine(this, e);
-                            var nextRetryDelay = NextRetryDelay(attempt);
+                            var nextRetryDelay = RetryHttpClientHelper.NextRetryDelay(attempt);
                             XYVRLogging.WriteLine(this, $"Failed to reconnect to the CVR WS API ({attempt + 1} times), will try again in {nextRetryDelay.TotalSeconds} seconds...");
                             await Task.Delay(nextRetryDelay);
                             attempt++;
@@ -285,18 +285,6 @@ internal class ChilloutVRLiveCommunicator
         if (instanceId == null || _fetchInstanceQueue.Contains(instanceId)) return;
         _fetchInstanceQueue.Enqueue(instanceId);
         WakeUpQueue();
-    }
-
-    public TimeSpan NextRetryDelay(int previousRetryCount)
-    {
-        return previousRetryCount switch
-        {
-            0 => TimeSpan.Zero,
-            1 => TimeSpan.FromSeconds(2),
-            2 => TimeSpan.FromSeconds(10),
-            3 => TimeSpan.FromSeconds(30),
-            _ => TimeSpan.FromSeconds(new Random().Next(60, 80))
-        };
     }
 
     private async Task<ChilloutVRAuthStorage?> GetToken__sensitive()

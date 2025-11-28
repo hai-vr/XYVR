@@ -178,14 +178,7 @@ internal class XYVRSignalRRetryPolicy : IRetryPolicy
 {
     public TimeSpan? NextRetryDelay(RetryContext retryContext)
     {
-        var prev = retryContext.PreviousRetryCount;
-        return prev switch
-        {
-            0 => TimeSpan.Zero,
-            1 => TimeSpan.FromSeconds(2),
-            2 => TimeSpan.FromSeconds(10),
-            3 => TimeSpan.FromSeconds(30),
-            _ => TimeSpan.FromSeconds(new Random().Next(60, 80))
-        };
+        var previousRetryCount = retryContext.PreviousRetryCount;
+        return RetryHttpClientHelper.NextRetryDelay((int)previousRetryCount);
     }
 }

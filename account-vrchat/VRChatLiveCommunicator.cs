@@ -602,7 +602,7 @@ internal class VRChatLiveCommunicator
                         catch (Exception e)
                         {
                             XYVRLogging.ErrorWriteLine(this, e);
-                            var nextRetryDelay = NextRetryDelay(attempt);
+                            var nextRetryDelay = RetryHttpClientHelper.NextRetryDelay(attempt);
                             XYVRLogging.WriteLine(this, $"Failed to reconnect to the VRC WS API ({attempt + 1} times), will try again in {nextRetryDelay.TotalSeconds} seconds...");
                             await Task.Delay(nextRetryDelay);
                             attempt++;
@@ -616,18 +616,6 @@ internal class VRChatLiveCommunicator
             XYVRLogging.ErrorWriteLine(this, e);
             throw;
         }
-    }
-    
-    public TimeSpan NextRetryDelay(int previousRetryCount)
-    {
-        return previousRetryCount switch
-        {
-            0 => TimeSpan.Zero,
-            1 => TimeSpan.FromSeconds(2),
-            2 => TimeSpan.FromSeconds(10),
-            3 => TimeSpan.FromSeconds(30),
-            _ => TimeSpan.FromSeconds(new Random().Next(60, 80))
-        };
     }
 
     private async Task<string> GetToken__sensitive()

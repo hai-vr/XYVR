@@ -82,9 +82,9 @@ internal class ClusterAPI
         var allResults = new List<ClusterUserState>();
         
         string? nextToken = null;
-        ClusterPaginatedUsersResponse deserialized;
         try
         {
+            ClusterPaginatedUsersResponse deserialized;
             do
             {
                 var url = UrlBuilder(pageSize, nextToken);
