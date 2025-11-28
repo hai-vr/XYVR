@@ -11,7 +11,7 @@ internal class ClusterAPI
     private readonly IResponseCollector _responseCollector;
     private readonly CancellationTokenSource _cancellationTokenSource;
     
-    private readonly HttpClient _client;
+    private readonly RetryHttpClientHelper _client;
     
     private string _bearer__sensitive;
 
@@ -20,12 +20,13 @@ internal class ClusterAPI
         _responseCollector = responseCollector;
         _cancellationTokenSource = cancellationTokenSource;
         
-        _client = new HttpClient();
-        _client.DefaultRequestHeaders.UserAgent.ParseAdd(XYVRValues.UserAgent);
-        _client.DefaultRequestHeaders.Add("x-cluster-device", "Web");
-        _client.DefaultRequestHeaders.Add("x-cluster-platform", "Web");
-        _client.DefaultRequestHeaders.Add("x-cluster-app-version", "3.61.2511121816");
-        _client.DefaultRequestHeaders.Add("x-cluster-build-version", "2511181137");
+        var client = new HttpClient();
+        client.DefaultRequestHeaders.UserAgent.ParseAdd(XYVRValues.UserAgent);
+        client.DefaultRequestHeaders.Add("x-cluster-device", "Web");
+        client.DefaultRequestHeaders.Add("x-cluster-platform", "Web");
+        client.DefaultRequestHeaders.Add("x-cluster-app-version", "3.61.2511121816");
+        client.DefaultRequestHeaders.Add("x-cluster-build-version", "2511181137");
+        _client = new RetryHttpClientHelper(client);
     }
 
     public async Task<ImmutableNonIndexedAccount> GetCallerAccount(DataCollectionReason dataCollectionReason)

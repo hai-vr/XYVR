@@ -24,7 +24,7 @@ internal class VRChatAPI
     private readonly Random _random = new();
     
     private CookieContainer _cookies;
-    private HttpClient _client;
+    private RetryHttpClientHelper _client;
 
     public bool IsLoggedIn { get; private set; }
 
@@ -39,8 +39,9 @@ internal class VRChatAPI
         {
             CookieContainer = _cookies
         };
-        _client = new HttpClient(handler);
-        _client.DefaultRequestHeaders.UserAgent.ParseAdd(XYVRValues.UserAgent);
+        var client = new HttpClient(handler);
+        client.DefaultRequestHeaders.UserAgent.ParseAdd(XYVRValues.UserAgent);
+        _client = new RetryHttpClientHelper(client);
     }
 
     public string GetAllCookies__Sensitive()
@@ -58,8 +59,10 @@ internal class VRChatAPI
         {
             CookieContainer = _cookies
         };
-        _client = new HttpClient(handler);
-        _client.DefaultRequestHeaders.UserAgent.ParseAdd(XYVRValues.UserAgent);
+        
+        var client = new HttpClient(handler);
+        client.DefaultRequestHeaders.UserAgent.ParseAdd(XYVRValues.UserAgent);
+        _client = new RetryHttpClientHelper(client);
         
         // Assume that if the user has an auth cookie, then they're logged in.
         // There is a route to check if the token is still valid, but for privacy, we don't want the application to send a request

@@ -8,14 +8,15 @@ namespace XYVR.AccountAuthority.ChilloutVR;
 
 internal class ChilloutVRAPI
 {
-    private readonly HttpClient _client;
+    private readonly RetryHttpClientHelper _client;
     private string _accessKey__sensitive;
     private string _username;
 
     public ChilloutVRAPI()
     {
-        _client = new HttpClient();
-        _client.DefaultRequestHeaders.UserAgent.ParseAdd(XYVRValues.UserAgent);
+        var client = new HttpClient();
+        client.DefaultRequestHeaders.UserAgent.ParseAdd(XYVRValues.UserAgent);
+        _client = new RetryHttpClientHelper(client);
     }
 
     public async Task<CvrLoginResponse> Login(string userinput_account__sensitive, string userinput_password__sensitive)

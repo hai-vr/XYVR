@@ -22,11 +22,17 @@ public class RetryHttpClientHelper
     {
         return await DoSendAsync(request, cancellationToken);
     }
+    
+
+    public async Task<HttpResponseMessage> GetAsync(string url, CancellationToken token)
+    {
+        return await SendAsync(new HttpRequestMessage(HttpMethod.Get, url), token);
+    }
 
     private async Task<HttpResponseMessage> DoSendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         var retryCount = 0;
-        while (true)
+        while (!cancellationToken.IsCancellationRequested)
         {
             try
             {
@@ -58,6 +64,8 @@ public class RetryHttpClientHelper
                 await Delay(cancellationToken, NextRetryDelay(retryCount), retryCount);
             }
         }
+        
+        throw new OperationCanceledException();
     }
 
     private static Task Delay(CancellationToken cancellationToken, TimeSpan nextRetryDelay, int retryCount)
