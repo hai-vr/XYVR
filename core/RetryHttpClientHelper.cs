@@ -37,24 +37,28 @@ public class RetryHttpClientHelper
             try
             {
                 var result = await _httpClient.SendAsync(request, cancellationToken);
-                if (!result.IsSuccessStatusCode)
+                if (result.IsSuccessStatusCode)
                 {
-                    if ((int)result.StatusCode / 100 == 5)
-                    {
-                        XYVRLogging.WriteLine(this, $"Got status code {result.StatusCode}");
-                        retryCount++;
-                        await Delay(cancellationToken, NextRetryDelay(retryCount), retryCount);
-                    }
-                    else if (result.StatusCode == HttpStatusCode.TooManyRequests)
-                    {
-                        XYVRLogging.WriteLine(this, $"Got status code {result.StatusCode} (Too Many Requests)");
-                        retryCount++;
-                        // Always wait at least this specified number of seconds.
-                        await Delay(cancellationToken, TimeSpan.FromSeconds(WaitThisMuchOnTooManyRequestsSeconds), retryCount);
-                    }
+                    return result;
                 }
-                
-                return result;
+
+                if ((int)result.StatusCode / 100 == 5)
+                {
+                    XYVRLogging.WriteLine(this, $"Got status code {result.StatusCode}");
+                    retryCount++;
+                    await Delay(cancellationToken, NextRetryDelay(retryCount), retryCount);
+                }
+                else if (result.StatusCode == HttpStatusCode.TooManyRequests)
+                {
+                    XYVRLogging.WriteLine(this, $"Got status code {result.StatusCode} (Too Many Requests)");
+                    retryCount++;
+                    // Always wait at least this specified number of seconds.
+                    await Delay(cancellationToken, TimeSpan.FromSeconds(WaitThisMuchOnTooManyRequestsSeconds), retryCount);
+                }
+                else
+                {
+                    return result;
+                }
             }
             catch (HttpRequestException e)
             {
