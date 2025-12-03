@@ -63,6 +63,8 @@ during the .NET build process.
 - Requires Node or something.
 - In `ui-frontend/src/`, run `npm install` and then `npm run build-and-copy`
 
+To "hot reload" the React frontend while the .NET application is running, run `npm run build-and-copy` after making your changes.
+
 #### Build the desktop app that shows the React app
 
 Build the `ui-webview-windows/` project.
@@ -89,13 +91,15 @@ Core projects:
 - **core** contains data structures shared by many projects in this solution and the repository of Individuals that handles the business logic of ingesting incoming data.
 - **development-scaffold** loads and saves the data; mainly into JSON files.
 - **ui-backend**: This bridges the React UI with the core objects.
+- **sqlite-container**: We use SQLite for redundancy as a secondary storage mechanism. This project contains this dependency.
 
 External system projects:
 
 - **account-resonite** uses HTTP and SignalR to communicate with the [Resonite API](https://wiki.resonite.com/API), and returns core objects.
 - **account-vrchat** uses HTTP and WebSockets to communicate with the [VRChat API](https://vrchat.community), and returns core objects.
 - **account-chilloutvr** uses HTTP and WebSockets to communicate with the ChilloutVR API, and returns core objects.
-- **audit-urls** contains all the URLs that are used to perform requests to external systems (currently: the Resonite API, VRChat API, and ChilloutVR API).
+- **account-chuster** uses HTTP to communicate with the Cluster API, and returns core objects.
+- **audit-urls** contains all the URLs that are used to perform requests to external systems (currently: the Resonite API, VRChat API, ChilloutVR API, and Cluster API).
 
 Obsolete:
 - **program**: This was a developer program to import the data. It is not user-friendly whatsoever; do not use this.
