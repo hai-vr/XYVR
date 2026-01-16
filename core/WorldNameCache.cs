@@ -39,6 +39,7 @@ public class WorldNameCache
             var world = VRCWorlds[key];
             if ((now - world.cachedAt).Duration().TotalDays > 45)
             {
+                XYVRLogging.WriteLine(this, $"Removed world {world.name} from cache (not seen for more than 45 days).");
                 VRCWorlds.Remove(key);
             }
         }
