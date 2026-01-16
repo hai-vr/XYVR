@@ -603,7 +603,7 @@ function AddressBookPage({ isDark,
                                     return 0;
                                 })
                                 .map((liveSession) => (
-                                    <LiveSession liveSession={liveSession} individuals={individuals} debugMode={debugMode} mini={false} resoniteShowSubSessions={resoniteShowSubSessions} setModalIndividual={setModalIndividual} portraits={portraits} />
+                                    <LiveSession key={liveSession.guid} liveSession={liveSession} individuals={individuals} debugMode={debugMode} mini={false} resoniteShowSubSessions={resoniteShowSubSessions} setModalIndividual={setModalIndividual} portraits={portraits} />
                                 ))}
                         </div>
                     </div>
