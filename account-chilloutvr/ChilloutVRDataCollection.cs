@@ -16,6 +16,8 @@ public class ChilloutVRDataCollection(IndividualRepository repository, ICredenti
 
     public async Task<List<ImmutableAccountIdentification>> IncrementalUpdateRepository(IIncrementalDataCollectionJobHandler jobHandler)
     {
+        var eTracker = await jobHandler.NewEnumerationTracker(ChilloutVRAuthority.QualifiedAppName);
+
         try
         {
             _api ??= await InitializeAPI();
@@ -44,20 +46,20 @@ public class ChilloutVRDataCollection(IndividualRepository repository, ICredenti
                 }
             ]);
             await jobHandler.NotifyAccountUpdated(local.ToList());
+            await jobHandler.NotifyProspective(eTracker);
 
             var results = new List<ImmutableAccountIdentification>();
         
             var contacts = await _api.GetContacts();
             foreach (var contact in contacts.data)
             {
-                var update = repository.MergeAccounts([
-                    new ImmutableNonIndexedAccount
-                    {
-                        namedApp = NamedApp.ChilloutVR,
-                        qualifiedAppName = ChilloutVRAuthority.QualifiedAppName,
-                        inAppIdentifier = contact.id,
-                        inAppDisplayName = contact.name,
-                        callers =
+                var account = new ImmutableNonIndexedAccount
+                {
+                    namedApp = NamedApp.ChilloutVR,
+                    qualifiedAppName = ChilloutVRAuthority.QualifiedAppName,
+                    inAppIdentifier = contact.id,
+                    inAppDisplayName = contact.name,
+                    callers =
                         [
                             new ImmutableCallerAccount
                             {
@@ -71,9 +73,11 @@ public class ChilloutVRDataCollection(IndividualRepository repository, ICredenti
                                 }
                             }
                         ]
-                    }
-                ]);
+                };
+                results.Add(account.AsIdentification());
+                var update = repository.MergeAccounts([account]);
                 await jobHandler.NotifyAccountUpdated(update.ToList());
+                await eTracker.Update(results.Count, contacts.data.Length);
             }
 
             return results;

@@ -133,14 +133,14 @@ internal class JobHandler : IIncrementalDataCollectionJobHandler
         return Task.CompletedTask;
     }
 
-    public Task<IncrementalEnumerationTracker> NewEnumerationTracker()
+    public Task<IncrementalEnumerationTracker> NewEnumerationTracker(string name)
     {
-        return Task.FromResult(new IncrementalEnumerationTracker());
+        return Task.FromResult(new IncrementalEnumerationTracker(this, name));
     }
 
-    public Task NotifyEnumeration(IncrementalEnumerationTracker tracker, int enumerationAccomplished, int enumerationTotalCount_canBeZero)
+    public Task NotifyEnumeration(IncrementalEnumerationTracker tracker, bool shouldSave)
     {
-        XYVRLogging.WriteLine(this, $"Progress: {enumerationAccomplished} / {enumerationTotalCount_canBeZero}");
+        XYVRLogging.WriteLine(this, $"Progress for '{tracker.Name}': {tracker.AccomplishedCount} / {tracker.TotalCount}");
         return Task.CompletedTask;
     }
 
