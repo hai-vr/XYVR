@@ -158,7 +158,7 @@ jobs:
       - name: Install base-devel and dependencies
         run: |
           pacman -Syu --noconfirm
-          pacman -S --noconfirm base-devel git sudo npm nodejs dotnet-sdk dotnet-runtime webkit2gtk imagemagick
+          pacman -S --noconfirm base-devel git sudo npm nodejs dotnet-sdk-9.0 dotnet-runtime-9.0 webkit2gtk imagemagick
 
       - name: Build package with makepkg
         run: |
