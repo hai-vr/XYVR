@@ -354,3 +354,21 @@ internal record FrontLiveSessionHost
         };
     }
 }
+
+[Serializable]
+internal record FrontProgressTracker
+{
+    public required string name;
+    public required int accomplished;
+    public required int total;
+
+    public static FrontProgressTracker FromCore(IncrementalEnumerationTracker tracker)
+    {
+        return new FrontProgressTracker
+        {
+            name = tracker.Name,
+            accomplished = tracker.AccomplishedCount,
+            total = tracker.TotalCount
+        };
+    }
+}

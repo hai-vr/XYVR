@@ -52,7 +52,7 @@ public class ResoniteDataCollection(IndividualRepository repository, IResponseCo
 
     public async Task<List<ImmutableAccountIdentification>> IncrementalUpdateRepository(IIncrementalDataCollectionJobHandler jobHandler)
     {
-        var eTracker = await jobHandler.NewEnumerationTracker();
+        var eTracker = await jobHandler.NewEnumerationTracker(ResoniteCommunicator.ResoniteQualifiedAppName);
 
         var resoniteCaller = await _resoniteCommunicator.CallerAccount();
         repository.MergeAccounts([resoniteCaller]);
@@ -72,7 +72,7 @@ public class ResoniteDataCollection(IndividualRepository repository, IResponseCo
                 incompleteAccountsIds.Add(account.AsIdentification());
                 var whichUpdated = repository.MergeAccounts([account]);
                 if (whichUpdated.Count > 0) await jobHandler.NotifyAccountUpdated(whichUpdated.ToList());
-                await jobHandler.NotifyEnumeration(eTracker, incompleteAccountsIds.Count, incAccs.Count);
+                await eTracker.Update(incompleteAccountsIds.Count, incAccs.Count);
             }
         }
         

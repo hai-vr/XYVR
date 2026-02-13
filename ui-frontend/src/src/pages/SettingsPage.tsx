@@ -4,7 +4,7 @@ import './SettingsPage.css'
 import '../Header.css'
 import Connector from "../components/Connector.tsx";
 import DarkModeToggleButton from "../components/DarkModeToggleButton.tsx";
-import {ConnectorType, type ConnectorTypeType, type FrontConnector} from "../types/ConnectorTypes.ts";
+import {ConnectorType, type ConnectorTypeType, type FrontConnector, type FrontProgressTracker} from "../types/ConnectorTypes.ts";
 import type {DebugFlags} from "../types/DebugFlags.ts";
 import {DotNetApi} from "../DotNetApi.ts";
 import {useTranslation} from "react-i18next";
@@ -40,15 +40,27 @@ function SettingsPage({
     const [initialized, setInitialized] = useState(false);
     const [connectors, setConnectors] = useState<FrontConnector[]>([]);
     const [deleteStates, setDeleteStates] = useState<{ [key: string]: DeleteStateType }>({});
+    const [dataCollectionProgress, setDataCollectionProgress] = useState<FrontProgressTracker | null>(null);
 
     useEffect(() => {
         const initializeApi = async () => {
             const json = await dotNetApi.dataCollectionApiGetConnectors();
             const arr: FrontConnector[] = JSON.parse(json);
             setConnectors(arr);
+
+            const json2 = await dotNetApi.dataCollectionApiGetCurrentDataCollectionProgress();
+            const progress: FrontProgressTracker|null = JSON.parse(json2);
+            setDataCollectionProgress(progress);
+
             setInitialized(true);
         };
+        const dataCollectionUpdated = (event: any) => {
+            console.log('Data collection updated event:', event.detail);
+            const currentProgress: FrontProgressTracker | null = event.detail;
+            setDataCollectionProgress(currentProgress);
+        }
 
+        window.addEventListener('dataCollectionUpdated', dataCollectionUpdated);
         initializeApi();
     }, []);
 
@@ -188,13 +200,16 @@ function SettingsPage({
 
             <div className="settings-buttons">
                 <a className="link-pointer" title="Open privacy and data considerations docs in your browser"
-                   onClick={openPrivacyDocs} onAuxClick={(e) => e.button === 1 && openPrivacyDocs()}
-                   onMouseDown={(e) => e.preventDefault()}>Learn more about our privacy considerations.</a>
+                    onClick={openPrivacyDocs} onAuxClick={(e) => e.button === 1 && openPrivacyDocs()}
+                    onMouseDown={(e) => e.preventDefault()}>Learn more about our privacy considerations.</a>
                 <button
+                    disabled={!(initialized && dataCollectionProgress == null)}
                     onClick={() => startDataCollection()}
                     title={t('dataCollection.start.title')}
                 >
-                    {t('dataCollection.start.label')}
+                    {dataCollectionProgress != null ? 
+                        `Collecting data for '${dataCollectionProgress.name}' (${dataCollectionProgress.accomplished} / ${dataCollectionProgress.total})`
+                        : t('dataCollection.start.label')}
                 </button>
             </div>
 
