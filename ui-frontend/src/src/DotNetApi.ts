@@ -43,7 +43,7 @@
     async preferencesApiSetPreferences(str: string): Promise<string> { return this.dispatch('preferencesApi', 'SetPreferences', [str]); }
     async preferencesApiGetPreferences(): Promise<string> { return this.dispatch('preferencesApi', 'GetPreferences'); }
 
-    async dataCollectionApiTryLogin(guid: string, login: string, password: string, stayLoggedIn: boolean): Promise<string> { return this.dispatch('dataCollectionApi', 'TryLogin', [guid, login, password, stayLoggedIn]); }
+    async dataCollectionApiTryLogin(guid: string, login: string, password: string, twoFactorCode: string | undefined, stayLoggedIn: boolean): Promise<string> { return this.dispatch('dataCollectionApi', 'TryLogin', [guid, login, password, twoFactorCode, stayLoggedIn]); }
     async dataCollectionApiTryTwoFactor(guid: string, isTwoFactorEmail: boolean, twoFactorCode: string, stayLoggedIn: boolean): Promise<string> { return this.dispatch('dataCollectionApi', 'TryTwoFactor', [guid, isTwoFactorEmail, twoFactorCode, stayLoggedIn]); }
     async dataCollectionApiTryLogout(guid: string): Promise<string> { return this.dispatch('dataCollectionApi', 'TryLogout', [guid]); }
 

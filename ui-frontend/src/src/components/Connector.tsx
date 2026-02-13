@@ -55,7 +55,7 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated, 
     const tryLogin = async () => {
         setIsRequestInProgress(true);
         if (!isInTwoFactorMode) {
-            const json = await dotNetApi.dataCollectionApiTryLogin(connector.guid, login, password, stayLoggedIn);
+            const json = await dotNetApi.dataCollectionApiTryLogin(connector.guid, login, password, twoFactorCode, stayLoggedIn);
             setIsRequestInProgress(false);
             const obj: ConnectionAttemptResult = JSON.parse(json);
             if (obj.type === ConnectionAttemptResultType.NeedsTwoFactorCode) {
@@ -157,6 +157,14 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated, 
                                 className="password-input"
                                 disabled={isRequestInProgress}
                             />
+                            {connector.type === ConnectorType.ResoniteAPI && <input
+                                type={debugMode.demoMode !== DemonstrationMode.Disabled && 'password' || 'text'}
+                                placeholder="2FA"
+                                value={twoFactorCode}
+                                onChange={(e) => setTwoFactorCode(e.target.value)}
+                                className="password-input"
+                                disabled={isRequestInProgress}
+                            />}
                             <label className="checkbox-container">
                                 <input
                                     type="checkbox"

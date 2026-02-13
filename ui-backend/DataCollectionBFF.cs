@@ -12,7 +12,7 @@ public interface IDataCollectionBFF
     Task<string> GetConnectors();
     Task<string> CreateConnector(string connectorType);
     Task DeleteConnector(string guid);
-    Task<string> TryLogin(string guid, string login__sensitive, string password__sensitive, bool stayLoggedIn);
+    Task<string> TryLogin(string guid, string login__sensitive, string password__sensitive, string? twoFactorCode__sensitive, bool stayLoggedIn);
     Task<string> TryTwoFactor(string guid, bool isTwoFactorEmail, string twoFactorCode__sensitive, bool stayLoggedIn);
     Task<string> TryLogout(string guid);
     Task StartDataCollection();
@@ -99,7 +99,7 @@ public class DataCollectionBFF : IDataCollectionBFF
         await Scaffolding.SaveConnectors(_appLifecycle.ConnectorsMgt);
     }
 
-    public async Task<string> TryLogin(string guid, string login__sensitive, string password__sensitive, bool stayLoggedIn)
+    public async Task<string> TryLogin(string guid, string login__sensitive, string password__sensitive, string? twoFactorCode__sensitive, bool stayLoggedIn)
     {
         var connector = _appLifecycle.ConnectorsMgt.GetConnector(guid);
         var connectionResult = await _appLifecycle.CredentialsMgt.TryConnect(connector, new ConnectionAttempt
@@ -107,6 +107,7 @@ public class DataCollectionBFF : IDataCollectionBFF
             connector = connector,
             login__sensitive = login__sensitive,
             password__sensitive = password__sensitive,
+            twoFactorCode__sensitive = twoFactorCode__sensitive,
             stayLoggedIn = stayLoggedIn
         });
         await ContinueLogin(connectionResult, stayLoggedIn);

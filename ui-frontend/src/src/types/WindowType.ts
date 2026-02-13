@@ -20,7 +20,7 @@
                         CreateConnector(connectorType: string): Promise<void>;
                         DeleteConnector(guid: string): Promise<void>;
                         StartDataCollection(): Promise<void>;
-                        TryLogin(guid: string, login: string, password: string, stayLoggedIn: boolean): Promise<string>;
+                        TryLogin(guid: string, login: string, password: string, twoFactorCode: string | undefined, stayLoggedIn: boolean): Promise<string>;
                         TryTwoFactor(guid: string, isTwoFactorEmail: boolean, twoFactorCode: string, stayLoggedIn: boolean): Promise<string>;
                         TryLogout(guid: string): Promise<string>;
                     };
