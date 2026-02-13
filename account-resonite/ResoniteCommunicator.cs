@@ -25,11 +25,11 @@ internal class ResoniteCommunicator
         _uid = uid__sensitive;
     }
 
-    public async Task ResoniteLogin(string username__sensitive, string password__sensitive)
+    public async Task ResoniteLogin(string username__sensitive, string password__sensitive, string? twoFactorCode__sensitive)
     {
         var api = new ResoniteAPI(XYVRGuids.ForResoniteMachineId(), _uid, _responseCollector);
         
-        _ = await api.Login(username__sensitive, password__sensitive, _stayLoggedIn);
+        _ = await api.Login(username__sensitive, password__sensitive, _stayLoggedIn, twoFactorCode__sensitive);
         await _credentialsStorage.StoreCookieOrToken(api.GetAllUserAndToken__Sensitive());
     }
 

@@ -29,7 +29,7 @@ public class ResoniteLoginService : ILoginService
         XYVRLogging.WriteLine(this, "Connecting to Resonite...");
         try
         {
-            await communicator.ResoniteLogin(connectionAttempt.login__sensitive, connectionAttempt.password__sensitive);
+            await communicator.ResoniteLogin(connectionAttempt.login__sensitive, connectionAttempt.password__sensitive, connectionAttempt.twoFactorCode__sensitive);
             
             var callerAccount = await communicator.CallerAccount();
             var connectorAccount = ILoginService.AsConnectorAccount(callerAccount);

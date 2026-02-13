@@ -167,7 +167,7 @@ internal record VRCXLocationContext
     /* UNUSED */ internal string WorldId { get; init; } = string.Empty;
     /* UNUSED */ internal string InstanceId { get; init; } = string.Empty;
     /* UNUSED */ internal string InstanceName { get; init; } = string.Empty;
-    /* UNUSED */ public VRCXLocationInferredAccessType AccessType { get; init; } = VRCXLocationInferredAccessType.Indeterminate;
+    public VRCXLocationInferredAccessType AccessType { get; init; } = VRCXLocationInferredAccessType.Indeterminate;
     // /* UNUSED */ internal string AccessTypeName { get; init; } = string.Empty;
     /* UNUSED */ internal string Region { get; init; } = string.Empty;
     /* UNUSED */ internal string ShortName { get; init; } = string.Empty;
