@@ -47,6 +47,7 @@
     async dataCollectionApiTryTwoFactor(guid: string, isTwoFactorEmail: boolean, twoFactorCode: string, stayLoggedIn: boolean): Promise<string> { return this.dispatch('dataCollectionApi', 'TryTwoFactor', [guid, isTwoFactorEmail, twoFactorCode, stayLoggedIn]); }
     async dataCollectionApiTryLogout(guid: string): Promise<string> { return this.dispatch('dataCollectionApi', 'TryLogout', [guid]); }
 
+    async dataCollectionApiGetCurrentDataCollectionProgress(): Promise<string> { return this.dispatch('dataCollectionApi', 'GetCurrentDataCollectionProgress'); }
     async dataCollectionApiGetConnectors(): Promise<string> { return this.dispatch('dataCollectionApi', 'GetConnectors'); }
     async dataCollectionApiCreateConnector(connectorType: string): Promise<string> { return this.dispatch('dataCollectionApi', 'CreateConnector', [connectorType]); }
     async dataCollectionApiDeleteConnector(guid: string): Promise<string> { return this.dispatch('dataCollectionApi', 'DeleteConnector', [guid]); }

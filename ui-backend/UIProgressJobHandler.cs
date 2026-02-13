@@ -3,10 +3,8 @@ using XYVR.Scaffold;
 
 namespace XYVR.UI.Backend;
 
-public class UIProgressJobHandler(IndividualRepository repository, Func<ImmutableIndividual, Task> individualUpdatedEventFn) : IIncrementalDataCollectionJobHandler
+public class UIProgressJobHandler(IndividualRepository repository, Func<ImmutableIndividual, Task> individualUpdatedEventFn, Func<IncrementalEnumerationTracker, Task> enumerationUpdatedFn) : IIncrementalDataCollectionJobHandler
 {
-    private int _prevEnumTotalCount;
-
     public async Task NotifyAccountUpdated(List<ImmutableAccountIdentification> increment)
     {
         XYVRLogging.WriteLine(this, $"Updated the following {increment.Count} accounts: {string.Join(", ", increment)}");
@@ -18,37 +16,28 @@ public class UIProgressJobHandler(IndividualRepository repository, Func<Immutabl
         }
     }
 
-    public async Task<IncrementalEnumerationTracker> NewEnumerationTracker()
+    public async Task<IncrementalEnumerationTracker> NewEnumerationTracker(string name)
     {
         XYVRLogging.WriteLine(this, "Saving repository...");
         await Scaffolding.SaveRepository(repository);
         
-        return new IncrementalEnumerationTracker();
+        return new IncrementalEnumerationTracker(this, name);
     }
 
-    public async Task NotifyEnumeration(IncrementalEnumerationTracker tracker, int enumerationAccomplished, int enumerationTotalCount_canBeZero)
+    public async Task NotifyEnumeration(IncrementalEnumerationTracker tracker, bool shouldSave)
     {
-        if (_prevEnumTotalCount != enumerationTotalCount_canBeZero)
-        {
-            _prevEnumTotalCount = enumerationTotalCount_canBeZero;
-            if (enumerationTotalCount_canBeZero != 0 && enumerationTotalCount_canBeZero % 100 == 0)
-            {
-                XYVRLogging.WriteLine(this, "Saving repository...");
-                await Scaffolding.SaveRepository(repository);
-            }
-        }
-        
-        if (enumerationAccomplished != 0 && enumerationAccomplished % 100 == 0)
+        if(shouldSave)
         {
             XYVRLogging.WriteLine(this, "Saving repository...");
             await Scaffolding.SaveRepository(repository);
         }
         
-        XYVRLogging.WriteLine(this, $"Progress: {enumerationAccomplished} / {enumerationTotalCount_canBeZero}");
+        XYVRLogging.WriteLine(this, $"Progress for '{tracker.Name}': {tracker.AccomplishedCount} / {tracker.TotalCount}");
+        await enumerationUpdatedFn.Invoke(tracker);
     }
 
-    public Task NotifyProspective(IncrementalEnumerationTracker tracker)
+    public async Task NotifyProspective(IncrementalEnumerationTracker tracker)
     {
-        return Task.CompletedTask;
+        await enumerationUpdatedFn.Invoke(tracker);
     }
 }
