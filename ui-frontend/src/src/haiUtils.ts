@@ -64,7 +64,8 @@ const USER_IN_PATH_HANDLERS: DomainHandler[] = [
     { displayName: 'GitLab', prefixes: ['gitlab.com/'], allowTrailingEmpty: true },
     { displayName: 'cluster.mu', prefixes: ['cluster.mu/u/'] },
     { displayName: 'Ko-fi', prefixes: ['ko-fi.com/'] },
-    { displayName: 'Patreon', prefixes: ['patreon.com/', 'www.patreon.com/'], allowTrailingEmpty: true },
+    { displayName: 'Patreon', prefixes: ['patreon.com/c/', 'www.patreon.com/c/'], allowTrailingEmpty: true }, // Array order matters, & Because the number of slashes is different in the prefix, we must not merge those.
+    { displayName: 'Patreon', prefixes: ['patreon.com/', 'www.patreon.com/'], allowTrailingEmpty: true }, // Array order matters, & Because the number of slashes is different in the prefix, we must not merge those.
     { displayName: 'Fantia', prefixes: ['fantia.jp/'] },
     { displayName: 'Fansly', prefixes: ['fansly.com/'], allowTrailingEmpty: true },
     { displayName: 'Booth.pm', prefixes: ['booth.pm/'], exclude: ['wish_list_names'] },
