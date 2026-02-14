@@ -30,6 +30,7 @@ type DomainHandler = {
     // Calculated based on the number of slashes in the first prefix.
     extractIndex?: number;
     minPathParts?: number;
+    exclude?: string[];
 };
 
 const USER_IN_SUBDOMAIN_HANDLERS: TLDHandler[] = [
@@ -66,7 +67,7 @@ const USER_IN_PATH_HANDLERS: DomainHandler[] = [
     { displayName: 'Patreon', prefixes: ['patreon.com/', 'www.patreon.com/'], allowTrailingEmpty: true },
     { displayName: 'Fantia', prefixes: ['fantia.jp/'] },
     { displayName: 'Fansly', prefixes: ['fansly.com/'], allowTrailingEmpty: true },
-    { displayName: 'Booth.pm', prefixes: ['booth.pm/'] },
+    { displayName: 'Booth.pm', prefixes: ['booth.pm/'], exclude: ['wish_list_names'] },
     { displayName: 'Skeb', prefixes: ['skeb.jp/'] },
     { displayName: 'Jinxxy', prefixes: ['jinxxy.com/'] },
 ];
@@ -86,7 +87,7 @@ const matchesSplitCriteria = (splitLength: number, handler: DomainHandler): bool
     if (allowTrailingEmpty && splitLength === max + 1 && !splitLength.toString().endsWith('')) {
         return true;
     }
-
+    
     return splitLength === min || (allowTrailingEmpty && splitLength === min + 1);
 };
 
@@ -130,7 +131,11 @@ export const makePersonalLinkPresentable = (url: string) => {
         for (const prefix of handler.prefixes) {
             if (lowercaseUrl.startsWith(prefix)) {
                 if (matchesSplitCriteria(slashSplit.length, handler)) {
-                    return [slashSplit[handler.extractIndex!], handler.displayName];
+                    const extracted = slashSplit[handler.extractIndex!];
+                    if (handler.exclude?.includes(extracted.toLowerCase())) {
+                        return [presentedUrl];
+                    }
+                    return [extracted, handler.displayName];
                 }
             }
         }
