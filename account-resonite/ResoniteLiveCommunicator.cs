@@ -139,7 +139,7 @@ internal partial class ResoniteLiveCommunicator
                 {
                     SlidingExpiration = TimeSpan.FromMinutes(5)
                 });
-                XYVRLogging.WriteLine(this, $"Storing for the first time information about {sessionUpdate.sessionId}, which is {ExtractTextFromColorTags(sessionUpdate.name)}");
+                // XYVRLogging.WriteLine(this, $"Storing for the first time information about {sessionUpdate.sessionId}, which is {ExtractTextFromColorTags(sessionUpdate.name)}");
                 anySessionUpdated = true;
             }
             else
