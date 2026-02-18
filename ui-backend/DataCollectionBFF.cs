@@ -9,6 +9,7 @@ namespace XYVR.UI.Backend;
 [ComVisible(true)]
 public interface IDataCollectionBFF
 {
+    Task<string> GetCurrentDataCollectionProgress();
     Task<string> GetConnectors();
     Task<string> CreateConnector(string connectorType);
     Task DeleteConnector(string guid);
@@ -27,6 +28,7 @@ public class DataCollectionBFF : IDataCollectionBFF
     private static readonly SemaphoreSlim Lock = new(1, 1);
     
     private bool _isRunningDataCollection;
+    private IncrementalEnumerationTracker? _lastDataCollectionTracker;
 
     public DataCollectionBFF(AppLifecycle appLifecycle)
     {
@@ -37,8 +39,8 @@ public class DataCollectionBFF : IDataCollectionBFF
     public async Task StartDataCollection()
     {
         if (_isRunningDataCollection) return;
-        
-        await Lock.WaitAsync(TimeSpan.FromSeconds(1));
+        if (!await Lock.WaitAsync(TimeSpan.FromSeconds(1))) return;
+
         try
         {
             _isRunningDataCollection = true;
@@ -56,11 +58,19 @@ public class DataCollectionBFF : IDataCollectionBFF
                 .Cast<IDataCollection>()
                 .ToList()) as IDataCollection;
 
-            await dataCollection.IncrementalUpdateRepository(new UIProgressJobHandler(repository, async individual =>
-            {
-                await _appLifecycle.SendEventToReact(FrontEvents.EventForIndividualUpdated, FrontIndividual.FromCore(individual, _appLifecycle.LiveStatusMonitoring));
-            }));
+            await dataCollection.IncrementalUpdateRepository(new UIProgressJobHandler(repository,
+                async individual =>
+                {
+                    await _appLifecycle.SendEventToReact(FrontEvents.EventForIndividualUpdated, FrontIndividual.FromCore(individual, _appLifecycle.LiveStatusMonitoring));
+                },
+                async tracker =>
+                {
+                    _lastDataCollectionTracker = tracker;
+                    await _appLifecycle.SendEventToReact(FrontEvents.EventForDataCollectionUpdated, FrontProgressTracker.FromCore(tracker));
+                }
+            ));
             await Scaffolding.SaveRepository(repository);
+            await _appLifecycle.SendEventToReact(FrontEvents.EventForDataCollectionUpdated, null);
         }
         catch (Exception e)
         {
@@ -69,11 +79,18 @@ public class DataCollectionBFF : IDataCollectionBFF
         }
         finally
         {
+            _lastDataCollectionTracker = null;
             _isRunningDataCollection = false;
             Lock.Release();
         }
     }
-    
+
+    public Task<string> GetCurrentDataCollectionProgress()
+    {
+        if (_lastDataCollectionTracker == null) return Task.FromResult<string>(null!);
+        return Task.FromResult(ToJSON(FrontProgressTracker.FromCore(_lastDataCollectionTracker)));
+    }
+
     public async Task<string> GetConnectors()
     {
         var connectors = _appLifecycle.ConnectorsMgt.Connectors;

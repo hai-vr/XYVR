@@ -47,3 +47,9 @@ export interface FrontConnectorAccount {
     inAppIdentifier: string;
     inAppDisplayName: string;
 }
+
+export interface FrontProgressTracker {
+    name: string;
+    accomplished: number;
+    total: number;
+}

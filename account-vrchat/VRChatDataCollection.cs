@@ -43,7 +43,7 @@ public class VRChatDataCollection(IndividualRepository repository, IResponseColl
 
     public async Task<List<ImmutableAccountIdentification>> IncrementalUpdateRepository(IIncrementalDataCollectionJobHandler jobHandler)
     {
-        var eTracker = await jobHandler.NewEnumerationTracker();
+        var eTracker = await jobHandler.NewEnumerationTracker(VRChatCommunicator.VRChatQualifiedAppName);
         
         var vrcCaller = await _vrChatCommunicator.CallerAccount();
         repository.MergeAccounts([vrcCaller]);
@@ -61,7 +61,7 @@ public class VRChatDataCollection(IndividualRepository repository, IResponseColl
             
             var whichIncompleteUpdated = repository.MergeIncompleteAccounts([incompleteAccount]);
             if (whichIncompleteUpdated.Count > 0) await jobHandler.NotifyAccountUpdated(whichIncompleteUpdated.ToList());
-            await jobHandler.NotifyEnumeration(eTracker, 0, incompleteAccounts.Count);
+            await eTracker.Update(0, incompleteAccounts.Count);
         }
 
         // We prioritize accounts that are pending update
@@ -103,7 +103,7 @@ public class VRChatDataCollection(IndividualRepository repository, IResponseColl
             if (whichUpdated.Count > 0) await jobHandler.NotifyAccountUpdated(whichUpdated.ToList());
 
             soFar++;
-            await jobHandler.NotifyEnumeration(eTracker, soFar, incompleteAccounts.Count);
+            await eTracker.Update(soFar, incompleteAccounts.Count);
         }
 
         return new List<ImmutableAccountIdentification> { vrcCaller.AsIdentification() }

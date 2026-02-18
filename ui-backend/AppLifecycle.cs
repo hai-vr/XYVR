@@ -132,7 +132,7 @@ public class AppLifecycle
         await _dispatchAsyncFn.Invoke(action);
     }
 
-    internal async Task SendEventToReact(string eventType__vulnerableToInjections, object obj)
+    internal async Task SendEventToReact(string eventType__vulnerableToInjections, object? obj)
     {
         if (eventType__vulnerableToInjections.Contains('\'')) throw new ArgumentException("Event type cannot contain single quotes.");
     
@@ -140,4 +140,4 @@ public class AppLifecycle
     }
 }
 
-public record EventToSendToReact(string eventType__vulnerableToInjections, object obj);
+public record EventToSendToReact(string eventType__vulnerableToInjections, object? obj);
