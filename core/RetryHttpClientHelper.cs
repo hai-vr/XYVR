@@ -22,7 +22,6 @@ public class RetryHttpClientHelper
     {
         return await DoSendAsync(request, cancellationToken);
     }
-    
 
     public async Task<HttpResponseMessage> GetAsync(string url, CancellationToken token)
     {
@@ -86,7 +85,9 @@ public class RetryHttpClientHelper
             1 => TimeSpan.FromSeconds(2),
             2 => TimeSpan.FromSeconds(10),
             3 => TimeSpan.FromSeconds(30),
-            _ => TimeSpan.FromSeconds(new Random().Next(60, 80))
+            4 => TimeSpan.FromSeconds(new Random().Next(60, 60 + 20)),
+            5 => TimeSpan.FromSeconds(new Random().Next(120, 120 + 30)),
+            _ => TimeSpan.FromSeconds(new Random().Next(300, 300 + 40))
         };
     }
 }
