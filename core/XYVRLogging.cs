@@ -20,6 +20,7 @@ public static class XYVRLogging
                 lock (_lock)
                 {
                     LogFile.WriteLine("ERROR: " + msg);
+                    LogFile.Flush();
                 }
             };
         }
@@ -45,6 +46,7 @@ public static class XYVRLogging
             lock (_lock)
             {
                 LogFile.WriteLine("INFO: " + msg);
+				LogFile.Flush();
             }
         }
     }
