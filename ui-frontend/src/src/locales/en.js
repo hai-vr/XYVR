@@ -138,4 +138,6 @@
     "ui.showNotes.label": "Show notes",
     "ui.showOnlyContacts.label": "Show only Contacts",
     "ui.showBios.label": "Show bios",
+    "connectors.addServerViewer.title": "Create a connection to watch servers",
+    "connectors.addServerViewer.label": "Add server viewer",
 }

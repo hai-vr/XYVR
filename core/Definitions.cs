@@ -210,4 +210,5 @@ public enum NamedApp
     VRChat = 2,
     Cluster = 3,
     ChilloutVR = 4,
+    GenericServerViewer = 5,
 }

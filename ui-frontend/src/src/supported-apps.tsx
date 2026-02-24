@@ -189,11 +189,44 @@ export const ClusterVRApp: SupportedApp = {
     }
 }
 
+export const GenericServerViewerApp: SupportedApp = {
+    namedApp: NamedApp.GenericServerViewer,
+    displayName: "Server Viewer",
+    searchTerm: 'server',
+    iconClass: 'genericserverviewer',
+    isSessionCapacityKnowable: true,
+    isTotalNumberOfUsersKnowable: true,
+    areOtherSessionUsersKnowable: true,
+    isJoinButtonMessage: false,
+    isSessionOpenableOnWeb: false,
+    hasLinkToProfile: false,
+    areFriendsCalledFriendsInsteadOfContact: false,
+    isKnowingInAppIdentifierRelevantForInAppFunctions: false,
+    canUserBeInMultipleSessionsSimultaneously: true,
+
+    getIcon(): React.ReactNode {
+        return <span></span>;
+    },
+
+    getAccessLevelText(_: LiveSessionMarkerType[]): string {
+        return '';
+    },
+
+    getSessionLink(_: string, __?: string): string {
+        return '';
+    },
+
+    getProfileLink(_: string): string {
+        return '';
+    }
+}
+
 export const SupportedAppsByNamedApp: Record<string, SupportedApp> = {
     [NamedApp.Resonite]: ResoniteApp,
     [NamedApp.VRChat]: VRChatApp,
     [NamedApp.ChilloutVR]: ChilloutVRApp,
     [NamedApp.Cluster]: ClusterVRApp,
+    [NamedApp.GenericServerViewer]: GenericServerViewerApp,
 };
 
 export const SupportedApps: SupportedApp[] = Object.values(SupportedAppsByNamedApp);

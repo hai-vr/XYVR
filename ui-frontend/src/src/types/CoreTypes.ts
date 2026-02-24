@@ -6,6 +6,7 @@ export const NamedApp = {
     VRChat: "VRChat",
     Cluster: "Cluster",
     ChilloutVR: "ChilloutVR",
+    GenericServerViewer: "GenericServerViewer",
 } as const;
 
 export type NamedAppType = typeof NamedApp[keyof typeof NamedApp];

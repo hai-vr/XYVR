@@ -217,6 +217,12 @@ function SettingsPage({
                                     >
                                         + {t('connectors.addConnection.label', {connectionName: 'cluster.mu'})}
                                     </button>
+                                    <button
+                                        onClick={() => createNewConnector(ConnectorType.GenericServerViewer)}
+                                        title={t('connectors.addServerViewer.title')}
+                                    >
+                                        + {t('connectors.addServerViewer.label')}
+                                    </button>
                                 </div>
                             </div>
                         </div>
