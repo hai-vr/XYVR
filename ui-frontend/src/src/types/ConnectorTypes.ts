@@ -6,7 +6,8 @@ export const ConnectorType =
     ResoniteAPI: 'ResoniteAPI',
     VRChatAPI: 'VRChatAPI',
     ChilloutVRAPI: 'ChilloutVRAPI',
-    ClusterAPI: 'ClusterAPI'
+    ClusterAPI: 'ClusterAPI',
+    GenericServerViewer: 'GenericServerViewer'
 } as const;
 
 export type ConnectorTypeType = typeof ConnectorType[keyof typeof ConnectorType];

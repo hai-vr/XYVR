@@ -29,7 +29,8 @@ public enum ConnectorType
     ResoniteAPI,
     VRChatAPI,
     ChilloutVRAPI,
-    ClusterAPI
+    ClusterAPI,
+    GenericServerViewer,
 }
 
 public enum RefreshMode

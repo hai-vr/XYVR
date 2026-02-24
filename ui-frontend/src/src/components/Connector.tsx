@@ -43,6 +43,7 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated, 
         || connector.type === ConnectorType.ResoniteAPI && NamedApp.Resonite
         || connector.type === ConnectorType.ChilloutVRAPI && NamedApp.ChilloutVR
         || connector.type === ConnectorType.ClusterAPI && NamedApp.Cluster
+        || connector.type === ConnectorType.GenericServerViewer && NamedApp.GenericServerViewer
         || NamedApp.NotNamed;
 
     const tempAccount: FrontConnectorAccount = {

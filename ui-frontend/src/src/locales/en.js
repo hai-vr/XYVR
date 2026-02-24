@@ -120,4 +120,7 @@
     "searchFilter.onlineCount": "{{count}} online",
     "ui.switchToShowPortraits.title": "Switch to show portraits",
     "ui.switchToHidePortraits.title": "Switch to hide portraits",
+    // V0.0.1-alpha.17
+    "connectors.addServerViewer.title": "Create a connection to watch servers",
+    "connectors.addServerViewer.label": "Add server viewer",
 }
