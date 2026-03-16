@@ -76,7 +76,7 @@ internal class ResoniteAPI
         var url = $"{AuditUrls.ResoniteApiUrl}/users/{_myUserId}/{_token__sensitive}";
         try
         {
-            var request = new HttpRequestMessage(HttpMethod.Get, url);
+            var request = new HttpRequestMessage(HttpMethod.Delete, url);
             request.Headers.Add("Authorization", $"res {_myUserId}:{_token__sensitive}");
 
             var response = await _client.SendAsync(request);
