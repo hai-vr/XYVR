@@ -134,11 +134,19 @@ public class DataCollectionBFF : IDataCollectionBFF
 
     public async Task<string> TryLogout(string guid)
     {
-        var connector = _appLifecycle.ConnectorsMgt.GetConnector(guid);
-        var connectionResult = await _appLifecycle.CredentialsMgt.TryLogout(connector);
-        await Scaffolding.SaveCredentials(await _appLifecycle.CredentialsMgt.SerializeCredentials());
+        try
+        {
+            var connector = _appLifecycle.ConnectorsMgt.GetConnector(guid);
+            var connectionResult = await _appLifecycle.CredentialsMgt.TryLogout(connector);
+            await Scaffolding.SaveCredentials(await _appLifecycle.CredentialsMgt.SerializeCredentials());
     
-        return ToJSON(connectionResult);
+            return ToJSON(connectionResult);
+        }
+        catch (Exception e)
+        {
+            XYVRLogging.ErrorWriteLine(this, e);
+            throw;
+        }
     }
 
     public async Task<string> TryTwoFactor(string guid, bool isTwoFactorEmail, string twoFactorCode__sensitive, bool stayLoggedIn)

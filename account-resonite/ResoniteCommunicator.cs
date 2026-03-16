@@ -35,9 +35,22 @@ internal class ResoniteCommunicator
 
     public async Task ResoniteLogout()
     {
-        _api ??= await InitializeApi();
+        try
+        {
+            _api ??= await InitializeApi();
+        }
+        catch (Exception e)
+        {
+            XYVRLogging.ErrorWriteLine(this, e);
+            XYVRLogging.ErrorWriteLine(this, "While trying to log out, we failed to initialize the API, so this may indicate that we might already be logged out.");
+        }
+
+        // _api may be null if the above failed
+        if (_api != null)
+        {
+            await _api.Logout();
+        }
         
-        await _api.Logout();
         await _credentialsStorage.DeleteCookieOrToken();
     }
 
