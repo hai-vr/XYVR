@@ -36,7 +36,7 @@ public class DataCollectionBFF : IDataCollectionBFF
         _serializer = BFFUtils.NewSerializer();
     }
 
-    public async Task StartDataCollection()
+    public async Task StartDataCollection() => await BFFUtils.LogErrors(this, async () =>
     {
         if (_isRunningDataCollection) return;
         if (!await Lock.WaitAsync(TimeSpan.FromSeconds(1))) return;
@@ -83,7 +83,7 @@ public class DataCollectionBFF : IDataCollectionBFF
             _isRunningDataCollection = false;
             Lock.Release();
         }
-    }
+    });
 
     public Task<string> GetCurrentDataCollectionProgress()
     {
@@ -91,7 +91,7 @@ public class DataCollectionBFF : IDataCollectionBFF
         return Task.FromResult(ToJSON(FrontProgressTracker.FromCore(_lastDataCollectionTracker)));
     }
 
-    public async Task<string> GetConnectors()
+    public async Task<string> GetConnectors() => await BFFUtils.LogErrors(this, async () =>
     {
         var connectors = _appLifecycle.ConnectorsMgt.Connectors;
         
@@ -100,23 +100,23 @@ public class DataCollectionBFF : IDataCollectionBFF
             .ToList())).ToList();
         
         return ToJSON(connectorF);
-    }
+    });
 
-    public async Task<string> CreateConnector(string connectorType)
+    public async Task<string> CreateConnector(string connectorType) => await BFFUtils.LogErrors(this, async () =>
     {
         var newConnector = _appLifecycle.ConnectorsMgt.CreateNewConnector(Enum.Parse<ConnectorType>(connectorType));
         await Scaffolding.SaveConnectors(_appLifecycle.ConnectorsMgt);
         
         return ToJSON(newConnector);
-    }
+    });
 
-    public async Task DeleteConnector(string guid)
+    public async Task DeleteConnector(string guid) => await BFFUtils.LogErrors(this, async () =>
     {
         _appLifecycle.ConnectorsMgt.DeleteConnector(guid);
         await Scaffolding.SaveConnectors(_appLifecycle.ConnectorsMgt);
-    }
+    });
 
-    public async Task<string> TryLogin(string guid, string login__sensitive, string password__sensitive, string? twoFactorCode__sensitive, bool stayLoggedIn)
+    public async Task<string> TryLogin(string guid, string login__sensitive, string password__sensitive, string? twoFactorCode__sensitive, bool stayLoggedIn) => await BFFUtils.LogErrors(this, async () =>
     {
         var connector = _appLifecycle.ConnectorsMgt.GetConnector(guid);
         var connectionResult = await _appLifecycle.CredentialsMgt.TryConnect(connector, new ConnectionAttempt
@@ -128,18 +128,18 @@ public class DataCollectionBFF : IDataCollectionBFF
             stayLoggedIn = stayLoggedIn
         });
         await ContinueLogin(connectionResult, stayLoggedIn);
-    
-        return ToJSON(connectionResult);
-    }
 
-    public async Task<string> TryLogout(string guid)
+        return ToJSON(connectionResult);
+    });
+
+    public async Task<string> TryLogout(string guid) => await BFFUtils.LogErrors(this, async () =>
     {
         try
         {
             var connector = _appLifecycle.ConnectorsMgt.GetConnector(guid);
             var connectionResult = await _appLifecycle.CredentialsMgt.TryLogout(connector);
             await Scaffolding.SaveCredentials(await _appLifecycle.CredentialsMgt.SerializeCredentials());
-    
+
             return ToJSON(connectionResult);
         }
         catch (Exception e)
@@ -147,9 +147,9 @@ public class DataCollectionBFF : IDataCollectionBFF
             XYVRLogging.ErrorWriteLine(this, e);
             throw;
         }
-    }
+    });
 
-    public async Task<string> TryTwoFactor(string guid, bool isTwoFactorEmail, string twoFactorCode__sensitive, bool stayLoggedIn)
+    public async Task<string> TryTwoFactor(string guid, bool isTwoFactorEmail, string twoFactorCode__sensitive, bool stayLoggedIn) => await BFFUtils.LogErrors(this, async () =>
     {
         var connector = _appLifecycle.ConnectorsMgt.GetConnector(guid);
         var connectionResult = await _appLifecycle.CredentialsMgt.TryConnect(connector, new ConnectionAttempt
@@ -160,9 +160,9 @@ public class DataCollectionBFF : IDataCollectionBFF
             isTwoFactorEmail = isTwoFactorEmail
         });
         await ContinueLogin(connectionResult, stayLoggedIn);
-    
+
         return ToJSON(connectionResult);
-    }
+    });
 
     private async Task ContinueLogin(ConnectionAttemptResult connectionResult, bool stayLoggedIn)
     {

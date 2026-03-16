@@ -27,7 +27,7 @@ public class PreferencesBFF : IPreferencesBFF
         _serializer = BFFUtils.NewSerializer();
     }
     
-    public async Task<string> GetPreferences()
+    public async Task<string> GetPreferences() => await BFFUtils.LogErrors(this, async () =>
     {
         XYVRLogging.WriteLine(this, "Getting preferences");
         if (_lastPrefs == null)
@@ -37,7 +37,7 @@ public class PreferencesBFF : IPreferencesBFF
         }
         
         return ToJson(_newPrefs!);
-    }
+    });
 
     public async Task EditPrefs(Func<ReactAppPreferences, ReactAppPreferences> editFn)
     {
@@ -46,12 +46,12 @@ public class PreferencesBFF : IPreferencesBFF
         _newPrefs = editFn(_newPrefs);
     }
 
-    public Task SetPreferences(string preferences)
+    public Task SetPreferences(string preferences) => BFFUtils.LogErrors(this, () =>
     {
         XYVRLogging.WriteLine(this, "Set preferences was called.");
         _newPrefs = JsonConvert.DeserializeObject<ReactAppPreferences>(preferences)!;
         return Task.CompletedTask;
-    }
+    });
 
     public async Task OnClosed()
     {

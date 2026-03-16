@@ -30,37 +30,21 @@ public class LiveBFF : ILiveBFF
         _thumbnailCache = Scaffolding.ThumbnailCache();
     }
 
-    public string GetAllExistingLiveUserData()
+    public string GetAllExistingLiveUserData() => BFFUtils.LogErrors(this, () =>
     {
-        try
-        {
             var liveData = _appLifecycle.LiveStatusMonitoring.GetAllUserData()
                 .Select(update => FrontLiveUserUpdate.FromCore(update, _appLifecycle.LiveStatusMonitoring))
                 .ToList();
             return JsonConvert.SerializeObject(liveData, _serializer);
-        }
-        catch (Exception e)
-        {
-            XYVRLogging.ErrorWriteLine(this, e);
-            throw;
-        }
-    }
+    });
 
-    public string GetAllExistingLiveSessionData()
+    public string GetAllExistingLiveSessionData() => BFFUtils.LogErrors(this, () =>
     {
-        try
-        {
-            var liveData = _appLifecycle.LiveStatusMonitoring.GetAllSessions()
-                .Select(FrontLiveSession.FromCore)
-                .ToList();
-            return JsonConvert.SerializeObject(liveData, _serializer);
-        }
-        catch (Exception e)
-        {
-            XYVRLogging.ErrorWriteLine(this, e);
-            throw;
-        }
-    }
+        var liveData = _appLifecycle.LiveStatusMonitoring.GetAllSessions()
+            .Select(FrontLiveSession.FromCore)
+            .ToList();
+        return JsonConvert.SerializeObject(liveData, _serializer);
+    });
 
     public async Task<byte[]?> GetThumbnailBytesOrNull(string sha__mustNotContainPathTraversal)
     {
@@ -138,19 +122,11 @@ public class LiveBFF : ILiveBFF
         });
     }
 
-    public async Task MakeGameClientJoinOrSelfInvite(string appName, string inAppIdentifier, string sessionId)
+    public async Task MakeGameClientJoinOrSelfInvite(string appName, string inAppIdentifier, string sessionId) => await BFFUtils.LogErrors(this, async () =>
     {
-        try
+        if (Enum.TryParse<NamedApp>(appName, out var namedApp))
         {
-            if (Enum.TryParse<NamedApp>(appName, out var namedApp))
-            {
-                await _appLifecycle.LiveMonitoringAgent.MakeGameClientJoinOrSelfInvite(namedApp, inAppIdentifier, sessionId);
-            }
+            await _appLifecycle.LiveMonitoringAgent.MakeGameClientJoinOrSelfInvite(namedApp, inAppIdentifier, sessionId);
         }
-        catch (Exception e)
-        {
-            XYVRLogging.ErrorWriteLine(this, e);
-            throw;
-        }
-    }
+    });
 }

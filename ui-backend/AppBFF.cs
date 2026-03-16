@@ -46,7 +46,7 @@ public class AppBFF : IAppBFF
         Scaffolding.DANGER_OpenUrl(url);
     }
 
-    public string GetAllExposedIndividualsOrderedByContact()
+    public string GetAllExposedIndividualsOrderedByContact() => BFFUtils.LogErrors(this, () =>
     {
         var live = _appLifecycle.LiveStatusMonitoring;
         
@@ -57,58 +57,49 @@ public class AppBFF : IAppBFF
             .ToList();
         
         return JsonConvert.SerializeObject(responseObj, Formatting.None, _serializer);
-    }
+    });
 
-    public async Task FusionIndividuals(string toDesolidarize, string toDestroy)
+    public async Task FusionIndividuals(string toDesolidarize, string toDestroy) => await BFFUtils.LogErrors(this, async () =>
     {
         XYVRLogging.WriteLine(this, $"Fusion individuals was called: {toDesolidarize}, {toDestroy}");
         if (toDesolidarize == toDestroy) throw new ArgumentException("Cannot fusion an Individual with itself");
-        
+
         var to = _appLifecycle.IndividualRepository.GetByGuid(toDesolidarize);
         var beingDestroyed = _appLifecycle.IndividualRepository.GetByGuid(toDestroy);
         _appLifecycle.IndividualRepository.FusionIndividuals(to, beingDestroyed);
         await Scaffolding.SaveRepository(_appLifecycle.IndividualRepository);
-    }
+    });
 
-    public async Task DesolidarizeIndividuals(string toDesolidarize)
+    public async Task DesolidarizeIndividuals(string toDesolidarize) => await BFFUtils.LogErrors(this, async () =>
     {
         XYVRLogging.WriteLine(this, $"Desolidarize was called: {toDesolidarize}");
-        
+
         var individual = _appLifecycle.IndividualRepository.GetByGuid(toDesolidarize);
         if (individual.accounts.Length <= 1) return;
-        
+
         _appLifecycle.IndividualRepository.DesolidarizeIndividualAccounts(individual);
         await Scaffolding.SaveRepository(_appLifecycle.IndividualRepository);
-    }
+    });
 
-    public async Task AssignProfileIllustration(string data)
+    public async Task AssignProfileIllustration(string data) => await BFFUtils.LogErrors(this, async () =>
     {
-        try
+        var profileIllustration = JsonConvert.DeserializeObject<ProfileIllustrationRequest>(data);
+        XYVRLogging.WriteLine(this, $"Assign profile illustration was called: {profileIllustration.individualGuid}");
+
+        var fileType = profileIllustration.file.type;
+        var isValidFileType = fileType.Contains("/gif") || fileType.Contains("/png") || fileType.Contains("/webp") || fileType.Contains("/jpg") || fileType.Contains("/jpeg");
+        if (!isValidFileType)
         {
-            var profileIllustration = JsonConvert.DeserializeObject<ProfileIllustrationRequest>(data);
-            XYVRLogging.WriteLine(this, $"Assign profile illustration was called: {profileIllustration.individualGuid}");
-
-            var fileType = profileIllustration.file.type;
-            var isValidFileType = fileType.Contains("/gif") || fileType.Contains("/png") || fileType.Contains("/webp") || fileType.Contains("/jpg") || fileType.Contains("/jpeg");
-            if (!isValidFileType)
-            {
-                throw new ArgumentException($"Not accepted file type: {fileType}");
-            }
-
-            // This is just to check that it exists
-            _ = _appLifecycle.IndividualRepository.GetByGuid(profileIllustration.individualGuid);
-
-            var byteData = Convert.FromBase64String(profileIllustration.file.base64Content);
-            await _appLifecycle.ProfileIllustrationRepository.AssignIllustration(profileIllustration.individualGuid, byteData, fileType);
-            await Scaffolding.SaveProfileIllustrationStorage(_appLifecycle.ProfileIllustrationRepository.SerializeStorage());
-
+            throw new ArgumentException($"Not accepted file type: {fileType}");
         }
-        catch (Exception e)
-        {
-            XYVRLogging.ErrorWriteLine(this, e);
-            throw;
-        }
-    }
+
+        // This is just to check that it exists
+        _ = _appLifecycle.IndividualRepository.GetByGuid(profileIllustration.individualGuid);
+
+        var byteData = Convert.FromBase64String(profileIllustration.file.base64Content);
+        await _appLifecycle.ProfileIllustrationRepository.AssignIllustration(profileIllustration.individualGuid, byteData, fileType);
+        await Scaffolding.SaveProfileIllustrationStorage(_appLifecycle.ProfileIllustrationRepository.SerializeStorage());
+    });
 }
 
 public class ProfileIllustrationRequest
