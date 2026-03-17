@@ -12,6 +12,7 @@ public record ReactAppPreferences
     [UsedImplicitly] public string lang { get; init; } = "en";
     
     [UsedImplicitly] public bool resoniteShowSubSessions { get; init; } = true;
+    [UsedImplicitly] public string[] deprioritizedVirtualSpaceNames { get; init; } = Array.Empty<string>();
     
     [UsedImplicitly] public double windowWidth { get; init; } = 600;
     [UsedImplicitly] public double windowHeight { get; init; } = 1000;

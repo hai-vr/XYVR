@@ -120,4 +120,12 @@
     "searchFilter.onlineCount": "{{count}} online",
     "ui.switchToShowPortraits.title": "Switch to show portraits",
     "ui.switchToHidePortraits.title": "Switch to hide portraits",
+    "settings.deprioritized.title": "Deprioritized Virtual Spaces",
+    "settings.deprioritized.add.placeholder": "Virtual space name to deprioritize",
+    "settings.deprioritized.add.button": "Add",
+    "settings.resonite.title": "Resonite Settings",
+    "settings.languages.title": "Languages",
+    "settings.privacy.link.label": "Learn more about our privacy considerations.",
+    "settings.privacy.link.title": "Open privacy and data considerations docs in your browser",
+    "settings.dataCollection.collecting": "Collecting data for '{{name}}' ({{accomplished}} / {{total}})",
 }

@@ -21,7 +21,8 @@ const AppRouter = ({ appVersion }: { appVersion: string }) => {
     const [lang, setLang] = useState('en')
     const [showNotes, setShowNotes] = useState(true)
     const [resoniteShowSubSessions, setResoniteShowSubSessions] = useState(true)
-    const [preferences, setPreferences] = useState<ReactAppPreferences>({isDark: true, showOnlyContacts: false, compactMode: false, portraits: true, lang: 'en', resoniteShowSubSessions: true})
+    const [deprioritizedVirtualSpaceNames, setDeprioritizedVirtualSpaceNames] = useState<string[]>([])
+    const [preferences, setPreferences] = useState<ReactAppPreferences>({isDark: true, showOnlyContacts: false, compactMode: false, portraits: true, lang: 'en', resoniteShowSubSessions: true, deprioritizedVirtualSpaceNames: []})
     const [isPreferencesObtained, setIsPreferencesObtained] = useState(false)
     const [debugMode, setDebugMode] = useState<DebugFlags>({debugMode: false, demoMode: DemonstrationMode.Disabled})
 
@@ -65,6 +66,12 @@ const AppRouter = ({ appVersion }: { appVersion: string }) => {
     }, [resoniteShowSubSessions])
 
     useEffect(() => {
+        const updatedPreferences = {...preferences, deprioritizedVirtualSpaceNames};
+        setPreferences(updatedPreferences);
+
+    }, [deprioritizedVirtualSpaceNames])
+
+    useEffect(() => {
         const changeLang = async () => {
             await i18n.changeLanguage(lang);
         };
@@ -98,6 +105,7 @@ const AppRouter = ({ appVersion }: { appVersion: string }) => {
                 setPortraits(prefs.portraits)
                 setLang(prefs.lang)
                 setResoniteShowSubSessions(prefs.resoniteShowSubSessions)
+                setDeprioritizedVirtualSpaceNames(prefs.deprioritizedVirtualSpaceNames || [])
                 setIsPreferencesObtained(true);
             }
         };
@@ -154,6 +162,7 @@ const AppRouter = ({ appVersion }: { appVersion: string }) => {
                                                                               showNotes={showNotes}
                                                                               setShowNotes={setShowNotes}
                                                                               resoniteShowSubSessions={resoniteShowSubSessions}
+                                                                              deprioritizedVirtualSpaceNames={deprioritizedVirtualSpaceNames}
                                                                               debugMode={debugMode}
                         />}/>
                         <Route path="/data-collection"
@@ -161,6 +170,8 @@ const AppRouter = ({ appVersion }: { appVersion: string }) => {
                                                       setLang={setLang}
                                                       resoniteShowSubSessions={resoniteShowSubSessions}
                                                       setResoniteShowSubSessions={setResoniteShowSubSessions}
+                                                      deprioritizedVirtualSpaceNames={deprioritizedVirtualSpaceNames}
+                                                      setDeprioritizedVirtualSpaceNames={setDeprioritizedVirtualSpaceNames}
                                                       debugMode={debugMode}/>}/>
                     </Routes>
                 </main>

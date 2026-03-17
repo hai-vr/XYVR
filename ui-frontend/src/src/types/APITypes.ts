@@ -6,4 +6,5 @@
     lang: string;
 
     resoniteShowSubSessions: boolean;
+    deprioritizedVirtualSpaceNames: string[];
 }

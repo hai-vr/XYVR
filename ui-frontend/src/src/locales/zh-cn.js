@@ -82,5 +82,8 @@ export default {
     "ui.showNotes.title": "切换为显示备注",
     "ui.showOnlyContacts.title": "切换为仅显示联系人",
     "ui.switchToCompactMode.title": "切换到紧凑模式",
-    "ui.switchToFullMode.title": "切换到完整模式"
+    "ui.switchToFullMode.title": "切换到完整模式",
+    "settings.deprioritized.title": "降级虚拟空间", // Generated
+    "settings.deprioritized.add.placeholder": "要降级的虚拟空间名称", // Generated
+    "settings.deprioritized.add.button": "添加", // Generated
 }

@@ -9,6 +9,7 @@ In the `hai-vr/XYVR` repository, Haï~ will be in change of writing this changel
 
 Features:
 - Current progress is now displayed on the data collection button, contributed by @art0007i.
+- Session names (typically, world names) that match certain strings can be pushed to the bottom of the live sessions list, from the settings page (Deprioritized Virtual Spaces).
 
 Fixes:
 - Fix Booth.pm wishlist URLs are no longer displayed as being an account name.

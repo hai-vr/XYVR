@@ -82,5 +82,8 @@
     "ui.showNotes.title": "メモを表示するように切り替え",
     "ui.showOnlyContacts.title": "連絡先のみを表示するように切り替え",
     "ui.switchToCompactMode.title": "コンパクトモードに切り替える",
-    "ui.switchToFullMode.title": "フルモードに切り替える"
+    "ui.switchToFullMode.title": "フルモードに切り替える",
+    "settings.deprioritized.title": "優先度を下げた仮想空間", // Generated
+    "settings.deprioritized.add.placeholder": "優先度を下げる仮想空間名", // Generated
+    "settings.deprioritized.add.button": "追加", // Generated
 }

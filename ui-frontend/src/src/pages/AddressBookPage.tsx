@@ -105,7 +105,8 @@ interface AddressBookPageProps {
     showNotes: boolean;
     setShowNotes: (showNotes: boolean) => void;
     debugMode: DebugFlags;
-    resoniteShowSubSessions: boolean,
+    resoniteShowSubSessions: boolean;
+    deprioritizedVirtualSpaceNames: string[];
 }
 
 function AddressBookPage({ isDark,
@@ -120,7 +121,8 @@ function AddressBookPage({ isDark,
                              setShowNotes,
                              debugMode,
                              resoniteShowSubSessions,
-}: AddressBookPageProps) {
+                             deprioritizedVirtualSpaceNames
+                         }: AddressBookPageProps) {
     const dotNetApi = new DotNetApi();
     const { t } = useTranslation();
 
@@ -585,6 +587,13 @@ function AddressBookPage({ isDark,
                         <div className="live-sessions-grid">
                             {filteredLiveSessions
                                 .sort((a, b) => {
+                                    const aSessionName = (a.inAppVirtualSpaceName || "").toLowerCase();
+                                    const bSessionName = (b.inAppVirtualSpaceName || "").toLowerCase();
+                                    const aDeprioritized = deprioritizedVirtualSpaceNames.some(name => aSessionName.includes(name.toLowerCase()));
+                                    const bDeprioritized = deprioritizedVirtualSpaceNames.some(name => bSessionName.includes(name.toLowerCase()));
+                                    if (aDeprioritized && !bDeprioritized) return 1;
+                                    if (!aDeprioritized && bDeprioritized) return -1;
+                                    
                                     const aKnownCount = a.participants.filter(p => p.isKnown).length;
                                     const bKnownCount = b.participants.filter(p => p.isKnown).length;
                                     const dKnownCount = bKnownCount - aKnownCount; // Descending order (most participants first)

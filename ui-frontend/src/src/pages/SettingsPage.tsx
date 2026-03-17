@@ -17,7 +17,9 @@ interface SettingsPageProps {
     debugMode: DebugFlags,
     setLang: (lang: string) => void,
     resoniteShowSubSessions: boolean,
-    setResoniteShowSubSessions: (resoniteShowSubSessions: boolean) => void
+    setResoniteShowSubSessions: (resoniteShowSubSessions: boolean) => void,
+    deprioritizedVirtualSpaceNames: string[],
+    setDeprioritizedVirtualSpaceNames: (deprioritizedVirtualSpaceNames: string[]) => void
 }
 
 interface DeleteStateType {
@@ -31,7 +33,9 @@ function SettingsPage({
                           debugMode,
                           setLang,
                           resoniteShowSubSessions,
-                          setResoniteShowSubSessions
+                          setResoniteShowSubSessions,
+                          deprioritizedVirtualSpaceNames,
+                          setDeprioritizedVirtualSpaceNames
                       }: SettingsPageProps) {
     const dotNetApi = new DotNetApi();
     const {t} = useTranslation();
@@ -41,6 +45,7 @@ function SettingsPage({
     const [connectors, setConnectors] = useState<FrontConnector[]>([]);
     const [deleteStates, setDeleteStates] = useState<{ [key: string]: DeleteStateType }>({});
     const [dataCollectionProgress, setDataCollectionProgress] = useState<FrontProgressTracker | null>(null);
+    const [newDeprioritizedName, setNewDeprioritizedName] = useState("");
 
     useEffect(() => {
         const initializeApi = async () => {
@@ -130,6 +135,17 @@ function SettingsPage({
         await dotNetApi.appApiOpenLink('https://docs.hai-vr.dev/docs/xyvr/privacy');
     };
 
+    const addDeprioritizedName = () => {
+        if (newDeprioritizedName && !deprioritizedVirtualSpaceNames.includes(newDeprioritizedName)) {
+            setDeprioritizedVirtualSpaceNames([...deprioritizedVirtualSpaceNames, newDeprioritizedName]);
+            setNewDeprioritizedName("");
+        }
+    };
+
+    const removeDeprioritizedName = (name: string) => {
+        setDeprioritizedVirtualSpaceNames(deprioritizedVirtualSpaceNames.filter(n => n !== name));
+    };
+
     return (
         <div className="data-collection-container">
             <div className="header-group">
@@ -199,21 +215,21 @@ function SettingsPage({
             )}
 
             <div className="settings-buttons">
-                <a className="link-pointer" title="Open privacy and data considerations docs in your browser"
+                <a className="link-pointer" title={t('settings.privacy.link.title')}
                     onClick={openPrivacyDocs} onAuxClick={(e) => e.button === 1 && openPrivacyDocs()}
-                    onMouseDown={(e) => e.preventDefault()}>Learn more about our privacy considerations.</a>
+                    onMouseDown={(e) => e.preventDefault()}>{t('settings.privacy.link.label')}</a>
                 <button
                     disabled={!(initialized && dataCollectionProgress == null)}
                     onClick={() => startDataCollection()}
                     title={t('dataCollection.start.title')}
                 >
                     {dataCollectionProgress != null ? 
-                        `Collecting data for '${dataCollectionProgress.name}' (${dataCollectionProgress.accomplished} / ${dataCollectionProgress.total})`
+                        t('settings.dataCollection.collecting', {name: dataCollectionProgress.name, accomplished: dataCollectionProgress.accomplished, total: dataCollectionProgress.total})
                         : t('dataCollection.start.label')}
                 </button>
             </div>
 
-            <h2>Resonite Settings</h2>
+            <h2>{t('settings.resonite.title')}</h2>
             <div className="settings-section">
                 <label className="checkbox-container">
                     <input
@@ -225,7 +241,29 @@ function SettingsPage({
                 </label>
             </div>
 
-            <h2>Languages</h2>
+            <h2>{t('settings.deprioritized.title')}</h2>
+            <div className="settings-section">
+                <div className="deprioritized-sessions-list">
+                    {deprioritizedVirtualSpaceNames.map(name => (
+                        <div key={name} className="deprioritized-session-item">
+                            <span>{name}</span>
+                            <button onClick={() => removeDeprioritizedName(name)}>✕</button>
+                        </div>
+                    ))}
+                </div>
+                <div className="deprioritized-sessions-add">
+                    <input
+                        type="text"
+                        value={newDeprioritizedName}
+                        onChange={(e) => setNewDeprioritizedName(e.target.value)}
+                        placeholder={t('settings.deprioritized.add.placeholder')}
+                        onKeyDown={(e) => e.key === 'Enter' && addDeprioritizedName()}
+                    />
+                    <button onClick={addDeprioritizedName}>{t('settings.deprioritized.add.button')}</button>
+                </div>
+            </div>
+
+            <h2>{t('settings.languages.title')}</h2>
             <div className="settings-buttons">
                 {availableLanguages.availableLanguages.map((lang: LanguageInfo) => (
                     <button key={lang.code} title={lang.englishName}

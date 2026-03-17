@@ -106,4 +106,52 @@
     }
 }
 
+.deprioritized-sessions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.deprioritized-session-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--bg-secondary);
+    padding: 8px 12px;
+    border-radius: var(--ideal-border-radius);
+    border: 1px solid var(--brd-primary);
+}
+
+.deprioritized-session-item button {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 0 4px;
+}
+
+.deprioritized-session-item button:hover {
+    color: var(--text-primary);
+}
+
+.deprioritized-sessions-add {
+    display: flex;
+    gap: 8px;
+}
+
+.deprioritized-sessions-add input {
+    flex: 1;
+    padding: 8px 12px;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--brd-primary);
+    border-radius: var(--ideal-border-radius);
+    color: var(--text-primary);
+}
+
+.deprioritized-sessions-add button {
+    padding: 8px 16px;
+}
+
 
