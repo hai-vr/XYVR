@@ -15,6 +15,7 @@ Fixes:
 - Fix Booth.pm wishlist URLs are no longer displayed as being an account name.
 - Fix some profile links to Patreon service starting containing patreon.com/c/ were incorrectly displayed.
 - Fix log file was previously truncated or had missing lines, if it was opened by an external program while XYVR is running.
+- Fix pressing the log out button on a Resonite connection with an expired token should no longer trigger an error.
 
 Internal changes:
 - Log when worlds are removed from the cache.
