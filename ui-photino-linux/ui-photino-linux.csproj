@@ -9,7 +9,7 @@
         <RootNamespace>XYVR.UI.Photino</RootNamespace>
         <GenerateEmbeddedFilesManifest>true</GenerateEmbeddedFilesManifest>
         <AssemblyName>xyvr</AssemblyName>
-        <OutputPath>$(MSBuildThisFileDirectory)/../build</OutputPath>
+        <OutputPath>$(MSBuildThisFileDirectory)/../build-photino</OutputPath>
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     </PropertyGroup>
 

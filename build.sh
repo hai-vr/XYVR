@@ -13,7 +13,7 @@ npm install
 npm run build-and-copy
 
 CsProjPath=$SCRIPT_DIR/ui-photino-linux/ui-photino-linux.csproj
-OutputDir=$SCRIPT_DIR/build
+OutputDir=$SCRIPT_DIR/build-photino
 mkdir -p $OutputDir
 echo Building csharp app from $CsProjPath
 
