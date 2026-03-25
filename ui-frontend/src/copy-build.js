@@ -25,8 +25,8 @@ function copyDir(src, dest) {
 const sourceDir = 'dist';
 const allDestinations = [
     // Used for near-live reload debug only:
-    '../../ui-webview-windows/bin/Debug/net9.0-windows/src/dist',
-    '../../ui-photino-linux/bin/Debug/net9.0/wwwroot',
+    '../../ui-webview-windows/bin/Debug/net10.0-windows/src/dist',
+    '../../ui-photino-linux/bin/Debug/net10.0/wwwroot',
     
     // Used for builds:
     '../../ui-webview-windows/src/dist',
@@ -38,7 +38,7 @@ const allDestinations = [
 
 const destinations = os.platform() === 'win32'
     ? allDestinations
-    : allDestinations.filter(dest => !dest.includes('net9.0-windows'));
+    : allDestinations.filter(dest => !dest.includes('net10.0-windows'));
 
 console.log('Starting file copy process...');
 

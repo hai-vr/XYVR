@@ -405,6 +405,7 @@ public static class Scaffolding
 
         _sqlite = new XYVRSqliteContainer(Path.Combine(_pathLateInit, "xyvr.sqlite.db"));
         _sqlite.Open();
+        _sqlite.CreateSingularStringStorageTableIfNotExists("data_individuals");
     }
 
     public static void CloseDatabase()

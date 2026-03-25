@@ -19,7 +19,7 @@ public class VRChatLoginService : ILoginService
         if (userinput_cookies__sensitive != null) vrcApi.ProvideCookies(userinput_cookies__sensitive);
 
         LoginResponse result;
-        if (connectionAttempt.twoFactorCode__sensitive == null)
+        if (string.IsNullOrEmpty(connectionAttempt.twoFactorCode__sensitive))
         {
             XYVRLogging.WriteLine(this, "Connecting to VRChat...");
             result = await vrcApi.Login(connectionAttempt.login__sensitive, connectionAttempt.password__sensitive);
