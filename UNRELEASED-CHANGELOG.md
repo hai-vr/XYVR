@@ -7,6 +7,9 @@ In the `hai-vr/XYVR` repository, Haï~ will be in change of writing this changel
 
 ## 0.0.1-alpha.17
 
+Important:
+- The application now requires .NET 10 (instead of .NET 9).
+
 Features:
 - Current progress is now displayed on the data collection button, contributed by @art0007i.
 - Session names (typically, world names) that match certain strings can be pushed to the bottom of the live sessions list, from the settings page (Deprioritized Virtual Spaces).
@@ -16,9 +19,12 @@ Fixes:
 - Fix some profile links to Patreon service starting containing patreon.com/c/ were incorrectly displayed.
 - Fix log file was previously truncated or had missing lines, if it was opened by an external program while XYVR is running.
 - Fix pressing the log out button on a Resonite connection with an expired token should no longer trigger an error.
+- Fix sqlite initialization on Linux, contributed by @art0007i.
+- Fix VRChat login should now function on Linux/Photino, contributed by @art0007i.
 
 Internal changes:
 - Log when worlds are removed from the cache.
 - If an API repeatedly returns a server error, we may wait for even longer periods before retrying.
   - Previously, the maximum delay was 80 seconds; it could now last 5 minutes.
 - Public Resonite sessions are no longer printed into the logs.
+- Builds are now output by default to the build/ and build-photino/ folder, contributed by @art0007i.
