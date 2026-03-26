@@ -1,10 +1,17 @@
-# Caution: This React project was created using heavy use of machine assistance
+ui-frontend
+=====
+
+## Hot reload
+
+To "hot reload" the React frontend while the .NET application is running, run `npm run build-and-copy` after making your changes, then press F5 in XYVR to reload the frontend.
+
+## Caution: This React project was created using heavy use of machine assistance
 
 This is Haï~ writing all of this README by hand:
 
 The React portion of this project (all JSX and CSS) was created using heavy use of machine assistance.
 
-## Context
+### Context
 
 Before being a Unity developer, I was originally a Java backend developer, and part of this project was a way for me
 to discover how to use machine assistance on web libraries that have been heavily trained upon.
@@ -24,7 +31,7 @@ of machine assistance in general.
 
 I have no real experience with React outside using it sparringly in Docusaurus out of necessity.
 
-## Acknowledgement of flaw
+### Acknowledgement of flaw
 
 Most of this React project was created through the use of prompts with Claude 4 integrated with Jetbrains Rider; in some areas
 it was spliced together by hand, but the majority is created using machine assistance.
@@ -33,7 +40,7 @@ As a developer, I do recognize that a significant part of the React project is a
 doesn't make a lot of sense, the CSS is disorganized, especially the color variants between light and dark mode, and many of the
 side effects were left unauthored after the machine assistance created them.
 
-## Backend
+### Backend
 
 The backend portion of this project was largely created by hand. Some areas in the .NET code were modified using machine assistance
 in some very limited ways, such as converting `Task<List<Account>>` from paginated requests to `IAsyncEnumerable<Account>`, or

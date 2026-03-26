@@ -63,7 +63,9 @@ during the .NET build process.
 - Requires Node or something.
 - In `ui-frontend/src/`, run `npm install` and then `npm run build-and-copy`
 
-To "hot reload" the React frontend while the .NET application is running, run `npm run build-and-copy` after making your changes.
+##### Hot reload
+
+To "hot reload" the React frontend while the .NET application is running, run `npm run build-and-copy` after making your changes, then press F5 in XYVR to reload the frontend.
 
 #### Build the desktop app that shows the React app
 
@@ -82,8 +84,8 @@ Build the `ui-webview-windows/` project.
 
 Main application execution projects:
 
-- **ui-webview-windows**: This is a WebView2 program that shows a React app that has been built, for use on Windows.
-- **ui-photino-linux**: This is a Photino program that shows a React app that has been built, for use on Linux.
+- **ui-webview-windows**: This is a WebView2 program that shows a React app that has been built, made for use on Windows.
+- **ui-photino-linux**: This is a Photino program that shows a React app that has been built, mainly made for use on Linux. That said, it can also be run on Windows.
 - **ui-frontend/src/**: This is the unbuilt React app. It is meant to be built using `npm run build-and-copy` so that the .NET program will copy its contents to the desktop app.
 
 Core projects:
