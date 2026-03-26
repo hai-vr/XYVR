@@ -13,7 +13,7 @@ You will need to install `libwebkit2gtk-4.0` see [below](#install-libwebkit2gtk-
 If you want to build this manually, **ui-photino-linux** is the .NET project you need to build, along with the **ui-frontend** React project.
 
 To run on Linux, you need to:
-- Install [.NET 9 SDK](https://learn.microsoft.com/en-us/dotnet/core/install/linux?WT.mc_id=dotnet-35129-website).
+- Install [.NET 10 SDK](https://learn.microsoft.com/en-us/dotnet/core/install/linux?WT.mc_id=dotnet-35129-website).
 - Install [`npm` and `node`](https://nodejs.org/en/download)
 - Install `libwebkit2gtk-4.0` see [below](#install-libwebkit2gtk-40).
 
