@@ -124,7 +124,7 @@ public static class Scaffolding
     public static async Task<SerializedCredentials> OpenCredentials()
     {
         EnsureRegistryHasEncryptionKeyForSavingSessionData();
-        return await OpenIfExists<SerializedCredentials>(CredentialsJsonFilePath, null, () => new SerializedCredentials(), _encryptionKeyForSessionData);
+        return await OpenIfExists(CredentialsJsonFilePath, null, () => new SerializedCredentials(), _encryptionKeyForSessionData);
     }
 
     public static async Task SaveCredentials(SerializedCredentials serialized)
@@ -136,7 +136,7 @@ public static class Scaffolding
     public static async Task<ProfileIllustrationStorage> OpenProfileIllustrationStorage()
     {
         Directory.CreateDirectory(ProfileIllustrationsFolderPath);
-        var result = await OpenIfExists<ProfileIllustrationStorage>(ProfileIllustrationsJsonFilePath, null, () => new ProfileIllustrationStorage());
+        var result = await OpenIfExists(ProfileIllustrationsJsonFilePath, null, () => new ProfileIllustrationStorage());
         result.SetPath(ProfileIllustrationsFolderPath);
         result.PreProcess();
         return result;
@@ -164,12 +164,12 @@ public static class Scaffolding
         return ret;
     }
     
-    public static async Task<ReactAppPreferences> OpenReactAppPreferences() => await OpenIfExists<ReactAppPreferences>(ReactAppJsonFilePath, null, () => new ReactAppPreferences());
+    public static async Task<ReactAppPreferences> OpenReactAppPreferences() => await OpenIfExists(ReactAppJsonFilePath, null, () => new ReactAppPreferences());
     public static async Task SaveReactAppPreferences(ReactAppPreferences serialized) => await SaveTo(serialized, ReactAppJsonFilePath, IndividualsTableName, null);
     
     public static async Task<WorldNameCache> OpenWorldNameCache()
     {
-        var result = await OpenIfExists<WorldNameCache>(WorldNameCacheJsonFilePath, null, () => new WorldNameCache());
+        var result = await OpenIfExists(WorldNameCacheJsonFilePath, null, () => new WorldNameCache());
         result.PreProcess();
         return result;
     }
