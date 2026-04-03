@@ -175,7 +175,7 @@ internal record VRCXLocationContext
     /* UNUSED */ internal string? HiddenId { get; init; }
     /* UNUSED */ internal string? PrivateId { get; init; }
     /* UNUSED */ internal string? FriendsId { get; init; }
-    /* UNUSED */ internal string? GroupId { get; init; }
+    internal string? GroupId { get; init; }
     /* UNUSED */ internal string? GroupAccessType { get; init; }
     /* UNUSED */ internal bool CanRequestInvite { get; init; }
     /* UNUSED */ internal bool Strict { get; init; }
