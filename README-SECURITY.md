@@ -154,6 +154,17 @@ Emails and passwords are not stored on disk; if the user has typed them, they ar
 
 All the other data are not encrypted, so the address book is readable plain text.
 
+## Use of ImageMagick
+
+ImageMagick is currently used by the backend to create downscaled and cropped portrait versions of large screenshots provided by the user;
+this makes the page rendering easier and also improves image filtering.
+
+At this time of writing, the pictures that are provided to ImageMagick are entirely made up of screenshots drag-and-dropped by the user. It
+does not process profile pictures nor live session thumbnails.
+
+Therefore, there should not be a direct risk of remote code execution through images fetched automatically by the application as those aren't processed
+by ImageMagick. That said, it remains an area to be watched in case a vulnerability pops up in ImageMagick, so this section is included in this document.
+
 ## Development workflows
 
 ### npm
