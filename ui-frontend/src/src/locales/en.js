@@ -128,4 +128,9 @@
     "settings.privacy.link.label": "Learn more about our privacy considerations.",
     "settings.privacy.link.title": "Open privacy and data considerations docs in your browser",
     "settings.dataCollection.collecting": "Collecting data for '{{name}}' ({{accomplished}} / {{total}})",
+    "settings.acknowledgements.title": "Third-party Acknowledgements",
+    "settings.acknowledgements.integratedBy": "Integrated into XYVR by {{name}}",
+    "settings.acknowledgements.maintainer": "Maintainer: {{name}}",
+    "settings.acknowledgements.license.button": "Show License",
+    "settings.acknowledgements.license.modalTitle": "License for {{title}}",
 }

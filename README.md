@@ -111,6 +111,9 @@ can help you conduct an audit.
 
 # Third-party acknowledgements
 
+Note: A JSON file representing the data below can be found in the [third-party-acknowledgements.js](ui-frontend/src/src/third-party-acknowledgements/third-party-acknowledgements.js) file.
+This file is used to generate the third-party acknowledgements section inside the settings page of the built XYVR application.
+
 The communication with the APIs is a custom implementation, with the requests based on the following reference documents:
 - The API page on the official [Resonite wiki](https://wiki.resonite.com/API).
 - The community-maintained VRChat API documentation at [vrchat.community](https://vrchat.community/) maintained by [github.com/vrchatapi](https://github.com/vrchatapi).

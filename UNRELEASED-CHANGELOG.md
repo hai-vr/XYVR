@@ -25,6 +25,7 @@ Features:
 - Current progress is now displayed on the data collection button, contributed by @art0007i.
 - Group names of VRChat live sessions are now shown under the user count.
 - Session names (typically, world names) that match certain strings can be pushed to the bottom of the live sessions list, from the settings page (Deprioritized Virtual Spaces).
+- Third-party acknowledgements are now visible from inside the built application, in the Settings page.
 
 Fixes:
 - Fix Booth.pm wishlist URLs are no longer displayed as being an account name.
