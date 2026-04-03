@@ -461,14 +461,32 @@ function AddressBookPage({ isDark,
                             </div>
 
                             <div className="header-buttons">
-                                <button
-                                    className="theme-toggle-btn"
-                                    onClick={() => setCompactMode(!compactMode)}
-                                    aria-pressed={compactMode}
-                                    title={compactMode ? t('ui.switchToFullMode.title') : t('ui.switchToCompactMode.title')}
-                                >
-                                    {compactMode ? <Binoculars /> : <Glasses />}
-                                </button>
+                                {searchField && <>
+                                    <button
+                                        className="theme-toggle-btn"
+                                        onClick={() => setCompactMode(!compactMode)}
+                                        aria-pressed={compactMode}
+                                        title={compactMode ? t('ui.switchToFullMode.title') : t('ui.switchToCompactMode.title')}
+                                    >
+                                        {compactMode ? <Binoculars /> : <Glasses />}
+                                    </button>
+                                    <button
+                                        className="theme-toggle-btn"
+                                        onClick={() => setShowNotes(!showNotes)}
+                                        aria-pressed={showNotes}
+                                        title={showNotes ? t('ui.hideNotes.title') : t('ui.showNotes.title')}
+                                    >
+                                        {showNotes ? <NotebookText /> : <Notebook />}
+                                    </button>
+                                    <button
+                                        className="theme-toggle-btn"
+                                        onClick={() => setShowOnlyContacts(!showOnlyContacts)}
+                                        aria-pressed={showOnlyContacts}
+                                        title={showOnlyContacts ? t('ui.showContactsAndNotes.title') : t('ui.showOnlyContacts.title')}
+                                    >
+                                        {showOnlyContacts ? <UserStar /> : <UserPen />}
+                                    </button></>
+                                }
                                 <button
                                     className="theme-toggle-btn"
                                     onClick={() => setPortraits(!portraits)}
@@ -476,22 +494,6 @@ function AddressBookPage({ isDark,
                                     title={portraits ? t('ui.switchToHidePortraits.title') : t('ui.switchToShowPortraits.title')}
                                 >
                                     {portraits ? <Image /> : <ImageOff />}
-                                </button>
-                                <button
-                                    className="theme-toggle-btn"
-                                    onClick={() => setShowNotes(!showNotes)}
-                                    aria-pressed={showNotes}
-                                    title={showNotes ? t('ui.hideNotes.title') : t('ui.showNotes.title')}
-                                >
-                                    {showNotes ? <NotebookText /> : <Notebook />}
-                                </button>
-                                <button
-                                    className="theme-toggle-btn"
-                                    onClick={() => setShowOnlyContacts(!showOnlyContacts)}
-                                    aria-pressed={showOnlyContacts}
-                                    title={showOnlyContacts ? t('ui.showContactsAndNotes.title') : t('ui.showOnlyContacts.title')}
-                                >
-                                    {showOnlyContacts ? <UserStar /> : <UserPen />}
                                 </button>
                                 <DarkModeToggleButton isDark={isDark} setIsDark={setIsDark} />
                             </div>

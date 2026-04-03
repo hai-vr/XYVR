@@ -34,6 +34,10 @@ Fixes:
 - Fix sqlite initialization on Linux, contributed by @art0007i.
 - Fix VRChat login should now function on Linux/Photino, contributed by @art0007i.
 
+Changes:
+- The Show/Hide portraits" button is now next to the "Light/Dark mode" button.
+- All other buttons are now only shown when a search is being made, as those buttons only have an effect during searches.
+
 Internal changes:
 - Log when worlds are removed from the cache.
 - If an API repeatedly returns a server error, we may wait for even longer periods before retrying.
