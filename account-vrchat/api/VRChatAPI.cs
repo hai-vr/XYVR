@@ -367,6 +367,40 @@ internal class VRChatAPI
         }
     }
 
+    public async Task<VRChatGroup?> GetGroupLenient(DataCollectionReason dataCollectionReason, string groupId, bool useFastFetch)
+    {
+        ThrowIfNotLoggedIn();
+        
+        var url = $"{AuditUrls.VrcApiUrl}/groups/{groupId}";
+        var requestGuid = XYVRGuids.ForRequest();
+
+        try
+        {
+            var response = await _client.GetAsync(url, _cancellationTokenSource.Token);
+
+            await EnsureRateLimiting(url, response.StatusCode, useFastFetch);
+
+            if (response.StatusCode == HttpStatusCode.NotFound)
+            {
+                DataCollectNotFound(url, requestGuid, await response.Content.ReadAsStringAsync(), dataCollectionReason);
+                return null;
+            }
+
+            EnsureSuccessOrThrowVerbose(response);
+
+            var responseStr = await response.Content.ReadAsStringAsync();
+
+            DataCollectSuccess(url, requestGuid, responseStr, dataCollectionReason);
+
+            return JsonConvert.DeserializeObject<VRChatGroup>(responseStr)!;
+        }
+        catch (Exception _)
+        {
+            DataCollectFailure(url, requestGuid, dataCollectionReason);
+            throw;
+        }
+    }
+
     private async IAsyncEnumerable<T> GetPaginatedResults<T>(DataCollectionReason dataCollectionReason, string requestGuid, Func<int, int, Task<string>> urlBuilder, int pageSize = 100)
     {
         var hasMoreData = true;

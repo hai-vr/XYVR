@@ -22,6 +22,17 @@ internal record InstanceQueueJob : IQueueJob
     public bool useFastFetch { get; init; } = false;
 }
 
+internal record GroupQueueJob : IQueueJob
+{
+    public string groupId { get; init; }
+}
+
+internal record CachedGroup
+{
+    public string GroupId { get; init; }
+    public string GroupName { get; init; }
+}
+
 internal class VRChatLiveCommunicator
 {
     private readonly ICredentialsStorage _credentialsStorage;
@@ -40,7 +51,8 @@ internal class VRChatLiveCommunicator
     private VRChatWebsocketClient _wsClient;
     private VRChatAPI? _api;
     private bool _hasInitiatedDisconnect;
-    private readonly Dictionary<string, VRChatInstance> _locationToInstance = new Dictionary<string, VRChatInstance>();
+    private readonly Dictionary<string, VRChatInstance> _locationToInstance = new();
+    private readonly Dictionary<string, CachedGroup> _groupCache;
 
     public event VrcLiveUpdateReceived? OnLiveUpdateReceived;
     public delegate Task VrcLiveUpdateReceived(ImmutableLiveUserUpdate liveUserUpdate);
@@ -51,10 +63,13 @@ internal class VRChatLiveCommunicator
     public event WorldResolved? OnWorldCached;
     public delegate Task WorldResolved(CachedWorld world);
 
+    public event GroupResolved? OnGroupCached;
+    public delegate Task GroupResolved(CachedGroup world);
+
     public event SessionRetrieved? OnSessionRetrieved;
     public delegate Task SessionRetrieved(VRChatInstance world);
 
-    public VRChatLiveCommunicator(ICredentialsStorage credentialsStorage, string callerInAppIdentifier, IResponseCollector responseCollector, WorldNameCache worldNameCache, IThumbnailCache thumbnailCache, CancellationTokenSource cancellationTokenSource)
+    public VRChatLiveCommunicator(ICredentialsStorage credentialsStorage, string callerInAppIdentifier, IResponseCollector responseCollector, WorldNameCache worldNameCache, Dictionary<string, CachedGroup> groupCache, IThumbnailCache thumbnailCache, CancellationTokenSource cancellationTokenSource)
     {
         _credentialsStorage = credentialsStorage;
         _callerInAppIdentifier = callerInAppIdentifier;
@@ -62,6 +77,7 @@ internal class VRChatLiveCommunicator
         _worldNameCache = worldNameCache;
         _thumbnailCache = thumbnailCache;
         _cancellationTokenSource = cancellationTokenSource;
+        _groupCache = groupCache;
     }
 
     private void WakeUpQueue()
@@ -150,9 +166,28 @@ internal class VRChatLiveCommunicator
                         sessionCapacity = locationInformation.capacity,
                         currentAttendance = locationInformation.userCount,
                         ageGated = locationInformation.ageGate,
-                        callerInAppIdentifier = _callerInAppIdentifier
+                        callerInAppIdentifier = _callerInAppIdentifier,
                     });
                     XYVRLogging.WriteLine(this, $"Collected live session about {instanceQueueJob.worldIdAndInstanceId}, will batch results... ({liveSessionsBatch.Count} sessions batched so far)");
+                }
+            }
+            else if (dequeued is GroupQueueJob groupQueueJob)
+            {
+                var groupId = groupQueueJob.groupId;
+                var groupInformation = await _api.GetGroupLenient(DataCollectionReason.CollectSessionLocationInformation, groupId, false);
+                if (groupInformation != null)
+                {
+                    var cachedGroup = new CachedGroup
+                    {
+                        GroupId = groupId,
+                        GroupName = $"{groupInformation.name} ({groupInformation.shortCode}.{groupInformation.discriminator})",
+                    };
+                    _groupCache[groupQueueJob.groupId] = cachedGroup;
+                    
+                    if (OnGroupCached != null)
+                    {
+                        await OnGroupCached.Invoke(cachedGroup);
+                    }
                 }
             }
 
@@ -216,18 +251,21 @@ internal class VRChatLiveCommunicator
                         : null;
                     
                     ImmutableLiveUserSessionState sessionState;
-                    if (knowledgePartial == null && cachedWorld != null)
+                    if (knowledgePartial == null && (cachedWorld != null || worldId != null))
                     {
-                        var actualSession = await OnLiveSessionReceived(MakeNonIndexedBasedOnWorld(friend.location, cachedWorld, _callerInAppIdentifier));
-                        sessionState = new ImmutableLiveUserSessionState
+                        var nonIndexedLiveSession = MakeNonIndexedBasedOnWorld(friend.location, cachedWorld, _callerInAppIdentifier);
+                        if (nonIndexedLiveSession.organizerId != null && nonIndexedLiveSession.organizerId.StartsWith("grp_"))
                         {
-                            knowledge = LiveUserSessionKnowledge.Known,
-                            sessionGuid = actualSession.guid
-                        };
-                    }
-                    else if (knowledgePartial == null && worldId != null)
-                    {
-                        var actualSession = await OnLiveSessionReceived(MakeNonIndexedBasedOnWorld(friend.location, null, _callerInAppIdentifier));
+                            var cachedGroup = GetOrQueueGroupFetch(nonIndexedLiveSession.organizerId);
+                            if (cachedGroup != null)
+                            {
+                                nonIndexedLiveSession = nonIndexedLiveSession with
+                                {
+                                    organizerName = cachedGroup.GroupName,
+                                };
+                            }
+                        }
+                        var actualSession = await OnLiveSessionReceived(nonIndexedLiveSession);
                         sessionState = new ImmutableLiveUserSessionState
                         {
                             knowledge = LiveUserSessionKnowledge.Known,
@@ -366,7 +404,20 @@ internal class VRChatLiveCommunicator
         ImmutableLiveSession session = null;
         if (content.location != null && content.location.StartsWith("wrld_"))
         {
-            session = await OnLiveSessionReceived(MakeNonIndexedBasedOnWorld(content.location, cachedWorld, _callerInAppIdentifier));
+            var nonIndexedLiveSession = MakeNonIndexedBasedOnWorld(content.location, cachedWorld, _callerInAppIdentifier);
+            if (nonIndexedLiveSession.organizerId != null && nonIndexedLiveSession.organizerId.StartsWith("grp_"))
+            {
+                var cachedGroup = GetOrQueueGroupFetch(nonIndexedLiveSession.organizerId);
+                if (cachedGroup != null)
+                {
+                    nonIndexedLiveSession = nonIndexedLiveSession with
+                    {
+                        organizerName = cachedGroup.GroupName,
+                    };
+                }
+            }
+            
+            session = await OnLiveSessionReceived(nonIndexedLiveSession);
 
             await QueueSessionFetchIfApplicable(content.location);
         }
@@ -440,7 +491,8 @@ internal class VRChatLiveCommunicator
             isVirtualSpacePrivate = cachedWorld?.releaseStatus == "private",
             thumbnailUrl = cachedWorld?.thumbnailUrl,
             callerInAppIdentifier = callerInAppIdentifier,
-            markers = ToMarker(vrcxLocationContext.AccessType)
+            markers = ToMarker(vrcxLocationContext.AccessType),
+            organizerId = vrcxLocationContext.GroupId,
         };
     }
 
@@ -558,6 +610,25 @@ internal class VRChatLiveCommunicator
         }
             
         return cachedWorldNullable;
+    }
+
+    private CachedGroup? GetOrQueueGroupFetch(string groupId)
+    {
+        if (!groupId.StartsWith("grp_"))
+        {
+            XYVRLogging.ErrorWriteLine(this, $"Programming error: {nameof(GetOrQueueGroupFetch)} must only be called on identifiers that start with grp_, but a {groupId} was passed.");
+            return null;
+        }
+        
+        if (_groupCache.TryGetValue(groupId, out var cachedValue)) return cachedValue;
+        
+        var job = new GroupQueueJob { groupId = groupId };
+        _allQueued[job] = true;
+        _highPriorityQueue.Enqueue(job);
+        
+        WakeUpQueue();
+        
+        return null;
     }
 
     private OnlineStatus ParseStatus(string userStatus, string platform)

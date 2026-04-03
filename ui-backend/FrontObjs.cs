@@ -259,6 +259,9 @@ internal record FrontLiveSession
 
     public required string callerInAppIdentifier { get; init; }
     public string? supplementalIdentifier { get; init; }
+    
+    public required string? organizerId { get; init; }
+    public required string? organizerName { get; init; }
 
     public static FrontLiveSession FromCore(ImmutableLiveSession liveSession)
     {
@@ -284,6 +287,8 @@ internal record FrontLiveSession
             allParticipants = [.. liveSession.allParticipants.Select(FrontParticipant.FromCore)],
             callerInAppIdentifier = liveSession.callerInAppIdentifier,
             supplementalIdentifier = liveSession.supplementalIdentifier,
+            organizerId = liveSession.organizerId,
+            organizerName = liveSession.organizerName,
         };
     }
 }

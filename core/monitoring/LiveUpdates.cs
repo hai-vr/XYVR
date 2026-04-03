@@ -118,6 +118,9 @@ public record ImmutableLiveSession
     public required string callerInAppIdentifier { get; init; }
     
     public required string? supplementalIdentifier { get; init; }
+    
+    public required string? organizerId { get; init; }
+    public required string? organizerName { get; init; }
 
     public virtual bool Equals(ImmutableLiveSession? other)
     {
@@ -139,7 +142,9 @@ public record ImmutableLiveSession
                markers.SequenceEqual(other.markers) &&
                allParticipants.SequenceEqual(other.allParticipants) &&
                callerInAppIdentifier == other.callerInAppIdentifier &&
-               supplementalIdentifier == other.supplementalIdentifier;
+               supplementalIdentifier == other.supplementalIdentifier &&
+               organizerId == other.organizerId &&
+               organizerName == other.organizerName;
     }
 
     public override int GetHashCode()
@@ -163,6 +168,8 @@ public record ImmutableLiveSession
             hashCode = (hashCode * 397) ^ XYVRSequenceHash.HashCodeOf(allParticipants);
             hashCode = (hashCode * 397) ^ callerInAppIdentifier.GetHashCode();
             hashCode = (hashCode * 397) ^ (supplementalIdentifier != null ? supplementalIdentifier.GetHashCode() : 0);
+            hashCode = (hashCode * 397) ^ (organizerId != null ? organizerId.GetHashCode() : 0);
+            hashCode = (hashCode * 397) ^ (organizerName != null ? organizerName.GetHashCode() : 0);
             return hashCode;
         }
     }
@@ -177,7 +184,10 @@ public record ImmutableLiveSession
                $"inAppSessionIdentifier: {inAppSessionIdentifier}, inAppSessionName: {inAppSessionName}, " +
                $"inAppVirtualSpaceName: {inAppVirtualSpaceName}, inAppHost: {inAppHost}, " +
                $"participants: {participantsStr}, virtualSpaceDefaultCapacity: {virtualSpaceDefaultCapacity}, " +
-               $"sessionCapacity: {sessionCapacity}, currentAttendance: {currentAttendance} }}";
+               $"sessionCapacity: {sessionCapacity}, currentAttendance: {currentAttendance} }}, " +
+               $"thumbnailUrl: {thumbnailUrl}, isVirtualSpacePrivate: {isVirtualSpacePrivate}, ageGated: {ageGated}, " +
+               $"markers: {markers}, allParticipants: {allParticipants}, callerInAppIdentifier: {callerInAppIdentifier}, " +
+               $"supplementalIdentifier: {supplementalIdentifier}, organizerId: {organizerId}, organizerName: {organizerName} }}";
     }
 }
 
@@ -209,6 +219,9 @@ public record ImmutableNonIndexedLiveSession
     public required string callerInAppIdentifier { get; init; }
     
     public string? supplementalIdentifier { get; init; }
+    
+    public string? organizerId { get; init; }
+    public string? organizerName { get; init; }
 
     public static ImmutableLiveSession MakeIndexed(ImmutableNonIndexedLiveSession inputSession)
     {
@@ -232,6 +245,8 @@ public record ImmutableNonIndexedLiveSession
             callerInAppIdentifier = inputSession.callerInAppIdentifier,
             markers = inputSession.markers ?? [],
             supplementalIdentifier = inputSession.supplementalIdentifier,
+            organizerId = inputSession.organizerId,
+            organizerName = inputSession.organizerName,
         };
     }
 }

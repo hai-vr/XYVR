@@ -223,6 +223,8 @@ export function LiveSession({
                             {participationSquares}
                         </div>
                     </div>}
+                {liveSession.organizerName &&
+                    <span className="live-session-organizer">{_D(liveSession.organizerName, debugMode)}</span>}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'space-between' }}>
                     <span>{liveSession.ageGated === true && <span title={t('live.session.markers.vrcAgeVerificationRequired')}><IdCard className="marker-age-verification-required" size={16} style={{marginRight: '6px'}} /></span>}
                         {isHeadless && <span title={t('live.session.markers.resoniteHeadless')}><Server size={16} style={{marginRight: '6px'}} /></span>}

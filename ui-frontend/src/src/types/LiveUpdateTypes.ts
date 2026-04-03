@@ -87,6 +87,8 @@ export interface FrontLiveSession {
     allParticipants: FrontParticipant[];
     callerInAppIdentifier: string;
     supplementalIdentifier?: string;
+    organizerId?: string;
+    organizerName?: string;
 }
 
 export interface FrontParticipant {

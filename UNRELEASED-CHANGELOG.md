@@ -7,11 +7,23 @@ In the `hai-vr/XYVR` repository, Haï~ will be in change of writing this changel
 
 ## 0.0.1-alpha.17
 
+### Privacy and data changes
+
+This update adds the group names to the live sessions.
+
+The Privacy and data considerations are being updated to reflect this.
+
+- In "*What is the nature of the requests to those servers?*", add to the "*The following requests are for live monitoring*" section:
+  - Get the group name of a session.
+
+### Application changes
+
 Important:
 - The application now requires .NET 10 (instead of .NET 9).
 
 Features:
 - Current progress is now displayed on the data collection button, contributed by @art0007i.
+- Group names of VRChat live sessions are now shown under the user count.
 - Session names (typically, world names) that match certain strings can be pushed to the bottom of the live sessions list, from the settings page (Deprioritized Virtual Spaces).
 
 Fixes:

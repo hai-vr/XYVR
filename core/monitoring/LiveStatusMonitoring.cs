@@ -207,6 +207,8 @@ public class LiveStatusMonitoring
             if (inputSession.markers != null) modifiedSession = modifiedSession with { markers = (ImmutableArray<LiveSessionMarker>)inputSession.markers };
             if (inputSession.allParticipants != null) modifiedSession = modifiedSession with { allParticipants = inputSession.allParticipants.Value };
             if (inputSession.supplementalIdentifier != null) modifiedSession = modifiedSession with { supplementalIdentifier = inputSession.supplementalIdentifier };
+            if (inputSession.organizerId != null) modifiedSession = modifiedSession with { organizerId = inputSession.organizerId };
+            if (inputSession.organizerName != null) modifiedSession = modifiedSession with { organizerName = inputSession.organizerName };
             
             if (usingParticipant != null && !modifiedSession.participants.Contains(usingParticipant))
                 modifiedSession = modifiedSession with { participants = [..modifiedSession.participants.Append(usingParticipant)] };

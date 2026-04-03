@@ -15,6 +15,8 @@ public class VRChatLiveMonitoring : ILiveMonitoring
     private CancellationTokenSource _cancellationTokenSource;
     private readonly HashSet<string> _sessionsOfInterest = new();
     private IThumbnailCache _thumbnailCache;
+    
+    private readonly Dictionary<string, CachedGroup> _groupIdToGroupData = new();
 
     public VRChatLiveMonitoring(ICredentialsStorage credentialsStorage, LiveStatusMonitoring monitoring, WorldNameCache worldNameCache, IThumbnailCache thumbnailCache)
     {
@@ -33,7 +35,7 @@ public class VRChatLiveMonitoring : ILiveMonitoring
             if (_isConnected) return;
             _cancellationTokenSource = new CancellationTokenSource();
             
-            _liveComms = new VRChatLiveCommunicator(_credentialsStorage, _callerInAppIdentifier, new DoNotStoreAnythingStorage(), _worldNameCache, _thumbnailCache, _cancellationTokenSource);
+            _liveComms = new VRChatLiveCommunicator(_credentialsStorage, _callerInAppIdentifier, new DoNotStoreAnythingStorage(), _worldNameCache, _groupIdToGroupData, _thumbnailCache, _cancellationTokenSource);
             _liveComms.OnLiveUpdateReceived += async update =>
             {
                 // XYVRLogging.WriteLine(this, $"OnLiveUpdateReceived: {JsonConvert.SerializeObject(update, serializer)}");
@@ -56,6 +58,27 @@ public class VRChatLiveMonitoring : ILiveMonitoring
                 foreach (var sessionOnThisWorld in allSessionsOnThisWorld)
                 {
                     var nonIndexedUpdate = VRChatLiveCommunicator.MakeNonIndexedBasedOnWorld(sessionOnThisWorld.inAppSessionIdentifier, world, _callerInAppIdentifier);
+                    await _monitoring.MergeSession(nonIndexedUpdate);
+                }
+            };
+            _liveComms.OnGroupCached += async group =>
+            {
+                XYVRLogging.WriteLine(this, $"A group was cached: {group.GroupId} {group.GroupName}");
+                
+                var allSessionsOnThisGroup = _monitoring.GetAllSessions(NamedApp.VRChat)
+                    .Where(session => session.organizerId != null && session.organizerId == group.GroupId)
+                    .ToList();
+                
+                foreach (var sessionOnThisGroup in allSessionsOnThisGroup)
+                {
+                    var nonIndexedUpdate = new ImmutableNonIndexedLiveSession
+                    {
+                        namedApp = sessionOnThisGroup.namedApp,
+                        qualifiedAppName = sessionOnThisGroup.qualifiedAppName,
+                        inAppSessionIdentifier = sessionOnThisGroup.inAppSessionIdentifier,
+                        callerInAppIdentifier = sessionOnThisGroup.callerInAppIdentifier,
+                        organizerName = group.GroupName,
+                    };
                     await _monitoring.MergeSession(nonIndexedUpdate);
                 }
             };
@@ -150,7 +173,7 @@ public class VRChatLiveMonitoring : ILiveMonitoring
     {
         if (_callerInAppIdentifier == null) throw new InvalidOperationException("Caller must be defined to invite yourself");
         
-        var comms = new VRChatLiveCommunicator(_credentialsStorage, _callerInAppIdentifier, new DoNotStoreAnythingStorage(), _worldNameCache, _thumbnailCache, cancellationTokenSource);
+        var comms = new VRChatLiveCommunicator(_credentialsStorage, _callerInAppIdentifier, new DoNotStoreAnythingStorage(), _worldNameCache, new Dictionary<string, CachedGroup>(), _thumbnailCache, cancellationTokenSource);
         await comms.InviteMyselfTo(sessionId);
     }
 }

@@ -78,6 +78,7 @@ XYVR is only interested in building an address book and monitoring live sessions
   - Get the currently active sessions. 
   - Get the session of a contact.
   - Get the world of a session and its thumbnail.
+  - Get the group name of a session.
 - Typing on the search bar or opening a users' profile in the UI does not perform any API request to the VRChat, Resonite, or ChilloutVR servers.
 
 The following are exceptions to this rule:
