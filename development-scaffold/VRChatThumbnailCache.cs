@@ -1,6 +1,7 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
 using XYVR.AccountAuthority.VRChat;
+using XYVR.Core;
 
 namespace XYVR.Scaffold;
 
@@ -47,5 +48,24 @@ public class VRChatThumbnailCache : IThumbnailCache
         return mustNotContainPathTraversal.Contains("/")
                || mustNotContainPathTraversal.Contains("\\")
                || mustNotContainPathTraversal.Contains(".");
+    }
+
+    public void KeepOnly(HashSet<string> keep)
+    {
+        var fullFilePathsToDelete = Directory.EnumerateFiles(_thumbnailCacheFolderPath)
+            .Where(fullFilePath =>
+            {
+                var fileName = Path.GetFileName(fullFilePath);
+                
+                var makeSureThisIsReallyAShaFilename = fileName.Length == 64;
+                return makeSureThisIsReallyAShaFilename && !keep.Contains(fileName);
+            })
+            .ToList();
+        
+        foreach (var fullFilePath in fullFilePathsToDelete)
+        {
+            XYVRLogging.WriteLine(this, $"Deleting unused thumbnail {fullFilePath}");
+            File.Delete(fullFilePath);
+        }
     }
 }

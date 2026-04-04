@@ -38,6 +38,7 @@ Fixes:
 Changes:
 - The Show/Hide portraits" button is now next to the "Light/Dark mode" button.
 - All other buttons are now only shown when a search is being made, as those buttons only have an effect during searches.
+- The thumbnail cache is now cleared when the application starts, as the storage could grow out of control.
 
 Internal changes:
 - Log when worlds are removed from the cache.

@@ -9,6 +9,14 @@ public class VRChatAuthorityScaffolder : IAuthorityScaffolder
     {
         var worldNameCache = await Scaffolding.OpenWorldNameCache();
         var thumbnailCache = Scaffolding.ThumbnailCache();
+
+        var keep = new HashSet<string>();
+        foreach (var world in worldNameCache.VRCWorlds.Values)
+        {
+            keep.Add(VRChatThumbnailCache.Sha(world.thumbnailUrl));
+        }
+        thumbnailCache.KeepOnly(keep);
+        
         return new VRChatAuthority(worldNameCache, thumbnailCache, async () => await Scaffolding.SaveWorldNameCache(worldNameCache), cancellationTokenSource);
     }
 }
