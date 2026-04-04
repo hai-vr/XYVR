@@ -34,6 +34,7 @@ Fixes:
 - Fix pressing the log out button on a Resonite connection with an expired token should no longer trigger an error.
 - Fix sqlite initialization on Linux, contributed by @art0007i.
 - Fix VRChat login should now function on Linux/Photino, contributed by @art0007i.
+- Attempt to fix a multithreading issue related to live session monitoring, which may have led to failing to list all sessions.
 
 Changes:
 - The Show/Hide portraits" button is now next to the "Light/Dark mode" button.

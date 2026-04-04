@@ -2,13 +2,15 @@
 
 namespace XYVR.Core;
 
-public class LiveStatusMonitoring
+public class LiveStatusMonitoring : IDisposable
 {
     private readonly Dictionary<NamedApp, Dictionary<string, ImmutableLiveUserUpdate>> _liveUpdatesByAppByUser = new();
     private readonly List<SessionRef> _sessions = new();
     private readonly Dictionary<string, SessionRef> _guidToSession = new();
     private readonly Dictionary<NamedApp, Dictionary<string, SessionRef>> _namedAppToInAppIdToSession = new();
     private readonly Dictionary<NamedApp, Dictionary<string, string>> _namedAppToAccountGuidToSessionParticipationGuid = new();
+
+    private readonly ReaderWriterLockSlim _lock = new();
 
     private event LiveUserUpdateMerged? OnLiveUserUpdateMerged;
     public delegate Task LiveUserUpdateMerged(ImmutableLiveUserUpdate liveUpdate);
@@ -34,102 +36,143 @@ public class LiveStatusMonitoring
 
     public List<ImmutableLiveUserUpdate> GetAllUserData(NamedApp namedApp)
     {
-        return _liveUpdatesByAppByUser[namedApp].Values.ToList();
+        _lock.EnterReadLock();
+        try
+        {
+            return _liveUpdatesByAppByUser[namedApp].Values.ToList();
+        }
+        finally
+        {
+            _lock.ExitReadLock();
+        }
     }
 
     public List<ImmutableLiveUserUpdate> GetAllUserData()
     {
-        return _liveUpdatesByAppByUser.Values.SelectMany(it => it.Values).ToList();
+        _lock.EnterReadLock();
+        try
+        {
+            return _liveUpdatesByAppByUser.Values.SelectMany(it => it.Values).ToList();
+        }
+        finally
+        {
+            _lock.ExitReadLock();
+        }
     }
 
     public List<ImmutableLiveSession> GetAllSessions(NamedApp namedApp)
     {
-        return _sessions.Select(it => it.value).Where(session => session.namedApp == namedApp).ToList();
+        _lock.EnterReadLock();
+        try
+        {
+            return _sessions.Select(it => it.value).Where(session => session.namedApp == namedApp).ToList();
+        }
+        finally
+        {
+            _lock.ExitReadLock();
+        }
     }
 
     public List<ImmutableLiveSession> GetAllSessions()
     {
-        return _sessions.Select(it => it.value).ToList();
+        _lock.EnterReadLock();
+        try
+        {
+            return _sessions.Select(it => it.value).ToList();
+        }
+        finally
+        {
+            _lock.ExitReadLock();
+        }
     }
-    
+
     public async Task MergeUser(ImmutableLiveUserUpdate inputUpdate)
     {
         ImmutableLiveUserUpdate actualUpdate;
         bool updateWasModified;
-        
-        // TODO:
-        // It is possible to have the same inAppIdentifier being updated with a different status,
-        // if the caller has multiple connections on the same app.
-        // For example, if someone's status is set to invisible, it may be possible that the status
-        // of that account is shown as Offline on one connection, and Online/InSameInstance for another connection.
-        // In that case, we may need to avoid deduplicating status by inAppIdentifier alone,
-        // and also use the callerInAppIdentifier, to know where we got the status from.
-        // The UI side or BFF would have to decide what status to associate with that account.
-        if (_liveUpdatesByAppByUser[inputUpdate.namedApp].TryGetValue(inputUpdate.inAppIdentifier, out var existingUpdate))
-        {
-            var modifiedUpdate = existingUpdate;
-            
-            if (inputUpdate.onlineStatus != null) modifiedUpdate = modifiedUpdate with { onlineStatus = inputUpdate.onlineStatus };
-            if (inputUpdate.customStatus != null) modifiedUpdate = modifiedUpdate with { customStatus = inputUpdate.customStatus };
-            if (inputUpdate.mainSession != null) modifiedUpdate = modifiedUpdate with { mainSession = inputUpdate.mainSession };
-            modifiedUpdate = modifiedUpdate with { multiSessionGuids = inputUpdate.multiSessionGuids };
-
-            // Did anything actually change?
-            if (modifiedUpdate != existingUpdate)
-            {
-                // The trigger is only relevant if an event actually causes any content to change
-                modifiedUpdate = modifiedUpdate with { trigger = inputUpdate.trigger };
-                
-                _liveUpdatesByAppByUser[inputUpdate.namedApp][inputUpdate.inAppIdentifier] = modifiedUpdate;
-
-                actualUpdate = modifiedUpdate;
-                updateWasModified = true;
-            }
-            else
-            {
-                actualUpdate = existingUpdate;
-                updateWasModified = false;
-            }
-        }
-        else
-        {
-            _liveUpdatesByAppByUser[inputUpdate.namedApp][inputUpdate.inAppIdentifier] = inputUpdate;
-
-            actualUpdate = inputUpdate;
-            updateWasModified = true;
-        }
-
-        var participant = actualUpdate.AsNonHostParticipant();
 
         ImmutableLiveSession? previousSession = null;
         ImmutableLiveSession? targetedSession = null;
-        if (actualUpdate.mainSession is { knowledge: LiveUserSessionKnowledge.Known } mainSession)
+
+        _lock.EnterWriteLock();
+        try
         {
-            if (_namedAppToAccountGuidToSessionParticipationGuid[actualUpdate.namedApp].TryGetValue(actualUpdate.inAppIdentifier, out var existingParticipationGuid))
+            // TODO:
+            // It is possible to have the same inAppIdentifier being updated with a different status,
+            // if the caller has multiple connections on the same app.
+            // For example, if someone's status is set to invisible, it may be possible that the status
+            // of that account is shown as Offline on one connection, and Online/InSameInstance for another connection.
+            // In that case, we may need to avoid deduplicating status by inAppIdentifier alone,
+            // and also use the callerInAppIdentifier, to know where we got the status from.
+            // The UI side or BFF would have to decide what status to associate with that account.
+            if (_liveUpdatesByAppByUser[inputUpdate.namedApp].TryGetValue(inputUpdate.inAppIdentifier, out var existingUpdate))
             {
-                if (existingParticipationGuid != mainSession.sessionGuid)
+                var modifiedUpdate = existingUpdate;
+
+                if (inputUpdate.onlineStatus != null) modifiedUpdate = modifiedUpdate with { onlineStatus = inputUpdate.onlineStatus };
+                if (inputUpdate.customStatus != null) modifiedUpdate = modifiedUpdate with { customStatus = inputUpdate.customStatus };
+                if (inputUpdate.mainSession != null) modifiedUpdate = modifiedUpdate with { mainSession = inputUpdate.mainSession };
+                modifiedUpdate = modifiedUpdate with { multiSessionGuids = inputUpdate.multiSessionGuids };
+
+                // Did anything actually change?
+                if (modifiedUpdate != existingUpdate)
                 {
-                    previousSession = InternalRemoveParticipant(inputUpdate.namedApp, participant);
+                    // The trigger is only relevant if an event actually causes any content to change
+                    modifiedUpdate = modifiedUpdate with { trigger = inputUpdate.trigger };
+
+                    _liveUpdatesByAppByUser[inputUpdate.namedApp][inputUpdate.inAppIdentifier] = modifiedUpdate;
+
+                    actualUpdate = modifiedUpdate;
+                    updateWasModified = true;
                 }
+                else
+                {
+                    actualUpdate = existingUpdate;
+                    updateWasModified = false;
+                }
+            }
+            else
+            {
+                _liveUpdatesByAppByUser[inputUpdate.namedApp][inputUpdate.inAppIdentifier] = inputUpdate;
+
+                actualUpdate = inputUpdate;
+                updateWasModified = true;
             }
 
-            if (mainSession.sessionGuid != null)
+            var participant = actualUpdate.AsNonHostParticipant();
+
+            if (actualUpdate.mainSession is { knowledge: LiveUserSessionKnowledge.Known } mainSession)
             {
-                var currentSession = _guidToSession[mainSession.sessionGuid].value;
-                if (!currentSession.participants.Contains(participant))
+                if (_namedAppToAccountGuidToSessionParticipationGuid[actualUpdate.namedApp].TryGetValue(actualUpdate.inAppIdentifier, out var existingParticipationGuid))
                 {
-                    targetedSession = currentSession with
+                    if (existingParticipationGuid != mainSession.sessionGuid)
                     {
-                        participants = [.._guidToSession[mainSession.sessionGuid].value.participants.Append(participant)]
-                    };
-                    _guidToSession[mainSession.sessionGuid].value = targetedSession;
-                    _namedAppToAccountGuidToSessionParticipationGuid[actualUpdate.namedApp][actualUpdate.inAppIdentifier] = mainSession.sessionGuid;
+                        previousSession = InternalRemoveParticipant(inputUpdate.namedApp, participant);
+                    }
+                }
+
+                if (mainSession.sessionGuid != null)
+                {
+                    var currentSession = _guidToSession[mainSession.sessionGuid].value;
+                    if (!currentSession.participants.Contains(participant))
+                    {
+                        targetedSession = currentSession with
+                        {
+                            participants = [.._guidToSession[mainSession.sessionGuid].value.participants.Append(participant)]
+                        };
+                        _guidToSession[mainSession.sessionGuid].value = targetedSession;
+                        _namedAppToAccountGuidToSessionParticipationGuid[actualUpdate.namedApp][actualUpdate.inAppIdentifier] = mainSession.sessionGuid;
+                    }
                 }
             }
+            else
+            {
+                previousSession = InternalRemoveParticipant(inputUpdate.namedApp, participant);
+            }
         }
-        else
+        finally
         {
-            previousSession = InternalRemoveParticipant(inputUpdate.namedApp, participant);
+            _lock.ExitWriteLock();
         }
 
         if (updateWasModified && OnLiveUserUpdateMerged != null)
@@ -172,8 +215,20 @@ public class LiveStatusMonitoring
 
     public async Task<ImmutableLiveSession> MergeSession(ImmutableNonIndexedLiveSession inputSession)
     {
-        var (liveSession, changed, previousSession) = InternalMergeSessionAndGet(inputSession);
-        
+        ImmutableLiveSession liveSession;
+        bool changed;
+        ImmutableLiveSession? previousSession;
+
+        _lock.EnterWriteLock();
+        try
+        {
+            (liveSession, changed, previousSession) = InternalMergeSessionAndGet(inputSession);
+        }
+        finally
+        {
+            _lock.ExitWriteLock();
+        }
+
         if (previousSession != null && OnLiveSessionUpdated != null)
         {
             await OnLiveSessionUpdated.Invoke(previousSession);
@@ -283,11 +338,32 @@ public class LiveStatusMonitoring
 
     public ImmutableLiveUserUpdate? GetLiveSessionStateOrNull(NamedApp accountNamedApp, string accountInAppIdentifier)
     {
-        return _liveUpdatesByAppByUser[accountNamedApp].GetValueOrDefault(accountInAppIdentifier);
+        _lock.EnterReadLock();
+        try
+        {
+            return _liveUpdatesByAppByUser[accountNamedApp].GetValueOrDefault(accountInAppIdentifier);
+        }
+        finally
+        {
+            _lock.ExitReadLock();
+        }
     }
 
     public ImmutableLiveSession? GetSessionByGuid(string sessionGuid)
     {
-        return _guidToSession.GetValueOrDefault(sessionGuid)?.value;
+        _lock.EnterReadLock();
+        try
+        {
+            return _guidToSession.GetValueOrDefault(sessionGuid)?.value;
+        }
+        finally
+        {
+            _lock.ExitReadLock();
+        }
+    }
+
+    public void Dispose()
+    {
+        _lock.Dispose();
     }
 }
