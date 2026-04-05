@@ -153,14 +153,25 @@ public static class Scaffolding
 
     private static async Task<string> GetOrCreateResoniteUID()
     {
-        Func<string> defaultGen = RandomUID__NotCryptographicallySecure;
         if (File.Exists(ResoniteUidFilePath))
         {
-            var text = await File.ReadAllTextAsync(ResoniteUidFilePath, Encoding);
-            return JsonConvert.DeserializeObject<string>(text, Serializer)!;
+            try
+            {
+                var text = await File.ReadAllTextAsync(ResoniteUidFilePath, Encoding);
+                var result = JsonConvert.DeserializeObject<string>(text, Serializer);
+                if (result != null) // May be null if the file somehow got corrupted and became empty.
+                {
+                    return result;
+                }
+            }
+            catch (Exception e)
+            {
+                XYVRLogging.ErrorWriteLine(typeof(Scaffolding), e);
+                XYVRLogging.ErrorWriteLine(typeof(Scaffolding), "Failed to read Resonite UID file, will generate a new one.");
+            }
         }
 
-        var ret = defaultGen();
+        var ret = RandomUID__NotCryptographicallySecure();
         await SaveTo(ret, ResoniteUidFilePath, null);
         return ret;
     }
