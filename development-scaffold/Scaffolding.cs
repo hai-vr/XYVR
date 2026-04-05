@@ -32,6 +32,7 @@ public static class Scaffolding
     }
     
     internal const string IndividualsTableName = "data_individuals";
+    internal const string PreferencesTableName = "data_preferences";
     
     public static string LockfileFilePath => Path.Combine(SavePath(), "XYVRLockfile");
     private static string IndividualsJsonFilePath => Path.Combine(SavePath(), ScaffoldingFileNames.IndividualsJsonFileName);
@@ -116,7 +117,7 @@ public static class Scaffolding
     }
 
     public static async Task<ImmutableIndividual[]> OpenRepository() => await OpenIfExists<ImmutableIndividual[]>(IndividualsJsonFilePath, IndividualsTableName, () => []);
-    public static async Task SaveRepository(IndividualRepository repository) => await SaveTo(repository.Individuals, IndividualsJsonFilePath, null);
+    public static async Task SaveRepository(IndividualRepository repository) => await SaveTo(repository.Individuals, IndividualsJsonFilePath, IndividualsTableName);
     
     public static async Task<Connector[]> OpenConnectors() => await OpenIfExists<Connector[]>(ConnectorsJsonFilePath, null, () => []);
     public static async Task SaveConnectors(ConnectorManagement management) => await SaveTo(management.Connectors, ConnectorsJsonFilePath, null);
@@ -164,8 +165,8 @@ public static class Scaffolding
         return ret;
     }
     
-    public static async Task<ReactAppPreferences> OpenReactAppPreferences() => await OpenIfExists(ReactAppJsonFilePath, null, () => new ReactAppPreferences());
-    public static async Task SaveReactAppPreferences(ReactAppPreferences serialized) => await SaveTo(serialized, ReactAppJsonFilePath, IndividualsTableName, null);
+    public static async Task<ReactAppPreferences> OpenReactAppPreferences() => await OpenIfExists(ReactAppJsonFilePath, PreferencesTableName, () => new ReactAppPreferences());
+    public static async Task SaveReactAppPreferences(ReactAppPreferences serialized) => await SaveTo(serialized, ReactAppJsonFilePath, PreferencesTableName, null);
     
     public static async Task<WorldNameCache> OpenWorldNameCache()
     {
@@ -205,8 +206,12 @@ public static class Scaffolding
                 {
                     text = EncryptionOfSessionData.DecryptString(text, encryptionKey);
                 }
-            
-                return JsonConvert.DeserializeObject<T>(text, Serializer)!;
+
+                var result = JsonConvert.DeserializeObject<T>(text, Serializer);
+                if (result != null) // Deserializing an empty string would return null, which can happen (and DID HAPPEN SEVERAL TIMES in practice) when a file becomes corrupted.
+                {
+                    return result;
+                }
             }
         }
         catch (Exception e)
@@ -405,7 +410,8 @@ public static class Scaffolding
 
         _sqlite = new XYVRSqliteContainer(Path.Combine(_pathLateInit, "xyvr.sqlite.db"));
         _sqlite.Open();
-        _sqlite.CreateSingularStringStorageTableIfNotExists("data_individuals");
+        _sqlite.CreateSingularStringStorageTableIfNotExists(IndividualsTableName);
+        _sqlite.CreateSingularStringStorageTableIfNotExists(PreferencesTableName);
     }
 
     public static void CloseDatabase()

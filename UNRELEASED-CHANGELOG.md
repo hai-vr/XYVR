@@ -35,11 +35,16 @@ Fixes:
 - Fix sqlite initialization on Linux, contributed by @art0007i.
 - Fix VRChat login should now function on Linux/Photino, contributed by @art0007i.
 - Attempt to fix a multithreading issue related to live session monitoring, which may have led to failing to list all sessions.
+- If the individuals.json file gets corrupted, it should now recover from this.
+  - Fix reading an empty string was previously treated as a success instead of a failure to deserialize.
+  - Fix data_individuals table was previously not written to for recovery.
+  - Fix data_individuals table was previously written to when saving preferences.
 
 Changes:
 - The Show/Hide portraits" button is now next to the "Light/Dark mode" button.
 - All other buttons are now only shown when a search is being made, as those buttons only have an effect during searches.
 - The thumbnail cache is now cleared when the application starts, as the storage could grow out of control.
+- If the ui-preferences.json file gets corrupted, we will try now try to recover from this.
 
 Internal changes:
 - Log when worlds are removed from the cache.
