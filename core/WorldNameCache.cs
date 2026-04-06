@@ -1,5 +1,7 @@
 ﻿namespace XYVR.Core;
 
+/// This was originally just for world names, but this now also caches group names because fetching group names
+/// slows down the amount of time XYVR took to have complete live session information.
 public class WorldNameCache
 {
     private const int LatestVersion = 3;
@@ -11,6 +13,7 @@ public class WorldNameCache
     public string purpose = Purpose;
     
     public Dictionary<string, CachedWorld> VRCWorlds = new();
+    public Dictionary<string, CachedGroup> VRCGroups = new();
 
     public void PreProcess()
     {
@@ -24,6 +27,12 @@ public class WorldNameCache
                 value.isObsolete = true;
                 value.needsRefresh = true;
             }
+            foreach (var value in VRCGroups.Values)
+            {
+                value.isObsolete = true;
+                value.needsRefresh = true;
+            }
+            
             XYVRLogging.WriteLine(this, $"Cache data is now marked as obsolete. Cache version was {cacheVersion} and it is now {LatestVersion}.");
             cacheVersion = LatestVersion;
         }
@@ -33,14 +42,25 @@ public class WorldNameCache
         // Delete entries from the world cache older than 45 days. This is because the world cache could grow indefinitely,
         // and we are loading the data into RAM, so we don't want unnecessary data to be loaded to RAM every time.
         // The value in "cachedAt" is refreshed along with the data when someone is witnessed in that world after 6 hours.
-        var keys = VRCWorlds.Keys.ToList();
-        foreach (var key in keys)
+        var worldKeys = VRCWorlds.Keys.ToList();
+        foreach (var key in worldKeys)
         {
             var world = VRCWorlds[key];
             if ((now - world.cachedAt).Duration().TotalDays > 45)
             {
                 XYVRLogging.WriteLine(this, $"Removed world {world.name} from cache (not seen for more than 45 days).");
                 VRCWorlds.Remove(key);
+            }
+        }
+        
+        var groupKeys = VRCGroups.Keys.ToList();
+        foreach (var key in groupKeys)
+        {
+            var group = VRCGroups[key];
+            if ((now - group.cachedAt).Duration().TotalDays > 15)
+            {
+                XYVRLogging.WriteLine(this, $"Removed group {group.groupName} from cache (not seen for more than 15 days).");
+                VRCGroups.Remove(key);
             }
         }
         
@@ -55,11 +75,34 @@ public class WorldNameCache
                 }
             }
         }
+
+        foreach (var group in VRCGroups.Values)
+        {
+            if (!group.isObsolete)
+            {
+                // We refresh the data in case the group name has changed.
+                if ((now - group.cachedAt).Duration().TotalDays > 1)
+                {
+                    group.needsRefresh = true;
+                }
+            }
+        }
     }
 
-    public CachedWorld? GetValidOrNull(string worldId)
+    public CachedWorld? GetValidWorldOrNull(string worldId)
     {
         var value = VRCWorlds.GetValueOrDefault(worldId);
+        if (value != null && !value.isObsolete)
+        {
+            return value;
+        }
+
+        return null;
+    }
+    
+    public CachedGroup? GetValidGroupOrNull(string groupId)
+    {
+        var value = VRCGroups.GetValueOrDefault(groupId);
         if (value != null && !value.isObsolete)
         {
             return value;
@@ -85,4 +128,19 @@ public class CachedWorld
     public required string releaseStatus;
     public required string description;
     public required int capacity;
+}
+
+[Serializable]
+public class CachedGroup
+{
+    public bool isObsolete;
+
+    public required DateTime cachedAt;
+    [NonSerialized] public bool needsRefresh;
+
+    public required string groupId;
+    public required string groupName;
+    public required string groupFullCode;
+
+    public string GroupDisplayableName => $"{groupName} ({groupFullCode})";
 }
