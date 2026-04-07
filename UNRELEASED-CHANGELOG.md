@@ -13,8 +13,13 @@ This update adds the group names to the live sessions.
 
 The Privacy and data considerations are being updated to reflect this.
 
+In addition, a line has been added to clarify that API requests and responses are processed directly from your machine;
+this does not describe a change in behavior.
+
 - In "*What is the nature of the requests to those servers?*", add to the "*The following requests are for live monitoring*" section:
-  - Get the group name of a session.
+>  - Get the group name of a session.
+- In *What servers are called?*, add:
+>  - Requests are sent directly to the social VR applications from your machine, and the responses are processed exclusively on your machine.
 
 ### Application changes
 

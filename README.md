@@ -51,6 +51,8 @@ XYVR does not operate any server, and it does not have analytics. The only servi
 XYVR has handling for four different social VR applications: **Resonite**, **VRChat**, **ChilloutVR**, and **Cluster**.
 Requests are only made to the servers of the corresponding social VR app when you add a connection in XYVR that refers to that app.
 
+Requests are sent directly to the social VR applications from your machine, and the responses are processed exclusively on your machine.
+
 - We only perform requests to the following URLs:
   - for VRChat accounts: `https://api.vrchat.cloud/api/1` (live updates: `wss://pipeline.vrchat.cloud/`)
   - for Resonite accounts: `https://api.resonite.com/` (live updates: `https://api.resonite.com/hub`)
