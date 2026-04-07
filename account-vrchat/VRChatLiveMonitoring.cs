@@ -6,7 +6,7 @@ public class VRChatLiveMonitoring : ILiveMonitoring
 {
     private readonly ICredentialsStorage _credentialsStorage;
     private readonly LiveStatusMonitoring _monitoring;
-    private readonly WorldNameCache _worldNameCache;
+    private readonly VariousNameCache _variousNameCache;
     private readonly SemaphoreSlim _operationLock = new(1, 1);
 
     private string? _callerInAppIdentifier;
@@ -16,11 +16,11 @@ public class VRChatLiveMonitoring : ILiveMonitoring
     private readonly HashSet<string> _sessionsOfInterest = new();
     private IThumbnailCache _thumbnailCache;
     
-    public VRChatLiveMonitoring(ICredentialsStorage credentialsStorage, LiveStatusMonitoring monitoring, WorldNameCache worldNameCache, IThumbnailCache thumbnailCache)
+    public VRChatLiveMonitoring(ICredentialsStorage credentialsStorage, LiveStatusMonitoring monitoring, VariousNameCache variousNameCache, IThumbnailCache thumbnailCache)
     {
         _credentialsStorage = credentialsStorage;
         _monitoring = monitoring;
-        _worldNameCache = worldNameCache;
+        _variousNameCache = variousNameCache;
         _thumbnailCache = thumbnailCache;
     }
 
@@ -33,7 +33,7 @@ public class VRChatLiveMonitoring : ILiveMonitoring
             if (_isConnected) return;
             _cancellationTokenSource = new CancellationTokenSource();
             
-            _liveComms = new VRChatLiveCommunicator(_credentialsStorage, _callerInAppIdentifier, new DoNotStoreAnythingStorage(), _worldNameCache, _thumbnailCache, _cancellationTokenSource);
+            _liveComms = new VRChatLiveCommunicator(_credentialsStorage, _callerInAppIdentifier, new DoNotStoreAnythingStorage(), _variousNameCache, _thumbnailCache, _cancellationTokenSource);
             _liveComms.OnLiveUpdateReceived += async update =>
             {
                 // XYVRLogging.WriteLine(this, $"OnLiveUpdateReceived: {JsonConvert.SerializeObject(update, serializer)}");
@@ -171,7 +171,7 @@ public class VRChatLiveMonitoring : ILiveMonitoring
     {
         if (_callerInAppIdentifier == null) throw new InvalidOperationException("Caller must be defined to invite yourself");
         
-        var comms = new VRChatLiveCommunicator(_credentialsStorage, _callerInAppIdentifier, new DoNotStoreAnythingStorage(), _worldNameCache, _thumbnailCache, cancellationTokenSource);
+        var comms = new VRChatLiveCommunicator(_credentialsStorage, _callerInAppIdentifier, new DoNotStoreAnythingStorage(), _variousNameCache, _thumbnailCache, cancellationTokenSource);
         await comms.InviteMyselfTo(sessionId);
     }
 }

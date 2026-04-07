@@ -25,7 +25,7 @@ public static class Scaffolding
         internal const string ResponseCollectionFileName = "response-collection.jsonl";
         internal const string ResoniteUidFileName = "resonite.uid";
         internal const string ReactAppJsonFileName = "ui-preferences.json";
-        internal const string WorldNameCacheFileName = ".cache_world-names.json";
+        internal const string VariousNameCacheFileName = ".cache_world-names.json";
         internal const string ThumbnailCacheFolderName = ".cache_thumbnails";
         internal const string ProfileIllustrationsFolderName = "profile-illustrations";
         internal const string ProfileIllustrationsJsonFileName = "profile-illustrations.json";
@@ -41,7 +41,7 @@ public static class Scaffolding
     private static string ResponseCollectionFilePath => Path.Combine(SavePath(), ScaffoldingFileNames.ResponseCollectionFileName);
     private static string ResoniteUidFilePath => Path.Combine(SavePath(), ScaffoldingFileNames.ResoniteUidFileName);
     private static string ReactAppJsonFilePath => Path.Combine(SavePath(), ScaffoldingFileNames.ReactAppJsonFileName);
-    private static string WorldNameCacheJsonFilePath => Path.Combine(SavePath(), ScaffoldingFileNames.WorldNameCacheFileName);
+    private static string VariousNameCacheJsonFilePath => Path.Combine(SavePath(), ScaffoldingFileNames.VariousNameCacheFileName);
     private static string ThumbnailCacheFolderPath => Path.Combine(SavePath(), ScaffoldingFileNames.ThumbnailCacheFolderName);
     private static string ProfileIllustrationsFolderPath => Path.Combine(SavePath(), ScaffoldingFileNames.ProfileIllustrationsFolderName);
     private static string ProfileIllustrationsJsonFilePath => Path.Combine(ProfileIllustrationsFolderPath, ScaffoldingFileNames.ProfileIllustrationsJsonFileName);
@@ -179,14 +179,14 @@ public static class Scaffolding
     public static async Task<ReactAppPreferences> OpenReactAppPreferences() => await OpenIfExists(ReactAppJsonFilePath, PreferencesTableName, () => new ReactAppPreferences());
     public static async Task SaveReactAppPreferences(ReactAppPreferences serialized) => await SaveTo(serialized, ReactAppJsonFilePath, PreferencesTableName, null);
     
-    public static async Task<WorldNameCache> OpenWorldNameCache()
+    public static async Task<VariousNameCache> OpenVariousNameCache()
     {
-        var result = await OpenIfExists(WorldNameCacheJsonFilePath, null, () => new WorldNameCache());
+        var result = await OpenIfExists(VariousNameCacheJsonFilePath, null, () => new VariousNameCache());
         result.PreProcess();
         return result;
     }
 
-    public static async Task SaveWorldNameCache(WorldNameCache serialized) => await SaveTo(serialized, WorldNameCacheJsonFilePath, null);
+    public static async Task SaveVariousNameCache(VariousNameCache serialized) => await SaveTo(serialized, VariousNameCacheJsonFilePath, null);
 
     public static async Task<List<ResponseCollectionTrail>> RebuildTrail()
     {

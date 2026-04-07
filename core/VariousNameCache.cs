@@ -1,9 +1,14 @@
-﻿namespace XYVR.Core;
+﻿using Newtonsoft.Json;
+
+namespace XYVR.Core;
 
 /// This was originally just for world names, but this now also caches group names because fetching group names
 /// slows down the amount of time XYVR took to have complete live session information.
-public class WorldNameCache
+public class VariousNameCache
 {
+    [NonSerialized]
+    private const double CacheDuration = 15;
+    
     private const int LatestVersion = 3;
     private const string Warning = "THE CONTENTS OF THIS FILE CAN BE DELETED AT ANY TIME. You must NOT use this file as a world data archival source; it is not the purpose of this file.";
     private const string Purpose = "The purpose of this file is to prevent repetitive requests to the VRChat API to show the world name of active sessions when restarting the application.";
@@ -38,31 +43,6 @@ public class WorldNameCache
         }
 
         var now = DateTime.Now;
-
-        // Delete entries from the world cache older than 45 days. This is because the world cache could grow indefinitely,
-        // and we are loading the data into RAM, so we don't want unnecessary data to be loaded to RAM every time.
-        // The value in "cachedAt" is refreshed along with the data when someone is witnessed in that world after 6 hours.
-        var worldKeys = VRCWorlds.Keys.ToList();
-        foreach (var key in worldKeys)
-        {
-            var world = VRCWorlds[key];
-            if ((now - world.cachedAt).Duration().TotalDays > 45)
-            {
-                XYVRLogging.WriteLine(this, $"Removed world {world.name} from cache (not seen for more than 45 days).");
-                VRCWorlds.Remove(key);
-            }
-        }
-        
-        var groupKeys = VRCGroups.Keys.ToList();
-        foreach (var key in groupKeys)
-        {
-            var group = VRCGroups[key];
-            if ((now - group.cachedAt).Duration().TotalDays > 15)
-            {
-                XYVRLogging.WriteLine(this, $"Removed group {group.groupName} from cache (not seen for more than 15 days).");
-                VRCGroups.Remove(key);
-            }
-        }
         
         foreach (var world in VRCWorlds.Values)
         {
@@ -87,6 +67,36 @@ public class WorldNameCache
                 }
             }
         }
+    }
+
+    public void CleanUp()
+    {
+        var now = DateTime.Now;
+
+        // Delete entries from the world cache older than 15 days. This is because the world cache could grow indefinitely,
+        // and we are loading the data into RAM, so we don't want unnecessary data to be loaded to RAM every time.
+        // The value in "cachedAt" is refreshed along with the data when someone is witnessed in that world after 6 hours.
+        var worldKeys = VRCWorlds.Keys.ToList();
+        foreach (var key in worldKeys)
+        {
+            var world = VRCWorlds[key];
+            if ((now - world.cachedAt).Duration().TotalDays > CacheDuration)
+            {
+                XYVRLogging.WriteLine(this, $"Removed world {world.name} from cache (not seen for more than {CacheDuration} days).");
+                VRCWorlds.Remove(key);
+            }
+        }
+        
+        var groupKeys = VRCGroups.Keys.ToList();
+        foreach (var key in groupKeys)
+        {
+            var group = VRCGroups[key];
+            if ((now - group.cachedAt).Duration().TotalDays > CacheDuration)
+            {
+                XYVRLogging.WriteLine(this, $"Removed group {group.groupName} from cache (not seen for more than {CacheDuration} days).");
+                VRCGroups.Remove(key);
+            }
+        } 
     }
 
     public CachedWorld? GetValidWorldOrNull(string worldId)
@@ -142,5 +152,6 @@ public class CachedGroup
     public required string groupName;
     public required string groupFullCode;
 
+    [JsonIgnore]
     public string GroupDisplayableName => $"{groupName} ({groupFullCode})";
 }

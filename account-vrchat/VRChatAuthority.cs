@@ -5,14 +5,14 @@ namespace XYVR.AccountAuthority.VRChat;
 
 public class VRChatAuthority : IAuthority
 {
-    private readonly WorldNameCache _worldNameCache;
+    private readonly VariousNameCache _variousNameCache;
     private readonly Func<Task> _saveFn;
     private IThumbnailCache _thumbnailCache;
     private CancellationTokenSource _cancellationTokenSource;
 
-    public VRChatAuthority(WorldNameCache worldNameCache, IThumbnailCache thumbnailCache, Func<Task> saveFn, CancellationTokenSource cancellationTokenSource)
+    public VRChatAuthority(VariousNameCache variousNameCache, IThumbnailCache thumbnailCache, Func<Task> saveFn, CancellationTokenSource cancellationTokenSource)
     {
-        _worldNameCache = worldNameCache;
+        _variousNameCache = variousNameCache;
         _saveFn = saveFn;
         _cancellationTokenSource = cancellationTokenSource;
         _thumbnailCache = thumbnailCache;
@@ -20,6 +20,7 @@ public class VRChatAuthority : IAuthority
 
     public async Task SaveWhateverNecessary()
     {
+        _variousNameCache.CleanUp();
         await _saveFn();
     }
 
@@ -40,7 +41,7 @@ public class VRChatAuthority : IAuthority
 
     public Task<ILiveMonitoring> NewLiveMonitoring(LiveStatusMonitoring monitoring, ICredentialsStorage credentialsStorage)
     {
-        return Task.FromResult<ILiveMonitoring>(new VRChatLiveMonitoring(credentialsStorage, monitoring, _worldNameCache, _thumbnailCache));
+        return Task.FromResult<ILiveMonitoring>(new VRChatLiveMonitoring(credentialsStorage, monitoring, _variousNameCache, _thumbnailCache));
     }
 
     public async Task<ImmutableNonIndexedAccount> ResolveCallerAccount(ICredentialsStorage credentialsStorage)

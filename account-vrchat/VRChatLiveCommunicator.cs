@@ -32,7 +32,7 @@ internal class VRChatLiveCommunicator
     private readonly ICredentialsStorage _credentialsStorage;
     private readonly string _callerInAppIdentifier;
     private readonly IResponseCollector _responseCollector;
-    private readonly WorldNameCache _worldNameCache;
+    private readonly VariousNameCache _variousNameCache;
     private readonly IThumbnailCache _thumbnailCache;
     private readonly CancellationTokenSource _cancellationTokenSource;
 
@@ -62,12 +62,12 @@ internal class VRChatLiveCommunicator
     public event SessionRetrieved? OnSessionRetrieved;
     public delegate Task SessionRetrieved(VRChatInstance world);
 
-    public VRChatLiveCommunicator(ICredentialsStorage credentialsStorage, string callerInAppIdentifier, IResponseCollector responseCollector, WorldNameCache worldNameCache, IThumbnailCache thumbnailCache, CancellationTokenSource cancellationTokenSource)
+    public VRChatLiveCommunicator(ICredentialsStorage credentialsStorage, string callerInAppIdentifier, IResponseCollector responseCollector, VariousNameCache variousNameCache, IThumbnailCache thumbnailCache, CancellationTokenSource cancellationTokenSource)
     {
         _credentialsStorage = credentialsStorage;
         _callerInAppIdentifier = callerInAppIdentifier;
         _responseCollector = responseCollector;
-        _worldNameCache = worldNameCache;
+        _variousNameCache = variousNameCache;
         _thumbnailCache = thumbnailCache;
         _cancellationTokenSource = cancellationTokenSource;
     }
@@ -133,7 +133,7 @@ internal class VRChatLiveCommunicator
                         XYVRLogging.ErrorWriteLine(this, $"Failed to download world thumbnail {worldLenient.thumbnailImageUrl}");
                     }
 
-                    _worldNameCache.VRCWorlds[worldId] = cache;
+                    _variousNameCache.VRCWorlds[worldId] = cache;
 
                     if (OnWorldCached != null)
                     {
@@ -178,7 +178,7 @@ internal class VRChatLiveCommunicator
                         groupFullCode = $"{groupInformation.shortCode}.{groupInformation.discriminator}"
                     };
                     
-                    _worldNameCache.VRCGroups[groupId] = cachedGroup;
+                    _variousNameCache.VRCGroups[groupId] = cachedGroup;
                     
                     if (OnGroupCached != null)
                     {
@@ -583,7 +583,7 @@ internal class VRChatLiveCommunicator
 
     private CachedWorld? GetOrQueueWorldFetch(string worldId)
     {
-        var cachedWorldNullable = _worldNameCache.GetValidWorldOrNull(worldId);
+        var cachedWorldNullable = _variousNameCache.GetValidWorldOrNull(worldId);
 
         var shouldAttemptQueueing = cachedWorldNullable == null || cachedWorldNullable.needsRefresh;
 
@@ -616,7 +616,7 @@ internal class VRChatLiveCommunicator
             return null;
         }
         
-        var cachedGroupNullable = _worldNameCache.GetValidGroupOrNull(groupId);
+        var cachedGroupNullable = _variousNameCache.GetValidGroupOrNull(groupId);
 
         var shouldAttemptQueueing = cachedGroupNullable == null || cachedGroupNullable.needsRefresh;
         
