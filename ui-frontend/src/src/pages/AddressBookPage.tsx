@@ -583,9 +583,9 @@ function AddressBookPage({ isDark,
                                 : <>{totalFilteredCount > 1
                                     ? t('addressBook.results.multipleResults', { count: totalFilteredCount })
                                     : t('addressBook.results.singleResult')} {' '}
-                                    Type <code className="inline-code-clickable"onClick={() => { setSearchField(':help '); focusSearchInput(); }}>:help</code> {t('addressBook.results.typeHelp')} {' '}
-                                    Type <code className="inline-code-clickable"onClick={() => { setSearchField(searchField + ' alias:'); focusSearchInput(); }}>alias:</code> {t('addressBook.results.typeAlias')} {' '}
-                                    Type <code className="inline-code-clickable"onClick={() => { setSearchField(searchField + ' bio:'); focusSearchInput(); }}>bio:</code> {t('addressBook.results.typeBio')}</>
+                                    Type <code className="inline-code-clickable" onClick={() => { setSearchField(':help '); focusSearchInput(); }}>:help</code> {t('addressBook.results.typeHelp')} {' '}
+                                    Type <code className="inline-code-clickable" onClick={() => { setSearchField(searchField + ' alias:'); focusSearchInput(); }}>alias:</code> {t('addressBook.results.typeAlias')} {' '}
+                                </>
                             }
                         </div>
                     )}
