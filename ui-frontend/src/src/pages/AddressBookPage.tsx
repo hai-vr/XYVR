@@ -17,15 +17,10 @@ import {
     shouldShowHelp
 } from './searchUtils.ts'
 import {
-    Binoculars,
-    Glasses, Image,
+    Image,
     ImageOff,
-    Notebook,
-    NotebookText,
     Search,
     Settings,
-    UserPen,
-    UserStar,
     X
 } from 'lucide-react'
 import DarkModeToggleButton from "../components/DarkModeToggleButton.tsx";
@@ -462,32 +457,6 @@ function AddressBookPage({ isDark,
                             </div>
 
                             <div className="header-buttons">
-                                {searchField && <>
-                                    <button
-                                        className="theme-toggle-btn"
-                                        onClick={() => setCompactMode(!compactMode)}
-                                        aria-pressed={compactMode}
-                                        title={compactMode ? t('ui.switchToFullMode.title') : t('ui.switchToCompactMode.title')}
-                                    >
-                                        {compactMode ? <Binoculars /> : <Glasses />}
-                                    </button>
-                                    <button
-                                        className="theme-toggle-btn"
-                                        onClick={() => setShowNotes(!showNotes)}
-                                        aria-pressed={showNotes}
-                                        title={showNotes ? t('ui.hideNotes.title') : t('ui.showNotes.title')}
-                                    >
-                                        {showNotes ? <NotebookText /> : <Notebook />}
-                                    </button>
-                                    <button
-                                        className="theme-toggle-btn"
-                                        onClick={() => setShowOnlyContacts(!showOnlyContacts)}
-                                        aria-pressed={showOnlyContacts}
-                                        title={showOnlyContacts ? t('ui.showContactsAndNotes.title') : t('ui.showOnlyContacts.title')}
-                                    >
-                                        {showOnlyContacts ? <UserStar /> : <UserPen />}
-                                    </button></>
-                                }
                                 <button
                                     className="theme-toggle-btn"
                                     onClick={() => setPortraits(!portraits)}
