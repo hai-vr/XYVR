@@ -1,6 +1,7 @@
 ﻿import {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import {useNavigate} from 'react-router-dom'
 import './AddressBookPage.css'
+import '../InputFields.css'
 import '../components/LiveSession.css'
 import '../components/Individual.css'
 import '../Header.css'
@@ -512,7 +513,7 @@ function AddressBookPage({ isDark,
                         return userCount > 0;
                     });
 
-                    if (appsWithUsers.length <= 1) return null;
+                    if (appsWithUsers.length <= 1 && !searchField) return null;
 
                     return (
                         <div className="search-filters">
@@ -529,6 +530,32 @@ function AddressBookPage({ isDark,
                                     />
                                 );
                             })}
+                            {searchField && <>
+                            <label className="checkbox-container search-filter">
+                                <input
+                                    type="checkbox"
+                                    checked={compactMode}
+                                    onChange={() => setCompactMode(!compactMode)}
+                                />
+                                {t('ui.compactMode.label')}
+                            </label>
+                            <label className="checkbox-container search-filter">
+                                <input
+                                    type="checkbox"
+                                    checked={showNotes}
+                                    onChange={() => setShowNotes(!showNotes)}
+                                />
+                                {t('ui.showNotes.label')}
+                            </label>
+                            <label className="checkbox-container search-filter">
+                                <input
+                                    type="checkbox"
+                                    checked={showOnlyContacts}
+                                    onChange={() => setShowOnlyContacts(!showOnlyContacts)}
+                                />
+                                {t('ui.showOnlyContacts.label')}
+                            </label>
+                            </>}
                         </div>
                     );
                 })()}

@@ -133,4 +133,8 @@
     "settings.acknowledgements.maintainer": "Maintainer: {{name}}",
     "settings.acknowledgements.license.button": "Show License",
     "settings.acknowledgements.license.modalTitle": "License for {{title}}",
+    // V0.0.1-alpha.18
+    "ui.compactMode.label": "Compact mode",
+    "ui.showNotes.label": "Show notes",
+    "ui.showOnlyContacts.label": "Show only Contacts",
 }
