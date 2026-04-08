@@ -143,6 +143,9 @@ function AddressBookPage({ isDark,
     const [isLoading, setIsLoading] = useState(false);
     const ITEMS_PER_LOAD = 25; // Load 25 more items each time
     const SEARCH_DELAY = 100; // 300ms delay for search
+    
+    // Non-persisted search options
+    const [showBios, setShowBios] = useState(false)
 
     useEffect(() => {
         const firstInd = individuals.filter(ind => ind.guid === mergeAccountGuidOrUnd).at(0);
@@ -336,8 +339,8 @@ function AddressBookPage({ isDark,
 
     // Check if bio should be shown based on search terms
     const showBio = useMemo(() => {
-        return shouldShowBio(debouncedSearchField);
-    }, [debouncedSearchField]);
+        return showBios || shouldShowBio(debouncedSearchField);
+    }, [debouncedSearchField, showBios]);
 
     const showHelp = useMemo(() => {
         return shouldShowHelp(debouncedSearchField);
@@ -500,30 +503,38 @@ function AddressBookPage({ isDark,
                                 );
                             })}
                             {searchField && <>
-                            <label className="checkbox-container search-filter">
-                                <input
-                                    type="checkbox"
-                                    checked={compactMode}
-                                    onChange={() => setCompactMode(!compactMode)}
-                                />
-                                {t('ui.compactMode.label')}
-                            </label>
-                            <label className="checkbox-container search-filter">
-                                <input
-                                    type="checkbox"
-                                    checked={showNotes}
-                                    onChange={() => setShowNotes(!showNotes)}
-                                />
-                                {t('ui.showNotes.label')}
-                            </label>
-                            <label className="checkbox-container search-filter">
-                                <input
-                                    type="checkbox"
-                                    checked={showOnlyContacts}
-                                    onChange={() => setShowOnlyContacts(!showOnlyContacts)}
-                                />
-                                {t('ui.showOnlyContacts.label')}
-                            </label>
+                                <label className="checkbox-container search-filter">
+                                    <input
+                                        type="checkbox"
+                                        checked={showOnlyContacts}
+                                        onChange={() => setShowOnlyContacts(!showOnlyContacts)}
+                                    />
+                                    {t('ui.showOnlyContacts.label')}
+                                </label>
+                                <label className="checkbox-container search-filter">
+                                    <input
+                                        type="checkbox"
+                                        checked={compactMode}
+                                        onChange={() => setCompactMode(!compactMode)}
+                                    />
+                                    {t('ui.compactMode.label')}
+                                </label>
+                                <label className="checkbox-container search-filter">
+                                    <input
+                                        type="checkbox"
+                                        checked={showNotes}
+                                        onChange={() => setShowNotes(!showNotes)}
+                                    />
+                                    {t('ui.showNotes.label')}
+                                </label>
+                                <label className="checkbox-container search-filter">
+                                    <input
+                                        type="checkbox"
+                                        checked={showBios}
+                                        onChange={() => setShowBios(!showBios)}
+                                    />
+                                    {t('ui.showBios.label')}
+                                </label>
                             </>}
                         </div>
                     );

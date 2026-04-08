@@ -137,4 +137,5 @@
     "ui.compactMode.label": "Compact mode",
     "ui.showNotes.label": "Show notes",
     "ui.showOnlyContacts.label": "Show only Contacts",
+    "ui.showBios.label": "Show bios",
 }
