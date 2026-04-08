@@ -627,30 +627,6 @@ function AddressBookPage({ isDark,
                     </div>
                 )}
 
-                {/*{!debouncedSearchField && online.length > 0 && <div className={`individuals-grid ${compactMode ? 'compact-mode' : ''}`}>*/}
-                {/*    {online*/}
-                {/*        .map((individual, index) => (*/}
-                {/*            <Individual*/}
-                {/*                key={individual.guid || index}*/}
-                {/*                individual={individual}*/}
-                {/*                isVisible={true}*/}
-                {/*                showBio={showBio}*/}
-                {/*                showAlias={showAlias}*/}
-                {/*                setMergeAccountGuidOrUnd={setMergeAccountGuidOrUnd}*/}
-                {/*                isBeingMerged={mergeAccountGuidOrUnd === individual.guid}*/}
-                {/*                displayNameOfOtherBeingMergedOrUnd={displayNameOfOtherBeingMergedOrUnd}*/}
-                {/*                fusionAccounts={fusionAccounts}*/}
-                {/*                unmergeAccounts={unmergeAccounts}*/}
-                {/*                compactMode={true}*/}
-                {/*                searchField={debouncedSearchField}*/}
-                {/*                showNotes={false}*/}
-                {/*                debugMode={debugMode}*/}
-                {/*                setModalIndividual={setModalIndividual}*/}
-                {/*            />*/}
-                {/*    ))}*/}
-                {/*</div>}*/}
-
-                {/*{!debouncedSearchField && online.length > 0 && <div className={`individuals-grid ${compactMode ? 'compact-mode' : ''}`}>*/}
                 {online.length > 0 && <div className={`live-session-accounts-grid ${compactMode ? 'compact-mode' : ''}`}>
                     {online
                         .map((individual) => (
@@ -662,24 +638,6 @@ function AddressBookPage({ isDark,
                                              clickOpensIndividual={individual} setModalIndividual={setModalIndividual}
                                              showSession={false} illustrativeDisplay={true} showAccountIcon={true} portrait={portraits} />)
                                 )
-                            
-                            // <Individual
-                            //     key={individual.guid || index}
-                            //     individual={individual}
-                            //     isVisible={true}
-                            //     showBio={showBio}
-                            //     showAlias={showAlias}
-                            //     setMergeAccountGuidOrUnd={setMergeAccountGuidOrUnd}
-                            //     isBeingMerged={mergeAccountGuidOrUnd === individual.guid}
-                            //     displayNameOfOtherBeingMergedOrUnd={displayNameOfOtherBeingMergedOrUnd}
-                            //     fusionAccounts={fusionAccounts}
-                            //     unmergeAccounts={unmergeAccounts}
-                            //     compactMode={true}
-                            //     searchField={debouncedSearchField}
-                            //     showNotes={false}
-                            //     debugMode={debugMode}
-                            //     setModalIndividual={setModalIndividual}
-                            // />
                     ))}
                 </div>}
 
