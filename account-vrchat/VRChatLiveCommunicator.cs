@@ -122,15 +122,23 @@ internal class VRChatLiveCommunicator
                         thumbnailUrl = worldLenient.thumbnailImageUrl,
                         capacity = worldLenient.capacity,
                     };
-                    var thumbnail = await _api.DownloadThumbnailImage(worldLenient.thumbnailImageUrl);
-                    if (thumbnail != null)
+                    
+                    if (!await _thumbnailCache.ExistsInCache(worldLenient.thumbnailImageUrl))
                     {
-                        XYVRLogging.WriteLine(this, $"Downloaded world thumbnail {worldLenient.thumbnailImageUrl}, this will be cached.");
-                        await _thumbnailCache.Save(worldLenient.thumbnailImageUrl, thumbnail);
+                        var thumbnail = await _api.DownloadThumbnailImage(worldLenient.thumbnailImageUrl);
+                        if (thumbnail != null)
+                        {
+                            XYVRLogging.WriteLine(this, $"Downloaded world thumbnail {worldLenient.thumbnailImageUrl}, this will be cached.");
+                            await _thumbnailCache.Save(worldLenient.thumbnailImageUrl, thumbnail);
+                        }
+                        else
+                        {
+                            XYVRLogging.ErrorWriteLine(this, $"Failed to download world thumbnail {worldLenient.thumbnailImageUrl}");
+                        }
                     }
                     else
                     {
-                        XYVRLogging.ErrorWriteLine(this, $"Failed to download world thumbnail {worldLenient.thumbnailImageUrl}");
+                        XYVRLogging.WriteLine(this, $"Thumbnail already exists in cache for world {worldLenient.name}, will not be downloading again.");
                     }
 
                     _variousNameCache.VRCWorlds[worldId] = cache;
@@ -598,7 +606,7 @@ internal class VRChatLiveCommunicator
             }
             else
             {
-                XYVRLogging.WriteLine(this, $"We need to refresh our knowledge of world id {worldId}, will queue fetch...");
+                XYVRLogging.WriteLine(this, $"We need to refresh our knowledge of world id {worldId}, will queue fetch... (needsRefresh was {cachedWorldNullable.needsRefresh})");
                 _queue.Enqueue(job);
             }
 

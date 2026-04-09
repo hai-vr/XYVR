@@ -22,6 +22,15 @@ public class VRChatThumbnailCache : IThumbnailCache
         await File.WriteAllBytesAsync(path, data);
     }
 
+    public Task<bool> ExistsInCache(string thumbnailUrl)
+    {
+        var sha__mustNotContainPathTraversal = Sha(thumbnailUrl);
+        var path = Path.Combine(_thumbnailCacheFolderPath, sha__mustNotContainPathTraversal);
+
+        var existsInCache = File.Exists(path);
+        return Task.FromResult(existsInCache);
+    }
+
     public static string Sha(string thumbnailUrl)
     {
         using (var sha256 = SHA256.Create())
