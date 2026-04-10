@@ -38,7 +38,6 @@ public class AppLifecycle
         // Order matters
         Scaffolding.DefineSavePathFromArgsOrUseDefault(args);
         Scaffolding.CreateDirectoriesPertainingToSavePath();
-        Scaffolding.OpenDatabase();
 
         try
         {
@@ -53,6 +52,8 @@ public class AppLifecycle
             
             throw new InvalidOperationException(error, e);
         }
+        
+        Scaffolding.OpenDatabase();
 
         // Setting up the log file must be done after the lock has been acquired.
         XYVRLogging.SetupLogFile();

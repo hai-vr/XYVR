@@ -16,6 +16,7 @@ Features:
 Fixes:
 - Thumbnails that exist in the file cache will no longer be redownloaded, even if the cached world data was flagged to be refreshed.
   - We're now assuming that the thumbnail URL will change whenever the thumbnail itself changes.
+- If XYVR is launched twice, the second instance will no longer try to open the database before getting a hold on the application lock.
 
 Changes:
 - The display options for search are now checkboxes instead of icons.
