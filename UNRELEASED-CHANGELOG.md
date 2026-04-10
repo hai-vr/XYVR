@@ -29,3 +29,4 @@ Internal changes:
   - That way, if the application starts after it has not executed for a while, it has a chance to keep using existing entries.
 - Cached world names are now removed when the world has not been seen for more than 15 days, rather than for more than 45 days.
   - That way, thumbnails for those worlds are removed sooner, freeing up disk space.
+- When a lot of live sessions are queued, submit batches of updates every 50 live sessions if the queue still contains at least 50 more items.

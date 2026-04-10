@@ -195,7 +195,10 @@ internal class VRChatLiveCommunicator
                 }
             }
 
-            if (_queue.Count(job => job is InstanceQueueJob) == 0)
+            var instanceQueueJobRemainingCount = _queue.Count(job => job is InstanceQueueJob);
+            if (instanceQueueJobRemainingCount == 0
+                // If there's a lot of updates remaining and we already have a huge batch, then flush it. This is for worst case scenarios.
+                || instanceQueueJobRemainingCount >= 50 && liveSessionsBatch.Count >= 50)
             {
                 // We batch the session updates, so that the UI doesn't reorder every time a session updates when the queue is being processed.
                 if (liveSessionsBatch.Count > 0 && OnLiveSessionReceived != null)
@@ -606,7 +609,7 @@ internal class VRChatLiveCommunicator
             }
             else
             {
-                XYVRLogging.WriteLine(this, $"We need to refresh our knowledge of world id {worldId}, will queue fetch... (needsRefresh was {cachedWorldNullable.needsRefresh})");
+                XYVRLogging.WriteLine(this, $"We need to refresh our knowledge of world id {worldId}, will queue fetch...");
                 _queue.Enqueue(job);
             }
 
