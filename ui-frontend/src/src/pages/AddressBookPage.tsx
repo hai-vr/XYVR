@@ -506,10 +506,10 @@ function AddressBookPage({ isDark,
                                 <label className="checkbox-container search-filter">
                                     <input
                                         type="checkbox"
-                                        checked={showOnlyContacts}
+                                        checked={!showOnlyContacts}
                                         onChange={() => setShowOnlyContacts(!showOnlyContacts)}
                                     />
-                                    {t('ui.showOnlyContacts.label')}
+                                    {t('ui.includeNonContactsWithNotes.label')}
                                 </label>
                                 <label className="checkbox-container search-filter">
                                     <input

@@ -136,6 +136,6 @@
     // V0.0.1-alpha.18
     "ui.compactMode.label": "Compact mode",
     "ui.showNotes.label": "Show notes",
-    "ui.showOnlyContacts.label": "Show only Contacts",
+    "ui.includeNonContactsWithNotes.label": "Include non-Contacts with Notes",
     "ui.showBios.label": "Show bios",
 }
