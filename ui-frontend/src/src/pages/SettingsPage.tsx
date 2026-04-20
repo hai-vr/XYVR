@@ -296,6 +296,8 @@ function SettingsPage({
                             )}
                         </div>
                         <div className="acknowledgement-meta">
+                            {ack.kind === 'license' && ack.licenseData && <a onClick={() => openLink(ack.licenseData?.licenseUrl || "")}
+                                                          className="link-pointer">{ack.licenseData?.licenseName}</a>}
                             {ack.maintainer && ack.maintainerUrl && (
                                 <div>
                                     {t('settings.acknowledgements.maintainer', {name: ''})}
