@@ -2,6 +2,7 @@
 import {useState, useEffect} from 'react'
 import AddressBookPage from '../pages/AddressBookPage.tsx'
 import SettingsPage from '../pages/SettingsPage.tsx'
+import AcknowledgementsPage from '../pages/AcknowledgementsPage.tsx'
 import './AppRouter.css'
 import {Toaster} from "react-hot-toast";
 import type {ReactAppPreferences} from "../types/APITypes.ts";
@@ -173,6 +174,7 @@ const AppRouter = ({ appVersion }: { appVersion: string }) => {
                                                       deprioritizedVirtualSpaceNames={deprioritizedVirtualSpaceNames}
                                                       setDeprioritizedVirtualSpaceNames={setDeprioritizedVirtualSpaceNames}
                                                       debugMode={debugMode}/>}/>
+                        <Route path="/acknowledgements" element={<AcknowledgementsPage isDark={isDark} setIsDark={setIsDark} />}/>
                     </Routes>
                 </main>
                 <Toaster
