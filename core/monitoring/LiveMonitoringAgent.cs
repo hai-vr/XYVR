@@ -41,7 +41,16 @@ public class LiveMonitoringAgent
         
             foreach (var agent in _liveMonitoringAgents.Values)
             {
-                await agent.StartMonitoring();
+                try
+                {
+                    XYVRLogging.WriteLine(this, $"Starting monitoring of {agent.GetType().Name}");
+                    await agent.StartMonitoring();
+                }
+                catch (Exception e)
+                {
+                    XYVRLogging.ErrorWriteLine(this, $"Failed to start monitoring for {agent.GetType().Name}; we will still try to start the other monitoring agents.");
+                    XYVRLogging.ErrorWriteLine(this, e);
+                }
             }
         }
         catch (Exception e)
