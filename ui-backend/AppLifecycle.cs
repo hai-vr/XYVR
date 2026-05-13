@@ -87,6 +87,7 @@ public class AppLifecycle
 
     public async Task WhenApplicationCloses()
     {
+        XYVRLogging.WriteLine(this, "We're about to start the synchronous Task to close the application.");
         Task.Run(async () =>
         {
             XYVRLogging.WriteLine(this, "Application is closing.");
@@ -119,7 +120,9 @@ public class AppLifecycle
                 throw;
             }
         }).Wait();
+        XYVRLogging.WriteLine(this, "We waited for the Task to end; we're now past the Wait() instruction.");
         Scaffolding.CloseDatabase();
+        XYVRLogging.WriteLine(this, "We have closed the database. We are about to flush the log file; no more logs after that.");
         XYVRLogging.CleanupLogFile();
     }
 
