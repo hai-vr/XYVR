@@ -3,7 +3,7 @@
 
 *XYVR* is an address book application that lets you search through your VRChat, Resonite, and ChilloutVR contacts, including live sessions.
 
-Once data is retrieved, it is stored offline, no Internet connection needed.
+Once data is retrieved, it is stored offline, and no Internet connection will be needed to view it.
 The address book remains fully functional even if access to the original account is lost for any reason.
 
 If you or your contacts have multiple accounts on different social VR apps and platforms (or even on the same platform), you can
