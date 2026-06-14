@@ -552,6 +552,7 @@ function AddressBookPage({ isDark,
                             <p>{t('addressBook.noResults.help')}</p>
                             <p><code className="inline-code-clickable" onClick={() => { setSearchField('bio:'); focusSearchInput(); }}>bio:<i>creator</i></code> {t('addressBook.search.bio.example')}</p>
                             <p><code className="inline-code-clickable" onClick={() => { setSearchField('links:'); focusSearchInput(); }}>links:<i>misskey</i></code> {t('addressBook.search.links.example')}</p>
+                            <p><code className="inline-code-clickable" onClick={() => { setSearchField('name:'); focusSearchInput(); }}>name:<i>hai</i></code> {t('addressBook.search.name.example')}</p>
                             <p><code className="inline-code-clickable" onClick={() => { setSearchField('alias:'); focusSearchInput(); }}>alias:<i>aoi</i></code> {t('addressBook.search.alias.example')}</p>
                             <p><code className="inline-code-clickable" onClick={() => { setSearchField('session:'); focusSearchInput(); }}>session:<i>mmc</i></code> {t('addressBook.search.session.example')}</p>
                             <p>{t('addressBook.search.quotes.help')} <code className="inline-code-clickable" onClick={() => { setSearchField('session:"'); focusSearchInput(); }}>session:<i>"h p"</i></code></p>

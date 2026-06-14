@@ -182,6 +182,7 @@ session:"hello world"
             || term.startsWith('links:')
             || term.startsWith('bio:')
             || term.startsWith('alias:')
+            || term.startsWith('name:')
             || term.startsWith('on:')
             || term.startsWith('session:')
             || term === ':confusables'
@@ -223,18 +224,21 @@ export const anyAccountMatchesSpecialTerms = (accounts: FrontAccount[], specialT
             ) || false;
         }
 
-        if (term.startsWith('alias:')) {
-            const searchString = term.substring(6); // Remove 'alias:' prefix
+        let isAliasSearch = term.startsWith('alias:');
+        if (isAliasSearch || term.startsWith('name:')) {
+            const searchString = isAliasSearch ? term.substring(6) : term.substring(5); // Remove 'alias:' or 'name:' prefix
             if (!searchString) return true; // Empty search string matches all
 
             const kanaVariants = generateKanaVariants(searchString);
 
             return accounts?.some(account => {
-                if (!account.allDisplayNames || !Array.isArray(account.allDisplayNames)) {
+                let strings = isAliasSearch ? account.allDisplayNames : [account.inAppDisplayName];
+                
+                if (!strings || !Array.isArray(strings)) {
                     return false;
                 }
 
-                return account.allDisplayNames.some(displayName => {
+                return strings.some(displayName => {
                     return kanaVariants.some(variant => {
                         const variantNormalized = removeDiacritics(variant, convertConfusables);
                         return removeDiacritics(displayName.toLowerCase()).includes(variantNormalized);

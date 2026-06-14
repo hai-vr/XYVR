@@ -138,4 +138,5 @@
     "ui.showNotes.label": "Show notes",
     "ui.includeNonContactsWithNotes.label": "Include non-Contacts with Notes",
     "ui.showBios.label": "Show bios",
+    "addressBook.search.name.example": "to search in current user names.",
 }

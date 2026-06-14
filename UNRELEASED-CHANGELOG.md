@@ -12,6 +12,7 @@ In the `hai-vr/XYVR` repository, Haï~ will be in change of writing this changel
 ### Application changes
 
 Features:
+- Add `name:` filter to search only in active display names.
 
 Fixes:
 - Thumbnails that exist in the file cache will no longer be redownloaded, even if the cached world data was flagged to be refreshed.
