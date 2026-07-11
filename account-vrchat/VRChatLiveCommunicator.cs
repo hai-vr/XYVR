@@ -40,6 +40,7 @@ internal class VRChatLiveCommunicator
     private readonly ConcurrentDictionary<IQueueJob, bool> _allQueued = new();
     private readonly ConcurrentQueue<IQueueJob> _queue = new();
     private readonly ConcurrentQueue<IQueueJob> _highPriorityQueue = new();
+    private readonly ConcurrentQueue<IQueueJob> _immediateQueue = new();
     private Task _queueTask = Task.CompletedTask;
 
     private VRChatWebsocketClient _wsClient;
@@ -101,9 +102,10 @@ internal class VRChatLiveCommunicator
 
         var liveSessionsBatch = new List<ImmutableNonIndexedLiveSession>();
         
-        while ((_queue.Count > 0 || _highPriorityQueue.Count > 0) && !_cancellationTokenSource.IsCancellationRequested)
+        while ((_queue.Count > 0 || _highPriorityQueue.Count > 0 || _immediateQueue.Count > 0) && !_cancellationTokenSource.IsCancellationRequested)
         {
-            var anythingDequeued = _highPriorityQueue.TryDequeue(out var dequeued) || _queue.TryDequeue(out dequeued);
+            var isImmediate = _immediateQueue.TryDequeue(out var dequeued);
+            var anythingDequeued = isImmediate || _highPriorityQueue.TryDequeue(out dequeued) || _queue.TryDequeue(out dequeued);
             if (anythingDequeued && dequeued is WorldQueueJob worldQueueJob)
             {
                 var worldId = worldQueueJob.worldId;
@@ -157,7 +159,7 @@ internal class VRChatLiveCommunicator
                 {
                     _locationToInstance.TryAdd(instanceQueueJob.worldIdAndInstanceId, locationInformation);
                     
-                    liveSessionsBatch.Add(new ImmutableNonIndexedLiveSession
+                    var liveSession = new ImmutableNonIndexedLiveSession
                     {
                         namedApp = NamedApp.VRChat,
                         qualifiedAppName = VRChatCommunicator.VRChatQualifiedAppName,
@@ -167,8 +169,21 @@ internal class VRChatLiveCommunicator
                         currentAttendance = locationInformation.userCount,
                         ageGated = locationInformation.ageGate,
                         callerInAppIdentifier = _callerInAppIdentifier,
-                    });
-                    XYVRLogging.WriteLine(this, $"Collected live session about {instanceQueueJob.worldIdAndInstanceId}, will batch results... ({liveSessionsBatch.Count} sessions batched so far)");
+                    };
+
+                    if (isImmediate)
+                    {
+                        XYVRLogging.WriteLine(this, $"Collected live session about {instanceQueueJob.worldIdAndInstanceId} (IMMEDIATE), submitting now.");
+                        if (OnLiveSessionReceived != null)
+                        {
+                            await OnLiveSessionReceived(liveSession);
+                        }
+                    }
+                    else
+                    {
+                        liveSessionsBatch.Add(liveSession);
+                        XYVRLogging.WriteLine(this, $"Collected live session about {instanceQueueJob.worldIdAndInstanceId}, will batch results... ({liveSessionsBatch.Count} sessions batched so far)");
+                    }
                 }
             }
             else if (dequeued is GroupQueueJob groupQueueJob)
@@ -456,7 +471,7 @@ internal class VRChatLiveCommunicator
         }
     }
 
-    private async Task QueueSessionFetchIfApplicable(string location, bool onlyConsiderItemsInQueue = false, bool useFastFetch = false)
+    public async Task QueueSessionFetchIfApplicable(string location, bool onlyConsiderItemsInQueue = false, bool useFastFetch = false, bool immediate = false)
     {
         _api ??= await InitializeAPI();
         
@@ -469,10 +484,17 @@ internal class VRChatLiveCommunicator
                 useFastFetch = useFastFetch
             };
             if (!onlyConsiderItemsInQueue && !_allQueued.ContainsKey(queueJob)
-                || onlyConsiderItemsInQueue && !_queue.Contains(queueJob) && !_highPriorityQueue.Contains(queueJob))
+                || onlyConsiderItemsInQueue && !_queue.Contains(queueJob) && !_highPriorityQueue.Contains(queueJob) && !_immediateQueue.Contains(queueJob))
             {
                 _allQueued[queueJob] = true;
-                _queue.Enqueue(queueJob);
+                if (immediate)
+                {
+                    _immediateQueue.Enqueue(queueJob);
+                }
+                else
+                {
+                    _queue.Enqueue(queueJob);
+                }
                 WakeUpQueue();
             }
         }

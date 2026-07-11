@@ -130,6 +130,13 @@ public class ClusterLiveMonitoring : ILiveMonitoring
         return Task.CompletedTask;
     }
 
+    public Task FetchUpdatedSessionInfo(string sessionId)
+    {
+        // Cluster monitoring is poll-based, it will eventually refresh.
+        // We could trigger an immediate RunFunction if we wanted to, but it's complex due to the loop.
+        return Task.CompletedTask;
+    }
+
     private async Task<ClusterAPI> InitializeApi()
     {
         var api = new ClusterAPI(new DoNotStoreAnythingStorage(), _cancellationTokenSource);

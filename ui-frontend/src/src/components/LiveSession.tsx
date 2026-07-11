@@ -9,6 +9,7 @@ import {useTranslation} from "react-i18next";
 import {DotNetApi} from "../DotNetApi.ts";
 import {IdCard, Server, Clipboard, Globe, Mail, SquareArrowDownRight} from "lucide-react";
 import {SupportedAppsByNamedApp} from "../supported-apps.tsx";
+import LiveSessionDetailsModal from "./LiveSessionDetailsModal.tsx";
 
 interface LiveSessionProps {
     liveSession: FrontLiveSession,
@@ -35,6 +36,7 @@ export function LiveSession({
     // @ts-ignore
     const [showSlots, setShowSlots] = useState(false);
     const [showParticipants, setShowParticipants] = useState(false);
+    const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
     const supportedApp = SupportedAppsByNamedApp[liveSession.namedApp];
 
@@ -72,6 +74,11 @@ export function LiveSession({
     const openLink = async () => {
         const link = supportedApp?.getSessionLink(liveSession.inAppSessionIdentifier, liveSession.supplementalIdentifier) || '';
         await dotNetApi.appApiOpenLink(link);
+    };
+
+    const handleNameClick = () => {
+        setIsDetailsModalOpen(true);
+        dotNetApi.liveApiFetchUpdatedSessionInfo(liveSession.namedApp, liveSession.callerInAppIdentifier, liveSession.inAppSessionIdentifier);
     };
 
     const participationSquares = (
@@ -118,6 +125,13 @@ export function LiveSession({
         || liveSession.thumbnailHash && `url(${dotNetApi.WorldThumbnailHashToUrl(liveSession.thumbnailHash)}), var(--live-session-overlay)`
         || 'var(--live-session-overlay)';
     return (<div key={liveSession.guid} className={`live-session-card live-session-thumbnail-bg ${liveSession.participants.length > 4 ? 'full-width' : ''}`}>
+        <LiveSessionDetailsModal 
+            isOpen={isDetailsModalOpen} 
+            onClose={() => setIsDetailsModalOpen(false)} 
+            liveSession={liveSession} 
+            individuals={individuals} 
+            debugMode={debugMode} 
+        />
         <div style={{
             position: 'relative',
             height: '100%'
@@ -151,7 +165,7 @@ export function LiveSession({
                             flexDirection: 'column',
                             alignItems: 'flex-start',
                             gap: '0.25rem'
-                        }}>
+                        }} className="modal-pointer" onClick={handleNameClick}>
                             <span
                                 title={capacityStr}>{_D2(liveSession.inAppVirtualSpaceName || '', debugMode, undefined, DemonstrationMode.EverythingButSessionNames) || t('live.session.unnamed')}</span>
                             {liveSession.inAppSessionName &&

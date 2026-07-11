@@ -12,4 +12,6 @@ public interface ILiveMonitoring
     Task DefineCaller(string callerInAppIdentifier);
     
     Task MakeGameClientJoinOrSelfInvite(string sessionId, CancellationTokenSource cancellationTokenSource);
+
+    Task FetchUpdatedSessionInfo(string sessionId);
 }

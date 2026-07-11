@@ -100,4 +100,11 @@ public class ChilloutVRLiveMonitoring(LiveStatusMonitoring monitoring, ICredenti
         // TODO: Currently not implemented
         return Task.CompletedTask;
     }
+
+    public Task FetchUpdatedSessionInfo(string sessionId)
+    {
+        if (!_isConnected) return Task.CompletedTask;
+        _liveComms.QueueUpdateInstance(sessionId);
+        return Task.CompletedTask;
+    }
 }

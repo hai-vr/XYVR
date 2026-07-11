@@ -11,6 +11,7 @@ public interface ILiveBFF
     string GetAllExistingLiveUserData();
     string GetAllExistingLiveSessionData();
     Task MakeGameClientJoinOrSelfInvite(string appName, string inAppIdentifier, string sessionId);
+    Task FetchUpdatedSessionInfo(string appName, string inAppIdentifier, string sessionId);
 }
 
 [ComVisible(true)]
@@ -127,6 +128,14 @@ public class LiveBFF : ILiveBFF
         if (Enum.TryParse<NamedApp>(appName, out var namedApp))
         {
             await _appLifecycle.LiveMonitoringAgent.MakeGameClientJoinOrSelfInvite(namedApp, inAppIdentifier, sessionId);
+        }
+    });
+
+    public async Task FetchUpdatedSessionInfo(string appName, string inAppIdentifier, string sessionId) => await BFFUtils.LogErrors(this, async () =>
+    {
+        if (Enum.TryParse<NamedApp>(appName, out var namedApp))
+        {
+            await _appLifecycle.LiveMonitoringAgent.FetchUpdatedSessionInfo(namedApp, inAppIdentifier, sessionId);
         }
     });
 }

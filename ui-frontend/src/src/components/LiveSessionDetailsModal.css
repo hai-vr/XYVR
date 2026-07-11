@@ -1,0 +1,9 @@
+﻿.live-session-details-modal-content {
+    width: 100%;
+}
+
+.live-session-details-modal-content .live-session-card {
+    margin: 0;
+    max-width: 100%;
+    width: 100%;
+}

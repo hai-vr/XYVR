@@ -174,4 +174,10 @@ public class VRChatLiveMonitoring : ILiveMonitoring
         var comms = new VRChatLiveCommunicator(_credentialsStorage, _callerInAppIdentifier, new DoNotStoreAnythingStorage(), _variousNameCache, _thumbnailCache, cancellationTokenSource);
         await comms.InviteMyselfTo(sessionId);
     }
+
+    public async Task FetchUpdatedSessionInfo(string sessionId)
+    {
+        if (!_isConnected) return;
+        await _liveComms.QueueSessionFetchIfApplicable(sessionId, false, true, true);
+    }
 }

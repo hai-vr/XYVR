@@ -39,6 +39,7 @@
 
     async liveApiGetAllExistingLiveSessionData(): Promise<string> { return this.dispatch('liveApi', 'GetAllExistingLiveSessionData'); }
     async liveApiMakeGameClientJoinOrSelfInvite(appName: string, inAppIdentifier: string, sessionId: string): Promise<string> { return this.dispatch('liveApi', 'MakeGameClientJoinOrSelfInvite', [appName, inAppIdentifier, sessionId]); }
+    async liveApiFetchUpdatedSessionInfo(appName: string, inAppIdentifier: string, sessionId: string): Promise<string> { return this.dispatch('liveApi', 'FetchUpdatedSessionInfo', [appName, inAppIdentifier, sessionId]); }
 
     async preferencesApiSetPreferences(str: string): Promise<string> { return this.dispatch('preferencesApi', 'SetPreferences', [str]); }
     async preferencesApiGetPreferences(): Promise<string> { return this.dispatch('preferencesApi', 'GetPreferences'); }

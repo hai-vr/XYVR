@@ -274,6 +274,12 @@ public class ResoniteLiveMonitoring : ILiveMonitoring, IDisposable
         return Task.CompletedTask;
     }
 
+    public async Task FetchUpdatedSessionInfo(string sessionId)
+    {
+        if (!_isConnected || _liveComms == null) return;
+        await _liveComms.RequestFullUpdate();
+    }
+
     private static void DANGER_OpenResoniteSession(string sessionId)
     {
         if (!sessionId.StartsWith("S-"))
