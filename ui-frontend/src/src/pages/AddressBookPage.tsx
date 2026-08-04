@@ -40,8 +40,8 @@ const sortIndividuals = (individuals: FrontIndividual[], unparsedSearchField: st
     if (!unparsedSearchField) {
         // Sort by online status first, even when there's no search term
         return [...individuals].sort((a, b) => {
-            let aHasAnyKnownSession = a.accounts.some(it => it.mainSession?.knowledge === LiveSessionKnowledge.Known);
-            let bHasAnyKnownSession = b.accounts.some(it => it.mainSession?.knowledge === LiveSessionKnowledge.Known);
+            const aHasAnyKnownSession = a.accounts.some(it => it.mainSession?.knowledge === LiveSessionKnowledge.Known);
+            const bHasAnyKnownSession = b.accounts.some(it => it.mainSession?.knowledge === LiveSessionKnowledge.Known);
             if (aHasAnyKnownSession && !bHasAnyKnownSession) return -1;
             if (!aHasAnyKnownSession && bHasAnyKnownSession) return 1;
 
@@ -74,8 +74,8 @@ const sortIndividuals = (individuals: FrontIndividual[], unparsedSearchField: st
             if (!aHasIdentifierMatch && bHasIdentifierMatch) return 1;
         }
 
-        let aHasAnyKnownSession = a.accounts.some(it => it.mainSession?.knowledge === LiveSessionKnowledge.Known);
-        let bHasAnyKnownSession = b.accounts.some(it => it.mainSession?.knowledge === LiveSessionKnowledge.Known);
+        const aHasAnyKnownSession = a.accounts.some(it => it.mainSession?.knowledge === LiveSessionKnowledge.Known);
+        const bHasAnyKnownSession = b.accounts.some(it => it.mainSession?.knowledge === LiveSessionKnowledge.Known);
         if (aHasAnyKnownSession && !bHasAnyKnownSession) return -1;
         if (!aHasAnyKnownSession && bHasAnyKnownSession) return 1;
 
@@ -216,7 +216,7 @@ function AddressBookPage({ isDark,
                 if (index !== -1) {
                     console.log('Found individual to update at index: ' + index);
                     const newIndividuals = [...prevIndividuals];
-                    let accounts = prevIndividuals[index].accounts?.map(acc =>
+                    const accounts = prevIndividuals[index].accounts?.map(acc =>
                         acc.qualifiedAppName === liveUpdate.qualifiedAppName && acc.inAppIdentifier === liveUpdate.inAppIdentifier
                             ? {
                                 ...acc,
@@ -227,7 +227,7 @@ function AddressBookPage({ isDark,
                             }
                             : acc
                     );
-                    let onlineStatusVals = accounts?.filter(acc => acc.onlineStatus);
+                    const onlineStatusVals = accounts?.filter(acc => acc.onlineStatus);
 
                     // Determine the best online status using priority system
                     let bestOnlineStatus = undefined;
@@ -302,7 +302,7 @@ function AddressBookPage({ isDark,
         // Simulate a small delay for better UX
         setTimeout(() => {
             setDisplayedCount(prev => {
-                let nextCount = Math.min(prev + ITEMS_PER_LOAD, sortedIndividuals.length);
+                const nextCount = Math.min(prev + ITEMS_PER_LOAD, sortedIndividuals.length);
                 if (nextCount > 199) {
                     // If the user scrolls too much, just show everything immediately
                     return sortedIndividuals.length;

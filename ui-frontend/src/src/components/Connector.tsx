@@ -39,7 +39,7 @@ const Connector = ({ connector, onDeleteClick, deleteState, onConnectorUpdated, 
     const [isInTwoFactorMode, setIsInTwoFactorMode] = useState(false);
     const [isRequestInProgress, setIsRequestInProgress] = useState(false);
 
-    let virtualApp = connector.type === ConnectorType.VRChatAPI && NamedApp.VRChat
+    const virtualApp = connector.type === ConnectorType.VRChatAPI && NamedApp.VRChat
         || connector.type === ConnectorType.ResoniteAPI && NamedApp.Resonite
         || connector.type === ConnectorType.ChilloutVRAPI && NamedApp.ChilloutVR
         || connector.type === ConnectorType.ClusterAPI && NamedApp.Cluster

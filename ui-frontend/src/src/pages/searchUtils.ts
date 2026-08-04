@@ -9,7 +9,7 @@ import {
 import {LiveSessionKnowledge} from "../types/LiveUpdateTypes.ts";
 
 export const removeDiacritics = (str: string, convertConfusables: boolean = false) => {
-    let diacriticsRemoved = str.normalize('NFD')
+    const diacriticsRemoved = str.normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '') // Replaces diacritics
         .replace(/\u2024/g, '.') // Replaces the crappy "one dot leader" character with a proper period
         .replace(/[\uFF00-\uFFEF]/g, (char) => {
@@ -224,7 +224,7 @@ export const anyAccountMatchesSpecialTerms = (accounts: FrontAccount[], specialT
             ) || false;
         }
 
-        let isAliasSearch = term.startsWith('alias:');
+        const isAliasSearch = term.startsWith('alias:');
         if (isAliasSearch || term.startsWith('name:')) {
             const searchString = isAliasSearch ? term.substring(6) : term.substring(5); // Remove 'alias:' or 'name:' prefix
             if (!searchString) return true; // Empty search string matches all
@@ -232,7 +232,7 @@ export const anyAccountMatchesSpecialTerms = (accounts: FrontAccount[], specialT
             const kanaVariants = generateKanaVariants(searchString);
 
             return accounts?.some(account => {
-                let strings = isAliasSearch ? account.allDisplayNames : [account.inAppDisplayName];
+                const strings = isAliasSearch ? account.allDisplayNames : [account.inAppDisplayName];
                 
                 if (!strings || !Array.isArray(strings)) {
                     return false;
@@ -370,7 +370,7 @@ export const isIndividualVisible = (individual: FrontIndividual, unparsedSearchT
     if (!unparsedSearchTerms) return true;
 
     const { specialTerms, regularTerms } = parseSearchField(unparsedSearchTerms);
-    var convertConfusables = specialTerms.includes(':confusables');
+    const convertConfusables = specialTerms.includes(':confusables');
 
     // Check special terms first
     if (specialTerms.length > 0 && !anyAccountMatchesSpecialTerms(individual.accounts, specialTerms, false, convertConfusables)) {

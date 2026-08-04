@@ -50,7 +50,7 @@ export function LiveSession({
     const attendenceUnknownMarker = liveSession.currentAttendance ? '' : '?';
     // Replace all spaces with NBSP
     const capacityStr = `${actualAttendance}${attendenceUnknownMarker} / ${specialCapacity}`.replaceAll(" ", "\u00a0");
-    let capacityDisplay = actualAttendance > sesscap ? actualAttendance : Math.min(actualAttendance + showRemainingSlots, sesscap);
+    const capacityDisplay = actualAttendance > sesscap ? actualAttendance : Math.min(actualAttendance + showRemainingSlots, sesscap);
     const hasMore = sesscap - actualAttendance > showRemainingSlots;
 
     const makeGameClientJoinOrSelfInvite = async () => {
@@ -114,7 +114,7 @@ export function LiveSession({
         <div style={{textAlign: "center"}} title={capacityStr}>{capacityStr}</div>
     </>);
 
-    let background = liveSession.thumbnailUrl && `url(${liveSession.thumbnailUrl}), var(--live-session-overlay)`
+    const background = liveSession.thumbnailUrl && `url(${liveSession.thumbnailUrl}), var(--live-session-overlay)`
         || liveSession.thumbnailHash && `url(${dotNetApi.WorldThumbnailHashToUrl(liveSession.thumbnailHash)}), var(--live-session-overlay)`
         || 'var(--live-session-overlay)';
     return (<div key={liveSession.guid} className={`live-session-card live-session-thumbnail-bg ${liveSession.participants.length > 4 ? 'full-width' : ''}`}>

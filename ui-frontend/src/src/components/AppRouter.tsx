@@ -120,7 +120,7 @@ const AppRouter = ({ appVersion }: { appVersion: string }) => {
             if (event.ctrlKey && event.shiftKey && event.key === 'D') {
                 event.preventDefault()
                 setDebugMode(prevMode => {
-                    let prevDemoMode = prevMode.demoMode;
+                    const prevDemoMode = prevMode.demoMode;
                     return ({
                         ...prevMode,
                         demoMode: prevDemoMode === DemonstrationMode.Everything ? DemonstrationMode.Disabled : DemonstrationMode.Everything
@@ -130,7 +130,7 @@ const AppRouter = ({ appVersion }: { appVersion: string }) => {
             if (event.ctrlKey && event.shiftKey && event.key === 'E') {
                 event.preventDefault()
                 setDebugMode(prevMode => {
-                    let prevDemoMode = prevMode.demoMode;
+                    const prevDemoMode = prevMode.demoMode;
                     return ({
                         ...prevMode,
                         demoMode: prevDemoMode === DemonstrationMode.EverythingButSessionNames ? DemonstrationMode.Disabled : DemonstrationMode.EverythingButSessionNames

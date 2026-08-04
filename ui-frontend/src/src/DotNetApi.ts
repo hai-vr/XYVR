@@ -5,7 +5,7 @@
     public static EnsureRegistered() {
         if (!DotNetApi.G_isRegistered) {
             // noinspection JSDeprecatedSymbols
-            let isPhotino = !!(window.external as any).sendMessage;
+            const isPhotino = !!(window.external as any).sendMessage;
             if (isPhotino) {
                 // noinspection JSDeprecatedSymbols
                 (window.external as any).receiveMessage((message: string) => DotNetApi.WhenPhotinoMessageReceived(message))
@@ -109,7 +109,7 @@
     private makeIndexedPromise(): IndexedPromise {
         const id = crypto.randomUUID();
 
-        let deferred: any = {};
+        const deferred: any = {};
         deferred.promise = new Promise((res, rej) => {
             deferred.resolve = res;
             deferred.reject = rej;

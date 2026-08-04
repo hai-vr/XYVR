@@ -75,7 +75,7 @@ const USER_IN_PATH_HANDLERS: DomainHandler[] = [
 
 for (const value of USER_IN_PATH_HANDLERS) {
     // We assume that the number of slashes is the same for all prefixes in the array
-    let numberOfSlashes = value.prefixes[0].split('/').length - 1;
+    const numberOfSlashes = value.prefixes[0].split('/').length - 1;
     value.extractIndex = numberOfSlashes;
     value.minPathParts = numberOfSlashes + 1;
 }
@@ -84,7 +84,7 @@ const matchesSplitCriteria = (splitLength: number, handler: DomainHandler): bool
     const min = handler.minPathParts ?? splitLength;
     const max = splitLength;
 
-    let allowTrailingEmpty = handler.allowTrailingEmpty === undefined ? true : handler.allowTrailingEmpty;
+    const allowTrailingEmpty = handler.allowTrailingEmpty === undefined ? true : handler.allowTrailingEmpty;
     if (allowTrailingEmpty && splitLength === max + 1 && !splitLength.toString().endsWith('')) {
         return true;
     }

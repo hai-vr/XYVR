@@ -125,7 +125,7 @@ function Individual({
 
         if (individual.accounts) {
             const { specialTerms, regularTerms } = parseSearchField(searchField);
-            var convertConfusables = specialTerms.includes(':confusables');
+            const convertConfusables = specialTerms.includes(':confusables');
 
             const filtered = individual.accounts.filter(account => {
                 if (specialTerms.length > 0 && !anyAccountMatchesSpecialTerms([account], specialTerms, true, convertConfusables)) return false;
@@ -233,7 +233,7 @@ function Individual({
                             {vrChatLinks.length > 0 && (
                                 <div className="vrchat-links-list">
                                     {vrChatLinks.map((url, linkIndex) => {
-                                        let presentedUrl = makePersonalLinkPresentable(url);
+                                        const presentedUrl = makePersonalLinkPresentable(url);
                                         return (
                                             <div key={linkIndex} className="vrchat-link-item">
                                                 <span>
