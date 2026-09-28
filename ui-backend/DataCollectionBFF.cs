@@ -61,7 +61,7 @@ public class DataCollectionBFF : IDataCollectionBFF
             await dataCollection.IncrementalUpdateRepository(new UIProgressJobHandler(repository,
                 async individual =>
                 {
-                    await _appLifecycle.SendEventToReact(FrontEvents.EventForIndividualUpdated, FrontIndividual.FromCore(individual, _appLifecycle.LiveStatusMonitoring));
+                    await _appLifecycle.SendEventToReact(FrontEvents.EventForIndividualUpdated, FrontIndividual.FromCore(individual, _appLifecycle.LiveStatusMonitoring, _appLifecycle.ProfileIllustrationRepository));
                 },
                 async tracker =>
                 {

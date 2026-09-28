@@ -54,6 +54,7 @@ export interface FrontIndividual {
     isExposed: boolean;
     customName?: string;
     note?: string;
+    hasProfileIllustration: boolean;
 
     onlineStatus?: OnlineStatusType;
     customStatus?: string;

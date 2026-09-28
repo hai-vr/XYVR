@@ -165,9 +165,8 @@ const Account = ({
             <div className={clsx("account-container", illustrativeDisplay && 'account-illustrative', illustrativeDisplay && !portrait && 'account-illustrative-not-portrait')}
                  style={{position: 'relative'}}>
                 {illustrativeDisplay && clickOpensIndividual && <div style={{
-                    background: portrait
-                        ? `var(--account-illustrative-overlay), url("individualprofile://${clickOpensIndividual.guid}"), var(--bg-primary)`
-                        : `var(--account-illustrative-overlay-not-portrait), url("individualprofile://${clickOpensIndividual.guid}"), var(--bg-primary)`,
+                    // Only request the illustration when there is one, as failed requests are not cached and would be repeated on every repaint.
+                    background: `${portrait ? 'var(--account-illustrative-overlay)' : 'var(--account-illustrative-overlay-not-portrait)'}, ${clickOpensIndividual.hasProfileIllustration ? `url("individualprofile://${clickOpensIndividual.guid}"), ` : ''}var(--bg-primary)`,
                     backgroundBlendMode: 'normal',
                     backgroundSize: 'cover',
                     backgroundPosition: portrait ? '50% 50%' : '50% 33%',

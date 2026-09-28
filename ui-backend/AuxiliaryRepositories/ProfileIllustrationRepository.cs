@@ -1,4 +1,5 @@
-﻿using ImageMagick;
+﻿using System.Collections.Concurrent;
+using ImageMagick;
 using XYVR.Scaffold;
 
 namespace XYVR.UI.Backend.AuxiliaryRepositories;
@@ -6,6 +7,10 @@ namespace XYVR.UI.Backend.AuxiliaryRepositories;
 public class ProfileIllustrationRepository
 {
     private readonly ProfileIllustrationStorage _storage;
+
+    // Resizing with ImageMagick is expensive, and the UI requests the same illustrations many times,
+    // so the resized illustrations are kept in memory until the illustration of that individual changes.
+    private readonly ConcurrentDictionary<string, ProfileIllustration> _resizedCache = new();
     
     public ProfileIllustrationRepository(ProfileIllustrationStorage storage)
     {
@@ -20,9 +25,25 @@ public class ProfileIllustrationRepository
     public async Task AssignIllustration(string individualGuid, byte[] data, string type)
     {
         await _storage.Store(individualGuid, data, type);
+        _resizedCache.TryRemove(individualGuid, out _);
+    }
+
+    public bool HasIllustration(string individualGuid)
+    {
+        return _storage.illustrations.ContainsKey(individualGuid);
     }
 
     public async Task<ProfileIllustration?> GetOrNull(string individualGuid)
+    {
+        if (_resizedCache.TryGetValue(individualGuid, out var cached)) return cached;
+
+        var result = await ResizeOrNull(individualGuid);
+        if (result != null) _resizedCache[individualGuid] = result;
+
+        return result;
+    }
+
+    private async Task<ProfileIllustration?> ResizeOrNull(string individualGuid)
     {
         var (type, bytes) = await _storage.RetrieveOrNull(individualGuid);
         if (type == null) return null;

@@ -53,7 +53,7 @@ public class AppBFF : IAppBFF
         var responseObj = _appLifecycle.IndividualRepository.Individuals
             .Where(individual => individual.isExposed)
             .OrderByDescending(individual => individual.isAnyContact)
-            .Select(individual => FrontIndividual.FromCore(individual, live))
+            .Select(individual => FrontIndividual.FromCore(individual, live, _appLifecycle.ProfileIllustrationRepository))
             .ToList();
         
         return JsonConvert.SerializeObject(responseObj, Formatting.None, _serializer);
@@ -99,6 +99,10 @@ public class AppBFF : IAppBFF
         var byteData = Convert.FromBase64String(profileIllustration.file.base64Content);
         await _appLifecycle.ProfileIllustrationRepository.AssignIllustration(profileIllustration.individualGuid, byteData, fileType);
         await Scaffolding.SaveProfileIllustrationStorage(_appLifecycle.ProfileIllustrationRepository.SerializeStorage());
+
+        // The UI only requests illustrations of individuals that have one, so it needs to know about the new one.
+        var individual = _appLifecycle.IndividualRepository.GetByGuid(profileIllustration.individualGuid);
+        await _appLifecycle.SendEventToReact(FrontEvents.EventForIndividualUpdated, FrontIndividual.FromCore(individual, _appLifecycle.LiveStatusMonitoring, _appLifecycle.ProfileIllustrationRepository));
     });
 }
 

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using XYVR.Core;
 using XYVR.Scaffold;
+using XYVR.UI.Backend.AuxiliaryRepositories;
 
 namespace XYVR.UI.Backend;
 
@@ -14,6 +15,7 @@ internal record FrontIndividual
     public bool isAnyContact { get; init; }
     public bool isExposed { get; init; }
     public string? customName { get; init; }
+    public bool hasProfileIllustration { get; init; }
 
     public OnlineStatus? onlineStatus { get; init; }
     public string? customStatus { get; init; }
@@ -23,7 +25,7 @@ internal record FrontIndividual
         return note.status == NoteState.Exists ? note.text : null;
     }
 
-    internal static FrontIndividual FromCore(ImmutableIndividual individual, LiveStatusMonitoring live)
+    internal static FrontIndividual FromCore(ImmutableIndividual individual, LiveStatusMonitoring live, ProfileIllustrationRepository profileIllustrations)
     {
         var accounts = individual.accounts
             .Select(account =>
@@ -44,6 +46,7 @@ internal record FrontIndividual
             isAnyContact = individual.isAnyContact,
             isExposed = individual.isExposed,
             customName = individual.customName,
+            hasProfileIllustration = profileIllustrations.HasIllustration(individual.guid),
             
             onlineStatus = nonNullStatus.Count > 0 ? nonNullStatus.FirstOrDefault(it => it != OnlineStatus.Offline, OnlineStatus.Offline) : null,
         };
