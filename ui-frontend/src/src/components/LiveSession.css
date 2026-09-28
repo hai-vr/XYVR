@@ -28,21 +28,10 @@
     grid-template-columns: repeat(auto-fit, 150px);
 }
 
-/* Inside a session card, the portraits share the card width instead of using fixed 150px columns,
-   so that a narrow card doesn't end up with a single portrait and a large empty gap next to it.
-   auto-fill keeps empty tracks, so a session with few participants doesn't get oversized portraits. */
+/* Inside a session card, the card width is always a whole number of portraits (see .live-sessions-grid),
+   so auto-fill lays out exactly that many portraits per row. */
 .live-session-card .live-session-accounts-grid {
-    grid-template-columns: repeat(auto-fill, minmax(min(120px, 100%), 1fr));
-}
-
-.live-session-card .live-session-accounts-grid > * {
-    min-width: 0;
-}
-
-/* Keep the 150x200 portrait proportions when the column width changes. */
-.live-session-card .account-illustrative:not(.account-illustrative-not-portrait) {
-    height: auto;
-    aspect-ratio: 3 / 4;
+    grid-template-columns: repeat(auto-fill, 150px);
 }
 
 .live-session-card .account-illustrative .account-display-name {
@@ -77,18 +66,50 @@
     font-size: 0.8rem;
 }
 
+/* Session cards have fixed widths that fit a whole number of 150px portraits (8px gap, 1rem padding, 1px border):
+   2 portraits = 342px, 3 portraits = 500px, 4 portraits = 658px.
+   The layout steps through: 3 columns, 2 columns, then 1 column of 4, 3, or 2 portraits.
+   Container queries are not available in WebKitGTK 2.36 (Linux), so the steps use the window width instead.
+   Each breakpoint is the grid width needed, plus the page horizontal padding (#root 2*1rem,
+   .individuals-container 2*20px, .live-sessions-section 2*(1rem + 1px) = 106px),
+   plus 20px for a vertical scrollbar. */
 .live-sessions-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    /*grid-template-columns: 1fr;*/
-    /*grid-template-columns: repeat(auto-fit, minmax(min(300px, 50vw), 1fr));*/
+    grid-template-columns: 342px;
+    justify-content: center;
     gap: 1rem;
 }
 
-/* For smaller screens, ensure single column when content is too narrow */
-@media (max-width: 768px) {
+.participation-squares {
+    text-wrap: nowrap;
+    text-align: left;
+    line-height: 13px;
+    margin: 0 auto;
+    margin-bottom: 5px;
+    width: fit-content;
+}
+
+@media (min-width: 626px) {
     .live-sessions-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: 500px;
+    }
+}
+
+@media (min-width: 784px) {
+    .live-sessions-grid {
+        grid-template-columns: 658px;
+    }
+}
+
+@media (min-width: 826px) {
+    .live-sessions-grid {
+        grid-template-columns: repeat(2, 342px);
+    }
+}
+
+@media (min-width: 1184px) {
+    .live-sessions-grid {
+        grid-template-columns: repeat(3, 342px);
     }
 }
 

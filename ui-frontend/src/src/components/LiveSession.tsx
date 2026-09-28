@@ -76,14 +76,7 @@ export function LiveSession({
 
     const participationSquares = (
     <>
-        <div style={{
-            textWrap: 'nowrap',
-            textAlign: 'left',
-            lineHeight: '13px',
-            margin: '0 auto',
-            marginBottom: '5px',
-            width: 'fit-content'
-        }}>
+        <div className="participation-squares">
             {Array.from({length: capacityDisplay}, (_, index) => (
                 <>
                     {index % 20 == 0 && index != 0 && <br/>}
