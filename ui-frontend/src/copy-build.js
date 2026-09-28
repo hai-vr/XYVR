@@ -26,7 +26,8 @@ const sourceDir = 'dist';
 const allDestinations = [
     // Used for near-live reload debug only:
     '../../ui-webview-windows/bin/Debug/net10.0-windows/src/dist',
-    '../../ui-photino-linux/bin/Debug/net10.0/wwwroot',
+    // The Linux project outputs to build-photino/ for every configuration, and the app serves wwwroot/ from there.
+    '../../build-photino/wwwroot',
     
     // Used for builds:
     '../../ui-webview-windows/src/dist',
