@@ -40,7 +40,8 @@
     transition: outline 0.3s ease;
 }
 
-.individual-container.hidden {
+.individual-container.hidden,
+.individual-container-compact.hidden {
     display: none;
 }
 

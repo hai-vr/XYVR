@@ -169,6 +169,13 @@
     border: 2px solid var(--brd-primary);
     border-top: 2px solid var(--accent-primary);
     border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .search-filters {

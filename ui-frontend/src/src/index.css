@@ -24,6 +24,7 @@
 
     --accent-primary: #27ac98;
     --accent-secondary: #5fd4c7;
+    --accent-primary-alpha: rgba(39, 172, 152, 0.3);
 
     --shadow-light: rgba(0, 0, 0, 0.2);
     --shadow-medium: rgba(0, 0, 0, 0.3);
@@ -101,6 +102,7 @@
 
     --accent-primary: #1e8a7a;
     --accent-secondary: #1e8a7a;
+    --accent-primary-alpha: rgba(30, 138, 122, 0.3);
 
     --shadow-light: rgba(0, 0, 0, 0.06);
     --shadow-medium: rgba(0, 0, 0, 0.1);
