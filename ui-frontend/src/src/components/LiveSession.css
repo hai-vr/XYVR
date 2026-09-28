@@ -28,6 +28,27 @@
     grid-template-columns: repeat(auto-fit, 150px);
 }
 
+/* Inside a session card, the portraits share the card width instead of using fixed 150px columns,
+   so that a narrow card doesn't end up with a single portrait and a large empty gap next to it.
+   auto-fill keeps empty tracks, so a session with few participants doesn't get oversized portraits. */
+.live-session-card .live-session-accounts-grid {
+    grid-template-columns: repeat(auto-fill, minmax(min(120px, 100%), 1fr));
+}
+
+.live-session-card .live-session-accounts-grid > * {
+    min-width: 0;
+}
+
+/* Keep the 150x200 portrait proportions when the column width changes. */
+.live-session-card .account-illustrative:not(.account-illustrative-not-portrait) {
+    height: auto;
+    aspect-ratio: 3 / 4;
+}
+
+.live-session-card .account-illustrative .account-display-name {
+    overflow-wrap: anywhere;
+}
+
 .live-session-background-image {
     border-radius: var(--ideal-border-radius);
 }
