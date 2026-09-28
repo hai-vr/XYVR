@@ -214,6 +214,7 @@ button {
     background-color: var(--bg-secondary);
     color: var(--text-primary);
     cursor: pointer;
+    transition: border-color 0.2s ease;
 }
 
 button:hover {
@@ -344,7 +345,7 @@ button:disabled:hover {
     bottom: 0;
     background-color: rgba(0, 0, 0, 0.1);
     border: 2px dashed var(--accent-primary);
-    border-radius: 8px;
+    border-radius: var(--ideal-border-radius);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -356,7 +357,7 @@ button:disabled:hover {
     background: var(--accent-primary);
     color: white;
     padding: 12px 24px;
-    border-radius: 6px;
+    border-radius: var(--ideal-border-radius);
     font-weight: bold;
 }
 

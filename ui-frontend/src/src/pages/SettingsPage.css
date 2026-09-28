@@ -95,6 +95,12 @@
     color: var(--text-primary);
 }
 
+.deprioritized-sessions-add input:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px var(--accent-primary-alpha);
+}
+
 .deprioritized-sessions-add button {
     padding: 8px 16px;
 }
@@ -165,7 +171,7 @@
     font-family: monospace;
     font-size: 0.85rem;
     padding: 12px;
-    border-radius: 4px;
+    border-radius: var(--ideal-border-radius);
     margin-top: 8px;
     color: var(--text-primary);
     border: 1px solid var(--brd-primary);
