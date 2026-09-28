@@ -14,7 +14,6 @@
 }
 
 .search-filter:hover {
-    background-color: var(--bg-secondary);
     border-color: var(--brd-accent);
     color: var(--accent-primary);
 }

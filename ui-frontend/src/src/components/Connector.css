@@ -22,20 +22,6 @@
     gap: 0.75rem;
 }
 
-/* Button visuals are standardized globally in index.css (normal, icon-button, delete-button). */
-
-/* Responsive adjustments specific to connector actions/card */
-@media (max-width: 768px) {
-    .connector-card {
-        padding: 1rem;
-    }
-    .connector-actions {
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-}
-
-
 .pill-toggle {
     display: flex;
     background: var(--bg-secondary);
@@ -79,9 +65,13 @@
 }
 
 @media (max-width: 768px) {
-    .input-fields {
-        min-width: auto;
-        width: 100%;
+    .connector-card {
+        padding: 1rem;
+    }
+
+    .connector-actions {
+        flex-direction: column;
+        gap: 0.5rem;
     }
 
     .pill-toggle {

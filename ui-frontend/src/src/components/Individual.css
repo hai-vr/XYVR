@@ -1,9 +1,6 @@
 ﻿.individual-container {
     display: block;
     background: var(--bg-secondary);
-    /*border: 1px solid var(--brd-primary);*/
-    /*border-radius: var(--ideal-border-radius);*/
-    /*padding: 24px;*/
     box-shadow: 0 2px 8px var(--shadow-medium);
     outline: 0px solid transparent;
     outline-offset: -4px;
@@ -12,18 +9,18 @@
 
 .individual-top {
     display: flex;
-    align-items: flex-start; /* or center, depending on how you want it aligned vertically */
+    align-items: flex-start;
 }
 
 /* Left column: fixed width */
 .individual-top > div:first-child {
-    flex: 0 0 150px; /* don’t grow, don’t shrink, 150px basis */
+    flex: 0 0 150px;
 }
 
 /* Right column: takes remaining space */
 .individual-top .individual-header {
     flex: 1 1 auto;
-    min-width: 0; /* important so content can shrink instead of forcing overflow */
+    min-width: 0; /* So that content can shrink instead of overflowing */
     padding: 12px;
 }
 
@@ -49,7 +46,6 @@
 
 .individual-container.being-merged {
     outline: 4px solid #ffdd00;
-    outline-offset: -4px;
 }
 
 .individual-header {
@@ -57,24 +53,7 @@
     align-items: center;
     margin-bottom: 16px;
     padding-bottom: 12px;
-    /*border-bottom: 2px solid var(--brd-secondary);*/
     position: relative;
-}
-
-.individual-avatar {
-    width: 40px;
-    height: 40px;
-    min-width: 40px;
-    min-height: 40px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--avatar-text);
-    font-size: 18px;
-    font-weight: bold;
-    margin-right: 12px;
 }
 
 .individual-name {
@@ -156,14 +135,6 @@
     border-bottom: 1px solid var(--brd-secondary);
 }
 
-.individual-container .accounts-container {
-    margin-bottom: 0;
-}
-
-.individual-container-compact .accounts-container {
-    margin-bottom: 0;
-}
-
 .accounts-grid {
     display: grid;
     gap: 8px;
@@ -178,23 +149,6 @@
     background: var(--bg-primary);
     border-radius: var(--ideal-border-radius);
     border: 2px dashed var(--brd-secondary);
-}
-
-.vrchat-links-container {
-    background: var(--vrchat-links-bg);
-    border: 1px solid var(--vrchat-links-border);
-    border-radius: var(--ideal-border-radius);
-    padding: 12px;
-    margin-bottom: 16px;
-}
-
-.vrchat-links-title {
-    font-size: 14px;
-    color: var(--accent-primary);
-    font-weight: 600;
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
 }
 
 .vrchat-links-list {
@@ -234,11 +188,4 @@
     border-radius: var(--ideal-border-radius);
     padding: 24px;
     text-align: left;
-}
-
-/* Light theme specific overrides */
-[data-theme="light"] .individual-avatar {
-    background: var(--vrchat-link-item-bg);
-    border: 1px solid var(--vrchat-link-item-border);
-    border-radius: var(--ideal-border-radius);
 }

@@ -1,7 +1,5 @@
 ﻿.header-group {
     display: flex;
-    margin-top: 0;
-    border-top: none;
 }
 
 .header-thin-right {
@@ -10,20 +8,17 @@
     padding: 0;
     border-radius: 0 0 var(--ideal-border-radius) var(--ideal-border-radius);
     margin-bottom: 20px;
-    margin-top: 0;
+    margin-left: 10px;
     box-sizing: border-box;
     min-width: 0;
+    width: 60px;
     border: var(--header-border);
     border-top: none;
     box-shadow: 0 4px 15px var(--shadow-medium);
-
-    width: 60px;
-    margin-left: 10px;
-    text-align: center;
+    display: flex;
     align-items: center;
     justify-content: center;
-
-    display: flex;
+    text-align: center;
 }
 
 .header-nav {
@@ -31,13 +26,18 @@
     cursor: pointer;
 }
 
+/* Cancels the global button:hover styles, which are more specific than .header-nav */
+.header-nav:hover {
+    background: none;
+    border: none;
+}
+
 .header-section {
-    background: var(--header-gradient);
+    background: var(--header-bg-color);
     color: var(--header-text);
     padding: 20px;
     border-radius: 0 0 var(--ideal-border-radius) var(--ideal-border-radius);
     margin-bottom: 20px;
-    margin-top: 0;
     box-shadow: 0 4px 15px var(--shadow-medium);
     width: 100%;
     box-sizing: border-box;
@@ -53,14 +53,6 @@
     width: 100%;
 }
 
-.header-nav:hover {
-    background: none;
-    border: none;
-    color: inherit;
-    transform: none;
-    box-shadow: none;
-}
-
 .header-title {
     margin: 0;
     font-size: 24px;
@@ -73,8 +65,6 @@
     margin-right: 1rem;
     display: flex;
     align-items: center;
-    margin-top: 0;
-    border-top: none;
 }
 
 .header-buttons {

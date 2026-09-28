@@ -1,7 +1,6 @@
-
 :root {
     --ideal-border-radius: 2px;
-    
+
     font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
     line-height: 1.5;
     font-weight: 400;
@@ -18,7 +17,6 @@
 
     --text-primary: #bbbbbb;
     --text-secondary: #888888;
-    --text-muted: #666666;
 
     --brd-primary: #555555;
     --brd-secondary: #5a5d5f;
@@ -31,11 +29,7 @@
     --shadow-medium: rgba(0, 0, 0, 0.3);
     --shadow-heavy: rgba(0, 0, 0, 0.4);
 
-    /* Logo colors */
-    --logo-react-glow: #61dafbaa;
-
     /* Header specific colors */
-    --header-gradient: var(--header-bg-color);
     --header-bg-color: var(--bg-secondary);
     --header-text: var(--text-primary);
     --header-border: 1px solid var(--brd-primary);
@@ -52,13 +46,8 @@
     --search-input-border: var(--brd-primary);
     --search-placeholder: var(--text-secondary);
     --search-focus-shadow: rgba(104, 151, 187, 0.3);
-    --search-icon-color: var(--text-secondary);
-    --search-icon-hover: var(--text-primary);
 
     /* Avatar colors */
-    --avatar-text: #ffffff;
-    --avatar-gradient-light: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-
     /* Status colors */
     --status-contact-bg: #4a6741;
     --status-contact-text: #90c695;
@@ -87,18 +76,7 @@
     --note-container-bg: #3e4446;
     --note-container-border: #5a5d5f;
 
-    --vrchat-links-bg: var(--bg-primary);
-    --vrchat-links-border: var(--brd-primary);
-    --vrchat-link-item-bg: var(--bg-primary);
-    --vrchat-link-item-border: var(--brd-primary);
-    --vrchat-link-item-hover-bg: var(--bg-secondary);
-    --vrchat-link-item-hover-border: var(--brd-accent);
-
-    /* Copy button hover */
-    --copy-button-hover-bg: rgba(104, 151, 187, 0.2);
-
     /* App icon colors */
-    /*--app-resonite: linear-gradient(170deg, #84ea22 20%, #fff834 80%);*/
     --app-resonite: #2d3136;
     --app-vrchat: #186dcd;
     --app-cluster: #ffffff;
@@ -108,15 +86,6 @@
     /* Set initial colors */
     color: var(--text-primary);
     background-color: var(--bg-primary);
-
-    /* Contact filter button colors (reusing existing semantic variables) */
-    --contacts-btn-border: var(--brd-secondary);
-    --contacts-btn-text: var(--text-secondary);
-    --contacts-btn-border-hover: var(--accent-primary);
-    --contacts-btn-text-hover: var(--accent-primary);
-    --contacts-btn-bg-active: var(--accent-primary);
-    --contacts-btn-text-active: #ffffff;
-
 }
 
 /* Light theme color overrides */
@@ -126,11 +95,9 @@
 
     --text-primary: #2c3e50;
     --text-secondary: #6c757d;
-    --text-muted: #495057;
 
     --brd-primary: #e1e5e9;
     --brd-secondary: #dee2e6;
-    --brd-accent: #27ac98;
 
     --accent-primary: #1e8a7a;
     --accent-secondary: #1e8a7a;
@@ -141,9 +108,7 @@
 
     /* Header specific colors for light theme */
     --header-bg-color: #27ac98;
-    --header-gradient: var(--header-bg-color);
     --header-text: white;
-    --header-border: 1px solid var(--brd-primary);
 
     /* Theme toggle button colors for light theme */
     --theme-toggle-bg: rgba(0, 0, 0, 0.05);
@@ -154,14 +119,8 @@
     /* Search input colors for light theme */
     --search-input-bg: rgba(255, 255, 255, 0.9);
     --search-input-text: #333;
-    --search-input-border: var(--brd-primary);
     --search-placeholder: #666;
     --search-focus-shadow: var(--shadow-medium);
-    --search-icon-color: #666;
-    --search-icon-hover: #333;
-
-    /* Avatar colors for light theme */
-    --avatar-text: #ffffff;
 
     /* Status colors for light theme */
     --status-contact-bg: #e8f5e8;
@@ -191,16 +150,8 @@
     --note-container-bg: #f0f8ff;
     --note-container-border: #b3d9ff;
 
-    /* Copy button hover for light theme */
-    --copy-button-hover-bg: rgba(25, 118, 210, 0.1);
-
     /* App icon colors remain the same for light theme except default */
     --app-default: #6c757d;
-
-    color: var(--text-primary);
-    background-color: var(--bg-primary);
-
-    --contacts-btn-text-active: #ffffff;
 }
 
 ::-webkit-scrollbar {
@@ -226,7 +177,6 @@
 ::-webkit-scrollbar-corner {
     background: var(--bg-primary);
 }
-
 
 a {
     font-weight: 500;
@@ -278,14 +228,7 @@ button:focus-visible {
     outline-offset: 2px;
 }
 
-button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    background-color: var(--bg-secondary);
-    border-color: var(--brd-primary);
-    color: var(--text-secondary);
-}
-
+button:disabled,
 input:disabled {
     opacity: 0.5;
     cursor: not-allowed;
@@ -328,7 +271,6 @@ button:disabled:hover {
     color: var(--text-primary);
 }
 
-/* Delete button (standardized) */
 .delete-button {
     background: #dc3545;
     color: #ffffff;
@@ -387,38 +329,7 @@ button:disabled:hover {
     color: var(--status-joinme-conflicting);
 }
 
-:root[data-theme="light"] .status-online {
-    color: var(--status-online);
-}
-
-:root[data-theme="light"] .status-online-conflicting {
-    color: var(--status-online-conflicting);
-}
-
-:root[data-theme="light"] .status-away {
-    color: var(--status-away);
-}
-
-:root[data-theme="light"] .status-askme {
-    color: var(--status-askme);
-}
-
-:root[data-theme="light"] .status-busy {
-    color: var(--status-busy);
-}
-
-:root[data-theme="light"] .status-joinme {
-    color: var(--status-joinme);
-}
-
-:root[data-theme="light"] .status-joinme-conflicting {
-    color: var(--status-joinme-conflicting);
-}
-
-.link-pointer {
-    cursor: pointer;
-}
-
+.link-pointer,
 .modal-pointer {
     cursor: pointer;
 }

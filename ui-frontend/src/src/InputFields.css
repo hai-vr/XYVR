@@ -81,29 +81,6 @@
     color: var(--text-secondary);
 }
 
-.api-type-select,
-.login-input,
-.password-input {
-    padding: 8px 12px;
-    border: 1px solid var(--brd-primary);
-    border-radius: var(--ideal-border-radius);
-    background: var(--bg-primary);
-    color: var(--text-primary);
-    font-size: 14px;
-}
-
-.api-type-select {
-    cursor: pointer;
-}
-
-.api-type-select:focus,
-.login-input:focus,
-.password-input:focus {
-    outline: none;
-    border-color: var(--accent-primary);
-    box-shadow: 0 0 0 3px var(--accent-primary-alpha);
-}
-
 .warning-message {
     background: var(--status-warning-bg);
     color: var(--status-warning-text);
@@ -132,11 +109,6 @@
     font-size: 13px;
     line-height: 1.4;
     margin-bottom: 0.5rem;
-}
-
-.info-message .info-icon {
-    font-size: 14px;
-    flex-shrink: 0;
 }
 
 @media (max-width: 768px) {

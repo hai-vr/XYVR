@@ -21,13 +21,9 @@
     height: auto;
 }
 
-.account-illustrative-display {
-    /*transition: background 0.3s ease, background-position 0.3s ease;*/
-}
-
 .count-container {
     background: none !important;
-    border: 1px solid rgba(0,0,0,0);
+    border: 1px solid transparent;
     border-radius: var(--ideal-border-radius);
     padding: 2px 12px;
     gap: 8px;
@@ -138,13 +134,6 @@
     border-radius: var(--ideal-border-radius);
     padding: 8px;
     margin-top: 4px;
-}
-
-.note-header {
-    font-size: 12px;
-    color: var(--accent-primary);
-    font-weight: 500;
-    margin-bottom: 4px;
 }
 
 .note-text {

@@ -1,12 +1,10 @@
 .individuals-container {
-    margin-top: 0;
     width: 100%;
     max-width: 1240px;
     min-width: 320px;
     padding: 0 20px;
     box-sizing: border-box;
-    margin-left: auto;
-    margin-right: auto;
+    margin: 0 auto;
     flex: 1;
 }
 
@@ -45,7 +43,7 @@
 
 .search-results-info {
     margin-top: 10px;
-     margin-bottom: 20px;
+    margin-bottom: 20px;
     font-size: 14px;
     opacity: 0.9;
     min-height: 18px;
@@ -82,16 +80,6 @@
 .search-input:focus {
     border-color: var(--accent-primary);
     box-shadow: 0 2px 8px var(--search-focus-shadow);
-}
-
-.search-icon {
-    position: absolute;
-    right: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--search-icon-color);
-    font-size: 16px;
-    pointer-events: none;
 }
 
 .search-clear-button {
@@ -159,8 +147,6 @@
     color: var(--text-secondary);
 }
 
-/* Contacts filter now uses normal button styling; no special visuals. */
-
 .load-more-section {
     display: flex;
     justify-content: center;
@@ -168,8 +154,6 @@
     padding: 20px;
     margin-top: 20px;
 }
-
-/* Load more uses normal button styling */
 
 .loading-indicator {
     display: flex;
@@ -197,12 +181,6 @@
     box-sizing: border-box;
 }
 
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-/* Responsive design for smaller screens */
 @media (max-width: 480px) {
     .individuals-container {
         padding: 0 10px;

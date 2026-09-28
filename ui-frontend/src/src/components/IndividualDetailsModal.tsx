@@ -1,6 +1,5 @@
 ﻿import Modal from './Modal';
 import {_D} from '../haiUtils';
-import './IndividualDetailsModal.css';
 import type {FrontIndividual} from "../types/CoreTypes.ts";
 import type {DebugFlags} from "../types/DebugFlags.ts";
 import Individual from "./Individual.tsx";

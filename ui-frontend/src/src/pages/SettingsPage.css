@@ -6,54 +6,9 @@
     min-width: 320px;
     padding: 0 20px;
     box-sizing: border-box;
-    margin-left: auto;
-    margin-right: auto;
+    margin: 0 auto;
     flex: 1;
 }
-
-.page-content {
-    padding: 2rem 0;
-    width: 100%;
-}
-
-.empty-state {
-    text-align: center;
-    padding: 4rem 2rem;
-    background-color: var(--bg-secondary);
-    border-radius: var(--ideal-border-radius);
-    border: 1px solid var(--brd-primary);
-    margin-top: 2rem;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.empty-state-icon {
-    font-size: 4rem;
-    margin-bottom: 1rem;
-    opacity: 0.6;
-}
-
-.empty-state-title {
-    font-size: 1.5rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-    color: var(--text-primary);
-}
-
-.empty-state-description {
-    font-size: 1rem;
-    color: var(--text-secondary);
-    max-width: 400px;
-    margin: 0 auto;
-    line-height: 1.5;
-}
-
-[data-theme="dark"] .empty-state {
-    background-color: var(--bg-secondary);
-    border-color: var(--brd-primary);
-}
-
-/* Data collection buttons now use normal button styling */
 
 .inline-code-clickable {
     cursor: pointer;
@@ -71,27 +26,11 @@
     width: 100%;
 }
 
-.connectors-title {
-    font-size: 1.5rem;
-    font-weight: 600;
-    margin-bottom: 1.5rem;
-    color: var(--text-primary);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
 .connectors-grid {
     display: grid;
     gap: 1.5rem;
     width: 100%;
     grid-template-columns: 1fr;
-}
-
-.settings-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
 }
 
 @media (min-width: 768px) {
@@ -104,6 +43,12 @@
     .connectors-grid {
         grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
     }
+}
+
+.settings-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .deprioritized-sessions-list {
@@ -225,5 +170,3 @@
     color: var(--text-primary);
     border: 1px solid var(--brd-primary);
 }
-
-
