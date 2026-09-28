@@ -113,12 +113,17 @@
     font-style: italic;
 }
 
+.live-session-organizer {
+    margin-bottom: 0.5rem;
+}
+
 .live-session-participants {
     display: flex;
     flex-direction: column;
     flex: 1;
     gap: 0.5rem;
     position: relative;
+    margin-bottom: 0.75rem;
 }
 
 .live-session-all-participants-outer {
