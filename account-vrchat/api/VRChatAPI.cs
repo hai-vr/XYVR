@@ -256,7 +256,27 @@ internal class VRChatAPI
 
             var responseStr = await response.Content.ReadAsStringAsync();
             DataCollectSuccess(url, requestGuid, responseStr, dataCollectionReason);
-            return JsonConvert.DeserializeObject<VRChatUser>(responseStr);
+            var user = JsonConvert.DeserializeObject<VRChatUser>(responseStr);
+
+            if (user != null)
+            {
+                var profileUrl = $"{AuditUrls.VrcApiUrl}/profile/{userId}";
+                var profileResponse = await _client.GetAsync(profileUrl, _cancellationTokenSource.Token);
+                
+                await EnsureRateLimiting(profileUrl, profileResponse.StatusCode);
+                
+                EnsureSuccessOrThrowVerbose(profileResponse);
+                
+                var profileStr = await profileResponse.Content.ReadAsStringAsync();
+                var profile = JsonConvert.DeserializeObject<VRChatUserProfile>(profileStr);
+                if (profile != null)
+                {
+                    user.bio = profile.bio;
+                    user.bioLinks = profile.bioLinks;
+                }
+            }
+
+            return user;
         }
         catch (Exception _)
         {

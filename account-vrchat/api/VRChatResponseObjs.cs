@@ -103,6 +103,12 @@ internal class VRChatBadge
     public string updatedAt;
 }
 
+internal class VRChatUserProfile
+{
+    public string bio;
+    public string[] bioLinks;
+}
+
 internal class VRChatNote
 {
     public string note;
